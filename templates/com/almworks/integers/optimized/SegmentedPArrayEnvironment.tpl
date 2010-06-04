@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// GENERATED CODE!!!
 package com.almworks.integers.optimized;
 
 public interface Segmented#E#ArrayEnvironment {

@@ -31,6 +31,9 @@ public class IntegerCollectionsCodegen {
   public static final int RET_VAL_HELP = 10;
   public static final int RET_VAL_INPUT_ERR = 239;
   public static final int RET_VAL_RUNTIME_ERR = 240;
+
+  public static final String generatedCodeNoticeTemplate = "// CODE GENERATED FROM ";
+
   public static final String javaComments = "/[*]([^*]*?[*])+?/|(?m://.*$)";
   public static final String javaEntityNameExtractor = "(?:public\\s+)?(?:class|enum|interface|(?:@\\s*interface))\\s+((?:\\w|#)+)";
   public static final String applicabilityStringRegex = "^#APPLY#([" + GenericType.getAllApplicableString() + "]+)\\s*";
@@ -141,6 +144,8 @@ public class IntegerCollectionsCodegen {
       throw new IOException("Cannot write to folder '" + parent + '\'');
     }
 
+    templateStr = insertGeneratedCodeNotice(relPath, templateStr);
+
     String applicabilityString = getApplicabilityString(templateFile, templateStr);
     templateStr = templateStr.replaceAll(applicabilityStringRegex, "");
     StringBuilder errors = new StringBuilder();
@@ -178,6 +183,15 @@ public class IntegerCollectionsCodegen {
       throw new BadFormatException("no valid template for Java class/enum/interface declaration found");
     }
     return entityMatcher.group(1);
+  }
+
+  private String insertGeneratedCodeNotice(String relPath, String templateStr) {
+    int where = 0;
+    Matcher m = Pattern.compile(javaComments).matcher(templateStr);
+    if (m.find()) where = m.end();
+    String generatedCodeNotice = generatedCodeNoticeTemplate + relPath;
+    templateStr = templateStr.substring(0, where) + lineSeparator + lineSeparator + generatedCodeNotice + lineSeparator + templateStr.substring(where);
+    return templateStr;
   }
 
   private static String getApplicabilityString(File templateFile, String templateStr) {
