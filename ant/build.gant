@@ -1,0 +1,224 @@
+ant.taskdef (  name : 'groovyc' , classname : 'org.codehaus.groovy.ant.Groovyc' )
+
+final String antProp(String it) {
+  prop = ant.project.properties[it] as String
+  if (prop == null) ant.fail("missing property: $it")
+  prop
+}
+
+final String gantDir = {
+  String v = ant.project.baseDir.getCanonicalPath().replace('\\', '/');
+  if (v.endsWith("/")) v = v.substring(0, v.length() - 1)
+  v
+}()
+
+final rel2 = {String root, String file -> "$root/$file"}
+final rel = {String file -> rel2 (gantDir, file) }
+
+ant.property(file: rel("build.properties"))
+
+final Boolean skipGenerate = "true".equals(System.getProperty("skipGenerate"));
+
+final String rootDir = rel("..")
+
+final String templatesDir =     rel2(rootDir, antProp("templates.dir"))
+final String buildDir =         rel2(rootDir, antProp("build.dir"))
+final String javaDir =          rel2(rootDir, antProp("java.dir"))
+final String libDir =           rel2(rootDir, antProp("lib.dir"))
+final String generatorSrcDir =  rel2(rootDir, antProp("generator.java.dir"))
+final String testDir =          rel2(rootDir, antProp("test.dir"))
+
+final String generatorClassesDir =    rel2(buildDir, antProp("generator.classes.dir"))
+final String generatedJavaDir =       rel2(buildDir, antProp("generated.java.dir"))
+final String generatedClassesDir =    rel2(buildDir, antProp("generated.classes.dir"))
+final String testsClassesDir =        rel2(buildDir, antProp("test.classes.dir"))
+final String testResultsDir =         rel2(buildDir, antProp("test.results.dir"))
+final String deliverDir =             rel2(buildDir, antProp("deliver.dir"))
+
+final String generatorClass = antProp("generator.mainClass")
+
+final String jarName = antProp("jar.name")
+
+final int version = 0
+
+final almMessage = {Object v -> println " [almworks] " + v; System.out.flush(); System.err.flush() }
+
+final defaultCompileParams = [debug: "true", includeAntRuntime: "no", source: "1.6", target: "1.6", nowarn: "on"]
+
+target(name: 'init') {
+  almMessage "init"
+
+  path(id: "libs") {
+    fileset(dir: libDir) {
+      include(name: "*.jar")
+    }
+  }
+
+  ant.presetdef(name: "copy") {
+    copy(overwrite: "true", failonerror: "true", preservelastmodified: "true")
+  }
+
+  almMessage "initDone"
+}
+
+target(name: 'clean') {
+  almMessage "cleaning build directory"
+  ant.delete(dir: buildDir)
+}
+
+target(name: 'makeGen') {
+  almMessage "makeGen"
+
+  ant.mkdir(dir: generatorClassesDir)
+  srcFiles = collectRelFileNames(new File(generatorSrcDir), "", ["java", "groovy"])
+  ant.groovyc([includeAntRuntime: "no", srcdir: generatorSrcDir, destdir: generatorClassesDir, sourcepath: srcFiles]) {
+    javac([debug: "true", source: "1.6", target: "1.6", nowarn: "on"])
+  }
+
+  almMessage "make gen done"
+}
+
+runGenerator = {boolean checkOnly ->
+  List<String> files = collectRelFileNames(new File(templatesDir), "", ["tpl"], false)
+  // get classpath for running with groovy classes
+  String groovyHome = System.getProperty("groovy.home")
+  if(!groovyHome) ant.fail(message: "cannot run integer collections code generator: no GROOVY_HOME found")
+
+  ant.java(
+    classname: generatorClass,
+    fork: "true",
+    dir: generatorClassesDir,
+    failonerror: "true"
+  ) {
+    classpath {
+      pathelement(location: generatorClassesDir)
+      fileset(dir: "$groovyHome/lib", includes: "*.jar")
+    }
+    arg(value: templatesDir)
+    arg(value: files.join(File.pathSeparator))
+    arg(value: generatedJavaDir)
+    arg(value: checkOnly)
+    jvmarg(value: "-Dfile.encoding=UTF-8")
+  }
+
+  almMessage checkOnly ? "verified: generated code corresponds to the templates" : "generate Java files done"
+}
+
+target(name: 'validateGeneratedCodeIntegrity') {
+  depends(['makeGen'])
+  runGenerator(true)
+}
+
+List<String> collectRelFileNames(File dir, String prefix, List<String> acceptedExtensions) {
+  collectRelFileNames(dir, prefix, acceptedExtensions, false)
+}
+
+List<String> collectRelFileNames(File dir, String prefix, List<String> acceptedExtensions, boolean includeMeInPrefix) {
+  prefix = includeMeInPrefix ? prefix + dir.getName() + "/" : prefix
+  File[] children = dir.listFiles()
+  def directChildren = children.findAll({f ->
+    if (!f.isFile())
+      return false
+    String n = f.getName()
+    return acceptedExtensions.any({String ext -> n.endsWith("." + ext)})
+  }).collect({File f -> prefix + f.getName() })
+  return directChildren.plus(children.findAll({File f -> f.isDirectory()}).collect({File f -> collectRelFileNames(f, prefix, acceptedExtensions, true)}).flatten())
+}
+
+target(name: 'generateJavaCode') {
+  depends(['makeGen'])
+  if (!skipGenerate) runGenerator(false)
+}
+
+target(name: 'make') {
+  depends(['init', 'generateJavaCode'])
+  ant.mkdir(dir: generatedClassesDir)
+  println "classpath: $libDir/"
+  ant.javac(defaultCompileParams + [destdir: generatedClassesDir, classpathref: "libs"]) {
+    src {
+      pathelement(path: generatedJavaDir)
+      pathelement(path: javaDir)
+    }
+  }
+  almMessage "make done"
+}
+
+target(name: 'test') {
+  depends(['init', 'make'])
+  ant.mkdir(dir: testsClassesDir)
+  ant.javac(defaultCompileParams + [destdir: testsClassesDir, classpathref: "libs"]) {
+    src {
+      pathelement(path: testDir)
+    }
+    classpath {
+      pathelement(path: generatedClassesDir)
+    }
+  }
+  almMessage "make tests done"
+  ant.mkdir(dir: testResultsDir)
+  ant.junit(fork: "true", forkmode: "once", printsummary: "true", haltonfailure: "true") {
+    formatter(type: "xml", usefile: "true")
+    classpath {
+      path(refid: "libs")
+      pathelement(path: generatedClassesDir)
+      pathelement(path: testsClassesDir)
+    }
+    batchtest(todir: testResultsDir) {
+      fileset(dir: testsClassesDir, includes: "**/*Test.class")
+      fileset(dir: testsClassesDir, includes: "**/*Tests.class")
+    }
+  }
+  almMessage "tests succeeded"
+}
+
+target(name: 'fetchVersion') {
+  depends(['init'])
+  almMessage "fetchVersion"
+  def info = "svn info $rootDir".execute().text
+  def m = info =~ /Revision: (\d+)/
+  if (!m) { ant.echo(message: "WARNING: no version"); }
+  else {
+    version = Integer.parseInt(m[0][1].toString());
+    def status = "svn status $rootDir".execute().text
+    if (status =~ /(?m)^[^\?]/) {
+      ant.echo(message: "WARNING: dirty build")
+      version += "+";
+    }
+  }
+  almMessage "version=" + version
+}
+
+target(name: 'dist') {
+  depends(['init', 'fetchVersion', 'make', 'test'])
+  almMessage "dist"
+
+  String deliverName = jarName
+  ant.mkdir(dir: deliverDir)
+  def jarFileName = deliverName + ".jar"
+  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn") {
+    manifest {
+      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+      attribute(name: "Implementation-Vendor", value: "ALM Works")
+      attribute(name: "Implementation-Version", value: "${version}")
+    }
+  }
+
+  def deliverSources = rel2(buildDir, "deliver-sources")
+  ant.delete(dir: deliverSources)
+  ant.mkdir(dir: deliverSources)
+  ant.copy(todir: deliverSources) {
+    fileset(dir: javaDir, excludes: "**/.svn")
+    fileset(dir: generatedJavaDir, excludes: "**/.svn")
+  }
+  String srcFileName = deliverName + "-src.zip"
+  ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
+
+  almMessage "dist done"
+}
+
+target(name: 'build') {
+  depends(['init', 'clean', 'make', 'test', 'dist'])
+  almMessage "build finished"
+}
+
+setDefaultTarget('build')

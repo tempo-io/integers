@@ -1,0 +1,17 @@
+<project basedir="." name="gant-helper">
+  <property environment="env"/>
+  <property name="gantHome" value="${env.GANT_HOME}"/>
+  <property name="groovyHome" value="${env.GROOVY_HOME}"/>
+
+  <taskdef name="gant" classname="org.codehaus.gant.ant.Gant">
+    <classpath>
+      <fileset dir="${gantHome}/lib" includes="*.jar"/>
+      <fileset dir="${groovyHome}/lib" includes="*.jar"/>
+      <pathelement location="."/>
+    </classpath>
+  </taskdef>
+
+  <target name="generateCollections">
+    <gant file="build.gant" target="generateJavaCode"/>
+  </target>
+</project>
