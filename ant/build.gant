@@ -39,7 +39,7 @@ final String generatorClass = antProp("generator.mainClass")
 
 final String jarName = antProp("jar.name")
 
-final int version = 0
+String version = ""
 
 final almMessage = {Object v -> println " [almworks] " + v; System.out.flush(); System.err.flush() }
 
@@ -178,7 +178,7 @@ target(name: 'fetchVersion') {
   def m = info =~ /Revision: (\d+)/
   if (!m) { ant.echo(message: "WARNING: no version"); }
   else {
-    version = Integer.parseInt(m[0][1].toString());
+    version = m[0][1].toString();
     def status = "svn status $rootDir".execute().text
     if (status =~ /(?m)^[^\?]/) {
       ant.echo(message: "WARNING: dirty build")
