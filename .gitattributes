@@ -71,12 +71,14 @@ templates/com/almworks/integers/util/PListRemovingDecorator.tpl -text
 templates/com/almworks/integers/util/PObjMap.tpl -text
 templates/com/almworks/integers/util/PSetBuilder.tpl -text
 templates/com/almworks/integers/util/ReadonlyPListRemovingDecorator.tpl -text
+templates/com/almworks/integers/util/SortedPListIntersectionIterator.tpl -text
 templates/com/almworks/integers/util/SortedPListMinusIterator.tpl -text
 test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
 test/com/almworks/integers/IntArrayTests.java -text
 test/com/almworks/integers/IntCollectionsCompare.java -text
 test/com/almworks/integers/IntCollectionsTests.java -text
+test/com/almworks/integers/IntIteratorTests.java -text
 test/com/almworks/integers/NativeIntFixture.java -text
 test/com/almworks/integers/ParallelIntListTests.java -text
 test/com/almworks/integers/optimized/SameValuesIntListTest.java -text

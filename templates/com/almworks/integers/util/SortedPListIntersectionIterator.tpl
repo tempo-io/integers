@@ -19,27 +19,27 @@ package com.almworks.integers.util;
 import com.almworks.integers.#E#Iterator;
 
 /**
- * Iterates through two sorted #e# lists in O(N+M), providing values that exist in the
- * first list and do not exist in the second
+ * Iterates through two sorted int lists in O(N+M), providing values that exist in
+ * both lists
  */
-public class Sorted#E#ListMinusIterator extends Finding#E#Iterator {
-  private final #E#Iterator myInclude;
-  private final #E#Iterator myExclude;
+public class Sorted#E#ListIntersectionIterator extends Finding#E#Iterator {
+  private final #E#Iterator myFirst;
+  private final #E#Iterator mySecond;
 
   private #e# myNext = #EW#.MIN_VALUE;
-  private #e# myLastExclude = #EW#.MIN_VALUE;
-  private boolean myExcludeIterated;
+  private #e# myLastSecond = #EW#.MIN_VALUE;
+  private boolean mySecondIterated;
 
-  public Sorted#E#ListMinusIterator(#E#Iterator include, #E#Iterator exclude) {
-    myInclude = include;
-    myExclude = exclude;
+  public Sorted#E#ListIntersectionIterator(#E#Iterator first, #E#Iterator second) {
+    myFirst = first;
+    mySecond = second;
   }
 
   protected boolean findNext() {
     #e# last = myNext;
-    while (myInclude.hasNext()) {
-      #e# v = myInclude.next();
-      assert v >= last : last + " " + v + " " + myInclude;
+    while (myFirst.hasNext()) {
+      #e# v = myFirst.next();
+      assert v >= last : last + " " + v + " " + myFirst;
       if (accept(v)) {
         myNext = v;
         return true;
@@ -50,23 +50,23 @@ public class Sorted#E#ListMinusIterator extends Finding#E#Iterator {
   }
 
   private boolean accept(#e# v) {
-    if (myExcludeIterated) {
-      if (v == myLastExclude)
-        return false;
-      if (v < myLastExclude)
+    if (mySecondIterated) {
+      if (v == myLastSecond)
         return true;
-    }
-    while (myExclude.hasNext()) {
-      #e# n = myExclude.next();
-      assert n >= myLastExclude : myLastExclude + " " + n + " " + myExclude;
-      myLastExclude = n;
-      myExcludeIterated = true;
-      if (v == myLastExclude)
+      if (v < myLastSecond)
         return false;
-      if (v < myLastExclude)
-        return true;
     }
-    return true;
+    while (mySecond.hasNext()) {
+      #e# n = mySecond.next();
+      assert n >= myLastSecond : myLastSecond + " " + n + " " + mySecond;
+      myLastSecond = n;
+      mySecondIterated = true;
+      if (v == myLastSecond)
+        return true;
+      if (v < myLastSecond)
+        return false;
+    }
+    return false;
   }
 
   protected #e# getNext() {
