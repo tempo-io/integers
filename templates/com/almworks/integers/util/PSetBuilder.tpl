@@ -19,6 +19,7 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import static com.almworks.integers.IntegersUtils.*;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 public final class #E#SetBuilder implements Cloneable, #E#Collector {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;
@@ -313,6 +314,30 @@ public final class #E#SetBuilder implements Cloneable, #E#Collector {
       return #E#List.EMPTY;
     return new #E#Array(mySorted, mySortedSize);
   }
+
+  /**
+   * @return a list of numbers, which should be used before any further mutation of the builder.
+   *
+   * This method does not finalize the builder.
+   */
+  public #E#List toTemporaryReadOnlySortedCollection() {
+    mergeTemp();
+    if (mySortedSize == 0)
+      return #E#List.EMPTY;
+    return new Abstract#E#List() {
+      @Override
+      public int size() {
+        return mySortedSize;
+      }
+
+      @Override
+      public #e# get(int index) throws NoSuchElementException {
+        if (index < 0 || index >= mySortedSize) throw new NoSuchElementException("" + index);
+        return mySorted[index];
+      }
+    };
+  }
+
 
   public #e#[] toNativeArray() {
     myFinished = true;
