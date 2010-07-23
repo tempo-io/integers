@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /**
- * Serves as a map with integer keys.
+ * Serves as a map with #e# keys.
  *
  * @param <E> element type
  */
@@ -124,6 +124,21 @@ public class #E#ObjMap<E> implements Iterable<#E#ObjMap.Entry<E>> {
   public Iterable<E> getValues() {
     //noinspection ReturnOfCollectionOrArrayField
     return Collections.unmodifiableList(myValues);
+  }
+
+  /**
+   * Removes mapping for the specified key if it is present.
+   * @return previously mapped object
+   */
+  public E remove(#e# key) {
+    mod();
+    int pos = myKeys.binarySearch(key);
+    if (pos >= 0) {
+      myKeys.removeAt(pos);
+      return myValues.remove(pos);
+    } else {
+      return null;
+    }
   }
 
   private void mod() {

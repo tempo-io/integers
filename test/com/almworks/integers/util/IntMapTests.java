@@ -114,6 +114,15 @@ public class IntMapTests extends TestCase {
     checkEntry(it.next(), 100);
   }
 
+  public void testRemove() {
+    myMap.put(0, "0");
+    myMap.put(100, "100");
+    assertEquals("0", myMap.remove(0));
+    IntObjMap.IntMapIterator it = myMap.iterator();
+    checkEntry(it.next(), 100);
+    assertFalse(it.hasNext());
+  }
+
   private void checkEntry(IntObjMap.Entry<String> e, int key) {
     assertEquals(key, e.getKey());
     assertEquals(String.valueOf(key), e.getValue());
