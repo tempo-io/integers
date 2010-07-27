@@ -306,4 +306,11 @@ import java.util.Arrays;
      int index = binarySearch(value);
      if (index >= 0) removeAt(index);
    }
- }
+
+   public #e#[] extractHostArray() {
+     #e#[] array = myArray;
+     myArray = EMPTY_#EC#S;
+     updateSize(0);
+     return array;
+   }
+  }
