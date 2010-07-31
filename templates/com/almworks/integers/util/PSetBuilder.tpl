@@ -315,6 +315,12 @@ public final class #E#SetBuilder implements Cloneable, #E#Collector {
     return new #E#Array(mySorted, mySortedSize);
   }
 
+  public #E#Array to#E#Array(){
+    myFinished=true;
+    mergeTemp();
+    return new #E#Array(mySorted, mySortedSize);
+  }
+
   /**
    * @return a list of numbers, which should be used before any further mutation of the builder.
    *
@@ -337,7 +343,6 @@ public final class #E#SetBuilder implements Cloneable, #E#Collector {
       }
     };
   }
-
 
   public #e#[] toNativeArray() {
     myFinished = true;
