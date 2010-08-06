@@ -16,10 +16,11 @@
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersUtils.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.*;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_#EC#S;
 
 public class #E#Collections {
   public static #e#[] toNativeArray(#E#Iterable iterable) {
@@ -221,5 +222,24 @@ public class #E#Collections {
 
   public static int compare(#e# a, #e# b) {
     return (a < b ? -1 : (a == b ? 0 : 1));
+  }
+
+  /**
+   * Returns #E#List adapter of the specified collection. If collection changes, the returned #E#List changes also. <br>
+   * Beware of unboxing: each call to the returned #E#List leads to unboxing of the source collection element. If you will frequently access the returned #E#List, it's a better idea to make a copy. See {@link #E#Array#create(java.util.Collection)}
+   */
+  public static #E#List as#E#List(@Nullable final List<#EW#> coll) {
+    if (coll == null || coll.isEmpty()) return #E#List.EMPTY;
+    return new Abstract#E#List() {
+      @Override
+      public int size() {
+        return coll.size();
+      }
+
+      @Override
+      public #e# get(int index) throws NoSuchElementException {
+        return coll.get(index);
+      }
+    };
   }
 }

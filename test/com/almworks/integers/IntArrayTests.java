@@ -210,5 +210,7 @@ public class IntArrayTests extends NativeIntFixture {
     l.add(9);
     IntArray a = IntArray.create(l);
     CHECK.order(a.toNativeArray(), 2, 3, 9);
+    IntList il = IntCollections.asIntList(l);
+    CHECK.order(il.toNativeArray(), 2, 3, 9);
   }
 }
