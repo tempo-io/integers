@@ -16,7 +16,6 @@
 .idea/modules.xml -text
 .idea/uiDesigner.xml -text
 .idea/vcs.xml -text
-.idea/workspace.xml -text
 ant/build.gant -text
 ant/build.properties -text
 ant/build.xml -text
