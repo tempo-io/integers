@@ -1,6 +1,6 @@
 package com.almworks.integers;
 
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class IntArrayTests extends NativeIntFixture {
   private IntArray array;
@@ -201,5 +201,14 @@ public class IntArrayTests extends NativeIntFixture {
     CHECK.order(array.iterator(), 1, 2, 3);
     array.retain(IntArray.create(2));
     CHECK.order(array.iterator(), 2);
+  }
+
+  public void testFromCollection() {
+    List<Integer> l = new ArrayList<Integer>();
+    l.add(2);
+    l.add(3);
+    l.add(9);
+    IntArray a = IntArray.create(l);
+    CHECK.order(a.toNativeArray(), 2, 3, 9);
   }
 }
