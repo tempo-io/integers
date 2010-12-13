@@ -59,9 +59,7 @@ public class IntegerCollectionsCodegen {
   private static <T> HashSet<T> hashSet(T... elem) {
     if (elem == null || elem.length == 0) return new HashSet<T>();
     HashSet<T> set = new HashSet<T>(elem.length);
-    for (T e: elem) {
-      set.add(e);
-    }
+    set.addAll(Arrays.asList(elem));
     return set;
   }
 

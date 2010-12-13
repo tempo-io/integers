@@ -242,4 +242,36 @@ public class #E#Collections {
       }
     };
   }
+
+  /**
+   * This algorithm supposes that the set to intersect with is usually shorter than the merged ones.
+   * It also supposes that a and b have a great deal of common elements (this assumption is not very important, though).
+   * */
+  public static #E#List uniteTwoLengthySortedSetsAndIntersectWithThirdShort(#E#List a, #E#List b, #E#List intersectWith) {
+    #E#Array result = new #E#Array(Math.min(intersectWith.size(), 16));
+    int ia = 0;
+    int sza = a.size();
+    int ib = 0;
+    int szb = b.size();
+    #e# v;
+    boolean add;
+    for (#E#ListIterator iiw = intersectWith.iterator(); iiw.hasNext(); ) {
+      v = iiw.next();
+      add = false;
+      ia = a.binarySearch(v, ia, sza);
+      if (ia >= 0) {
+        add = true;
+      } else {
+        ia = -ia - 1;
+        ib = b.binarySearch(v, ib, szb);
+        if (ib >= 0) {
+          add = true;
+        } else {
+          ib = -ib - 1;
+        }
+      }
+      if (add) result.add(v);
+    }
+    return result;
+  }
 }

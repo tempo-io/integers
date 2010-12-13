@@ -27,6 +27,7 @@ final String javaDir =          rel2(rootDir, antProp("java.dir"))
 final String libDir =           rel2(rootDir, antProp("lib.dir"))
 final String generatorSrcDir =  rel2(rootDir, antProp("generator.java.dir"))
 final String testDir =          rel2(rootDir, antProp("test.dir"))
+final String utilDir =          rel2(rootDir, antProp("util.dir"))
 
 final String generatorClassesDir =    rel2(buildDir, antProp("generator.classes.dir"))
 final String generatedJavaDir =       rel2(buildDir, antProp("generated.java.dir"))
@@ -34,6 +35,7 @@ final String generatedClassesDir =    rel2(buildDir, antProp("generated.classes.
 final String testsClassesDir =        rel2(buildDir, antProp("test.classes.dir"))
 final String testResultsDir =         rel2(buildDir, antProp("test.results.dir"))
 final String deliverDir =             rel2(buildDir, antProp("deliver.dir"))
+final String utilClassesDir =       rel2(buildDir, antProp("util.classes.dir"))
 
 final String generatorClass = antProp("generator.mainClass")
 
@@ -66,12 +68,23 @@ target(name: 'clean') {
   ant.delete(dir: buildDir)
 }
 
+target(name: 'utils') {
+  almMessage "building utils"
+  ant.mkdir(dir: utilClassesDir)
+  ant.javac(defaultCompileParams + [srcDir: utilDir, destDir: utilClassesDir])
+  path(id: "util.classes") {
+    pathelement(path: utilClassesDir)
+  }
+  almMessage "building utils done"
+}
+
 target(name: 'makeGen') {
+  depends(['utils'])
   almMessage "makeGen"
 
   ant.mkdir(dir: generatorClassesDir)
   srcFiles = collectRelFileNames(new File(generatorSrcDir), "", ["java", "groovy"])
-  ant.groovyc([includeAntRuntime: "no", srcdir: generatorSrcDir, destdir: generatorClassesDir, sourcepath: srcFiles]) {
+  ant.groovyc([includeAntRuntime: "no", srcdir: generatorSrcDir, destdir: generatorClassesDir, sourcepath: srcFiles, classpathref: "util.classes"]) {
     javac([debug: "true", source: "1.6", target: "1.6", nowarn: "on"])
   }
 
@@ -91,7 +104,8 @@ runGenerator = {boolean checkOnly ->
     failonerror: "true"
   ) {
     classpath {
-      pathelement(location: generatorClassesDir)
+      pathelement(path: generatorClassesDir)
+      pathelement(path: utilClassesDir)
       fileset(dir: "$groovyHome/lib", includes: "*.jar")
     }
     arg(value: templatesDir)
@@ -144,7 +158,8 @@ target(name: 'make') {
 }
 
 target(name: 'test') {
-  depends(['init', 'make'])
+  depends(['init', 'make', 'utils'])
+  almMessage "compiling tests"
   ant.mkdir(dir: testsClassesDir)
   ant.javac(defaultCompileParams + [destdir: testsClassesDir, classpathref: "libs"]) {
     src {
@@ -152,6 +167,7 @@ target(name: 'test') {
     }
     classpath {
       pathelement(path: generatedClassesDir)
+      pathelement(path: utilClassesDir)
     }
   }
   almMessage "make tests done"
@@ -162,6 +178,7 @@ target(name: 'test') {
       path(refid: "libs")
       pathelement(path: generatedClassesDir)
       pathelement(path: testsClassesDir)
+      pathelement(path: utilClassesDir)
     }
     batchtest(todir: testResultsDir) {
       fileset(dir: testsClassesDir, includes: "**/*Test.class")

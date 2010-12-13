@@ -51,6 +51,15 @@ public class CollectionsCompare {
     order(Arrays.asList(expected), Arrays.asList(actual));
   }
 
+  public void order(LongList actual, long ... expected) {
+    order(actual.toNativeArray(), expected);
+  }
+
+  public void order(LongList expected, LongList actual) {
+    order(actual.toNativeArray(), expected.toNativeArray());
+  }
+
+
   public void order(List<?> expected, List<?> actual) {
     Assert.assertNotNull("Expected in null", expected);
     Assert.assertNotNull("Collection in null", actual);
