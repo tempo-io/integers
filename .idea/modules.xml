@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/Build.iml" filepath="$PROJECT_DIR$/.idea/Build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Collections.iml" filepath="$PROJECT_DIR$/.idea/Collections.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Generator.iml" filepath="$PROJECT_DIR$/.idea/Generator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/util/Util.iml" filepath="$PROJECT_DIR$/util/Util.iml" />
     </modules>
   </component>
 </project>

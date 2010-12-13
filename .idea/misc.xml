@@ -6,6 +6,9 @@
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
+  <component name="EntryPointsManager">
+    <entry_points version="2.0" />
+  </component>
   <component name="IdProvider" IDEtalkID="940B95994EF6A8B64E08990DEF7B192D" />
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
@@ -78,5 +81,6 @@
       <CheckinOptions />
     </option>
   </component>
+  <component name="WebServicesPlugin" addRequiredLibraries="true" />
 </project>
 
