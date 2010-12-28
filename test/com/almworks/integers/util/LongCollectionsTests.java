@@ -22,10 +22,35 @@ import junit.framework.TestCase;
 
 import java.util.Random;
 
-import static com.almworks.integers.LongCollections.uniteTwoLengthySortedSetsAndIntersectWithThirdShort;
+import static com.almworks.integers.LongCollections.*;
 
 public class LongCollectionsTests extends TestCase {
   public static final CollectionsCompare COMPARE = new CollectionsCompare();
+  private Random myRandom;
+  public static final String SEED = "com.almworks.integers.seed";
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    setupRandom();
+  }
+
+  private void setupRandom() {
+    String seedStr = System.getProperty(SEED, "");
+    long seed;
+    try {
+      seed = Long.parseLong(seedStr);
+      System.out.println("Using seed from settings: " + seed);
+    } catch (NumberFormatException _) {
+      seed = System.currentTimeMillis();
+      System.out.println("Using seed " + seed);
+    }
+    myRandom = new Random(seed);
+  }
+
+  public Random getRandom() {
+    return myRandom;
+  }
 
   public void testUniteTwoLengthySortedSetsAndIntersectWithThirdShort() {
     doTestSimple();
@@ -43,15 +68,14 @@ public class LongCollectionsTests extends TestCase {
   }
 
   private void doTestMany() {
-    Random rand = new Random(System.currentTimeMillis());
     int len = 1000;
     float intersRate = 0.3f;
     int intersLen = 100;
     int maxElem = len * 10;
     for (int nTest = 0; nTest < 10; ++nTest) {
-      LongList a = createRand(rand, len, maxElem, 2);
-      LongList b = createRand(rand, len, maxElem, 3);
-      Pair<LongArray, LongArray> exp_int = createInters(rand, a, b, intersRate, intersLen, maxElem);
+      LongList a = createRand(myRandom, len, maxElem, 2);
+      LongList b = createRand(myRandom, len, maxElem, 3);
+      Pair<LongArray, LongArray> exp_int = createInters(myRandom, a, b, intersRate, intersLen, maxElem);
       LongArray inters = exp_int.getSecond();
       System.out.println("\n/////////\na: " + a + "\nb: " + b + "\ninters:" + inters);
       COMPARE.order(exp_int.getFirst(), uniteTwoLengthySortedSetsAndIntersectWithThirdShort(a, b, inters));
@@ -95,5 +119,37 @@ public class LongCollectionsTests extends TestCase {
     trueIntersection.sortUnique();
     withExtra.sortUnique();
     return Pair.create(trueIntersection, withExtra);
+  }
+
+  public void testDiffSortedLists() throws Exception {
+    COMPARE.order(diffSortedLists(LongList.EMPTY, LongList.EMPTY));
+    COMPARE.order(diffSortedLists(com.almworks.integers.LongArray.create(0, 3, 4, 7), com.almworks.integers.LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
+
+    com.almworks.integers.LongArray diff = new com.almworks.integers.LongArray();
+    com.almworks.integers.LongArray a = new com.almworks.integers.LongArray();
+    com.almworks.integers.LongArray b = new com.almworks.integers.LongArray();
+    for (int i = 0; i < 10; ++i) {
+      initLists(a, b, diff);
+      COMPARE.order(diffSortedLists(a, b), diff);
+    }
+  }
+
+  private void initLists(LongArray a, LongArray b, LongArray diff) {
+    a.clear();
+    b.clear();
+    diff.clear();
+    for (int i = 0; i < 100; ++i) {
+      a.add(getRandom().nextInt(1000));
+      b.add(getRandom().nextInt(1000));
+    }
+    a.sortUnique();
+    b.sortUnique();
+    LongArray notb = LongArray.copy(a);
+    notb.removeAll(b);
+    LongArray nota = LongArray.copy(b);
+    nota.removeAll(a);
+    diff.addAll(nota);
+    diff.addAll(notb);
+    diff.sortUnique();
   }
 }

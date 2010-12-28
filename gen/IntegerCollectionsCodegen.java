@@ -36,7 +36,7 @@ public class IntegerCollectionsCodegen {
 
   public static final String javaComments = "/[*]([^*]*?[*])+?/|(?m://.*$)";
   public static final String javaEntityNameExtractor = "(?:public\\s+)?(?:class|enum|interface|(?:@\\s*interface))\\s+((?:\\w|#)+)";
-  public static final String applicabilityStringRegex = "^#APPLY#([" + GenericType.getAllApplicableString() + "]+)\\s*";
+  public static final String applicabilityStringRegex = "^#APPLY#([" + TypeDescriptor.getAllApplicableString() + "]+)\\s*";
   public static final String skipImportsRegex = SkipImportsRegex.REGEX;
   public static final String skipImportsWhitespaceRegex = SkipImportsRegex.WHITESPACE_REGEX;
   private static final String lineSeparator = String.format("%n");
@@ -147,7 +147,7 @@ public class IntegerCollectionsCodegen {
     String applicabilityString = getApplicabilityString(templateFile, templateStr);
     templateStr = templateStr.replaceAll(applicabilityStringRegex, "");
     StringBuilder errors = new StringBuilder();
-    for (GenericType type : GenericType.getApplicableTypes(applicabilityString)) {
+    for (TypeDescriptor type : TypeDescriptor.getApplicableTypes(applicabilityString)) {
       String outFileName = type.apply(outFileNameTemplate);
       String out = type.apply(templateStr);
       File outFile = new File(parent, outFileName + myOutputFileExt);
@@ -195,7 +195,7 @@ public class IntegerCollectionsCodegen {
   private static String getApplicabilityString(File templateFile, String templateStr) {
     Matcher matcher = Pattern.compile(applicabilityStringRegex).matcher(templateStr);
     if (!matcher.find()) {
-      return GenericType.getAllApplicableString();
+      return TypeDescriptor.getAllApplicableString();
     }
     String ret = matcher.group(1);
     if(matcher.find()) {
@@ -301,74 +301,6 @@ public class IntegerCollectionsCodegen {
     } catch (IOException e) {
       // is thrown only if StringReader or BufferReader was closed when readLine is called, which is very strange
       throw new Error(e);
-    }
-  }
-
-  /**
-   * A type operation.
-   */
-  private enum GenericType {
-    INT("int", "Integer", "Int", "INT", "I"),
-    LONG("long", "Long", "Long", "LONG", "J"),
-//    BYTE("byte", "Byte", "Byte", "BYTE", "B"),
-//    SHORT("short", "Short", "Short", "SHORT", "S")
-    ;
-
-    private final Map<TypeAspect, String> myReplacements = new HashMap<TypeAspect, String>();
-    private final String myApplicableCode;
-
-    GenericType(String type, String objectWrapper, String shortName, String capitalizedName, String applicableCode) {
-      myApplicableCode = applicableCode;
-      myReplacements.put(TypeAspect.TYPE, type);
-      myReplacements.put(TypeAspect.OBJECT_WRAPPER, objectWrapper);
-      myReplacements.put(TypeAspect.SHORT_NAME, shortName);
-      myReplacements.put(TypeAspect.CAPS_NAME, capitalizedName);
-      myReplacements.put(TypeAspect.REMOVE_IT, "int");
-    }
-
-    public String apply(String template) {
-      String out = template;
-      for (TypeAspect aspect : TypeAspect.values()) {
-        out = aspect.getPattern().matcher(out).replaceAll(myReplacements.get(aspect));
-      }
-      return out;
-    }
-
-    public static List<GenericType> getApplicableTypes(String applicabilityString) {
-      List<GenericType> applicableTypes = new ArrayList<GenericType>();
-      for (GenericType t : values()) {
-        if(applicabilityString.contains(t.myApplicableCode)) {
-          applicableTypes.add(t);
-        }
-      }
-      return applicableTypes;
-    }
-
-    public static String getAllApplicableString() {
-      StringBuilder all = new StringBuilder(values().length);
-      for (GenericType t : values()) {
-        all.append(t.myApplicableCode);
-      }
-      return all.toString();
-    }
-  }
-
-  private enum TypeAspect {
-    TYPE("#e#"),
-    OBJECT_WRAPPER("#EW#"),
-    SHORT_NAME("#E#"),
-    CAPS_NAME("#EC#"),
-    REMOVE_IT("#i#")
-    ;
-
-    private final String myPattern;
-
-    Pattern getPattern() {
-      return Pattern.compile(myPattern);
-    }
-
-    TypeAspect(String pattern) {
-      myPattern = pattern;
     }
   }
 }

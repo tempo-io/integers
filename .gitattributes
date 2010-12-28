@@ -21,6 +21,7 @@ ant/build.properties -text
 ant/build.xml -text
 gen/IntegerCollectionsCodegen.java -text
 gen/SkipImportsRegex.groovy -text
+gen/TypeDescriptor.java -text
 java/com/almworks/integers/IntegersUtils.java -text
 java/com/almworks/integers/util/RemovedIndexIterator.java -text
 lib/annotations.jar -text

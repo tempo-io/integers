@@ -274,4 +274,36 @@ public class #E#Collections {
     }
     return result;
   }
+
+  public static #E#List diffSortedLists(#E#List a, #E#List b) {
+    int ia = 0;
+    int sza = a.size();
+    int ib = 0;
+    int szb = b.size();
+    #E#Array diff = new #E#Array();
+    while (ia < sza || ib < szb) {
+      if (ia >= sza) {
+        for (; ib < szb; ++ib) diff.add(b.get(ib));
+        break;
+      }
+      if (ib >= szb) {
+        for (; ia < sza; ++ia) diff.add(a.get(ia));
+        break;
+      }
+      #e# ea = a.get(ia);
+      #e# eb = b.get(ib);
+      if (ea < eb) {
+        diff.add(ea);
+        ++ia;
+      } else if (ea > eb) {
+        diff.add(eb);
+        ++ib;
+      } else {
+        ++ia;
+        ++ib;
+      }
+    }
+    return diff;
+  }
+
 }
