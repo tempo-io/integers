@@ -192,10 +192,14 @@ target(name: 'fetchVersion') {
   depends(['init'])
   almMessage "fetchVersion"
   def svnver = "svnversion $rootDir".execute().text
-  if (svnver.isEmpty()) ant.echo(message: "WARNING: no version")
+  def m = svnver =~ /(\d+)/
+  if (!m.find()) ant.echo(message: "WARNING: no version " + (svnver.isEmpty() ? svnver : svnver.split()[0]))
   else {
-    version = svnver.split()[0]
-    if (!(version ==~ /\d+/)) ant.echo(message: "WARNING: dirty build");
+    version = m[0][1]
+    if (!(svnver ==~ /\d+/)) {
+      ant.echo(message: "WARNING: dirty build " + (svnver.isEmpty() ? svnver : svnver.split()[0]))
+      version += "+"
+    }
   }
   almMessage "version=" + version
 }
