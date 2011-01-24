@@ -118,10 +118,9 @@ public class #E#ObjMap<E> implements Iterable<#E#ObjMap.Entry<E>> {
   }
 
   /**
-   * Returns values sorted by their keys in ascending order.
-   * @return
+   * @return an unmodifiable list of values sorted by their keys in ascending order.
    */
-  public Iterable<E> getValues() {
+  public List<E> getValues() {
     //noinspection ReturnOfCollectionOrArrayField
     return Collections.unmodifiableList(myValues);
   }
