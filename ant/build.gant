@@ -206,6 +206,20 @@ target(name: 'fetchVersion') {
   almMessage "version=" + version
 }
 
+target(name: 'javadoc') {
+  depends(['init', 'make'])
+  almMessage "javadoc"
+  ant.mkdir(dir: deliverDir)
+  ant.mkdir(dir: "$buildDir/javadoc")
+  ant.javadoc(destdir: "$buildDir/javadoc", 'protected': "true", packagenames: 'com.almworks.integers') {
+    sourcepath {
+      pathelement(path: generatedJavaDir)
+      pathelement(path: javaDir)
+    }
+  }
+  ant.jar(basedir: "$buildDir/javadoc", destfile: "$deliverDir/$jarName-javadoc.jar",)
+}
+
 target(name: 'dist') {
   depends(['init', 'fetchVersion', 'make', 'test'])
   almMessage "dist"
@@ -230,7 +244,7 @@ target(name: 'dist') {
   }
   String srcFileName = deliverName + "-src.zip"
   ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
-
+  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar")
   almMessage "dist done"
 }
 
