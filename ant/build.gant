@@ -45,7 +45,7 @@ String version = ""
 
 final almMessage = {Object v -> println " [almworks] " + v; System.out.flush(); System.err.flush() }
 
-final defaultCompileParams = [debug: "true", includeAntRuntime: "no", source: "1.6", target: "1.6", nowarn: "on"]
+final defaultCompileParams = [debug: "true", includeAntRuntime: "no", source: "1.5", target: "1.5", nowarn: "on"]
 
 target(name: 'init') {
   almMessage "init"
