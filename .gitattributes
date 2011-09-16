@@ -45,10 +45,12 @@ templates/com/almworks/integers/PList.tpl -text
 templates/com/almworks/integers/PListIterator.tpl -text
 templates/com/almworks/integers/PProgression.tpl -text
 templates/com/almworks/integers/ParallelPList.tpl -text
+templates/com/almworks/integers/TwoWayPMap.tpl -text
 templates/com/almworks/integers/WritablePList.tpl -text
 templates/com/almworks/integers/WritablePListIterator.tpl -text
 templates/com/almworks/integers/func/PFunction.tpl -text
 templates/com/almworks/integers/func/PFunction2.tpl -text
+templates/com/almworks/integers/func/PFunctions.tpl -text
 templates/com/almworks/integers/func/PProcedure.tpl -text
 templates/com/almworks/integers/func/PProcedure2.tpl -text
 templates/com/almworks/integers/optimized/PSegment.tpl -text
@@ -77,6 +79,7 @@ test/com/almworks/integers/IntCollectionsTests.java -text
 test/com/almworks/integers/IntIteratorTests.java -text
 test/com/almworks/integers/NativeIntFixture.java -text
 test/com/almworks/integers/ParallelIntListTests.java -text
+test/com/almworks/integers/TwoWayIntMapTests.java -text
 test/com/almworks/integers/optimized/SameValuesIntListTest.java -text
 test/com/almworks/integers/optimized/SegmentedIntArrayTests.java -text
 test/com/almworks/integers/optimized/TestEnvForSegmentedIntArray.java -text
@@ -84,6 +87,7 @@ test/com/almworks/integers/util/IntMapTests.java -text
 test/com/almworks/integers/util/IntSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/IntSetBuilderTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
+test/com/almworks/util/TestRandom.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text
 util/com/almworks/util/BadFormatException.java -text
