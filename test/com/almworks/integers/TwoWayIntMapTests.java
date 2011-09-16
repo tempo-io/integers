@@ -134,6 +134,10 @@ public class TwoWayIntMapTests extends TestCase {
     map.insertAll(IntArray.create(3, 7, 1, 4, 9, 2, 6), IntArray.create(30, 70, 10, 40, 90, 20, 60));
     compare.order(map.getKeys().toNativeArray(), arithmetic(0, 10).toNativeArray());
     for (int i = 0; i < 10; ++i) assertEquals(i*10, map.get(i));
+
+    map.clear();
+    map.insertAllRo(IntProgression.arithmetic(0, 10), IntProgression.arithmetic(0, 10, 10));
+    for (int i = 0; i < 10; ++i) assertEquals(i*10, map.get(i));
   }
 
   public void testContains() {

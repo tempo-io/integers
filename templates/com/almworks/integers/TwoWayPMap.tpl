@@ -182,6 +182,10 @@ public class TwoWay#E#Map {
     return sorted.isUniqueSorted();
   }
 
+  public void insertAllRo(#E#List keys, #E#List vals) {
+    insertAll(new #E#Array(keys), new #E#Array(vals));
+  }
+
   public void insertAll(Writable#E#List keys, #E#Function keyToVal) {
     int m = keys.size();
     #E#Array vals = new #E#Array(m);
