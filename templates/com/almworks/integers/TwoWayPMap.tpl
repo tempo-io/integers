@@ -33,7 +33,7 @@ public class TwoWay#E#Map {
   private final #E#Array myVals = new #E#Array();
 
   public boolean containsKey(#e# key) {
-    return myKeys.contains(key);
+    return myKeys.binarySearch(key) >= 0;
   }
 
   public boolean containsAllKeys(#E#List keys) {
@@ -82,7 +82,7 @@ public class TwoWay#E#Map {
   }
 
   public boolean containsVal(#e# val) {
-    return myVals.contains(val);
+    return myVals.binarySearch(val) >= 0;
   }
 
   /** Throws {@link IllegalArgumentException} if the map does not contain the mapping for the key.
@@ -252,15 +252,23 @@ public class TwoWay#E#Map {
     assert checkInvariants(keys + "\n" + vals);
   }
 
-  /** Transforms each value using the specified function.<br/>
+  /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
   public void transformVals(@NotNull #E#Function f) {
+    transformVals(#EW#.MIN_VALUE, f);
+  }
+
+  /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
+   * Memory: O(n). */
+  public void transformVals(#e# valFrom, @NotNull #E#Function f) {
     int n = size();
     boolean isSortingBroken = false;
     #e# lastVal = #EW#.MIN_VALUE;
-    for (int i = 0; i < n; ++i) {
-      #e# val = f.invoke(myVals.get(i));
-      myVals.set(i, val);
+    int viFrom = myVals.binarySearch(valFrom);
+    if (viFrom < 0) viFrom = -viFrom - 1;
+    for (int vi = viFrom; vi < n; ++vi) {
+      #e# val = f.invoke(myVals.get(vi));
+      myVals.set(vi, val);
       if (val < lastVal) isSortingBroken = true;
       lastVal = val;
     }
@@ -270,7 +278,7 @@ public class TwoWay#E#Map {
     assert checkInvariants(String.valueOf(f));
   }
 
-  /** Transforms the value of each mapping using the specified function (key, val). */
+  /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
   public void transformVals(@NotNull #E#Function2 f) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
@@ -438,11 +446,14 @@ public class TwoWay#E#Map {
     #E#Collections.removeAllAtSorted(myVals, visToRemove);
   }
 
-  public void removeAllValsRo(#E#List vals) {
-    removeAllVals(new #E#Array(vals));
+  @NotNull
+  public #E#List removeAllValsRo(#E#List vals) {
+    return removeAllVals(new #E#Array(vals));
   }
 
-  public void removeAllVals(Writable#E#List vals) {
+  /** @return list of values that have not been removed (not contained in the map) */
+  @NotNull
+  public #E#List removeAllVals(Writable#E#List vals) {
     if (!vals.isSorted()) vals.sort();
     vals.removeDuplicates();
     int m = vals.size();
@@ -450,12 +461,12 @@ public class TwoWay#E#Map {
 
     IntArray visToRemove = new IntArray(m);
     #E#Array vsToRemove = new #E#Array(m);
-    fillVsToRemove(vals, m, n, visToRemove, vsToRemove);
+    #E#List notInMap = fillVsToRemove(vals, m, n, visToRemove, vsToRemove);
 
     IntArray kisToRemove = new IntArray(m);
     for (int i = 0; i < n; ++i) {
       int vi = myIdxMap.get(i);
-      if (visToRemove.contains(vi)) {
+      if (visToRemove.binarySearch(vi) >= 0) {
         kisToRemove.add(i);
       }
     }
@@ -464,21 +475,28 @@ public class TwoWay#E#Map {
     removeValsSorted0(vsToRemove, visToRemove);
 
     assert checkInvariants(String.valueOf(vals));
+    return notInMap == null ? #E#List.EMPTY : notInMap;
   }
 
-  private void fillVsToRemove(Writable#E#List vals, int m, int n, IntArray visToRemove, #E#Array vsToRemove) {
+  @Nullable
+  private #E#List fillVsToRemove(Writable#E#List vals, int m, int n, IntArray visToRemove, #E#Array vsToRemove) {
+    Writable#E#List notInMap = null;
     int vi = 0;
     for (int i = 0; i < m; ++i) {
       #e# v = vals.get(i);
+      boolean inMap = false;
       do {
         int nvi = myVals.binarySearch(v, vi, n);
         if (nvi < 0) break;
         vi = nvi;
         visToRemove.add(vi);
         vsToRemove.add(v);
+        inMap = true;
         vi += 1;
       } while (true);
+      if (!inMap) (notInMap == null ? notInMap = new #E#Array() : notInMap).add(v);
     }
+    return notInMap;
   }
 
   @Override

@@ -389,11 +389,21 @@ public class TwoWayIntMapTests extends TestCase {
 
   public void testRemoveAllVals() {
     map.insertAllRo(IntProgression.arithmetic(0, 10), apply(swap(MOD), 3));
-    map.removeAllVals(IntArray.create(2, 0));
+    IntList notInMap;
+    notInMap = map.removeAllVals(IntArray.create(2, 0));
+    compare.empty(notInMap.toNativeArray());
     compare.order(map.getKeys().iterator(), 1, 4, 7);
     checkMapValsEqualKeysMod(3);
     map.removeAllVals(IntArray.create(1));
     assertEquals(0, map.size());
+
+    map.clear();
+    map.insertAllRo(IntProgression.arithmetic(0, 10, 2), apply(swap(MOD), 13));
+    // Important: specify one of the values not in the map
+    notInMap = map.removeAllVals(IntArray.create(6, 7, 8, 9, 10));
+    compare.order(notInMap.iterator(), 7, 9);
+    compare.order(map.getKeys().iterator(), 0, 2, 4, 12, 14, 16, 18);
+    checkMapValsEqualKeysMod(13);
   }
 
   public void testRemoveAllValsMany() {

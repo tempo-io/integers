@@ -16,6 +16,9 @@
 
 package com.almworks.integers.func;
 
+import com.almworks.integers.#E#Iterable;
+import com.almworks.integers.#E#Iterator;
+
 public class #E#Functions {
   private #E#Functions() {}
 
@@ -152,4 +155,19 @@ public class #E#Functions {
     };
   }
     
+  /** Returns a function that returns values from the supplied Iterable. Function argument is ignored. */
+  public static #E#Function sequence(final #E#Iterable iterable) {
+    return new #E#Function() {
+      #E#Iterator it = iterable.iterator();
+      @Override
+      public #e# invoke(#e# a) {
+        return it.next();
+      }
+  
+      @Override
+      public String toString() {
+        return "i => " + iterable;
+      }
+    };
+  }
 }
