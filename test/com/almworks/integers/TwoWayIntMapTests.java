@@ -386,4 +386,36 @@ public class TwoWayIntMapTests extends TestCase {
     }
     return list;
   }
+
+  public void testRemoveAllVals() {
+    map.insertAllRo(IntProgression.arithmetic(0, 10), apply(swap(MOD), 3));
+    map.removeAllVals(IntArray.create(2, 0));
+    compare.order(map.getKeys().iterator(), 1, 4, 7);
+    checkMapValsEqualKeysMod(3);
+    map.removeAllVals(IntArray.create(1));
+    assertEquals(0, map.size());
+  }
+
+  public void testRemoveAllValsMany() {
+    final int N_KEYS = 2000;
+    final int PRIME = 43;
+    final int N_ATTEMPTS = 10;
+    final int VALS_IN_ATTEMPT = 3;
+    map.insertAllRo(IntProgression.arithmetic(0, N_KEYS), apply(swap(MOD), PRIME));
+    Random rand = new RandomHolder().getRandom();
+    IntArray removed = new IntArray();
+    for (int i = 0; i < N_ATTEMPTS; ++i) {
+      IntArray toRemove = new IntArray();
+      for (int j = 0; j < VALS_IN_ATTEMPT; ++j) {
+        int v = rand.nextInt(PRIME);
+        toRemove.add(v);
+        removed.add(v);
+      }
+      map.removeAllVals(toRemove);
+      for (int j = 0; j < removed.size(); ++j) {
+        assertFalse(i + "\n" + map.getKeys() + "\n" + toRemove + "\n" + removed.get(j), map.getKeys().contains(removed.get(j)));
+      }
+      checkMapValsEqualKeysMod(PRIME);
+    }
+  }
 }

@@ -337,7 +337,7 @@ public class TwoWay#E#Map {
     assert checkInvariants(String.valueOf(injection));
   }
 
-  private static void sort(final #E#Array main, final IntArray parallel) {
+  private static void sort(final Writable#E#List main, final WritableIntList parallel) {
     assert main.size() == parallel.size();
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
@@ -401,15 +401,14 @@ public class TwoWay#E#Map {
       }
     }
 
-    removeVals0(vsToRemove, visToRemove);
+    sort(vsToRemove, visToRemove);
+    removeValsSorted0(vsToRemove, visToRemove);
 
     assert checkInvariants(String.valueOf(keys));
     return notInMap == null ? #E#Array.EMPTY : notInMap;
   }
 
-  private void removeVals0(#E#Array vsToRemove, IntArray visToRemove) {
-    sort(vsToRemove, visToRemove);
-
+  private void removeValsSorted0(Writable#E#List vsToRemove, WritableIntList visToRemove) {
     // Fix index map before removing values: we have to shift remaining values back
     int mRem = vsToRemove.size();
     int nLeft = myIdxMap.size();
@@ -437,6 +436,49 @@ public class TwoWay#E#Map {
     // Remove values
     visToRemove.sort();
     #E#Collections.removeAllAtSorted(myVals, visToRemove);
+  }
+
+  public void removeAllValsRo(#E#List vals) {
+    removeAllVals(new #E#Array(vals));
+  }
+
+  public void removeAllVals(Writable#E#List vals) {
+    if (!vals.isSorted()) vals.sort();
+    vals.removeDuplicates();
+    int m = vals.size();
+    int n = size();
+
+    IntArray visToRemove = new IntArray(m);
+    #E#Array vsToRemove = new #E#Array(m);
+    fillVsToRemove(vals, m, n, visToRemove, vsToRemove);
+
+    IntArray kisToRemove = new IntArray(m);
+    for (int i = 0; i < n; ++i) {
+      int vi = myIdxMap.get(i);
+      if (visToRemove.contains(vi)) {
+        kisToRemove.add(i);
+      }
+    }
+    #E#Collections.removeAllAtSorted(myKeys, kisToRemove);
+    IntCollections.removeAllAtSorted(myIdxMap, kisToRemove);
+    removeValsSorted0(vsToRemove, visToRemove);
+
+    assert checkInvariants(String.valueOf(vals));
+  }
+
+  private void fillVsToRemove(Writable#E#List vals, int m, int n, IntArray visToRemove, #E#Array vsToRemove) {
+    int vi = 0;
+    for (int i = 0; i < m; ++i) {
+      #e# v = vals.get(i);
+      do {
+        int nvi = myVals.binarySearch(v, vi, n);
+        if (nvi < 0) break;
+        vi = nvi;
+        visToRemove.add(vi);
+        vsToRemove.add(v);
+        vi += 1;
+      } while (true);
+    }
   }
 
   @Override
