@@ -181,6 +181,24 @@ public class #E#Collections {
     return length - offset;
   }
 
+  /** @return index of a duplicate (not necessarily leftmost) or -1 if none */
+  public static int findDuplicate(#E#List unsorted) {
+    #E#Array sorted = new #E#Array(unsorted);
+    sorted.sort();
+    return findDuplicateSorted(unsorted);
+  }
+
+  /** @return index of the leftmost duplicate or -1 if none*/
+  public static int findDuplicateSorted(#E#List sorted) {
+    #e# prev = 0;
+    for (int i = 0, m = sorted.size(); i < m; ++i) {
+      #e# k = sorted.get(i);
+      if (i > 0 && prev == k) return i;
+      prev = k;
+    }
+    return -1;
+  }
+
   public static #e#[] ensureCapacity(@Nullable #e#[] array, int capacity) {
     int length = array == null ? -1 : array.length;
     if (length >= capacity)
@@ -306,4 +324,24 @@ public class #E#Collections {
     return diff;
   }
 
+  public static void removeAllAtSorted(Writable#E#List list, IntList indexes) {
+    if (!indexes.isSorted()) throw new IllegalArgumentException("Indexes are not sorted: " + indexes);
+    int rangeStart = -1;
+    int rangeFinish = -2;
+    int diff = 0;
+    for (IntIterator it = indexes.iterator(); it.hasNext(); ) {
+      int ind = it.next();
+      if (rangeFinish < 0) {
+        rangeStart = ind;
+      } else if (ind != rangeFinish) {
+        assert rangeStart >= 0 : list + " " + indexes + ' ' + it + ' ' + rangeStart + ' ' + rangeFinish;
+        assert ind > rangeFinish : indexes + " " + ind + ' ' + rangeFinish + ' ' + rangeStart;
+        list.removeRange(rangeStart - diff, rangeFinish - diff);
+        diff += rangeFinish - rangeStart;
+        rangeStart = ind;
+      }
+      rangeFinish = ind + 1;
+    }
+    if (rangeFinish - rangeStart >= 1) list.removeRange(rangeStart - diff, rangeFinish - diff);
+  }
 }

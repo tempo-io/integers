@@ -186,6 +186,10 @@ public class TwoWay#E#Map {
     insertAll(new #E#Array(keys), new #E#Array(vals));
   }
 
+  public void insertAllRo(#E#List keys, #E#Function keyToVal) {
+    insertAll(new #E#Array(keys), keyToVal);
+  }
+
   public void insertAll(Writable#E#List keys, #E#Function keyToVal) {
     int m = keys.size();
     #E#Array vals = new #E#Array(m);
@@ -206,8 +210,8 @@ public class TwoWay#E#Map {
     if (vals.size() != m) throw new IllegalArgumentException("Sizes of keys and values lists are not equal: " + m + " keys, but " + vals.size() + " values");
     #EW# violatingKey = containsKeysUnsorted(keys, false);
     if (violatingKey != null) throw new IllegalArgumentException("Cannot insert multiple mappings because key " + violatingKey + " is already contained");
-    #EW# duplicateKey = findDuplicate(keys);
-    if (duplicateKey != null) throw new IllegalArgumentException("Duplicate key " + duplicateKey);
+    int duplicateKeyIdx = #E#Collections.findDuplicate(keys);
+    if (duplicateKeyIdx >= 0) throw new IllegalArgumentException("Duplicate key " + keys.get(duplicateKeyIdx));
 
     if (!vals.isSorted()) vals.sort(keys);
     IntArray insPoints = new IntArray(m);
@@ -248,19 +252,8 @@ public class TwoWay#E#Map {
     assert checkInvariants(keys + "\n" + vals);
   }
 
-  private #EW# findDuplicate(#E#List keys) {
-    #E#Array sorted = new #E#Array(keys);
-    sorted.sort();
-    #EW# prev = null;
-    for (int i = 0, m = keys.size(); i < m; ++i) {
-      #e# k = keys.get(i);
-      if (prev != null && prev == k) return k;
-      prev = k;
-    }
-    return null;
-  }
-
-  /** Transforms each value using the specified function. */
+  /** Transforms each value using the specified function.<br/>
+   * Memory: O(n). */
   public void transformVals(@NotNull #E#Function f) {
     int n = size();
     boolean isSortingBroken = false;
@@ -326,18 +319,176 @@ public class TwoWay#E#Map {
     myIdxMap.setAll(0, newIdxMap);
   }
 
+  /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
+  public void transformKeys(#E#Function injection) throws NonInjectiveFunctionException {
+    int n = size();
+    #E#Array newKeys = new #E#Array(n);
+    for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
+  
+    IntArray newIdxMap = new IntArray(myIdxMap);
+    sort(newKeys, newIdxMap);
+    int dupIdx = #E#Collections.findDuplicateSorted(newKeys);
+    if (dupIdx >= 0) throw new NonInjectiveFunctionException(newKeys.get(dupIdx), injection + " is not an injective function: generated duplicate key " + newKeys.get(dupIdx) + ", value: " + myVals.get(newIdxMap.get(dupIdx)));
+    myKeys.clear();
+    myIdxMap.clear();
+    myKeys.addAll(newKeys);
+    myIdxMap.addAll(newIdxMap);
+  
+    assert checkInvariants(String.valueOf(injection));
+  }
+
+  private static void sort(final #E#Array main, final IntArray parallel) {
+    assert main.size() == parallel.size();
+    // We cannot use PArray.sort(PArray... sortAlso) because types are different
+    IntegersUtils.quicksort(main.size(),
+      // compare
+      new IntFunction2() { public int invoke(int a, int b) {
+        return #E#Collections.compare(main.get(a), main.get(b));
+      }},
+      // swap
+      new IntProcedure2() {
+        @Override
+        public void invoke(int a, int b) {
+          main.swap(a, b);
+          parallel.swap(a, b);
+        }
+      }
+    );
+  }
+
+  /** Removes the mapping specified by the key.
+   * @throws IllegalArgumentException if there is no mapping for the key; check {@link #containsKey} before calling this method. */
+  public #e# remove(#e# key) throws IllegalArgumentException {
+    int ki = myKeys.binarySearch(key);
+    if (ki >= 0) {
+      myKeys.removeAt(ki);
+      int vi = myIdxMap.removeAt(ki);
+      #e# val = myVals.removeAt(vi);
+      shiftValueIndexes(vi, myIdxMap.size());
+      assert checkInvariants(key + " " + val);
+      return val;
+    } else throw new IllegalArgumentException("Cannot remove: no mapping for key " + key);
+  }
+
+  /** Removes mappings for those keys that are contained in the map. Keys not contained in the map are returned.<br/>
+   * Time: O (n log m) if keys are sorted or O (m log n + n log m) otherwise. <Br/>
+   * Space: O(m).
+   * @return keys from the input list that are not contained in the map */
+  public #E#List removeAll(#E#List keys) {
+    Writable#E#List notInMap = null;
+
+    #E#Array vsToRemove = new #E#Array();
+    IntArray visToRemove = new IntArray();
+    #e# lastK = #EW#.MIN_VALUE;
+    boolean keysSorted = true;
+    int ki = 0;
+    // Remove mappings and keys; values will be removed after we fix the rest of the index map
+    for (#E#ListIterator kIt = keys.iterator(); kIt.hasNext(); ) {
+      #e# k = kIt.next();
+      keysSorted &= k > lastK;
+      lastK = k;
+      if (!keysSorted) ki = 0;
+      ki = myKeys.binarySearch(k, ki, myKeys.size());
+      if (ki < 0) {
+        if (!keys.subList(0, kIt.lastIndex()).contains(k))
+          (notInMap == null ? notInMap = new #E#Array() : notInMap).add(k);
+        ki = -ki - 1;
+      } else {
+        myKeys.removeAt(ki);
+        int vi = myIdxMap.removeAt(ki);
+        visToRemove.add(vi);
+        vsToRemove.add(myVals.get(vi));
+      }
+    }
+
+    removeVals0(vsToRemove, visToRemove);
+
+    assert checkInvariants(String.valueOf(keys));
+    return notInMap == null ? #E#Array.EMPTY : notInMap;
+  }
+
+  private void removeVals0(#E#Array vsToRemove, IntArray visToRemove) {
+    sort(vsToRemove, visToRemove);
+
+    // Fix index map before removing values: we have to shift remaining values back
+    int mRem = vsToRemove.size();
+    int nLeft = myIdxMap.size();
+    for (int i = 0; i < nLeft; ++i) {
+      int vi = myIdxMap.get(i);
+      #e# v = myVals.get(vi);
+      int d = vsToRemove.binarySearch(v);
+      if (d < 0) d = -d - 1;
+      else {
+        // Consider the following example:
+        // vis:        [0 1 2 3 4]
+        // myVals:      1 2 3 3 3
+        // vsToRemove:  ^     ^
+        // Here, element with vi = 2 should be shifted 1 position left and with vi = 4 -- 2 positions left.
+        // In other words, we have to scroll through all values being removed that are equal to the current value, v, and decrement current index, vi, by the amount of removed values to the left of v in myVals.
+        // Note that d denotes the leftmost element of vsToRemove that is equal to v (but not necessarily the leftmost equal to v in myVals).
+        for (int j = d; j < mRem && vsToRemove.get(j) == v; ++j) {
+          if (visToRemove.get(j) < vi)
+            d += 1;
+        }
+      }
+      myIdxMap.set(i, vi - d);
+    }
+
+    // Remove values
+    visToRemove.sort();
+    #E#Collections.removeAllAtSorted(myVals, visToRemove);
+  }
+
+  @Override
+  public String toString() {
+    return "K: " + myKeys + "\nM: " + myIdxMap + "\nV: " + myVals;
+  }
+
   public static class Entry {
     public final #e# key;
     public final #e# val;
 
-    private Entry(#e# key, #e# val) {
+    public Entry(#e# key, #e# val) {
       this.key = key;
       this.val = val;
     }
 
     @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      Entry entry = (Entry) o;
+
+      if (key != entry.key) return false;
+      if (val != entry.val) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = #EW#.valueOf(key).hashCode();
+      result = 31 * result + #EW#.valueOf(val).hashCode();
+      return result;
+    }
+
+    @Override
     public String toString() {
       return "(" + key + ", " + val + ')';
+    }
+  }
+
+  public static class NonInjectiveFunctionException extends IllegalArgumentException {
+    private final #e# myDuplicateValue;
+
+    public NonInjectiveFunctionException(#e# duplicateValue, String msg) {
+      super(msg);
+      myDuplicateValue = duplicateValue;
+    }
+
+    public #e# getDuplicateValue() {
+      return myDuplicateValue;
     }
   }
 }

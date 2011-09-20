@@ -18,7 +18,7 @@ package com.almworks.util;
 
 import java.util.Random;
 
-public class TestRandom {
+public class RandomHolder {
   /** Tests may use (pseudo-)random number generator via {@link #getRandom}. To reproduce failing test, look up the used seed in the logs and set this system property. */
   public static final String RANDGEN_SEED = "tests.seed";
 

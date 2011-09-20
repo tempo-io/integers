@@ -218,4 +218,12 @@ public class IntCollectionsTests extends NativeIntFixture {
     }
     return resultingIndices.iterator();
   }
+
+  public void testRemoveAllAtSorted() {
+    IntArray a = new IntArray(IntProgression.arithmetic(0, 20));
+    IntCollections.removeAllAtSorted(a, IntArray.create(0, 3, 4, 7, 10, 11, 12, 13, 19));
+    CHECK.order(a.iterator(), 1, 2, 5, 6, 8, 9, 14, 15, 16, 17, 18);
+    IntCollections.removeAllAtSorted(a, IntArray.create(1, 2, 3, 4, 9));
+    CHECK.order(a.iterator(), 1, 9, 14, 15, 16, 18);
+  }
 }

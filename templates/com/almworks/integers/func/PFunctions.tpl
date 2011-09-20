@@ -19,6 +19,18 @@ package com.almworks.integers.func;
 public class #E#Functions {
   private #E#Functions() {}
 
+  public static final #E#Function NEG = new #E#Function() {
+    @Override
+    public #e# invoke(#e# a) {
+      return -a;
+    }
+
+    @Override
+    public String toString() {
+      return "-";
+    }
+  };
+
   public static final #E#Function2 ADD = new #E#Function2() {
     @Override
     public #e# invoke(#e# a, #e# b) {
@@ -108,4 +120,36 @@ public class #E#Functions {
       }
     };
   }
+
+  public static #E#Function swap(final #e# v1, final #e# v2) {
+    return new #E#Function() {
+      @Override
+      public #e# invoke(#e# x) {
+        return
+          x == v1 ? v2 :
+          x == v2 ? v1 :
+          x;
+      }
+
+      @Override
+      public String toString() {
+        return v1 + " <-> " + v2;
+      }
+    };
+  }
+  
+  public static #E#Function compose(final #E#Function f1, final #E#Function f2) {
+    return new #E#Function() {
+      @Override
+      public #e# invoke(#e# a) {
+        return f1.invoke(f2.invoke(a));
+      }
+
+      @Override
+      public String toString() {
+        return '(' + f1.toString() + ") o (" + f2.toString() + ')';
+      }
+    };
+  }
+    
 }
