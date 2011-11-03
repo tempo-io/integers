@@ -16,8 +16,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction2;
-import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.*;
 
 import java.util.*;
 
@@ -178,6 +177,67 @@ public final class IntegersUtils {
         return i;
     }
     return -1;
+  }
+
+
+  /**
+   * Generates all permutations of size <tt>n</tt> with the property that two subsequent permutations differ in a swap of two subsequent elements (Gray property.) <br/>
+   * Before this method is called, an initial permutation is assumed. As the method proceeds, it calls the specified procedure with the left index of the pair to be swapped
+   * to generate the next permutation. After it returns, all permutations have been generated. <br/>
+   * Sample usage:
+   * <pre><tt>
+   *  // Prints out all permutations of an array.
+   *  IntArray someArray = IntArray.create(2, 3, 9);
+   *  allPermutations(someArray.size(), new IntProcedure() {
+   *    {
+   *      // This is needed to print the first permutation
+   *      printArray();
+   *    }
+   *    public void invoke(int swapIdx) {
+   *      someArray.swap(swapIdx, swapIdx + 1);
+   *      printArray();
+   *    }
+   *    private void printArray() { System.out.println(someArray); }
+   *  }
+   * </tt></pre>
+   * <br/>
+   * @param n size of the permutation, must be > 0 (otherwise NegativeArraySizeException is thrown)
+   * @param swapWithNext callback that receives an index of a position to swap with its neighbour on the right (swapPos + 1).
+   * It is guaranteed that both of these indexes are in the interval [0, n). Each swap produces a new permutation that differs from the previously generated ones. <br/>
+   * */
+  public static void allPermutations(int n, IntProcedure swapWithNext) {
+    // Direct permutation
+    int[] r = IntProgression.arithmetic(0, n).toNativeArray();
+    // Reverse permutation
+    int[] p = IntProgression.arithmetic(0, n).toNativeArray();
+    // Number of iteration in the factorial base
+    int[] t = new int[n];
+    // Direction of each element's movement
+    BitSet right = new BitSet(n);
+    int j;
+    while ((j = incFact(t)) > 0) {
+      right.flip(j + 1, n);
+      boolean rdir = right.get(j);
+      swapWithNext.invoke(rdir ? p[j] : p[j] - 1);
+      int k = p[j] + (rdir ? +1 : -1);
+      int rk = r[k];
+      IntCollections.swap(r, p[j], k);
+      IntCollections.swap(p, j, rk);
+    }
+  }
+
+  /**
+   * Increments a number in the factorial-base.<Br/>
+   * Number in the factorial base is represented as
+   * {@code a = \overline{a_0 a_1 ... a_{n-1}} = \sum_{i=0}^{n-1}{a_i i!}, 0 \leq a_i < i+1}.<br/>
+   * Although in this notation a_0 is useless, this method uses it to report overflow and space waste is minuscule.
+   * @return 0-based index of the position that was incremented. 0 means overflow (in that case t[k] = 0 for all k) */
+  public static int incFact(int[] t) {
+    int i;
+    for (i = t.length - 1; i >= 0 && t[i] + 1 > i; --i) ;
+    if (i >= 0) t[i] += 1;
+    for (int j = i + 1; j < t.length; ++j) t[j] = 0;
+    return i;
   }
 
   private IntegersUtils() {}

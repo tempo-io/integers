@@ -21,6 +21,10 @@ public class IntCollectionsCompare extends CollectionsCompare {
     unordered(actual.toNativeArray(), expected.toNativeArray());
   }
 
+  public void unordered(LongList actual, LongList expected) {
+    unordered(actual.toNativeArray(), expected.toNativeArray());
+  }
+
   public void unordered(IntList actual, int ... expected) {
     unordered(actual.toNativeArray(), expected);
   }
@@ -44,6 +48,14 @@ public class IntCollectionsCompare extends CollectionsCompare {
     int[] actualCopy = IntegersUtils.arrayCopy(actual);
     Arrays.sort(actualCopy);
     int[] expectedCopy = IntegersUtils.arrayCopy(expected);
+    Arrays.sort(expectedCopy);
+    order(actualCopy, expectedCopy);
+  }
+
+  public void unordered(long[] actual, long... expected) {
+    long[] actualCopy = Arrays.copyOf(actual, actual.length);
+    Arrays.sort(actualCopy);
+    long[] expectedCopy = Arrays.copyOf(expected, expected.length);
     Arrays.sort(expectedCopy);
     order(actualCopy, expectedCopy);
   }

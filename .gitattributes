@@ -35,6 +35,7 @@ lib/junit.jar -text
 templates/com/almworks/integers/AbstractPList.tpl -text
 templates/com/almworks/integers/AbstractPListIndexIterator.tpl -text
 templates/com/almworks/integers/AbstractWritablePList.tpl -text
+templates/com/almworks/integers/DynamicPSet.tpl -text
 templates/com/almworks/integers/EmptyPIterator.tpl -text
 templates/com/almworks/integers/IndexedPIterator.tpl -text
 templates/com/almworks/integers/IndexedPListIterator.tpl -text
@@ -79,10 +80,13 @@ templates/com/almworks/integers/util/SortedPListIntersectionIterator.tpl -text
 templates/com/almworks/integers/util/SortedPListMinusIterator.tpl -text
 test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
+test/com/almworks/integers/DynamicLongSetPerf.java -text
+test/com/almworks/integers/DynamicLongSetTests.java -text
 test/com/almworks/integers/IntArrayTests.java -text
 test/com/almworks/integers/IntCollectionsCompare.java -text
 test/com/almworks/integers/IntCollectionsTests.java -text
 test/com/almworks/integers/IntIteratorTests.java -text
+test/com/almworks/integers/IntegersUtilsTests.java -text
 test/com/almworks/integers/NativeIntFixture.java -text
 test/com/almworks/integers/ParallelIntListTests.java -text
 test/com/almworks/integers/TwoWayIntMapTests.java -text
