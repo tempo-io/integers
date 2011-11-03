@@ -14,6 +14,12 @@
 .idea/libraries/lib.xml -text
 .idea/misc.xml -text
 .idea/modules.xml -text
+.idea/runConfigurations/Build.xml -text
+.idea/runConfigurations/Dist.xml -text
+.idea/runConfigurations/Generate.xml -text
+.idea/runConfigurations/Generate_Make.xml -text
+.idea/runConfigurations/Test.xml -text
+.idea/runConfigurations/fetchVersion.xml -text
 .idea/uiDesigner.xml -text
 .idea/vcs.xml -text
 ant/build.gant -text
