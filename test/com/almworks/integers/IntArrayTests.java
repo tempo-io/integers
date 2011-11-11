@@ -1,5 +1,6 @@
 package com.almworks.integers;
 
+import com.almworks.util.RandomHolder;
 import java.util.*;
 
 public class IntArrayTests extends NativeIntFixture {
@@ -212,5 +213,35 @@ public class IntArrayTests extends NativeIntFixture {
     CHECK.order(a.toNativeArray(), 2, 3, 9);
     IntList il = IntCollections.asIntList(l);
     CHECK.order(il.toNativeArray(), 2, 3, 9);
+  }
+
+  private void testReverse(int[] a, int[] b){
+    IntArray lst = new IntArray();
+    lst.addAll(a);
+    IntArray referenceLst = new IntArray();
+    referenceLst.addAll(b);
+    lst.reverseInPlace();
+    assertEquals(lst, referenceLst);
+  }
+
+  public void testReverse(){
+    testReverse(new int[]{}, new int[]{});
+    testReverse(new int[]{0}, new int[]{0});
+    testReverse(new int[]{1,1,0}, new int[]{0,1,1});
+    testReverse(new int[]{0,1,3,6,10,15,21,28,36}, new int[]{36,28,21,15,10,6,3,1,0});
+
+    IntArray lst = new IntArray();
+    Random r = new RandomHolder().getRandom();
+    for (int i = 0; i < 20; i++){
+      lst.add(r.nextInt(200));
+    }
+    lst.sortUnique();
+    lst.reverseInPlace();
+    for (int i = 1; i < lst.size(); i++){
+      if (lst.get(i-1)<=lst.get(i)){
+        fail();
+      }
+    }
+
   }
 }

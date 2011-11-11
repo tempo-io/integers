@@ -207,4 +207,24 @@ public class SameValuesIntListTest extends NativeIntFixture {
   private SameValuesIntList create() {
     return new SameValuesIntList();
   }
+
+  private void testReverse(int[] a, int[] b){
+    SameValuesIntList lst = new SameValuesIntList();
+    lst.addAll(a);
+    SameValuesIntList referenceLst = new SameValuesIntList();
+    referenceLst.addAll(b);
+    lst.reverseInPlace();
+    assertEquals(lst, referenceLst);
+  }
+
+  public void testReverse(){
+    testReverse(new int[]{0,1,3,6,10,15,21,28,36}, new int[]{36,28,21,15,10,6,3,1,0});
+    testReverse(new int[]{2,4,4,5,5,5,7,7,7,7}, new int[]{7,7,7,7,5,5,5,4,4,2});
+    testReverse(new int[]{0,0,0,1,1}, new int[]{1,1,0,0,0});
+    testReverse(new int[]{1,1,0}, new int[]{0,1,1});
+    testReverse(new int[]{0,0,0,0,1,1,0}, new int[]{0,1,1,0,0,0,0});
+    testReverse(new int[]{}, new int[]{});
+    testReverse(new int[]{0}, new int[]{0});
+    testReverse(new int[]{2,2,3,3,3}, new int[]{3,3,3,2,2});
+  }
 }

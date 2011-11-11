@@ -16,11 +16,13 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.Nullable;
 import java.util.NoSuchElementException;
 
 public class Int#E#Map {
   private final WritableIntList myKeys;
   private final Writable#E#List myValues;
+  @Nullable private ConsistencyViolatingMutator mutator;
 
   public Int#E#Map(WritableIntList keys, Writable#E#List values) {
     myKeys = keys;
@@ -41,19 +43,23 @@ public class Int#E#Map {
   }
 
   public void clear() {
+    checkMutatorPresence();
     myKeys.clear();
     myValues.clear();
   }
 
   public int findKey(int key) {
+    checkMutatorPresence();
     return findKey(key, 0);
   }
 
   public #e# getValueAt(int index) {
+    checkMutatorPresence();
     return myValues.get(index);
   }
 
   public void insertAt(int index, int key, #e# value) {
+    checkMutatorPresence();
     assert index >= 0 && index <= size() : index + " " + this;
     assert
       index == 0 || myKeys.get(index - 1) < key : index + " " + key + " " + myKeys.get(index - 1);
@@ -62,11 +68,13 @@ public class Int#E#Map {
   }
 
   private void doInsert(int idx, int key, #e# value) {
+    checkMutatorPresence();
     myKeys.insert(idx, key);
     myValues.insert(idx, value);
   }
 
   public void adjustKeys(int from, int to, int increment) {
+    checkMutatorPresence();
     if (from >= to) return;
     if (from < 0) throw new IndexOutOfBoundsException(from + " " + this);
     int sz = size();
@@ -85,27 +93,32 @@ public class Int#E#Map {
   }
 
   public void setKey(int index, int key) {
+    checkMutatorPresence();
     checkIndex(index);
     checkSetKeyAt(index, key);
     myKeys.set(index, key);
   }
 
   public void removeRange(int from, int to) {
+    checkMutatorPresence();
     myKeys.removeRange(from, to);
     myValues.removeRange(from, to);
   }
 
   public int getKey(int index) {
+    checkMutatorPresence();
     return myKeys.get(index);
   }
 
   public int findKey(int key, int from) {
+    checkMutatorPresence();
     int size = myKeys.size();
     assert from == size || from == 0 || myKeys.get(from - 1) < key : key + " " + from + " " + this;
     return myKeys.binarySearch(key, from, size);
   }
 
   public void setAt(int index, int key, #e# value) {
+    checkMutatorPresence();
     checkIndex(index);
     checkSetKeyAt(index, key);
     myKeys.set(index, key);
@@ -125,6 +138,7 @@ public class Int#E#Map {
   }
 
   public boolean containsKey(int key) {
+    checkMutatorPresence();
     return findKey(key) >= 0;
   }
 
@@ -143,6 +157,74 @@ public class Int#E#Map {
   private void checkSetKeyAt(int index, int key) {
     if (index > 0 && myKeys.get(index - 1) >= key) throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index - 1) + " " + this);
     if (index + 1 < size() && myKeys.get(index + 1) <= key) throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index + 1) + " " + this);
+  }
+
+  private boolean checkInvariants(){
+    if (myKeys.size() > 0){
+      if (!myKeys.isSorted()) return false;
+      if (myValues.get(0) == 0) return false;
+    }
+    #e# currValue;
+    #e# lastValue = 0;
+    for (#E#Iterator ii = myValues.iterator(); ii.hasNext();){
+      currValue = ii.next();
+      if (currValue == lastValue) return false;
+      lastValue = currValue;
+    }
+    return myKeys.size() == myValues.size();
+  }
+
+  private void checkMutatorPresence() throws IllegalStateException{
+    if (mutator != null) throw new IllegalStateException();
+  }
+
+  // Enters this object into a mode in which consistency-breaking mutations are allowed.
+  // While in this mode, usage of almost all of this object's methods are forbidden.
+  // Instead of them, mutator's methods should be used.
+  // mutator.commit() checks consistency and brings this object back to its normal state.
+  public ConsistencyViolatingMutator startMutation(){
+    return new ConsistencyViolatingMutator();
+  }
+
+  public class ConsistencyViolatingMutator {
+
+    public ConsistencyViolatingMutator(){
+      if (mutator != null) throw new IllegalStateException();
+      mutator = this;
+    }
+
+    public void setKey(int index, int key) {
+      checkIndex(index);
+      myKeys.set(index, key);
+    }
+
+    public int getKey(int index) {
+      return myKeys.get(index);
+    }
+
+    public void setValue(int index, #e# val) {
+      checkIndex(index);
+      myValues.set(index, val);
+    }
+
+    public #e# getValue(int index) {
+      return myValues.get(index);
+    }
+
+    public void insertAt(int idx, int key, #e# value) {
+      myKeys.insert(idx, key);
+      myValues.insert(idx, value);
+    }
+
+    public void removeAt(int idx) {
+      myKeys.removeAt(idx);
+      myValues.removeAt(idx);
+    }
+
+    public void commit() throws IllegalStateException{
+      if (!checkInvariants()) throw new IllegalStateException();
+      Int#E#Map.this.mutator = null;
+    }
   }
 
   public static class Iterator {

@@ -306,6 +306,43 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     return ki < myMap.size() ? myMap.getKey(ki) : -1;
   }
 
+  public void reverseInPlace() {
+    int msz = myMap.size();
+    if (msz == 0){
+      return;
+    }
+    Int#E#Map.ConsistencyViolatingMutator m = myMap.startMutation();
+    if (m.getKey(0) != 0) {
+      m.insertAt(0,0,0);
+      msz++;
+    }
+    int i;
+    int j = msz - 1;
+    int rightSum = size();
+    int leftSum = rightSum - m.getKey(j);
+    int a1 = 0;
+    int a2 = leftSum;
+    #e# swp;
+    for (i = 0; i < msz/2; i++, j--){
+      leftSum += m.getKey(j) - m.getKey(j-1);
+      rightSum -= m.getKey(i+1) - m.getKey(i);
+      m.setKey(i, a1);
+      a1 = a2;
+      a2 = leftSum;
+      m.setKey(j,rightSum);
+
+      swp = m.getValue(i);
+      m.setValue(i, m.getValue(j));
+      m.setValue(j, swp);
+    }
+    m.setKey(i, a1);
+    if (m.getValue(0) == 0) {
+      m.removeAt(0);
+    }
+    m.commit();
+    assert checkInvariants();
+  }
+
 
   private final class SameValuesIterator extends WritableIndexIterator {
     private Int#E#Map.Iterator myIterator;

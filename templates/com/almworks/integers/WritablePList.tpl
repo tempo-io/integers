@@ -61,6 +61,8 @@ public interface Writable#E#List extends #E#List, #E#Collector {
 
   void swap(int index1, int index2);
 
+  void reverseInPlace();
+
   /**
    * Assumes that list is sorted.
    */
