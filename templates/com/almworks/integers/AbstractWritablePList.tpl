@@ -290,9 +290,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   public void reverseInPlace(){
-    int halfSize = size()/2;
     int j = size() - 1;
-    for (int i = 0; i < halfSize; i++, j--) swap(i,j);
+    for (int i = 0; i < j; i++, j--) swap(i,j);
   }
 
   protected class WritableIndexIterator extends IndexIterator implements Writable#E#ListIterator {

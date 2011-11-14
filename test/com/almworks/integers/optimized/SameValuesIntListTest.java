@@ -223,8 +223,14 @@ public class SameValuesIntListTest extends NativeIntFixture {
     testReverse(new int[]{0,0,0,1,1}, new int[]{1,1,0,0,0});
     testReverse(new int[]{1,1,0}, new int[]{0,1,1});
     testReverse(new int[]{0,0,0,0,1,1,0}, new int[]{0,1,1,0,0,0,0});
+    testReverse(new int[]{0,0,1,2,2,2,3,3,3,3}, new int[]{3,3,3,3,2,2,2,1,0,0});
+    testReverse(new int[]{4,4,1,2,2,2,3,3,3,3}, new int[]{3,3,3,3,2,2,2,1,4,4});
+    testReverse(new int[]{0,0,1,2,2,2,0,0,0,0}, new int[]{0,0,0,0,2,2,2,1,0,0});
+    testReverse(new int[]{4,4,1,2,2,2,0,0,0,0}, new int[]{0,0,0,0,2,2,2,1,4,4});
     testReverse(new int[]{}, new int[]{});
     testReverse(new int[]{0}, new int[]{0});
+    testReverse(new int[]{0,0,0}, new int[]{0,0,0});
+    testReverse(new int[]{1,1,1}, new int[]{1,1,1});
     testReverse(new int[]{2,2,3,3,3}, new int[]{3,3,3,2,2});
   }
 }

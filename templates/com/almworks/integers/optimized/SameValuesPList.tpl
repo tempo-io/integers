@@ -307,38 +307,45 @@ public class SameValues#E#List extends AbstractWritable#E#List {
   }
 
   public void reverseInPlace() {
+    int sz = size();
     int msz = myMap.size();
-    if (msz == 0){
-      return;
-    }
-    Int#E#Map.ConsistencyViolatingMutator m = myMap.startMutation();
-    if (m.getKey(0) != 0) {
-      m.insertAt(0,0,0);
-      msz++;
-    }
-    int i;
-    int j = msz - 1;
-    int rightSum = size();
-    int leftSum = rightSum - m.getKey(j);
-    int a1 = 0;
-    int a2 = leftSum;
-    #e# swp;
-    for (i = 0; i < msz/2; i++, j--){
-      leftSum += m.getKey(j) - m.getKey(j-1);
-      rightSum -= m.getKey(i+1) - m.getKey(i);
-      m.setKey(i, a1);
-      a1 = a2;
-      a2 = leftSum;
-      m.setKey(j,rightSum);
+    if (msz == 0) return;
+    int i = 0;
+    int keySwp;
+    #e# valSwp;
 
-      swp = m.getValue(i);
-      m.setValue(i, m.getValue(j));
-      m.setValue(j, swp);
+    Int#E#Map.ConsistencyViolatingMutator m = myMap.startMutation();
+
+    // SameValuesIntList is designed in such a way, that, if it starts with zeros,
+    // then normally myMap.myKeys.get(0) != 0, i.e starting zeros are omitted in myMap.
+    // Therefore myMap might now need to be shrinked or extended by 1 element.
+    if (m.getValue(msz-1) != 0) {
+      if (m.getKey(0) != 0) {
+        m.insertAt(msz, sz, 0);
+        msz++;
+      } else {
+        i++;
+        // Swapping edge values. The rest is done in loop.
+        valSwp = m.getValue(0);
+        m.setValue(0, m.getValue(msz-1));
+        m.setValue(msz-1, valSwp);
+      }
     }
-    m.setKey(i, a1);
-    if (m.getValue(0) == 0) {
-      m.removeAt(0);
+
+    int j = msz - 1;
+    for (; i < j; i++, j--){
+
+      keySwp = m.getKey(i);
+      m.setKey(i, sz - m.getKey(j));
+      m.setKey(j, sz - keySwp);
+
+      valSwp = m.getValue(i);
+      m.setValue(i, m.getValue(j-1));
+      m.setValue(j-1, valSwp);
     }
+    if (i == j) m.setKey(i, sz - m.getKey(i));
+    // If list's last elements were zeros and first elements were not, then myMap needs to be shrinked by 1.
+    if (m.getValue(msz-1) == sz) m.removeAt(msz-1);
     m.commit();
     assert checkInvariants();
   }

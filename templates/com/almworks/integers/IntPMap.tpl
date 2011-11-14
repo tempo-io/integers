@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 public class Int#E#Map {
   private final WritableIntList myKeys;
   private final Writable#E#List myValues;
-  @Nullable private ConsistencyViolatingMutator mutator;
+  @Nullable private ConsistencyViolatingMutator myMutator;
 
   public Int#E#Map(WritableIntList keys, Writable#E#List values) {
     myKeys = keys;
@@ -175,13 +175,16 @@ public class Int#E#Map {
   }
 
   private void checkMutatorPresence() throws IllegalStateException{
-    if (mutator != null) throw new IllegalStateException();
+    if (myMutator != null) throw new IllegalStateException();
   }
 
-  // Enters this object into a mode in which consistency-breaking mutations are allowed.
-  // While in this mode, usage of almost all of this object's methods are forbidden.
-  // Instead of them, mutator's methods should be used.
-  // mutator.commit() checks consistency and brings this object back to its normal state.
+  /**
+   * Enters this {@code Int#E#Map} into a mode in which consistency-breaking mutations are allowed.
+   *
+   * <p>While in this mode, usage of almost all of this {@code Int#E#Map}'s methods are forbidden.
+   * Instead of them, {@code myMutator}'s methods should be used.<br>
+   * {@code myMutator.commit()} checks consistency and brings this {@code Int#E#Map} back to its normal state.</p>
+   */
   public ConsistencyViolatingMutator startMutation(){
     return new ConsistencyViolatingMutator();
   }
@@ -189,8 +192,8 @@ public class Int#E#Map {
   public class ConsistencyViolatingMutator {
 
     public ConsistencyViolatingMutator(){
-      if (mutator != null) throw new IllegalStateException();
-      mutator = this;
+      if (myMutator != null) throw new IllegalStateException();
+      myMutator = this;
     }
 
     public void setKey(int index, int key) {
@@ -223,7 +226,7 @@ public class Int#E#Map {
 
     public void commit() throws IllegalStateException{
       if (!checkInvariants()) throw new IllegalStateException();
-      Int#E#Map.this.mutator = null;
+      Int#E#Map.this.myMutator = null;
     }
   }
 
