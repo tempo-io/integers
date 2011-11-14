@@ -159,14 +159,14 @@ public class Int#E#Map {
     if (index + 1 < size() && myKeys.get(index + 1) <= key) throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index + 1) + " " + this);
   }
 
-  private boolean checkInvariants(){
-    if (myKeys.size() > 0){
+  private boolean checkInvariants() {
+    if (myKeys.size() > 0) {
       if (!myKeys.isSorted()) return false;
       if (myValues.get(0) == 0) return false;
     }
     #e# currValue;
     #e# lastValue = 0;
-    for (#E#Iterator ii = myValues.iterator(); ii.hasNext();){
+    for (#E#Iterator ii = myValues.iterator(); ii.hasNext();) {
       currValue = ii.next();
       if (currValue == lastValue) return false;
       lastValue = currValue;
@@ -185,13 +185,13 @@ public class Int#E#Map {
    * Instead of them, {@code myMutator}'s methods should be used.<br>
    * {@code myMutator.commit()} checks consistency and brings this {@code Int#E#Map} back to its normal state.</p>
    */
-  public ConsistencyViolatingMutator startMutation(){
+  public ConsistencyViolatingMutator startMutation() {
     return new ConsistencyViolatingMutator();
   }
 
   public class ConsistencyViolatingMutator {
 
-    public ConsistencyViolatingMutator(){
+    public ConsistencyViolatingMutator() {
       if (myMutator != null) throw new IllegalStateException();
       myMutator = this;
     }
@@ -224,7 +224,7 @@ public class Int#E#Map {
       myValues.removeAt(idx);
     }
 
-    public void commit() throws IllegalStateException{
+    public void commit() throws IllegalStateException {
       if (!checkInvariants()) throw new IllegalStateException();
       Int#E#Map.this.myMutator = null;
     }

@@ -289,7 +289,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     return result;
   }
 
-  public void reverseInPlace(){
+  public void reverseInPlace() {
     int j = size() - 1;
     for (int i = 0; i < j; i++, j--) swap(i,j);
   }

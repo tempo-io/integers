@@ -314,26 +314,61 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     int keySwp;
     #e# valSwp;
 
+    // Shorthands used in comments:
+    // k[i] - myMap.myKeys.get(i) before reversion.
+    // k'[i] - myMap.myKeys.get(i) after reversion.
+    // v[i], v'[i] - respectivly, myMap.myValues
+
     Int#E#Map.ConsistencyViolatingMutator m = myMap.startMutation();
 
-    // SameValuesIntList is designed in such a way, that, if it starts with zeros,
-    // then normally myMap.myKeys.get(0) != 0, i.e starting zeros are omitted in myMap.
-    // Therefore myMap might now need to be shrinked or extended by 1 element.
+    // Initial adjustments section.
+    //
+    // SameValues#E#List is designed in such a way, that, if it starts with zeros,
+    // then normally k[0] != 0 && v[0] != 0, i.e starting zeros are omitted in myMap.
+    // Hence, 4 variants are possible:
+    //   a) List starts with zeros and ends with zeros:
+    //     No adjustments needed, main loop will do all the work.
+    //   b) List starts with zeros and ends with non-zeros:
+    //     A list will have to be expanded by one element. k[] will be expanded
+    //     with sz, and main loop will still work correctly.
+    //   c) List starts with non-zeros and ends with zeros:
+    //     A list will have to be shrinked by one element.
+    //     After main loop is finished, a last element will contain unnecesary data,
+    //     which is to be removed.
+    //   d) List starts with non-zeros and ends with non-zeros:
+    //     First element won't be used in a loop, edge values will be swapped outside the loop.
     if (m.getValue(msz-1) != 0) {
       if (m.getKey(0) != 0) {
+        // Case b.
         m.insertAt(msz, sz, 0);
         msz++;
       } else {
+        // Case d.
         i++;
-        // Swapping edge values. The rest is done in loop.
         valSwp = m.getValue(0);
         m.setValue(0, m.getValue(msz-1));
         m.setValue(msz-1, valSwp);
       }
     }
-
     int j = msz - 1;
-    for (; i < j; i++, j--){
+
+    // Main loop section.
+    //
+    // After initial adjustment, the next statement is true for any reasonable nonnegative x:
+    // k'[i+x] == sz - k[j-x].
+    // *proving omitted*
+    // Obviously, k'[j-x] == sz - k[i+x], so the loop modifies k "simultaneously" from both ends.
+    //
+    // Also, loop performs a simple reversion of v[].
+    // Note that v[] are taken with shifted index, j-1 instead of j.
+    // This way, v[msz-1] is not engaged in the reversion here.
+    // Depending on a case, there are different explanations:
+    //   a) v[msz-1] is 0, and only v[0 .. msz-2] should be engaged.
+    //   b) It's inserted manually and is 0, and only native values should be reversed.
+    //   c) It will be removed, and only v[0 .. msz-2] should be engaged.
+    //   d) It should be swapped with v[0], but in this case v[0] is skipped in a loop,
+    //     so they are swapped in initial adjustments section separetely.
+    for (; i < j; i++, j--) {
 
       keySwp = m.getKey(i);
       m.setKey(i, sz - m.getKey(j));
@@ -343,9 +378,12 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       m.setValue(i, m.getValue(j-1));
       m.setValue(j-1, valSwp);
     }
+
     if (i == j) m.setKey(i, sz - m.getKey(i));
-    // If list's last elements were zeros and first elements were not, then myMap needs to be shrinked by 1.
-    if (m.getValue(msz-1) == sz) m.removeAt(msz-1);
+
+    // Case c.
+    if (m.getKey(msz-1) == sz) m.removeAt(msz-1);
+    
     m.commit();
     assert checkInvariants();
   }
