@@ -317,7 +317,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     // Shorthands used in comments:
     // k[i] - myMap.myKeys.get(i) before reversion.
     // k'[i] - myMap.myKeys.get(i) after reversion.
-    // v[i], v'[i] - respectivly, myMap.myValues
+    // v[i], v'[i] - respectively, myMap.myValues
 
     Int#E#Map.ConsistencyViolatingMutator m = myMap.startMutation();
 
@@ -354,10 +354,13 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
     // Main loop section.
     //
-    // After initial adjustment, the next statement is true for any reasonable nonnegative x:
+    // Given the values of i, j after the initial adjustment, it can be shown by induction on x that
     // k'[i+x] == sz - k[j-x].
-    // *proving omitted*
-    // Obviously, k'[j-x] == sz - k[i+x], so the loop modifies k "simultaneously" from both ends.
+    // for any x such that i + x < j - x.
+    // To prove it, note that k'[i+x+1]-k'[i+x] is the length of the (i+x)-th block in the reversed array,
+    // but it is (j-(i+x)-1)-th block in the initial array, and its length is k[j-(i+x)]-k[j-(i+x)-1];
+    // equaling these expressions gives the expression above.
+    // Similarly, k'[j-x] == sz - k[i+x], so the loop modifies k[] "simultaneously" from both ends.
     //
     // Also, loop performs a simple reversion of v[].
     // Note that v[] are taken with shifted index, j-1 instead of j.
@@ -369,7 +372,6 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     //   d) It should be swapped with v[0], but in this case v[0] is skipped in a loop,
     //     so they are swapped in initial adjustments section separetely.
     for (; i < j; i++, j--) {
-
       keySwp = m.getKey(i);
       m.setKey(i, sz - m.getKey(j));
       m.setKey(j, sz - keySwp);
