@@ -1,5 +1,6 @@
 package com.almworks.integers;
 
+import com.almworks.integers.optimized.SameValuesIntList;
 import com.almworks.integers.util.SortedIntListIntersectionIterator;
 import junit.framework.TestCase;
 import com.almworks.integers.util.SortedIntListMinusIterator;
@@ -132,4 +133,40 @@ public class IntIteratorTests extends TestCase {
         return b.toString();
     }
 
+  public void testCursor(){
+    SameValuesIntList a = new SameValuesIntList();
+    a.addAll(1,1,1,2,2,3,3,3,3);
+    SameValuesIntList b, refList;
+
+    refList = new SameValuesIntList();
+    refList.addAll(1,1,1,2,2,3,3,3,3);
+    b = new SameValuesIntList();
+    for (IntCursor i: a.cursor()) {
+      b.add(i.value());
+    }
+    assertEquals(b, refList);
+
+    refList = new SameValuesIntList();
+    refList.addAll(1,1,2,2,3,3);
+    b = new SameValuesIntList();
+    for (IntCursor i: a.cursor(1, 7)) {
+      b.add(i.value());
+    }
+    assertEquals(b, refList);
+
+    refList = new SameValuesIntList();
+    refList.addAll(2,3,3,3,3);
+    b = new SameValuesIntList();
+    for (IntCursor i: a.cursor(4)) {
+      b.add(i.value());
+    }
+    assertEquals(b, refList);
+
+    refList = new SameValuesIntList();
+    refList.addAll(2,2);
+    for (IntCursor i: a.cursor()) {
+      if (i.value() % 2 == 1) i.remove();
+    }
+    assertEquals(a, refList);
+  }
 }

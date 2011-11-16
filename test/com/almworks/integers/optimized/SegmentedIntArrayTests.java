@@ -281,7 +281,7 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     checkList(array, ap(0, 1, 2000), ap(100, 1, 3000), ap(0, 1, 10240), ap(5240, 1, 5000));
   }
 
-  private void testReverse(int[] a, int[] b){
+  private void testReverse(int[] a, int[] b) {
     SegmentedIntArray lst = new SegmentedIntArray();
     lst.addAll(a);
     SegmentedIntArray referenceLst = new SegmentedIntArray();
@@ -290,7 +290,7 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     assertEquals(lst, referenceLst);
   }
 
-  public void testReverse(){
+  public void testReverse() {
     testReverse(new int[]{}, new int[]{});
     testReverse(new int[]{0}, new int[]{0});
     testReverse(new int[]{1,1,0}, new int[]{0,1,1});

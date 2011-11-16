@@ -215,7 +215,7 @@ public class IntArrayTests extends NativeIntFixture {
     CHECK.order(il.toNativeArray(), 2, 3, 9);
   }
 
-  private void testReverse(int[] a, int[] b){
+  private void testReverse(int[] a, int[] b) {
     IntArray lst = new IntArray();
     lst.addAll(a);
     IntArray referenceLst = new IntArray();
@@ -224,7 +224,7 @@ public class IntArrayTests extends NativeIntFixture {
     assertEquals(lst, referenceLst);
   }
 
-  public void testReverse(){
+  public void testReverse() {
     testReverse(new int[]{}, new int[]{});
     testReverse(new int[]{0}, new int[]{0});
     testReverse(new int[]{1,1,0}, new int[]{0,1,1});
@@ -232,16 +232,15 @@ public class IntArrayTests extends NativeIntFixture {
 
     IntArray lst = new IntArray();
     Random r = new RandomHolder().getRandom();
-    for (int i = 0; i < 20; i++){
+    for (int i = 0; i < 20; i++) {
       lst.add(r.nextInt(200));
     }
     lst.sortUnique();
     lst.reverseInPlace();
-    for (int i = 1; i < lst.size(); i++){
-      if (lst.get(i-1)<=lst.get(i)){
+    for (int i = 1; i < lst.size(); i++) {
+      if (lst.get(i-1)<=lst.get(i)) {
         fail();
       }
     }
-
   }
 }

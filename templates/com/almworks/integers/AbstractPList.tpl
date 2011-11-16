@@ -224,6 +224,21 @@ public abstract class Abstract#E#List implements #E#List {
     return low;
   }
 
+  public #E#Cursor cursor() {
+    #E#Iterator i = iterator();
+    return new #E#Cursor(i);
+  }
+
+  public #E#Cursor cursor(int from) {
+    #E#Iterator i = iterator(from);
+    return new #E#Cursor(i);
+  }
+
+  public #E#Cursor cursor(int from, int to) {
+    #E#Iterator i = iterator(from, to);
+    return new #E#Cursor(i);
+  }
+
   public int getNextDifferentValueIndex(int curIndex) {
     if (curIndex < 0 || curIndex >= size())
       throw new IndexOutOfBoundsException(curIndex + " " + this);
