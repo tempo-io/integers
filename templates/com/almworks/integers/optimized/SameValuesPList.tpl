@@ -356,9 +356,9 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     //
     // Given the values of i, j after the initial adjustment, it can be shown by induction on x that
     // k'[i+x] == sz - k[j-x].
-    // for any x such that i + x < j - x.
+    // for any non-negative x such that i + x < j - x.
     // To prove it, note that k'[i+x+1]-k'[i+x] is the length of the (i+x)-th block in the reversed array,
-    // but it is (j-(i+x)-1)-th block in the initial array, and its length is k[j-(i+x)]-k[j-(i+x)-1];
+    // but it is also (j-(i+x)-1)-th block in the initial array, and its length is k[j-(i+x)]-k[j-(i+x)-1];
     // equaling these expressions gives the expression above.
     // Similarly, k'[j-x] == sz - k[i+x], so the loop modifies k[] "simultaneously" from both ends.
     //
@@ -370,7 +370,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     //   b) It's inserted manually and is 0, and only native values should be reversed.
     //   c) It will be removed, and only v[0 .. msz-2] should be engaged.
     //   d) It should be swapped with v[0], but in this case v[0] is skipped in a loop,
-    //     so they are swapped in initial adjustments section separetely.
+    //     so they are swapped in initial adjustments section separately.
     for (; i < j; i++, j--) {
       keySwp = m.getKey(i);
       m.setKey(i, sz - m.getKey(j));

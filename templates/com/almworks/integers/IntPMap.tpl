@@ -174,7 +174,7 @@ public class Int#E#Map {
     return myKeys.size() == myValues.size();
   }
 
-  private void checkMutatorPresence() throws IllegalStateException{
+  private void checkMutatorPresence() throws IllegalStateException {
     if (myMutator != null) throw new IllegalStateException();
   }
 

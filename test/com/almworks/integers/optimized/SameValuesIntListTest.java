@@ -1,6 +1,5 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.DynamicIntSet;
 import com.almworks.integers.NativeIntFixture;
 
 public class SameValuesIntListTest extends NativeIntFixture {
