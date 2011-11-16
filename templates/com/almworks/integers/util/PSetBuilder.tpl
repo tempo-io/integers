@@ -315,7 +315,7 @@ public final class #E#SetBuilder implements Cloneable, #E#Collector {
     return new #E#Array(mySorted, mySortedSize);
   }
 
-  public #E#Array to#E#Array(){
+  public #E#Array to#E#Array() {
     myFinished=true;
     mergeTemp();
     return new #E#Array(mySorted, mySortedSize);

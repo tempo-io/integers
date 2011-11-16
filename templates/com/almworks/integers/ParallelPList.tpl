@@ -19,9 +19,10 @@ package com.almworks.integers;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A 2-dimensional array, which is internally stored as one {@code Writable#E#List}. <br>
- * Size of first dimension, {@code myListCount}, is set during object initialization, and is final. <br>
- * Second dimension is generally changeable. <br>
+ * A square array, which is internally stored as one {@code Writable#E#List}. <br>
+ * Size of the first dimension, {@code myListCount} (a number of sublists),
+ * is set during object initialization, and is final. <br>
+ * Size of the second dimension (a size of any sublist) is changeable. <br>
  * Sublist elements are stored in parallel. For example,
  * three lists, {a1,a2,a3}, {b1,b2,b3}, {c1,c2,c3},
  * would be stored as {a1,b1,c1,a2,b2,c2,a3,b3,c3}

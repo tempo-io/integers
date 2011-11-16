@@ -133,7 +133,7 @@ public class IntIteratorTests extends TestCase {
         return b.toString();
     }
 
-  public void testCursor(){
+  public void testCursor() {
     SameValuesIntList a = new SameValuesIntList();
     a.addAll(1,1,1,2,2,3,3,3,3);
     SameValuesIntList b, refList;
