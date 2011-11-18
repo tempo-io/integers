@@ -61,6 +61,12 @@ public interface Writable#E#List extends #E#List, #E#Collector {
 
   void swap(int index1, int index2);
 
+  /**
+   * This method reverses the order in which elements appear in the list, striving to use
+   * a mimimum of additional memory while reversing.
+   * Note that, depending on implementation of a list, an amount of memory used by a list might
+   * differ from an amount used by its reversion.
+   */
   void reverseInPlace();
 
   /**

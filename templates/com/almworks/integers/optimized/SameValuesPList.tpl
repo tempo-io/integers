@@ -306,6 +306,10 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     return ki < myMap.size() ? myMap.getKey(ki) : -1;
   }
 
+  /**
+   * Due to the fact that leading zeros are not stored in {@code myMap}, {@code myMap} might get
+   * shrinked or expanded by 1 element after reversion. (See code comments for details)
+   */
   public void reverseInPlace() {
     int sz = size();
     int msz = myMap.size();

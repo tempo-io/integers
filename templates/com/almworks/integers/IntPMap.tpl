@@ -126,14 +126,17 @@ public class Int#E#Map {
   }
 
   public Iterator iterator() {
+    checkMutatorPresence();
     return iterator(0, size());
   }
 
   public Iterator iterator(int from) {
+    checkMutatorPresence();
     return iterator(from, size());
   }
 
   public Iterator iterator(int from, int to) {
+    checkMutatorPresence();
     return new Iterator(myKeys.iterator(from, to), myValues.iterator(from, to));
   }
 
@@ -143,10 +146,12 @@ public class Int#E#Map {
   }
 
   public IntListIterator keysIterator(int from, int to) {
+    checkMutatorPresence();
     return myKeys.iterator(from, to);
   }
 
   public #E#Iterator valuesIterator(int from, int to) {
+    checkMutatorPresence();
     return myValues.iterator(from, to);
   }
 
@@ -181,11 +186,13 @@ public class Int#E#Map {
   /**
    * Enters this {@code Int#E#Map} into a mode in which consistency-breaking mutations are allowed.
    *
-   * <p>While in this mode, usage of almost all of this {@code Int#E#Map}'s methods are forbidden.
+   * <p>While in this mode, usage of all of this {@code Int#E#Map}'s methods
+   * (except {@code size()} and {@code empty()}) would throw IllegalStateException.
    * Instead of them, {@code myMutator}'s methods should be used.<br>
-   * {@code myMutator.commit()} checks consistency and brings this {@code Int#E#Map} back to its normal state.</p>
+   * {@code myMutator.commit()} brings this {@code Int#E#Map} back to its normal state.</p>
+   * @throws IllegalStateException if this {@code Int#E#Map} is already in mutation state.
    */
-  public ConsistencyViolatingMutator startMutation() {
+  public ConsistencyViolatingMutator startMutation() throws IllegalStateException {
     return new ConsistencyViolatingMutator();
   }
 
@@ -224,8 +231,8 @@ public class Int#E#Map {
       myValues.removeAt(idx);
     }
 
-    public void commit() throws IllegalStateException {
-      if (!checkInvariants()) throw new IllegalStateException();
+    public void commit() {
+      assert checkInvariants();
       Int#E#Map.this.myMutator = null;
     }
   }
