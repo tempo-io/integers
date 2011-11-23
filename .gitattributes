@@ -32,6 +32,7 @@ java/com/almworks/integers/IntegersUtils.java -text
 java/com/almworks/integers/util/RemovedIndexIterator.java -text
 lib/annotations.jar -text
 lib/junit.jar -text
+templates/com/almworks/integers/AbstractPIterator.tpl -text
 templates/com/almworks/integers/AbstractPList.tpl -text
 templates/com/almworks/integers/AbstractPListIndexIterator.tpl -text
 templates/com/almworks/integers/AbstractWritablePList.tpl -text

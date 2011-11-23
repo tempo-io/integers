@@ -114,7 +114,7 @@ public class IntIteratorTests extends TestCase {
             if(index >= values.size()) {
                 fail("Iterator is too long: " + s(it) + " past expected " + s(values.iterator()));
             }
-            assertEquals("Wrong value at index " + index, values.get(index), it.next());
+            assertEquals("Wrong value at index " + index, values.get(index), it.nextValue());
             index++;
         }
         assertEquals("Iterator is too short", values.size(), index);
@@ -123,7 +123,7 @@ public class IntIteratorTests extends TestCase {
     private String s(IntIterator it) {
         final StringBuilder b = new StringBuilder();
         while(it.hasNext()) {
-            b.append(it.next()).append(", ");
+            b.append(it.nextValue()).append(", ");
         }
         if(b.length() > 0) {
             b.setLength(b.length() - 2);
@@ -134,39 +134,23 @@ public class IntIteratorTests extends TestCase {
     }
 
   public void testCursor() {
-    SameValuesIntList a = new SameValuesIntList();
-    a.addAll(1,1,1,2,2,3,3,3,3);
-    SameValuesIntList b, refList;
+    IntProgression.Arithmetic rO = new IntProgression.Arithmetic(1,5,1);
+    for (IntIterator i: rO){
+      int b = i.value();
+    }
+    
+    SameValuesIntList b, refList, refList2;
+
+    refList2 = new SameValuesIntList();
+    refList2.addAll(1,1,1,2,2,3,3,3,3);
 
     refList = new SameValuesIntList();
     refList.addAll(1,1,1,2,2,3,3,3,3);
     b = new SameValuesIntList();
-    for (IntCursor i: a.cursor()) {
+    for (IntIterator i: refList2) {
       b.add(i.value());
+      ((WritableIntListIterator) i).set(0,3);
     }
     assertEquals(b, refList);
-
-    refList = new SameValuesIntList();
-    refList.addAll(1,1,2,2,3,3);
-    b = new SameValuesIntList();
-    for (IntCursor i: a.cursor(1, 7)) {
-      b.add(i.value());
-    }
-    assertEquals(b, refList);
-
-    refList = new SameValuesIntList();
-    refList.addAll(2,3,3,3,3);
-    b = new SameValuesIntList();
-    for (IntCursor i: a.cursor(4)) {
-      b.add(i.value());
-    }
-    assertEquals(b, refList);
-
-    refList = new SameValuesIntList();
-    refList.addAll(2,2);
-    for (IntCursor i: a.cursor()) {
-      if (i.value() % 2 == 1) i.remove();
-    }
-    assertEquals(a, refList);
   }
 }

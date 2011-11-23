@@ -116,7 +116,7 @@ public class TwoWayIntMapTests extends TestCase {
   private void checkMapValsEqualKeysMod(int prime) {
 /*
     for (IntIterator i = map.getKeys().iterator(); i.hasNext(); ) {
-      int key = i.next();
+      int key = i.nextValue();
       assertEquals("key=" + key + " | prime=" + prime, key % prime, map.get(key));
     }
 */
@@ -128,7 +128,7 @@ public class TwoWayIntMapTests extends TestCase {
     StringBuilder actual = new StringBuilder();
     boolean fail = false;
     for (IntIterator i = map.getKeys().iterator(); i.hasNext(); ) {
-      int key = i.next();
+      int key = i.nextValue();
       int exp = f.invoke(key);
       int act = map.get(key);
       expected.append(new TwoWayIntMap.Entry(key, exp)).append("\n");
@@ -212,7 +212,7 @@ public class TwoWayIntMapTests extends TestCase {
     for (int i = 0; i < keys.size(); ++i) {
       int k1 = keys.get(i);
       for (WritableIntListIterator keyIt = keys.iterator(); keyIt.hasNext(); ) {
-        int k2 = keyIt.next();
+        int k2 = keyIt.nextValue();
         if (keyIt.lastIndex() != i && k1 == k2) keyIt.remove();
       }
     }

@@ -415,7 +415,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
         if (p < 0)
           p = -p - 2;
         myIterator = myMap.iterator(p);
-        myIterator.next();
+        myIterator.nextValue();
         myValue = myIterator.value();
       }
       advanceToNextChange();
@@ -423,12 +423,12 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
     private void advanceToNextChange() {
       if (myIterator.hasNext()) {
-        myIterator.next();
+        myIterator.nextValue();
         myNextChangeIndex = myIterator.key();
       } else myNextChangeIndex = size();
     }
 
-    public #e# next() throws ConcurrentModificationException, NoSuchElementException {
+    public #e# nextValue() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();

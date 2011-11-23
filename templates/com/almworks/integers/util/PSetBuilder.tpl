@@ -77,7 +77,7 @@ public final class #E#SetBuilder implements Cloneable, #E#Collector {
 
   public void addAll(#E#Iterator iterator) {
     while (iterator.hasNext())
-      add(iterator.next());
+      add(iterator.nextValue());
   }
 
   public void addAll(#E#List values) {

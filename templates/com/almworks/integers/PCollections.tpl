@@ -274,7 +274,7 @@ public class #E#Collections {
     #e# v;
     boolean add;
     for (#E#ListIterator iiw = intersectWith.iterator(); iiw.hasNext(); ) {
-      v = iiw.next();
+      v = iiw.nextValue();
       add = false;
       ia = a.binarySearch(v, ia, sza);
       if (ia >= 0) {
@@ -330,7 +330,7 @@ public class #E#Collections {
     int rangeFinish = -2;
     int diff = 0;
     for (IntIterator it = indexes.iterator(); it.hasNext(); ) {
-      int ind = it.next();
+      int ind = it.nextValue();
       if (rangeFinish < 0) {
         rangeStart = ind;
       } else if (ind != rangeFinish) {

@@ -80,7 +80,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
   public void addAll(#E#Iterator iterator) {
     while (iterator.hasNext())
-      add(iterator.next());
+      add(iterator.nextValue());
   }
 
   public void addAll(#e#... values) {
@@ -110,7 +110,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
   public void removeAll(#e# value) {
     for (Writable#E#ListIterator ii = iterator(); ii.hasNext();) {
-      if (ii.next() == value) {
+      if (ii.nextValue() == value) {
         ii.remove();
       }
     }
@@ -147,7 +147,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
    */
   public void removeAll(#E#List collection) {
     for (#E#Iterator ii = collection.iterator(); ii.hasNext();)
-      removeAll(ii.next());
+      removeAll(ii.nextValue());
   }
 
   public void removeAll(#e#... values) {
@@ -179,7 +179,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
   public void insertAll(int index, #E#Iterator iterator) {
     while (iterator.hasNext())
-      insert(index++, iterator.next());
+      insert(index++, iterator.nextValue());
   }
 
   public void insertAll(int index, #E#List list) {
@@ -219,8 +219,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     for (int i = 0; i < count; i++) {
       assert si.hasNext();
       assert di.hasNext();
-      di.next();
-      di.set(0, si.next());
+      di.nextValue();
+      di.set(0, si.nextValue());
     }
   }
 
@@ -263,9 +263,9 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     if (size() < 2) return;
     Writable#E#ListIterator ii = iterator();
     assert ii.hasNext();
-    #e# last = ii.next();
+    #e# last = ii.nextValue();
     while (ii.hasNext()) {
-      #e# next = ii.next();
+      #e# next = ii.nextValue();
       assert next >= last : last + " " + next;
       if (next == last) {
         ii.remove();
@@ -316,9 +316,9 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
       return super.lastIndex();
     }
 
-    public #e# next() throws ConcurrentModificationException, NoSuchElementException {
+    public #e# nextValue() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
-      return super.next();
+      return super.nextValue();
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {

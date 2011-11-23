@@ -75,7 +75,7 @@ public abstract class NativeIntFixture extends TestCase {
           ((IntListIterator) it).move(i);
         else
           for (int j = 0; j < i; j++)
-            it.next();
+            it.nextValue();
       }
       CHECK.order(it, IntegersUtils.arrayCopy(ints, i, ints.length - i));
     }
@@ -83,7 +83,7 @@ public abstract class NativeIntFixture extends TestCase {
     for (int i = 0; i < ints.length; i++) {
       int anInt = ints[i];
       assertTrue(it.hasNext());
-      assertEquals(anInt, it.next());
+      assertEquals(anInt, it.nextValue());
       assertEquals(anInt, list.get(i));
     }
     assertFalse(it.hasNext());

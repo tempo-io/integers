@@ -23,12 +23,12 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
   /**
    * Will set the value in the list at a position relative to the last returned item.
    * <p>
-   * set(0, X) will set the value at the place of the last call to next(), get(-1) will set previous value, etc
+   * set(0, X) will set the value at the place of the last call to nextValue(), get(-1) will set previous value, etc
    */
   void set(int offset, #e# value) throws NoSuchElementException;
 
   /**
-   * Removes backCount last items from the collection. Before this method is called, backCount calls to next() must
+   * Removes backCount last items from the collection. Before this method is called, backCount calls to nextValue() must
    * have passed.
    */
   void removeRange(int fromOffset, int toOffset) throws NoSuchElementException;

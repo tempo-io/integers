@@ -29,14 +29,14 @@ public interface #E#ListIterator extends #E#Iterator {
   /**
    * Returns the value at a position relative to the last returned item.
    * <p>
-   * get(0) will return the same value as the last call to next(), get(-1) will return previous value, get(1) will return
-   * the next value to be returned by next()
+   * get(0) will return the same value as the last call to nextValue(), get(-1) will return previous value, get(1) will return
+   * the next value to be returned by nextValue()
    */
   #e# get(int offset) throws ConcurrentModificationException, NoSuchElementException;
 
   /**
-   * @return current position of the iterator. The index of last returned element by call to {@link #next()} if iterator isn't moved.
-   * @throws NoSuchElementException if iterator isn't ever advanced ({@link #next()} isn't ever called)
+   * @return current position of the iterator. The index of last returned element by call to {@link #nextValue()} if iterator isn't moved.
+   * @throws NoSuchElementException if iterator isn't ever advanced ({@link #nextValue()} isn't ever called)
    */
   int lastIndex() throws NoSuchElementException;
 }

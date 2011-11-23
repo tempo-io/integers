@@ -16,12 +16,13 @@
 
 package com.almworks.integers.util;
 
+import com.almworks.integers.AbstractIntIterator;
 import com.almworks.integers.IntListIterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-class RemovedIndexIterator implements IntListIterator  {
+class RemovedIndexIterator extends AbstractIntIterator implements IntListIterator  {
   private final IntListIterator myRemovedLocations;
 
   RemovedIndexIterator(IntListIterator removedLocations) {
@@ -32,9 +33,11 @@ class RemovedIndexIterator implements IntListIterator  {
     return myRemovedLocations.hasNext();
   }
 
-  public int next() throws ConcurrentModificationException, NoSuchElementException {
-    int value = myRemovedLocations.next();
-    return value + myRemovedLocations.lastIndex();
+  public IntListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    int value = myRemovedLocations.nextValue();
+    myValue = value + myRemovedLocations.lastIndex();
+    myIterated= true;
+    return this;
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {

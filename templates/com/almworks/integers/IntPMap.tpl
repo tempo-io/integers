@@ -89,7 +89,7 @@ public class Int#E#Map {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
-    for (WritableIntListIterator it = myKeys.iterator(from, to); it.hasNext();) it.set(0, it.next() + increment);
+    for (WritableIntListIterator it = myKeys.iterator(from, to); it.hasNext();) it.set(0, it.nextValue() + increment);
   }
 
   public void setKey(int index, int key) {
@@ -172,7 +172,7 @@ public class Int#E#Map {
     #e# currValue;
     #e# lastValue = 0;
     for (#E#Iterator ii = myValues.iterator(); ii.hasNext();) {
-      currValue = ii.next();
+      currValue = ii.nextValue();
       if (currValue == lastValue) return false;
       lastValue = currValue;
     }
@@ -255,10 +255,10 @@ public class Int#E#Map {
       return r;
     }
 
-    public void next() {
+    public void nextValue() {
       myAdvanced = false;
-      myCurrentKey = myKeyIt.next();
-      myCurrentValue = mValueIt.next();
+      myCurrentKey = myKeyIt.nextValue();
+      myCurrentValue = mValueIt.nextValue();
       myAdvanced = true;
     }
 

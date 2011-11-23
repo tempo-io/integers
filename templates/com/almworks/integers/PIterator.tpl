@@ -17,46 +17,29 @@
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
 * @see #E#Iterable
 */
-public interface #E#Iterator {
+public interface #E#Iterator extends Iterator<#E#Iterator> {
   /**
   * Constant value for empty Iterators
   */
   Writable#E#ListIterator EMPTY = new Empty#E#Iterator();
 
   /**
-   * @return true next call to {@link #next()} won't throw NoSuchElementException
+   * @return true next call to {@link #nextValue()} won't throw NoSuchElementException
    */
   boolean hasNext() throws ConcurrentModificationException;
+
+  #e# value();
 
   /**
   * @return next element and advances iterator.
   * @throws NoSuchElementException if there is no next element, iterator has reached end
   * @throws ConcurrentModificationException if underlaying collection is concurrently modified
   */
-  #e# next() throws ConcurrentModificationException, NoSuchElementException;
-
-  class Single implements #E#Iterator {
-    private final #e# myValue;
-    private boolean myIterated;
-
-    public Single(#e# value) {
-      myValue = value;
-    }
-
-    public boolean hasNext() {
-      return !myIterated;
-    }
-
-    public #e# next() throws NoSuchElementException {
-      if (myIterated)
-        throw new NoSuchElementException();
-      myIterated = true;
-      return myValue;
-    }
-  }
+  #e# nextValue() throws ConcurrentModificationException, NoSuchElementException;
 }

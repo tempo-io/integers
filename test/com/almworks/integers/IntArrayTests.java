@@ -40,7 +40,7 @@ public class IntArrayTests extends NativeIntFixture {
     WritableIntListIterator ii = array.iterator();
     int x = 10000;
     while (ii.hasNext()) {
-      assertEquals(x, ii.next());
+      assertEquals(x, ii.nextValue());
       assertEquals(x, ii.get(0));
       if (x > 1)
         assertEquals(x - 1, ii.get(1));
@@ -110,7 +110,7 @@ public class IntArrayTests extends NativeIntFixture {
       array.add(i);
     WritableIntListIterator ii = array.iterator(100, 600);
     for (int i = 0; i < 10; i++)
-      ii.next();
+      ii.nextValue();
     ii.removeRange(-9, 1);
     try {
       ii.removeRange(-9, 1);
@@ -129,9 +129,9 @@ public class IntArrayTests extends NativeIntFixture {
     for (int i = 0; i < 10000; i++)
       array.add(i);
     WritableIntListIterator ii = array.iterator(8191, 9192);
-    ii.next();
+    ii.nextValue();
     while (ii.hasNext()) {
-      ii.next();
+      ii.nextValue();
       ii.remove();
     }
     checkList(array, ap(0, 1, 8192), ap(9192, 1, 808));
@@ -143,7 +143,7 @@ public class IntArrayTests extends NativeIntFixture {
     WritableIntListIterator ii = array.iterator();
     for (int i = 0; i < 100; i++) {
       assertTrue(ii.hasNext());
-      assertEquals(100 * i, ii.next());
+      assertEquals(100 * i, ii.nextValue());
       ii.move(99);
     }
     assertFalse(ii.hasNext());

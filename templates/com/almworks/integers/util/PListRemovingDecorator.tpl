@@ -120,7 +120,7 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
     int last = Integer.MIN_VALUE;
     // todo apply "-i" when sortedRemoveIndexes are collected
     for (WritableIntListIterator ii = indices.iterator(1); ii.hasNext();) {
-      int value = ii.next();
+      int value = ii.nextValue();
       assert value > last : i + " " + last + " " + value;
       last = value;
       ii.set(0, value - i);
@@ -159,11 +159,11 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
       myBaseIterator = base().iterator(from + myNextRemoved);
     }
 
-    public #e# next() throws ConcurrentModificationException, NoSuchElementException {
+    public #e# nextValue() throws ConcurrentModificationException, NoSuchElementException {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       setNext(getNextIndex() + 1);
-      #e# value = myBaseIterator.next();
+      #e# value = myBaseIterator.nextValue();
       IntList removedPrepared = getRemovedPrepared();
       int rs = removedPrepared.size();
       if (myNextRemoved < rs) {

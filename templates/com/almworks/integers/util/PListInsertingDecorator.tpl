@@ -115,7 +115,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
     if (idx < 0)
       idx = -idx - 1;
     for (IntListIterator ii = myInserted.keysIterator(idx, myInserted.size()); ii.hasNext(); idx++) {
-      if (ii.next() - idx > baseIndex)
+      if (ii.nextValue() - idx > baseIndex)
         break;
     }
     return baseIndex + idx;
@@ -143,7 +143,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
 
     private void advanceToNextInsert() {
       if (myInsertedIterator.hasNext()) {
-        myInsertedIterator.next();
+        myInsertedIterator.nextValue();
         myNextInsert = myInsertedIterator.key();
       } else myNextInsert = -1;
     }
@@ -156,7 +156,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
       return r;
     }
 
-    public #e# next() {
+    public #e# nextValue() {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       #e# r;
@@ -164,7 +164,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
         r = myInsertedIterator.value();
         advanceToNextInsert();
       } else {
-        r = myBaseIterator.next();
+        r = myBaseIterator.nextValue();
       }
       setNext(getNextIndex()+1);
       return r;

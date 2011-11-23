@@ -16,12 +16,13 @@
 
 package com.almworks.integers.util;
 
+import com.almworks.integers.Abstract#E#Iterator;
 import com.almworks.integers.#E#Iterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class Finding#E#Iterator implements #E#Iterator {
+public abstract class Finding#E#Iterator extends Abstract#E#Iterator {
   private boolean myFound;
   private boolean mySought;
 
@@ -35,7 +36,7 @@ public abstract class Finding#E#Iterator implements #E#Iterator {
     return myFound;
   }
 
-  public final #e# next() throws ConcurrentModificationException, NoSuchElementException {
+  public final #E#Iterator next() throws ConcurrentModificationException, NoSuchElementException {
     if (!mySought) {
       myFound = findNext();
       mySought = true;
@@ -45,7 +46,8 @@ public abstract class Finding#E#Iterator implements #E#Iterator {
     #e# r = getNext();
     mySought = false;
     myFound = false;
-    return r;
+    myValue = r;
+    return super.next();
   }
 
   protected abstract #e# getNext();

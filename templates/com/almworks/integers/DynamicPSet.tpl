@@ -131,7 +131,7 @@ public class Dynamic#E#Set {
     #e#[] arr = new #e#[size()];
     int i = 0;
     for (LURIterator it = new LURIterator(); it.hasNext(); ) {
-      arr[i++] = myKeys[it.next()];
+      arr[i++] = myKeys[it.nextValue()];
     }
     return new #E#Array(arr);
   }
@@ -139,7 +139,7 @@ public class Dynamic#E#Set {
   public void addAll(#E#List keys) {
     int[] ps = prepareAdd(keys.size());
     for (#E#Iterator i = keys.iterator(); i.hasNext(); ) {
-      add0(i.next(), ps);
+      add0(i.nextValue(), ps);
     }
   }
 
@@ -452,7 +452,7 @@ public class Dynamic#E#Set {
     });
   }
 
-  private class LURIterator implements IntIterator {
+  private class LURIterator extends AbstractIntIterator {
     private int x = myRoot;
     private final int[] xs;
     private int xsi;
@@ -468,8 +468,7 @@ public class Dynamic#E#Set {
       return x != 0 || xsi > 0;
     }
 
-    @Override
-    public int next() throws ConcurrentModificationException, NoSuchElementException {
+    public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (!hasNext()) throw new NoSuchElementException();
       if (x == 0) x = xs[--xsi];
       else {
@@ -482,7 +481,8 @@ public class Dynamic#E#Set {
       }
       int ret = x;
       x = myRight[x];
-      return ret;
+      myValue = ret;
+      return super.next();
     }
   }
 }

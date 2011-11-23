@@ -117,7 +117,7 @@ public class Parallel#E#List {
       if (dst != null && dst.length < getListCount())
         throw new IllegalArgumentException();
       for (int i = 0; i < getListCount(); i++) {
-        #e# val = myIt.next();
+        #e# val = myIt.nextValue();
         if (dst != null)
           dst[i] = val;
       }

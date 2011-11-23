@@ -177,7 +177,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return;
     doExpand(index, count);
     for (Writable#E#ListIterator ii = iterator(index, index + count); ii.hasNext();) {
-      ii.next();
+      ii.nextValue();
       ii.set(0, value);
     }
     assert checkInvariants();
@@ -684,7 +684,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   public void setRange(int from, int to, #e# value) {
     assert checkInvariants();
     for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.next();
+      ii.nextValue();
       ii.set(0, value);
     }
     assert checkInvariants();
@@ -736,7 +736,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return;
     checkRange(from, to);
     for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.next()));
+      ii.set(0, function.invoke(ii.nextValue()));
     }
     assert checkInvariants();
   }
@@ -747,7 +747,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return;
     checkRange(from, to);
     for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.next(), secondArgument));
+      ii.set(0, function.invoke(ii.nextValue(), secondArgument));
     }
     assert checkInvariants();
   }
@@ -778,7 +778,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
 
 
 
-  private class SegmentedIterator implements Writable#E#ListIterator {
+  private class SegmentedIterator extends Abstract#E#Iterator implements Writable#E#ListIterator {
     private final int myFrom;
     private int myTo;
     private int myNext;
@@ -822,7 +822,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       assert checkIterator();
     }
 
-    public #e# next() throws ConcurrentModificationException, NoSuchElementException {
+    public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
       assert checkIterator();
       checkMod();
       if (myNext < myFrom || myNext >= myTo)
@@ -834,7 +834,9 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       myOffset++;
       adjustOffset();
       assert checkIterator();
-      return r;
+      myValue = r;
+      myIterated = true;
+      return this;
     }
 
     private void adjustOffset() {

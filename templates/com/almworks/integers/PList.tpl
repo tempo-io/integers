@@ -121,27 +121,6 @@ public interface #E#List extends #E#Iterable {
   #E#ListIterator iterator(int from, int to);
 
   /**
-   * Suggested usage of this method is building of enhanced {@code for}-statements. <br>
-   * Example: {@code for (#E#Cursor a : someList.cursor()) b += a.value() }
-   * @return A special iterator.
-   */
-  #E#Cursor cursor();
-
-  /**
-   * Suggested usage of this method is building of enhanced {@code for}-statements. <br>
-   * Example: {@code for (#E#Cursor a : someList.cursor(3)) b += a.value() }
-   * @return A special iterator.
-   */
-  #E#Cursor cursor(int from);
-
-  /**
-   * Suggested usage of this method is building of enhanced {@code for}-statements. <br>
-   * Example: {@code for (#E#Cursor a : someList.cursor(3, 6)) b += a.value() }
-   * @return A special iterator.
-   */
-  #E#Cursor cursor(int from, int to);
-
-  /**
    * For a given index i, returns minimum index j, for which exactly one of the following holds:
    * <ul>
    * <li>{@code j = -1 and for all k > i, a[k] = a[i]};</li>
