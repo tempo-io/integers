@@ -307,8 +307,9 @@ public class SameValues#E#List extends AbstractWritable#E#List {
   }
 
   /**
-   * Due to the fact that leading zeros are not stored in {@code myMap}, {@code myMap} might get
-   * shrinked or expanded by 1 element after reversion. (See code comments for details)
+   * Due to the leading-zeros optimization, a list starting with zeros and finishing with nonzeros
+   * might be allocated in less amount of memory compared to its reversion.
+   * Hence, calling this method on such lists might result in additional (possibly huge) memory allocation.
    */
   public void reverseInPlace() {
     int sz = size();
