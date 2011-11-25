@@ -5,10 +5,10 @@ import java.util.*;
 public final class Containers {
   private Containers() {}
 
-  public static <T> List<T> collectList(Iterator<? extends T> iterator) {
+  public static <T> List<T> collectList(Iterator<? extends T> listIterator) {
     ArrayList<T> result = new ArrayList<T>();
-    while (iterator.hasNext()) {
-      T t = iterator.next();
+    while (listIterator.hasNext()) {
+      T t = listIterator.next();
       result.add(t);
     }
     return result;

@@ -67,14 +67,12 @@ public final class #E#Array extends AbstractWritable#E#List {
     return new #E#Array(#E#Collections.arrayCopy(array, 0, length));
   }
 
-  public static #E#Array copy(@Nullable #E#Iterable iterable) {
-    if (iterable == null) return new #E#Array();
-    if (iterable instanceof #E#Array) {
-      #E#Array other = (#E#Array) iterable;
+  public static #E#Array copy(@Nullable #E#List #e#List) {
+    if (#e#List == null) return new #E#Array();
+    if (#e#List instanceof #E#Array) {
+      #E#Array other = (#E#Array) #e#List;
       return copy(other.myArray, other.size());
-    } else if (iterable instanceof #E#List)
-      return new #E#Array((#E#List) iterable);
-    else return new #E#Array(iterable.iterator());
+    } else return new #E#Array(#e#List);
   }
 
   public static #E#Array create(#e# ... values) {
@@ -230,7 +228,7 @@ public final class #E#Array extends AbstractWritable#E#List {
       list.toArray(0, myArray, sz, added);
       updateSize(newSize);
     } else {
-      addAll(collection.iterator());
+      addAll(collection.listIterator());
     }
   }
 
@@ -271,9 +269,9 @@ public final class #E#Array extends AbstractWritable#E#List {
     assert isUniqueSorted();
     if (size() != collection.size())
       return false;
-    #E#Iterator ownIt = iterator();
+    #E#Iterator ownIt = listIterator();
     #e# prevOther = #EW#.MIN_VALUE;
-    for (#E#Iterator it = collection.iterator(); it.hasNext();) {
+    for (#E#Iterator it = collection.listIterator(); it.hasNext();) {
       #e# own = ownIt.nextValue();
       #e# other = it.nextValue();
       if (other <= prevOther) {
@@ -302,7 +300,7 @@ public final class #E#Array extends AbstractWritable#E#List {
   }
 
   /**
-   * Adds first maxCount elements from iterator or all if iterator end reached first
+   * Adds elements from iterator until maxCount elements are added or iterator reaches its end.
    * @param iterator
    * @param maxCount
    * @return number of added elements

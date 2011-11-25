@@ -35,7 +35,7 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
 
   /**
   * Removes element at current iterator position.
-  * @throws NoSuchElementException if iterator wasn't ever advanced or moved outside of range.
+  * @throws NoSuchElementException if iterator moved outside of range or wasn't ever advanced.
   */
   void remove() throws NoSuchElementException, ConcurrentModificationException;
 }

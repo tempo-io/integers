@@ -50,22 +50,26 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   @NotNull
-  public Writable#E#ListIterator iterator() {
-    return iterator(0, size());
+  public Writable#E#ListIterator listIterator() {
+    return listIterator(0, size());
   }
 
   @NotNull
-  public Writable#E#ListIterator iterator(int from) {
-    return iterator(from, size());
+  public Writable#E#ListIterator listIterator(int from) {
+    return listIterator(from, size());
   }
 
   @NotNull
-  public Writable#E#ListIterator iterator(int from, int to) {
+  public Writable#E#ListIterator listIterator(int from, int to) {
     if (from >= to) {
       assert from == to : from + " " + to;
       return #E#Iterator.EMPTY;
     }
     return new WritableIndexIterator(from, to);
+  }
+
+  public Writable#E#ListIterableFromIterator writableListIterable() {
+    return new Writable#E#ListIterableFromIterator(listIterator());
   }
 
   public void addAll(#E#List values) {
@@ -74,7 +78,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
       for (int i = 0; i < sz; i++)
         add(values.get(i));
     } else {
-      addAll(values.iterator());
+      addAll(values.listIterator());
     }
   }
 
@@ -109,7 +113,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   public void removeAll(#e# value) {
-    for (Writable#E#ListIterator ii = iterator(); ii.hasNext();) {
+    for (Writable#E#ListIterator ii = listIterator(); ii.hasNext();) {
       if (ii.nextValue() == value) {
         ii.remove();
       }
@@ -146,7 +150,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
    * // todo something effective
    */
   public void removeAll(#E#List collection) {
-    for (#E#Iterator ii = collection.iterator(); ii.hasNext();)
+    for (#E#Iterator ii = collection.listIterator(); ii.hasNext();)
       removeAll(ii.nextValue());
   }
 
@@ -189,7 +193,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   public void insertAll(int index, #E#List values, int sourceIndex, int count) {
-    insertAll(index, values.iterator(sourceIndex, sourceIndex + count));
+    insertAll(index, values.listIterator(sourceIndex, sourceIndex + count));
   }
 
   public void set(int index, #e# value) {
@@ -205,7 +209,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     if (count <= 0) return;
     int sz = size();
     checkAddedCount(index, count, sz);
-    transfer(values.iterator(sourceOffset, sourceOffset + count), iterator(index, sz), count);
+    transfer(values.listIterator(sourceOffset, sourceOffset + count), listIterator(index, sz), count);
   }
 
   private void checkAddedCount(int index, int count, int size) {
@@ -261,7 +265,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   public void removeDuplicates() {
     assert isSorted() : this;
     if (size() < 2) return;
-    Writable#E#ListIterator ii = iterator();
+    Writable#E#ListIterator ii = listIterator();
     assert ii.hasNext();
     #e# last = ii.nextValue();
     while (ii.hasNext()) {

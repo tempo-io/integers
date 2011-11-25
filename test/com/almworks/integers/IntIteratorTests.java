@@ -11,7 +11,7 @@ public class IntIteratorTests extends TestCase {
 
     public void testSimple() {
         assertContents(
-                a(1, 3, 5).iterator(),
+                a(1, 3, 5).listIterator(),
                 a(1, 3, 5));
     }
 
@@ -49,7 +49,7 @@ public class IntIteratorTests extends TestCase {
     }
 
     private void testMinus(IntArray include, IntArray exclude, IntArray difference) {
-        assertContents(new SortedIntListMinusIterator(include.iterator(), exclude.iterator()), difference);
+        assertContents(new SortedIntListMinusIterator(include.listIterator(), exclude.listIterator()), difference);
     }
 
     public void testInterEmptyArrays() {
@@ -101,7 +101,7 @@ public class IntIteratorTests extends TestCase {
     }
 
     private void testInter(IntArray array1, IntArray array2, IntArray intersection) {
-        assertContents(new SortedIntListIntersectionIterator(array1.iterator(), array2.iterator()), intersection);
+        assertContents(new SortedIntListIntersectionIterator(array1.listIterator(), array2.listIterator()), intersection);
     }
 
     private IntArray a(int... values) {
@@ -112,7 +112,7 @@ public class IntIteratorTests extends TestCase {
         int index = 0;
         while(it.hasNext()) {
             if(index >= values.size()) {
-                fail("Iterator is too long: " + s(it) + " past expected " + s(values.iterator()));
+                fail("Iterator is too long: " + s(it) + " past expected " + s(values.listIterator()));
             }
             assertEquals("Wrong value at index " + index, values.get(index), it.nextValue());
             index++;
@@ -147,10 +147,11 @@ public class IntIteratorTests extends TestCase {
     refList = new SameValuesIntList();
     refList.addAll(1,1,1,2,2,3,3,3,3);
     b = new SameValuesIntList();
-    for (IntIterator i: refList2) {
+    for (WritableIntListIterator i: refList2.writableListIterable()) {
       b.add(i.value());
-      ((WritableIntListIterator) i).set(0,3);
+      i.set(0, 3);
     }
     assertEquals(b, refList);
+
   }
 }

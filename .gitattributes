@@ -47,7 +47,6 @@ templates/com/almworks/integers/PArrayIterator.tpl -text
 templates/com/almworks/integers/PCollections.tpl -text
 templates/com/almworks/integers/PCollector.tpl -text
 templates/com/almworks/integers/PCollectorAdapter.tpl -text
-templates/com/almworks/integers/PIterable.tpl -text
 templates/com/almworks/integers/PIterator.tpl -text
 templates/com/almworks/integers/PList.tpl -text
 templates/com/almworks/integers/PListIterator.tpl -text
@@ -55,6 +54,7 @@ templates/com/almworks/integers/PProgression.tpl -text
 templates/com/almworks/integers/ParallelPList.tpl -text
 templates/com/almworks/integers/TwoWayPMap.tpl -text
 templates/com/almworks/integers/WritablePList.tpl -text
+templates/com/almworks/integers/WritablePListIterableFromIterator.tpl -text
 templates/com/almworks/integers/WritablePListIterator.tpl -text
 templates/com/almworks/integers/func/PFunction.tpl -text
 templates/com/almworks/integers/func/PFunction2.tpl -text

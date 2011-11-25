@@ -195,18 +195,18 @@ public class IntCollectionsTests extends NativeIntFixture {
   public void testGetNextDiffValueIndex() {
     IntList testList1 = IntArray.create(1, 1, 2, 2, 2, 2, 3, 2);
     IntList expected = IntArray.create(0, 2, 6, 7);
-    CHECK.order(getNextDifferentValueIndex(testList1), expected.iterator());
+    CHECK.order(getNextDifferentValueIndex(testList1), expected.listIterator());
 
     SameValuesIntList testList2 = new SameValuesIntList();
     testList2.addAll(testList1);
-    CHECK.order(getNextDifferentValueIndex(testList2), expected.iterator());
+    CHECK.order(getNextDifferentValueIndex(testList2), expected.listIterator());
 
     IntList testList3 = IntArray.create(0, 0, 1, 1, 1, 1, 10, 1);
-    CHECK.order(getNextDifferentValueIndex(testList3), expected.iterator());
+    CHECK.order(getNextDifferentValueIndex(testList3), expected.listIterator());
 
     SameValuesIntList testList4 = new SameValuesIntList();
     testList4.addAll(testList3);
-    CHECK.order(getNextDifferentValueIndex(testList4), expected.iterator());
+    CHECK.order(getNextDifferentValueIndex(testList4), expected.listIterator());
 
   }
 
@@ -216,14 +216,14 @@ public class IntCollectionsTests extends NativeIntFixture {
       assertTrue("exceeded the list size!", i < list.size());
       resultingIndices.add(i);
     }
-    return resultingIndices.iterator();
+    return resultingIndices.listIterator();
   }
 
   public void testRemoveAllAtSorted() {
     IntArray a = new IntArray(IntProgression.arithmetic(0, 20));
     IntCollections.removeAllAtSorted(a, IntArray.create(0, 3, 4, 7, 10, 11, 12, 13, 19));
-    CHECK.order(a.iterator(), 1, 2, 5, 6, 8, 9, 14, 15, 16, 17, 18);
+    CHECK.order(a.listIterator(), 1, 2, 5, 6, 8, 9, 14, 15, 16, 17, 18);
     IntCollections.removeAllAtSorted(a, IntArray.create(1, 2, 3, 4, 9));
-    CHECK.order(a.iterator(), 1, 9, 14, 15, 16, 18);
+    CHECK.order(a.listIterator(), 1, 9, 14, 15, 16, 18);
   }
 }

@@ -148,8 +148,8 @@ public class CollectionsCompare {
     order(expected, Containers.collectList(actual));
   }
 
-  public void order(Object[] objects, Iterator<?> iterator) {
-    order(objects, Containers.collectList(iterator));
+  public void order(Object[] objects, Iterator<?> listIterator) {
+    order(objects, Containers.collectList(listIterator));
   }
 
   public void empty(Collection<?> collection) {

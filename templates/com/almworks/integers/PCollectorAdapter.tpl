@@ -18,7 +18,7 @@ package com.almworks.integers;
 
 public abstract class #E#CollectorAdapter implements #E#Collector {
   public void addAll(#E#List values) {
-    addAll(values.iterator());
+    addAll(values.listIterator());
   }
 
   public void addAll(#E#Iterator iterator) {

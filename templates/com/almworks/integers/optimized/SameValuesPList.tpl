@@ -280,7 +280,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
   }
 
   @NotNull
-  public Writable#E#ListIterator iterator(int from, int to) {
+  public Writable#E#ListIterator listIterator(int from, int to) {
     if (from > to || from < 0 || to > size())
       throw new IndexOutOfBoundsException(from + " " + to + " " + this);
     return new SameValuesIterator(from, to);
@@ -416,7 +416,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
         if (p < 0)
           p = -p - 2;
         myIterator = myMap.iterator(p);
-        myIterator.nextValue();
+        myIterator.next();
         myValue = myIterator.value();
       }
       advanceToNextChange();
@@ -424,7 +424,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
     private void advanceToNextChange() {
       if (myIterator.hasNext()) {
-        myIterator.nextValue();
+        myIterator.next();
         myNextChangeIndex = myIterator.key();
       } else myNextChangeIndex = size();
     }

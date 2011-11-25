@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public interface #E#List extends #E#Iterable {
+public interface #E#List extends Iterable<#E#Iterator> {
   #E#List EMPTY = new #E#Array(EMPTY_#EC#S);
 
   /**
@@ -106,19 +106,25 @@ public interface #E#List extends #E#Iterable {
   * @return iterator initially located before first element. Iterator will walk the whole list
   */
   @NotNull
-  #E#ListIterator iterator();
+  #E#Iterator iterator();
+
+  /**
+  * @return iterator initially located before first element. Iterator will walk the whole list
+  */
+  @NotNull
+  #E#ListIterator listIterator();
 
   /**
   * @return iterator initially located before element at index from. Iterator will walk till last element
   */
   @NotNull
-  #E#ListIterator iterator(int from);
+  #E#ListIterator listIterator(int from);
 
   /**
   * @return iterator initially located before element at index from and iterator will walk up to index to (exclusive)
   */
   @NotNull
-  #E#ListIterator iterator(int from, int to);
+  #E#ListIterator listIterator(int from, int to);
 
   /**
    * For a given index i, returns minimum index j, for which exactly one of the following holds:

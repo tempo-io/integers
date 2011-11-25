@@ -51,7 +51,7 @@ public class Modifying#E#ListRemovingDecorator extends #E#ListRemovingDecorator 
   public void removeAt(int index) {
     int idx = removedBefore(index);
     myRemovedSorted.insert(idx, index);
-    for (WritableIntListIterator ii = myRemovedSorted.iterator(idx + 1); ii.hasNext();) {
+    for (WritableIntListIterator ii = myRemovedSorted.listIterator(idx + 1); ii.hasNext();) {
       int p = ii.nextValue();
       ii.set(0, p - 1);
     }

@@ -20,9 +20,6 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
-* @see #E#Iterable
-*/
 public interface #E#Iterator extends Iterator<#E#Iterator> {
   /**
   * Constant value for empty Iterators
@@ -38,7 +35,7 @@ public interface #E#Iterator extends Iterator<#E#Iterator> {
 
   /**
   * @return next element and advances iterator.
-  * @throws NoSuchElementException if there is no next element, iterator has reached end
+  * @throws NoSuchElementException if there is no next element and iterator has reached an end
   * @throws ConcurrentModificationException if underlaying collection is concurrently modified
   */
   #e# nextValue() throws ConcurrentModificationException, NoSuchElementException;

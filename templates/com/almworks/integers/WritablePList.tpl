@@ -21,13 +21,21 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Writable#E#List extends #E#List, #E#Collector {
   @NotNull
-  Writable#E#ListIterator iterator();
+  Writable#E#ListIterator listIterator();
 
   @NotNull
-  Writable#E#ListIterator iterator(int from);
+  Writable#E#ListIterator listIterator(int from);
 
   @NotNull
-  Writable#E#ListIterator iterator(int from, int to);
+  Writable#E#ListIterator listIterator(int from, int to);
+
+  /**
+   * Use this method in FOR-EACH statement if you want to iterate using Writable#E#ListIterator.
+   * Example:<br>
+   *   {@code for {WritableLongListIterator i: myList.writableListIterable()} ...}
+   */
+  @NotNull
+  Writable#E#ListIterableFromIterator writableListIterable();
 
   void removeRange(int from, int to);
 

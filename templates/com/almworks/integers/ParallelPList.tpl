@@ -78,12 +78,12 @@ public class Parallel#E#List {
     myStorage.insertAll(offset * getListCount(), new #E#Array(values));
   }
 
-  public Iterator iterator(int offset) {
-    return new Iterator(myStorage.iterator(offset * getListCount()));
+  public Iterator listIterator(int offset) {
+    return new Iterator(myStorage.listIterator(offset * getListCount()));
   }
 
-  public Iterator iterator(int from, int to) {
-    return new Iterator(myStorage.iterator(from * getListCount(), to * getListCount()));
+  public Iterator listIterator(int from, int to) {
+    return new Iterator(myStorage.listIterator(from * getListCount(), to * getListCount()));
   }
 
   public void removeAt(int offset) {

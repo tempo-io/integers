@@ -32,7 +32,7 @@ public class ParallelIntListTests extends TestCase {
     myList.insert(1, 2, 3);
     checkStorage(0, 1, 2, 3);
 
-    ParallelIntList.Iterator it = myList.iterator(0);
+    ParallelIntList.Iterator it = myList.listIterator(0);
     int[] vals = new int[2];
     it.next(vals);
     CHECK.order(vals, 0, 1);
@@ -54,7 +54,7 @@ public class ParallelIntListTests extends TestCase {
     it.set(0, 1, 3);
     checkStorage(0, 1, 2, 3);
 
-    it = myList.iterator(1);
+    it = myList.listIterator(1);
     it.next(null);
     it.set(0, 0, 20);
     checkStorage(0, 1, 20, 3);
@@ -68,7 +68,7 @@ public class ParallelIntListTests extends TestCase {
     myList.insert(4, 30, 40);
     checkStorage(-2, -3, 1, 2, 10, 20, 3, 4, 30, 40);
 
-    ParallelIntList.Iterator it = myList.iterator(1);
+    ParallelIntList.Iterator it = myList.listIterator(1);
     it.next(null);
     int[] vals = new int[2];
     it.get(0, vals);
@@ -87,7 +87,7 @@ public class ParallelIntListTests extends TestCase {
     it.get(0, vals);
     CHECK.order(vals, 3, 4);
 
-    it = myList.iterator(0);
+    it = myList.listIterator(0);
     it.next(null);
     it.get(0, vals);
     CHECK.order(vals, -2, -3);
@@ -106,6 +106,6 @@ public class ParallelIntListTests extends TestCase {
   }
 
   private void checkStorage(int ... expected) {
-    CHECK.order(myStorage.iterator(), expected);
+    CHECK.order(myStorage.listIterator(), expected);
   }
 }

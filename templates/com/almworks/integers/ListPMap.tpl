@@ -175,18 +175,18 @@ public class List#E#Map {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
-    for (Parallel#E#List.Iterator ii = myMap.iterator(from, to); ii.hasNext();) {
+    for (Parallel#E#List.Iterator ii = myMap.listIterator(from, to); ii.hasNext();) {
       ii.next(null);
       ii.set(0, 0, (#e#)(ii.get(0, 0) + increment));
     }
   }
 
   public #E#ListIterator keysIterator(int from, int to) {
-    return myKeys.iterator(from, to);
+    return myKeys.listIterator(from, to);
   }
 
   public #E#ListIterator valuesIterator(int from, int to) {
-    return myValues.iterator(from, to);
+    return myValues.listIterator(from, to);
   }
 
   public void clear() {
@@ -199,7 +199,7 @@ public class List#E#Map {
     private boolean myEntry;
 
     public Iterator(int from, int to) {
-      ii = myMap.iterator(from, to);
+      ii = myMap.listIterator(from, to);
     }
 
     public boolean hasNext() {

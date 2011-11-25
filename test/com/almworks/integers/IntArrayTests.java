@@ -37,7 +37,7 @@ public class IntArrayTests extends NativeIntFixture {
     int COUNT = 10000;
     for (int i = 0; i < COUNT; i++)
       array.add(COUNT - i);
-    WritableIntListIterator ii = array.iterator();
+    WritableIntListIterator ii = array.listIterator();
     int x = 10000;
     while (ii.hasNext()) {
       assertEquals(x, ii.nextValue());
@@ -108,7 +108,7 @@ public class IntArrayTests extends NativeIntFixture {
   public void testIteratorRemoveRange() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
-    WritableIntListIterator ii = array.iterator(100, 600);
+    WritableIntListIterator ii = array.listIterator(100, 600);
     for (int i = 0; i < 10; i++)
       ii.nextValue();
     ii.removeRange(-9, 1);
@@ -128,7 +128,7 @@ public class IntArrayTests extends NativeIntFixture {
   public void testIteratorRemoveFromEnd() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
-    WritableIntListIterator ii = array.iterator(8191, 9192);
+    WritableIntListIterator ii = array.listIterator(8191, 9192);
     ii.nextValue();
     while (ii.hasNext()) {
       ii.nextValue();
@@ -140,7 +140,7 @@ public class IntArrayTests extends NativeIntFixture {
   public void testIteratorSkip() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
-    WritableIntListIterator ii = array.iterator();
+    WritableIntListIterator ii = array.listIterator();
     for (int i = 0; i < 100; i++) {
       assertTrue(ii.hasNext());
       assertEquals(100 * i, ii.nextValue());
@@ -199,9 +199,9 @@ public class IntArrayTests extends NativeIntFixture {
   public void testRetain() {
     array.addAll(1, 5, 2, 4, 3);
     array.retain(IntArray.create(3, 1, 2));
-    CHECK.order(array.iterator(), 1, 2, 3);
+    CHECK.order(array.listIterator(), 1, 2, 3);
     array.retain(IntArray.create(2));
-    CHECK.order(array.iterator(), 2);
+    CHECK.order(array.listIterator(), 2);
   }
 
   public void testFromCollection() {

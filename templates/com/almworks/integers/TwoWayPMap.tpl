@@ -391,7 +391,7 @@ public class TwoWay#E#Map {
     boolean keysSorted = true;
     int ki = 0;
     // Remove mappings and keys; values will be removed after we fix the rest of the index map
-    for (#E#ListIterator kIt = keys.iterator(); kIt.hasNext(); ) {
+    for (#E#ListIterator kIt = keys.listIterator(); kIt.hasNext(); ) {
       #e# k = kIt.nextValue();
       keysSorted &= k > lastK;
       lastK = k;
