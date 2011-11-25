@@ -29,7 +29,7 @@ public abstract class Abstract#E#List implements #E#List {
 
   public StringBuilder toString(StringBuilder builder) {
     builder.append(IntegersUtils.substringAfterLast(getClass().getName(), ".")).append(" ").append(size()).append(" [");
-    #E#Iterator ii = listIterator();
+    #E#Iterator ii = iterator();
     String sep = "";
     while (ii.hasNext()) {
       builder.append(sep).append(ii.nextValue());
@@ -43,22 +43,18 @@ public abstract class Abstract#E#List implements #E#List {
     return toString(new StringBuilder()).toString();
   }
 
-  public #E#Iterator iterator() {
-    return listIterator();
+  @NotNull
+  public #E#ListIterator iterator() {
+    return iterator(0, size());
   }
 
   @NotNull
-  public #E#ListIterator listIterator() {
-    return listIterator(0, size());
+  public #E#ListIterator iterator(int from) {
+    return iterator(from, size());
   }
 
   @NotNull
-  public #E#ListIterator listIterator(int from) {
-    return listIterator(from, size());
-  }
-
-  @NotNull
-  public #E#ListIterator listIterator(int from, int to) {
+  public #E#ListIterator iterator(int from, int to) {
     if (from >= to) {
       assert from == to : from + " " + to;
       return #E#Iterator.EMPTY;
@@ -68,7 +64,7 @@ public abstract class Abstract#E#List implements #E#List {
 
   public int indexOf(#e# value) {
     int i = 0;
-    for (#E#Iterator ii = listIterator(); ii.hasNext(); i++)
+    for (#E#Iterator ii = iterator(); ii.hasNext(); i++)
       if (ii.nextValue() == value)
         return i;
     return -1;
@@ -80,7 +76,7 @@ public abstract class Abstract#E#List implements #E#List {
 
   public #e#[] toArray(int startIndex, #e#[] dest, int destOffset, int length) {
     if (length > 0) {
-      #E#Iterator ii = listIterator(startIndex, size());
+      #E#Iterator ii = iterator(startIndex, size());
       int e = destOffset + length;
       for (int i = destOffset; i < e; i++) {
         assert ii.hasNext();
@@ -114,8 +110,8 @@ public abstract class Abstract#E#List implements #E#List {
     #E#List that = (#E#List) o;
     if (size() != that.size())
       return false;
-    #E#Iterator ii1 = listIterator();
-    #E#Iterator ii2 = that.listIterator();
+    #E#Iterator ii1 = iterator();
+    #E#Iterator ii2 = that.iterator();
     while (ii1.hasNext() && ii2.hasNext()) {
       if (ii1.nextValue() != ii2.nextValue())
         return false;
@@ -125,7 +121,7 @@ public abstract class Abstract#E#List implements #E#List {
 
   public int hashCode() {
     int hashCode = 1;
-    #E#Iterator ii = listIterator();
+    #E#Iterator ii = iterator();
     while (ii.hasNext()) {
       hashCode = 31 * hashCode + (int)ii.nextValue();
     }
@@ -140,7 +136,7 @@ public abstract class Abstract#E#List implements #E#List {
   }
 
   protected boolean checkSorted(boolean checkUnique) {
-    #E#Iterator it = listIterator();
+    #E#Iterator it = iterator();
     if (!it.hasNext()) return true;
     #e# prev = it.nextValue();
     while (it.hasNext()) {
@@ -257,7 +253,7 @@ public abstract class Abstract#E#List implements #E#List {
   @Override
   public List<#EW#> toList() {
     List<#EW#> list = IntegersUtils.arrayList();
-    for(#E#Iterator ii = listIterator(); ii.hasNext();) {
+    for(#E#Iterator ii = iterator(); ii.hasNext();) {
       list.add(ii.nextValue());
     }
     return list;

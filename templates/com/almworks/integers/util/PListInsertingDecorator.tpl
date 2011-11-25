@@ -55,7 +55,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
   }
 
   @NotNull
-  public #E#ListIterator listIterator(int from, int to) {
+  public #E#ListIterator iterator(int from, int to) {
     return new LocalIterator(from, to);
   }
 
@@ -123,7 +123,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
 
 
   private class LocalIterator extends Abstract#E#ListIndexIterator {
-    private #E#Iterator myBaseIterator = base().listIterator();
+    private #E#Iterator myBaseIterator = base().iterator();
     private Int#E#Map.Iterator myInsertedIterator;
     private int myNextInsert = -1;
 
@@ -136,7 +136,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
       int idx = findInsertion(from);
       if (idx < 0)
         idx = -idx - 1;
-      myBaseIterator = base().listIterator(from - idx);
+      myBaseIterator = base().iterator(from - idx);
       myInsertedIterator = myInserted.iterator(idx);
       advanceToNextInsert();
     }

@@ -115,7 +115,7 @@ public class TwoWayIntMapTests extends TestCase {
 
   private void checkMapValsEqualKeysMod(int prime) {
 /*
-    for (IntIterator i = map.getKeys().listIterator(); i.hasNext(); ) {
+    for (IntIterator i = map.getKeys().iterator(); i.hasNext(); ) {
       int key = i.nextValue();
       assertEquals("key=" + key + " | prime=" + prime, key % prime, map.get(key));
     }
@@ -127,7 +127,7 @@ public class TwoWayIntMapTests extends TestCase {
     StringBuilder expected = new StringBuilder();
     StringBuilder actual = new StringBuilder();
     boolean fail = false;
-    for (IntIterator i = map.getKeys().listIterator(); i.hasNext(); ) {
+    for (IntIterator i = map.getKeys().iterator(); i.hasNext(); ) {
       int key = i.nextValue();
       int exp = f.invoke(key);
       int act = map.get(key);
@@ -211,7 +211,7 @@ public class TwoWayIntMapTests extends TestCase {
   private void removeDuplicates(IntArray keys) {
     for (int i = 0; i < keys.size(); ++i) {
       int k1 = keys.get(i);
-      for (WritableIntListIterator keyIt = keys.listIterator(); keyIt.hasNext(); ) {
+      for (WritableIntListIterator keyIt = keys.iterator(); keyIt.hasNext(); ) {
         int k2 = keyIt.nextValue();
         if (keyIt.lastIndex() != i && k1 == k2) keyIt.remove();
       }
@@ -304,15 +304,15 @@ public class TwoWayIntMapTests extends TestCase {
 
     toRemove = IntArray.create(-2, -1, 0, 1, 5, 6, 8, 10);
     notInMap = map.removeAll(toRemove);
-    compare.order(notInMap.listIterator(), -2, -1, 1, 10);
-    compare.order(map.getKeys().listIterator(), 7);
+    compare.order(notInMap.iterator(), -2, -1, 1, 10);
+    compare.order(map.getKeys().iterator(), 7);
     checkMapValsEqualKeysMod(3);
 
     map.clear();
     map.insertAllRo(arithmetic(0, 10), apply(swap(MOD), 3));
     notInMap = map.removeAll(IntArray.create(7, 9, 8));
     assertTrue(notInMap.isEmpty());
-    compare.order(map.getKeys().listIterator(), 0, 1, 2, 3, 4, 5, 6);
+    compare.order(map.getKeys().iterator(), 0, 1, 2, 3, 4, 5, 6);
     checkMapValsEqualKeysMod(3);
   }
 
@@ -392,7 +392,7 @@ public class TwoWayIntMapTests extends TestCase {
     IntList notInMap;
     notInMap = map.removeAllVals(IntArray.create(2, 0));
     compare.empty(notInMap.toNativeArray());
-    compare.order(map.getKeys().listIterator(), 1, 4, 7);
+    compare.order(map.getKeys().iterator(), 1, 4, 7);
     checkMapValsEqualKeysMod(3);
     map.removeAllVals(IntArray.create(1));
     assertEquals(0, map.size());
@@ -401,8 +401,8 @@ public class TwoWayIntMapTests extends TestCase {
     map.insertAllRo(IntProgression.arithmetic(0, 10, 2), apply(swap(MOD), 13));
     // Important: specify one of the values not in the map
     notInMap = map.removeAllVals(IntArray.create(6, 7, 8, 9, 10));
-    compare.order(notInMap.listIterator(), 7, 9);
-    compare.order(map.getKeys().listIterator(), 0, 2, 4, 12, 14, 16, 18);
+    compare.order(notInMap.iterator(), 7, 9);
+    compare.order(map.getKeys().iterator(), 0, 2, 4, 12, 14, 16, 18);
     checkMapValsEqualKeysMod(13);
   }
 

@@ -138,7 +138,7 @@ public class Dynamic#E#Set {
 
   public void addAll(#E#List keys) {
     int[] ps = prepareAdd(keys.size());
-    for (#E#Iterator i = keys.listIterator(); i.hasNext(); ) {
+    for (#E#Iterator i = keys.iterator(); i.hasNext(); ) {
       add0(i.nextValue(), ps);
     }
   }

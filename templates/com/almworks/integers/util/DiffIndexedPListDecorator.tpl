@@ -44,8 +44,8 @@ public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
   }
 
   @NotNull
-  public #E#ListIterator listIterator(int from, int to) {
-    IntListIterator indexIterator = myIndexes.listIterator(from, to);
+  public #E#ListIterator iterator(int from, int to) {
+    IntListIterator indexIterator = myIndexes.iterator(from, to);
     return new DiffIndexedIterator(from, indexIterator);
   }
 

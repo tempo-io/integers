@@ -280,7 +280,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
   }
 
   @NotNull
-  public Writable#E#ListIterator listIterator(int from, int to) {
+  public Writable#E#ListIterator iterator(int from, int to) {
     if (from > to || from < 0 || to > size())
       throw new IndexOutOfBoundsException(from + " " + to + " " + this);
     return new SameValuesIterator(from, to);

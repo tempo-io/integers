@@ -89,7 +89,7 @@ public class Int#E#Map {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
-    for (WritableIntListIterator it = myKeys.listIterator(from, to); it.hasNext();) it.set(0, it.nextValue() + increment);
+    for (WritableIntListIterator it = myKeys.iterator(from, to); it.hasNext();) it.set(0, it.nextValue() + increment);
   }
 
   public void setKey(int index, int key) {
@@ -137,7 +137,7 @@ public class Int#E#Map {
 
   public Iterator iterator(int from, int to) {
     checkMutatorPresence();
-    return new Iterator(myKeys.listIterator(from, to), myValues.listIterator(from, to));
+    return new Iterator(myKeys.iterator(from, to), myValues.iterator(from, to));
   }
 
   public boolean containsKey(int key) {
@@ -147,12 +147,12 @@ public class Int#E#Map {
 
   public IntListIterator keysIterator(int from, int to) {
     checkMutatorPresence();
-    return myKeys.listIterator(from, to);
+    return myKeys.iterator(from, to);
   }
 
   public #E#Iterator valuesIterator(int from, int to) {
     checkMutatorPresence();
-    return myValues.listIterator(from, to);
+    return myValues.iterator(from, to);
   }
 
   private void checkIndex(int index) {
@@ -171,7 +171,7 @@ public class Int#E#Map {
     }
     #e# currValue;
     #e# lastValue = 0;
-    for (#E#Iterator ii = myValues.listIterator(); ii.hasNext();) {
+    for (#E#Iterator ii = myValues.iterator(); ii.hasNext();) {
       currValue = ii.nextValue();
       if (currValue == lastValue) return false;
       lastValue = currValue;

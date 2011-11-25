@@ -158,7 +158,7 @@ public class #E#Functions {
   /** Returns a function that returns values from the supplied Iterable. Function argument is ignored. */
   public static #E#Function sequence(final #E#List #e#List) {
     return new #E#Function() {
-      #E#Iterator it = #e#List.listIterator();
+      #E#Iterator it = #e#List.iterator();
       @Override
       public #e# invoke(#e# a) {
         return it.nextValue();

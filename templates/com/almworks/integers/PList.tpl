@@ -106,25 +106,19 @@ public interface #E#List extends Iterable<#E#Iterator> {
   * @return iterator initially located before first element. Iterator will walk the whole list
   */
   @NotNull
-  #E#Iterator iterator();
-
-  /**
-  * @return iterator initially located before first element. Iterator will walk the whole list
-  */
-  @NotNull
-  #E#ListIterator listIterator();
+  #E#ListIterator iterator();
 
   /**
   * @return iterator initially located before element at index from. Iterator will walk till last element
   */
   @NotNull
-  #E#ListIterator listIterator(int from);
+  #E#ListIterator iterator(int from);
 
   /**
   * @return iterator initially located before element at index from and iterator will walk up to index to (exclusive)
   */
   @NotNull
-  #E#ListIterator listIterator(int from, int to);
+  #E#ListIterator iterator(int from, int to);
 
   /**
    * For a given index i, returns minimum index j, for which exactly one of the following holds:

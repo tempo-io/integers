@@ -28,7 +28,7 @@ public abstract class NativeIntFixture extends TestCase {
     }
     r.sortUnique();
     int[] expected = r.toNativeArray();
-    CHECK.order(collection.listIterator(), expected);
+    CHECK.order(collection.iterator(), expected);
   }
 
   protected void checkList(IntList collection, int[]... v) {
@@ -37,7 +37,7 @@ public abstract class NativeIntFixture extends TestCase {
       r.addAll(ints);
     }
     int[] expected = r.toNativeArray();
-    CHECK.order(collection.listIterator(), expected);
+    CHECK.order(collection.iterator(), expected);
   }
 
   protected int[] range(int from, int to) {
@@ -66,10 +66,10 @@ public abstract class NativeIntFixture extends TestCase {
       ints = IntegersUtils.EMPTY_INTS;
     CHECK.order(collection.toNativeArray(), ints);
     assertEquals(collection.size(), ints.length);
-    CHECK.order(collection.listIterator(), ints);
+    CHECK.order(collection.iterator(), ints);
     IntIterator it;
     for (int i = 0; i < ints.length; i++) {
-      it = list.listIterator();
+      it = list.iterator();
       if (i > 0) {
         if (it instanceof IntListIterator)
           ((IntListIterator) it).move(i);
@@ -79,7 +79,7 @@ public abstract class NativeIntFixture extends TestCase {
       }
       CHECK.order(it, IntegersUtils.arrayCopy(ints, i, ints.length - i));
     }
-    it = collection.listIterator();
+    it = collection.iterator();
     for (int i = 0; i < ints.length; i++) {
       int anInt = ints[i];
       assertTrue(it.hasNext());

@@ -81,7 +81,7 @@ public final class #E#SetBuilder implements Cloneable, #E#Collector {
   }
 
   public void addAll(#E#List values) {
-    addAll(values.listIterator());
+    addAll(values.iterator());
   }
 
   public void mergeFrom(#E#SetBuilder other) {

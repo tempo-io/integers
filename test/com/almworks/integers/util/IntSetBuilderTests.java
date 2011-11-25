@@ -42,7 +42,7 @@ public class IntSetBuilderTests extends NativeIntFixture {
         builder.add(v);
       }
       set.sortUnique();
-      CHECK.order(builder.toSortedCollection().listIterator(), set.toNativeArray());
+      CHECK.order(builder.toSortedCollection().iterator(), set.toNativeArray());
     }
   }
 

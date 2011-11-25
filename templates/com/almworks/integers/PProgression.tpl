@@ -57,7 +57,7 @@ public abstract class #E#Progression extends Abstract#E#List {
     }
 
     @NotNull
-    public #E#ListIterator listIterator() {
+    public #E#ListIterator iterator() {
       return new ArithmeticIterator(myInitial, myStep, myCount);
     }
 

@@ -154,7 +154,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   }
 
   @NotNull
-  public Writable#E#ListIterator listIterator(int from, int to) {
+  public Writable#E#ListIterator iterator(int from, int to) {
     if (from >= to) {
       assert from == to : from + " " + to;
       return #E#Iterator.EMPTY;
@@ -175,7 +175,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     if (count <= 0)
       return;
     doExpand(index, count);
-    for (Writable#E#ListIterator ii = listIterator(index, index + count); ii.hasNext();) {
+    for (Writable#E#ListIterator ii = iterator(index, index + count); ii.hasNext();) {
       ii.nextValue();
       ii.set(0, value);
     }
@@ -682,7 +682,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
 
   public void setRange(int from, int to, #e# value) {
     assert checkInvariants();
-    for (Writable#E#ListIterator ii = listIterator(from, to); ii.hasNext();) {
+    for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
       ii.nextValue();
       ii.set(0, value);
     }
@@ -734,7 +734,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     if (from >= to)
       return;
     checkRange(from, to);
-    for (Writable#E#ListIterator ii = listIterator(from, to); ii.hasNext();) {
+    for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
       ii.set(0, function.invoke(ii.nextValue()));
     }
     assert checkInvariants();
@@ -745,7 +745,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     if (from >= to)
       return;
     checkRange(from, to);
-    for (Writable#E#ListIterator ii = listIterator(from, to); ii.hasNext();) {
+    for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
       ii.set(0, function.invoke(ii.nextValue(), secondArgument));
     }
     assert checkInvariants();

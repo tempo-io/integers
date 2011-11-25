@@ -11,7 +11,7 @@ public class IntIteratorTests extends TestCase {
 
     public void testSimple() {
         assertContents(
-                a(1, 3, 5).listIterator(),
+                a(1, 3, 5).iterator(),
                 a(1, 3, 5));
     }
 
@@ -49,7 +49,7 @@ public class IntIteratorTests extends TestCase {
     }
 
     private void testMinus(IntArray include, IntArray exclude, IntArray difference) {
-        assertContents(new SortedIntListMinusIterator(include.listIterator(), exclude.listIterator()), difference);
+        assertContents(new SortedIntListMinusIterator(include.iterator(), exclude.iterator()), difference);
     }
 
     public void testInterEmptyArrays() {
@@ -101,7 +101,7 @@ public class IntIteratorTests extends TestCase {
     }
 
     private void testInter(IntArray array1, IntArray array2, IntArray intersection) {
-        assertContents(new SortedIntListIntersectionIterator(array1.listIterator(), array2.listIterator()), intersection);
+        assertContents(new SortedIntListIntersectionIterator(array1.iterator(), array2.iterator()), intersection);
     }
 
     private IntArray a(int... values) {
@@ -112,7 +112,7 @@ public class IntIteratorTests extends TestCase {
         int index = 0;
         while(it.hasNext()) {
             if(index >= values.size()) {
-                fail("Iterator is too long: " + s(it) + " past expected " + s(values.listIterator()));
+                fail("Iterator is too long: " + s(it) + " past expected " + s(values.iterator()));
             }
             assertEquals("Wrong value at index " + index, values.get(index), it.nextValue());
             index++;

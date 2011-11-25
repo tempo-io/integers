@@ -97,13 +97,13 @@ public class #E#ListConcatenation extends Abstract#E#List {
   }
 
   @NotNull
-  public #E#ListIterator listIterator(int from, int to) {
+  public #E#ListIterator iterator(int from, int to) {
     if (from >= to) {
       assert from == to : from + " " + to;
       return #E#Iterator.EMPTY;
     }
     // todo effective
-    return super.listIterator(from, to);
+    return super.iterator(from, to);
   }
 
   public int getSliceCount() {

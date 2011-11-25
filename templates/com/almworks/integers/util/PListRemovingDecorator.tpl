@@ -69,12 +69,12 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
   }
 
   @NotNull
-  public #E#ListIterator listIterator(int from, int to) {
+  public #E#ListIterator iterator(int from, int to) {
     return new LocalIterator(from, to);
   }
 
   public IntListIterator removedIndexIterator() {
-    return new RemovedIndexIterator(getRemovedPrepared().listIterator());
+    return new RemovedIndexIterator(getRemovedPrepared().iterator());
   }
 
   public #E#Iterator removedValueIterator() {
@@ -119,7 +119,7 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
     int i = 1;
     int last = Integer.MIN_VALUE;
     // todo apply "-i" when sortedRemoveIndexes are collected
-    for (WritableIntListIterator ii = indices.listIterator(1); ii.hasNext();) {
+    for (WritableIntListIterator ii = indices.iterator(1); ii.hasNext();) {
       int value = ii.nextValue();
       assert value > last : i + " " + last + " " + value;
       last = value;
@@ -156,7 +156,7 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
     private LocalIterator(int from, int to) {
       super(from, to);
       myNextRemoved = removedBefore(from);
-      myBaseIterator = base().listIterator(from + myNextRemoved);
+      myBaseIterator = base().iterator(from + myNextRemoved);
     }
 
     public #e# nextValue() throws ConcurrentModificationException, NoSuchElementException {
@@ -187,7 +187,7 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
       super.move(count);
       if (count != 0) {
         myNextRemoved = removedBefore(getNextIndex());
-        myBaseIterator = base().listIterator(getNextIndex() + myNextRemoved);
+        myBaseIterator = base().iterator(getNextIndex() + myNextRemoved);
       }
     }
 

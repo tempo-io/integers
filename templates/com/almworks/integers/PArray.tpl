@@ -228,7 +228,7 @@ public final class #E#Array extends AbstractWritable#E#List {
       list.toArray(0, myArray, sz, added);
       updateSize(newSize);
     } else {
-      addAll(collection.listIterator());
+      addAll(collection.iterator());
     }
   }
 
@@ -269,9 +269,9 @@ public final class #E#Array extends AbstractWritable#E#List {
     assert isUniqueSorted();
     if (size() != collection.size())
       return false;
-    #E#Iterator ownIt = listIterator();
+    #E#Iterator ownIt = iterator();
     #e# prevOther = #EW#.MIN_VALUE;
-    for (#E#Iterator it = collection.listIterator(); it.hasNext();) {
+    for (#E#Iterator it = collection.iterator(); it.hasNext();) {
       #e# own = ownIt.nextValue();
       #e# other = it.nextValue();
       if (other <= prevOther) {
