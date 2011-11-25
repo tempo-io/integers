@@ -307,7 +307,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
   }
 
   /**
-   * Due to the leading-zeros optimization, a list starting with zeros and finishing with nonzeros
+   * Due to the leading-zeros optimization, a list starting with zeros and ending with nonzeros
    * might be allocated in less amount of memory compared to its reversion.
    * Hence, calling this method on such lists might result in additional (possibly huge) memory allocation.
    */
