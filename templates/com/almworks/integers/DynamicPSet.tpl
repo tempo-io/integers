@@ -453,6 +453,7 @@ public class Dynamic#E#Set {
   }
 
   private class LURIterator extends AbstractIntIterator {
+    private int myCurrent;
     private int x = myRoot;
     private final int[] xs;
     private int xsi;
@@ -479,10 +480,14 @@ public class Dynamic#E#Set {
           l = myLeft[x];
         }
       }
-      int ret = x;
+      myCurrent = x;
       x = myRight[x];
-      myValue = ret;
-      return super.next();
+      return this;
+    }
+
+    public int value() throws IllegalStateException {
+      if (x == myRoot) throw new IllegalStateException();
+      return myCurrent;
     }
   }
 }

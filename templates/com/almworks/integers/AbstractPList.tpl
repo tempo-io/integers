@@ -64,9 +64,10 @@ public abstract class Abstract#E#List implements #E#List {
 
   public int indexOf(#e# value) {
     int i = 0;
-    for (#E#Iterator ii = iterator(); ii.hasNext(); i++)
-      if (ii.nextValue() == value)
-        return i;
+    for (#E#Iterator ii : Abstract#E#List.this) {
+      if (ii.value() == value) return i;
+      i++;
+    }
     return -1;
   }
 
@@ -253,8 +254,8 @@ public abstract class Abstract#E#List implements #E#List {
   @Override
   public List<#EW#> toList() {
     List<#EW#> list = IntegersUtils.arrayList();
-    for(#E#Iterator ii = iterator(); ii.hasNext();) {
-      list.add(ii.nextValue());
+    for(#E#Iterator ii : Abstract#E#List.this) {
+      list.add(ii.value());
     }
     return list;
   }

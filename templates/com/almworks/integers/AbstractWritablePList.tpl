@@ -113,8 +113,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   public void removeAll(#e# value) {
-    for (Writable#E#ListIterator ii = iterator(); ii.hasNext();) {
-      if (ii.nextValue() == value) {
+    for (Writable#E#ListIterator ii : AbstractWritable#E#List.this.writableListIterable()) {
+      if (ii.value() == value) {
         ii.remove();
       }
     }
@@ -150,8 +150,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
    * // todo something effective
    */
   public void removeAll(#E#List collection) {
-    for (#E#Iterator ii = collection.iterator(); ii.hasNext();)
-      removeAll(ii.nextValue());
+    for (#E#Iterator ii : collection)
+      removeAll(ii.value());
   }
 
   public void removeAll(#e#... values) {

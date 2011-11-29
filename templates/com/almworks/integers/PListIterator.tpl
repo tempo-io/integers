@@ -21,8 +21,8 @@ import java.util.NoSuchElementException;
 
 public interface #E#ListIterator extends #E#Iterator {
   /**
-   * Moves current position of the iterator relative to current position. Positive value means move to greate indexes,
-   * negative - to smaller indexes. Zero doesn't change iterator state.
+   * Moves current position of the iterator relative to current position.
+   * Positive value means move to greate indexes, negative - to smaller indexes. Zero doesn't change iterator state.
    */
   void move(int offset) throws ConcurrentModificationException, NoSuchElementException;
 
@@ -35,8 +35,10 @@ public interface #E#ListIterator extends #E#Iterator {
   #e# get(int offset) throws ConcurrentModificationException, NoSuchElementException;
 
   /**
-   * @return current position of the iterator. The index of last returned element by call to {@link #nextValue()} if iterator isn't moved.
-   * @throws NoSuchElementException if iterator isn't ever advanced ({@link #nextValue()} isn't ever called)
+   * @return current position of the iterator. The index of last returned element by call to
+   * {@link #next()} or {@link #nextValue()} if iterator isn't moved.
+   * @throws NoSuchElementException if iterator wasn't ever advanced
+   * ({@link #next()} or {@link #nextValue()} weren't ever called)
    */
   int lastIndex() throws NoSuchElementException;
 }

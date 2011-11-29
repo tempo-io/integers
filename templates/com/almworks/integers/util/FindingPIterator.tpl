@@ -43,11 +43,13 @@ public abstract class Finding#E#Iterator extends Abstract#E#Iterator {
     }
     if (!myFound)
       throw new NoSuchElementException();
-    #e# r = getNext();
     mySought = false;
     myFound = false;
-    myValue = r;
-    return super.next();
+    return this;
+  }
+
+  public #e# value() {
+    return getNext();
   }
 
   protected abstract #e# getNext();

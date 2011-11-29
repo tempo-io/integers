@@ -171,8 +171,8 @@ public class Int#E#Map {
     }
     #e# currValue;
     #e# lastValue = 0;
-    for (#E#Iterator ii = myValues.iterator(); ii.hasNext();) {
-      currValue = ii.nextValue();
+    for (#E#Iterator ii : myValues) {
+      currValue = ii.value();
       if (currValue == lastValue) return false;
       lastValue = currValue;
     }

@@ -23,8 +23,9 @@ import java.util.*;
 import static com.almworks.integers.IntegersUtils.EMPTY_#EC#S;
 
 public class #E#Collections {
-  public static #e#[] toNativeArray(#E#List #e#List) {
-    return toNativeArray(#e#List.iterator());
+  public static #e#[] toNativeArray(#E#Iterable iterable) {
+    if (iterable instanceof #E#List) return ((#E#List) iterable).toNativeArray();
+    return toNativeArray(iterable.iterator());
   }
 
   public static #e#[] toNativeArray(#E#Iterator it) {
@@ -34,18 +35,21 @@ public class #E#Collections {
     return array.toNativeArray();
   }
 
-  public static #e#[] toSortedNativeArray(#E#List #e#List) {
-    #e#[] array = toNativeArray(#e#List);
+  public static #e#[] toSortedNativeArray(#E#Iterable iterable) {
+    #e#[] array = toNativeArray(iterable);
     Arrays.sort(array);
     return array;
   }
 
-  public static #E#List toSortedUnique(#E#List values) {
+  public static #E#List toSortedUnique(#E#Iterable values) {
     return toSorted(true, values);
   }
 
-  public static #E#List toSorted(boolean unique, #E#List values) {
-    if ((unique && values.isUniqueSorted()) || (!unique && values.isSorted())) return values;
+  public static #E#List toSorted(boolean unique, #E#Iterable values) {
+    if (values instanceof #E#List) {
+      #E#List list = (#E#List) values;
+      if ((unique && list.isUniqueSorted()) || (!unique && list.isSorted())) return list;
+    }
     #e#[] array = toNativeArray(values.iterator());
     if (array.length == 0) return #E#List.EMPTY;
     Arrays.sort(array);
@@ -269,8 +273,8 @@ public class #E#Collections {
     int szb = b.size();
     #e# v;
     boolean add;
-    for (#E#ListIterator iiw = intersectWith.iterator(); iiw.hasNext(); ) {
-      v = iiw.nextValue();
+    for (#E#Iterator iiw : intersectWith) {
+      v = iiw.value();
       add = false;
       ia = a.binarySearch(v, ia, sza);
       if (ia >= 0) {
@@ -325,8 +329,8 @@ public class #E#Collections {
     int rangeStart = -1;
     int rangeFinish = -2;
     int diff = 0;
-    for (IntIterator it = indexes.iterator(); it.hasNext(); ) {
-      int ind = it.nextValue();
+    for (IntIterator it : indexes) {
+      int ind = it.value();
       if (rangeFinish < 0) {
         rangeStart = ind;
       } else if (ind != rangeFinish) {

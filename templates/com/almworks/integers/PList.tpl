@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public interface #E#List extends Iterable<#E#Iterator> {
+public interface #E#List extends #E#Iterable {
   #E#List EMPTY = new #E#Array(EMPTY_#EC#S);
 
   /**

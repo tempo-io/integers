@@ -20,6 +20,9 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+* @see #E#Iterable
+*/
 public interface #E#Iterator extends Iterator<#E#Iterator> {
   /**
   * Constant value for empty Iterators
@@ -27,11 +30,15 @@ public interface #E#Iterator extends Iterator<#E#Iterator> {
   Writable#E#ListIterator EMPTY = new Empty#E#Iterator();
 
   /**
-   * @return true next call to {@link #nextValue()} won't throw NoSuchElementException
+   * @return true next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
    */
   boolean hasNext() throws ConcurrentModificationException;
 
-  #e# value();
+  /**
+   * @throws NoSuchElementException if there is no next element and iterator has reached its end or if iterator
+   * wasn't ever advanced ({@link #next()} or {@link #nextValue()} weren't ever called)
+   */
+  #e# value() throws NoSuchElementException;
 
   /**
   * @return next element and advances iterator.

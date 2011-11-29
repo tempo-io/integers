@@ -781,6 +781,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     private final int myFrom;
     private int myTo;
     private int myNext;
+    private #e# myCurrent;
 
     /**
      * The segment of the current value
@@ -828,14 +829,17 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
         throw new NoSuchElementException(String.valueOf(this));
       if (mySegment == null)
         mySegment = mySegments.segments[mySegmentIndex];
-      #e# r = mySegment.data[myOffset];
+      myCurrent = mySegment.data[myOffset];
       myNext++;
       myOffset++;
       adjustOffset();
       assert checkIterator();
-      myValue = r;
-      myIterated = true;
       return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+    if (myNext <= myFrom) throw new NoSuchElementException();
+      return myCurrent;
     }
 
     private void adjustOffset() {
@@ -878,8 +882,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public int lastIndex() {
-      if (myNext <= myFrom)
-        throw new NoSuchElementException();
+      if (myNext <= myFrom) throw new NoSuchElementException();
       return myNext - 1;
     }
 
@@ -929,6 +932,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       assert checkIterator();
     }
 
+    @Override
     public void remove() throws NoSuchElementException, ConcurrentModificationException {
       assert checkIterator();
       checkMod();

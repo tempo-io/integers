@@ -67,12 +67,14 @@ public final class #E#Array extends AbstractWritable#E#List {
     return new #E#Array(#E#Collections.arrayCopy(array, 0, length));
   }
 
-  public static #E#Array copy(@Nullable #E#List #e#List) {
-    if (#e#List == null) return new #E#Array();
-    if (#e#List instanceof #E#Array) {
-      #E#Array other = (#E#Array) #e#List;
+  public static #E#Array copy(@Nullable #E#Iterable iterable) {
+    if (iterable == null) return new #E#Array();
+    if (iterable instanceof #E#Array) {
+      #E#Array other = (#E#Array) iterable;
       return copy(other.myArray, other.size());
-    } else return new #E#Array(#e#List);
+    } else if (iterable instanceof #E#List)
+      return new #E#Array((#E#List) iterable);
+    else return new #E#Array(iterable.iterator());
   }
 
   public static #E#Array create(#e# ... values) {
@@ -271,9 +273,9 @@ public final class #E#Array extends AbstractWritable#E#List {
       return false;
     #E#Iterator ownIt = iterator();
     #e# prevOther = #EW#.MIN_VALUE;
-    for (#E#Iterator it = collection.iterator(); it.hasNext();) {
+    for (#E#Iterator it : collection) {
       #e# own = ownIt.nextValue();
-      #e# other = it.nextValue();
+      #e# other = it.value();
       if (other <= prevOther) {
         assert false : collection; // Not sorted
         return false;

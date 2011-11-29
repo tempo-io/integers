@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 public class Indexed#E#ListIterator extends Abstract#E#Iterator implements #E#ListIterator {
   private final IntListIterator myIndexes;
   private final #E#List mySource;
+  private boolean myIterated;
 
   public Indexed#E#ListIterator(#E#List source, IntListIterator indexIterator) {
     mySource = source;
@@ -33,9 +34,14 @@ public class Indexed#E#ListIterator extends Abstract#E#Iterator implements #E#Li
   }
 
   public #E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-    myValue = mySource.get(myIndexes.nextValue());
+    myIndexes.next();
     myIterated = true;
     return this;
+  }
+
+  public #e# value() throws NoSuchElementException {
+    if (!myIterated) throw new NoSuchElementException();
+    return mySource.get(myIndexes.value());
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
@@ -47,6 +53,7 @@ public class Indexed#E#ListIterator extends Abstract#E#Iterator implements #E#Li
   }
 
   public int lastIndex() {
+    if (!myIterated) throw new NoSuchElementException();
     return myIndexes.lastIndex();
   }
 }

@@ -19,18 +19,6 @@ package com.almworks.integers;
 import java.util.NoSuchElementException;
 
 public abstract class Abstract#E#Iterator implements #E#Iterator {
-  protected #e# myValue;
-  protected boolean myIterated;
-
-  public #E#Iterator next() {
-    myIterated = true;
-    return this;
-  }
-
-  public #e# value() throws IllegalStateException {
-      if (!myIterated) throw new IllegalStateException();
-      return myValue;
-  }
 
   public #e# nextValue() {
     next();
@@ -42,6 +30,8 @@ public abstract class Abstract#E#Iterator implements #E#Iterator {
   }
 
   class Single extends Abstract#E#Iterator {
+    private #e# myValue;
+    private boolean myIterated;
 
     public Single(#e# value) {
       myValue = value;
@@ -53,7 +43,12 @@ public abstract class Abstract#E#Iterator implements #E#Iterator {
 
     public #E#Iterator next() throws NoSuchElementException {
       if (myIterated) throw new NoSuchElementException();
-      return super.next();
+      myIterated = true;
+      return this;
+    }
+
+    public #e# value() {
+      return myValue;
     }
   }
 }

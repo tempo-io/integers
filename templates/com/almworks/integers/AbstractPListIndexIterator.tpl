@@ -39,11 +39,13 @@ public abstract class Abstract#E#ListIndexIterator extends Abstract#E#Iterator i
 
   public #E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
     if (myNext >= myTo) throw new NoSuchElementException();
-    #e# r = absget(myNext);
     myNext++;
-    myValue = r;
-    myIterated = true;
     return this;
+  }
+
+  public #e# value() throws NoSuchElementException {
+    if (myNext <= myFrom) throw new NoSuchElementException();
+    return absget(myNext-1);
   }
 
   public void move(int count) throws ConcurrentModificationException, NoSuchElementException {

@@ -23,6 +23,7 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 class RemovedIndexIterator extends AbstractIntIterator implements IntListIterator  {
+  private boolean myIterated;
   private final IntListIterator myRemovedLocations;
 
   RemovedIndexIterator(IntListIterator removedLocations) {
@@ -34,10 +35,14 @@ class RemovedIndexIterator extends AbstractIntIterator implements IntListIterato
   }
 
   public IntListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-    int value = myRemovedLocations.nextValue();
-    myValue = value + myRemovedLocations.lastIndex();
-    myIterated= true;
+    myRemovedLocations.next();
+    myIterated = true;
     return this;
+  }
+
+  public int value() throws NoSuchElementException {
+    if (!myIterated) throw new NoSuchElementException();
+    return myRemovedLocations.value() + myRemovedLocations.lastIndex();
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {

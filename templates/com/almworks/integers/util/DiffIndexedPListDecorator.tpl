@@ -59,6 +59,7 @@ public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
 
   private class DiffIndexedIterator extends Abstract#E#Iterator implements #E#ListIterator {
     private int myNext;
+    private boolean myIterated;
     private final IntListIterator myIndexIterator;
 
     public DiffIndexedIterator(int from, IntListIterator indexIterator) {
@@ -77,6 +78,7 @@ public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
     }
 
     public int lastIndex() {
+      if (!myIterated) throw new NoSuchElementException();
       return myIndexIterator.lastIndex();
     }
 
@@ -85,11 +87,16 @@ public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
     }
 
     public #E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      int index = myIndexIterator.nextValue() + myNext;
+      myIndexIterator.next();
       myNext++;
-      myValue = mySource.get(index);
       myIterated = true;
       return this;
+    }
+
+    public #e# value() throws IllegalStateException {
+      if (!myIterated) throw new NoSuchElementException();
+      int index = myIndexIterator.value() + myNext - 1;
+      return mySource.get(index);
     }
   }
 }

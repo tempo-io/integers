@@ -28,6 +28,7 @@ public class Empty#E#Iterator extends Abstract#E#Iterator implements Writable#E#
     throw new NoSuchElementException();
   }
 
+  @Override
   public void remove() throws NoSuchElementException, ConcurrentModificationException {
     throw new NoSuchElementException();
   }
@@ -37,6 +38,10 @@ public class Empty#E#Iterator extends Abstract#E#Iterator implements Writable#E#
   }
 
   public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    throw new NoSuchElementException();
+  }
+
+  public #e# value() throws NoSuchElementException {
     throw new NoSuchElementException();
   }
 
