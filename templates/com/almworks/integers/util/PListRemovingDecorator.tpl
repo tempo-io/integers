@@ -152,6 +152,7 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
   private class LocalIterator extends Abstract#E#ListIndexIterator {
     private int myNextRemoved;
     private #E#ListIterator myBaseIterator;
+    private #e# myValue;
 
     private LocalIterator(int from, int to) {
       super(from, to);
@@ -159,11 +160,11 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
       myBaseIterator = base().iterator(from + myNextRemoved);
     }
 
-    public #e# nextValue() throws ConcurrentModificationException, NoSuchElementException {
+    public #E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       setNext(getNextIndex() + 1);
-      #e# value = myBaseIterator.nextValue();
+      myValue = myBaseIterator.nextValue();
       IntList removedPrepared = getRemovedPrepared();
       int rs = removedPrepared.size();
       if (myNextRemoved < rs) {
@@ -175,7 +176,13 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
           myNextRemoved = nr;
         }
       }
-      return value;
+      return this;
+    }
+
+    public #e# value() {
+      if (getNextIndex() <= getFrom())
+        throw new NoSuchElementException();
+      return myValue;
     }
 
     public boolean hasNext() {

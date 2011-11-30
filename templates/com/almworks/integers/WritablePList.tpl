@@ -32,10 +32,9 @@ public interface Writable#E#List extends #E#List, #E#Collector {
   /**
    * Use this method in FOR-EACH statement if you want to iterate using Writable#E#ListIterator.
    * Example:<br>
-   *   {@code for {WritableLongListIterator i: myList.writableListIterable()} ...}
+   *   {@code for {Writable#E#ListIterator i: myList.writableListIterable()} ...}
    */
-  @NotNull
-  Writable#E#ListIterableFromIterator writableListIterable();
+  @NotNull Iterable<Writable#E#ListIterator> writableListIterable();
 
   void removeRange(int from, int to);
 

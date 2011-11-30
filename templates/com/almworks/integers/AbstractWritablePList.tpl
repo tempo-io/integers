@@ -68,8 +68,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     return new WritableIndexIterator(from, to);
   }
 
-  public Writable#E#ListIterableFromIterator writableListIterable() {
-    return new Writable#E#ListIterableFromIterator(iterator());
+  @NotNull public Iterable<Writable#E#ListIterator> writableListIterable() {
+    return #E#Iterables.fromWritableListIterator(iterator());
   }
 
   public void addAll(#E#List values) {
@@ -113,7 +113,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   public void removeAll(#e# value) {
-    for (Writable#E#ListIterator ii : AbstractWritable#E#List.this.writableListIterable()) {
+    for (Writable#E#ListIterator ii : writableListIterable()) {
       if (ii.value() == value) {
         ii.remove();
       }
@@ -315,14 +315,19 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
       return super.get(relativeOffset);
     }
 
-    public int lastIndex() {
+    public int index() throws NoSuchElementException {
       checkMod();
-      return super.lastIndex();
+      return super.index();
     }
 
-    public #e# nextValue() throws ConcurrentModificationException, NoSuchElementException {
+    public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
-      return super.nextValue();
+      return (Writable#E#ListIterator)super.next();
+    }
+
+    public #e# value() throws ConcurrentModificationException, NoSuchElementException {
+      checkMod();
+      return super.value();
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {

@@ -36,7 +36,7 @@ public interface #E#Iterator extends Iterator<#E#Iterator> {
 
   /**
    * @throws NoSuchElementException if there is no next element and iterator has reached its end or if iterator
-   * wasn't ever advanced ({@link #next()} or {@link #nextValue()} weren't ever called)
+   * wasn't ever advanced ({@link #next()} or {@link #nextValue()} have never been called)
    */
   #e# value() throws NoSuchElementException;
 

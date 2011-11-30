@@ -881,7 +881,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return seg.data[off];
     }
 
-    public int lastIndex() {
+    public int index() throws NoSuchElementException {
       if (myNext <= myFrom) throw new NoSuchElementException();
       return myNext - 1;
     }

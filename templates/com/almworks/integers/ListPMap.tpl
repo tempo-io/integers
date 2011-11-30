@@ -206,7 +206,7 @@ public class List#E#Map {
       return ii.hasNext();
     }
 
-    public void nextValue() {
+    public void next() {
       myEntry = false;
       ii.next(myKeyValue);
       myEntry = true;

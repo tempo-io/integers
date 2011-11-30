@@ -156,18 +156,24 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
       return r;
     }
 
-    public #e# nextValue() {
+    public #E#ListIterator next() throws NoSuchElementException {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
-      #e# r;
-      if (myNextInsert >= 0 && myNextInsert == getNextIndex()) {
-        r = myInsertedIterator.value();
+      if (myNextInsert >= 0 && myNextInsert == getNextIndex()-1)
         advanceToNextInsert();
-      } else {
-        r = myBaseIterator.nextValue();
-      }
+      else if (myBaseIterator.hasNext())
+        myBaseIterator.next();
       setNext(getNextIndex()+1);
-      return r;
+      return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+      if (getNextIndex() <= getFrom())
+        throw new NoSuchElementException();
+      if (myNextInsert >= 0 && myNextInsert == getNextIndex()-1)
+        return myInsertedIterator.value();
+      else
+        return myBaseIterator.value();
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {

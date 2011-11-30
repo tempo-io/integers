@@ -77,9 +77,9 @@ public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
       return mySource.get(index + myNext + offset - 1);
     }
 
-    public int lastIndex() {
+    public int index() throws NoSuchElementException {
       if (!myIterated) throw new NoSuchElementException();
-      return myIndexIterator.lastIndex();
+      return myIndexIterator.index();
     }
 
     public boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {

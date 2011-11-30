@@ -53,7 +53,7 @@ public class Empty#E#Iterator extends Abstract#E#Iterator implements Writable#E#
     throw new NoSuchElementException();
   }
 
-  public int lastIndex() {
-    return -1;
+  public int index() throws NoSuchElementException {
+    throw new NoSuchElementException();
   }
 }

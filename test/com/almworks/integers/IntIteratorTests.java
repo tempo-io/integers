@@ -1,6 +1,8 @@
 package com.almworks.integers;
 
 import com.almworks.integers.optimized.SameValuesIntList;
+import com.almworks.integers.util.IntListInsertingDecorator;
+import com.almworks.integers.util.ReadonlyIntListRemovingDecorator;
 import com.almworks.integers.util.SortedIntListIntersectionIterator;
 import junit.framework.TestCase;
 import com.almworks.integers.util.SortedIntListMinusIterator;
@@ -139,19 +141,45 @@ public class IntIteratorTests extends TestCase {
       int b = i.value();
     }
     
-    SameValuesIntList b, refList, refList2;
+    SameValuesIntList result, expected, source;
 
-    refList2 = new SameValuesIntList();
-    refList2.addAll(1,1,1,2,2,3,3,3,3);
+    source = new SameValuesIntList();
+    source.addAll(1,1,1,2,2,3,3,3,3);
 
-    refList = new SameValuesIntList();
-    refList.addAll(1,1,1,2,2,3,3,3,3);
-    b = new SameValuesIntList();
-    for (WritableIntListIterator i: refList2.writableListIterable()) {
-      b.add(i.value());
+    expected = new SameValuesIntList();
+    expected.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
+    result = new SameValuesIntList();
+    for (WritableIntListIterator i: source.writableListIterable()) {
+      result.add(i.value());
       i.set(0, 3);
     }
-    assertEquals(b, refList);
+    assertEquals(expected, result);
+
+    source.clear();
+    source.addAll(8,9);
+    expected.clear();
+    expected.addAll(8,9,10,13,15);
+    result.clear();
+    IntListInsertingDecorator tst = new IntListInsertingDecorator(source);
+    tst.insert(2,10);
+    tst.insert(3,13);
+    tst.insert(4,15);
+    for (IntIterator i : tst) {
+      result.add(i.value());
+    }
+    assertEquals(expected, result);
+
+    source.clear();
+    source.addAll(10,13,15,14,11,12,16,17,18);
+    expected.clear();
+    expected.addAll(10,15,14,12,16,18);
+    result.clear();
+    ReadonlyIntListRemovingDecorator tst2 =
+        ReadonlyIntListRemovingDecorator.createFromPrepared(source, new IntArray(new int[]{1,3,5}));
+    for (IntIterator i : tst2) {
+      result.add(i.value());
+    }
+    assertEquals(expected, result);
 
   }
 }

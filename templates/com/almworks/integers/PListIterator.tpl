@@ -35,10 +35,10 @@ public interface #E#ListIterator extends #E#Iterator {
   #e# get(int offset) throws ConcurrentModificationException, NoSuchElementException;
 
   /**
-   * @return current position of the iterator. The index of last returned element by call to
-   * {@link #next()} or {@link #nextValue()} if iterator isn't moved.
-   * @throws NoSuchElementException if iterator wasn't ever advanced
+   * @return The current position of the iterator and the index of an element returned by {@link #value()}.
+   * <br>{@code move(p)} would change index by {@code p}, {@link #next()} and {@link #nextValue()} would change it by 1.
+   * @throws NoSuchElementException if iterator has never been advanced
    * ({@link #next()} or {@link #nextValue()} weren't ever called)
    */
-  int lastIndex() throws NoSuchElementException;
+  int index() throws NoSuchElementException;
 }

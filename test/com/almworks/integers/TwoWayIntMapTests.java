@@ -213,7 +213,7 @@ public class TwoWayIntMapTests extends TestCase {
       int k1 = keys.get(i);
       for (WritableIntListIterator keyIt : keys.writableListIterable()) {
         int k2 = keyIt.value();
-        if (keyIt.lastIndex() != i && k1 == k2) keyIt.remove();
+        if (keyIt.index() != i && k1 == k2) keyIt.remove();
       }
     }
   }

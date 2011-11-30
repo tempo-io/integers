@@ -52,8 +52,8 @@ public class Indexed#E#ListIterator extends Abstract#E#Iterator implements #E#Li
     return mySource.get(myIndexes.get(relativeOffset));
   }
 
-  public int lastIndex() {
+  public int index() throws NoSuchElementException {
     if (!myIterated) throw new NoSuchElementException();
-    return myIndexes.lastIndex();
+    return myIndexes.index();
   }
 }

@@ -62,7 +62,7 @@ public abstract class Abstract#E#ListIndexIterator extends Abstract#E#Iterator i
     return absget(idx);
   }
 
-  public int lastIndex() {
+  public int index() throws NoSuchElementException {
     if (myNext <= myFrom)
       throw new NoSuchElementException();
     return myNext - 1;

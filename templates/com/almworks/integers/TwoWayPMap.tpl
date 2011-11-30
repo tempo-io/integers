@@ -398,7 +398,7 @@ public class TwoWay#E#Map {
       if (!keysSorted) ki = 0;
       ki = myKeys.binarySearch(k, ki, myKeys.size());
       if (ki < 0) {
-        if (!keys.subList(0, kIt.lastIndex()).contains(k))
+        if (!keys.subList(0, kIt.index()).contains(k))
           (notInMap == null ? notInMap = new #E#Array() : notInMap).add(k);
         ki = -ki - 1;
       } else {

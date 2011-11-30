@@ -42,7 +42,7 @@ class RemovedIndexIterator extends AbstractIntIterator implements IntListIterato
 
   public int value() throws NoSuchElementException {
     if (!myIterated) throw new NoSuchElementException();
-    return myRemovedLocations.value() + myRemovedLocations.lastIndex();
+    return myRemovedLocations.value() + myRemovedLocations.index();
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
@@ -51,11 +51,11 @@ class RemovedIndexIterator extends AbstractIntIterator implements IntListIterato
 
   public int get(int relativeOffset) throws NoSuchElementException {
     int value = myRemovedLocations.get(relativeOffset);
-    return value + myRemovedLocations.lastIndex() + relativeOffset;
+    return value + myRemovedLocations.index() + relativeOffset;
   }
 
-  public int lastIndex() {
-    return myRemovedLocations.lastIndex();
+  public int index() {
+    return myRemovedLocations.index();
   }
 
 }
