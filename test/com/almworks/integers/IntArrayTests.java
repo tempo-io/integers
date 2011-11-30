@@ -37,10 +37,9 @@ public class IntArrayTests extends NativeIntFixture {
     int COUNT = 10000;
     for (int i = 0; i < COUNT; i++)
       array.add(COUNT - i);
-    WritableIntListIterator ii = array.iterator();
     int x = 10000;
-    while (ii.hasNext()) {
-      assertEquals(x, ii.nextValue());
+    for (WritableIntListIterator ii : array.writableListIterable()) {
+      assertEquals(x, ii.value());
       assertEquals(x, ii.get(0));
       if (x > 1)
         assertEquals(x - 1, ii.get(1));

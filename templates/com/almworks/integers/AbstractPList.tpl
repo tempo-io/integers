@@ -29,10 +29,9 @@ public abstract class Abstract#E#List implements #E#List {
 
   public StringBuilder toString(StringBuilder builder) {
     builder.append(IntegersUtils.substringAfterLast(getClass().getName(), ".")).append(" ").append(size()).append(" [");
-    #E#Iterator ii = iterator();
     String sep = "";
-    while (ii.hasNext()) {
-      builder.append(sep).append(ii.nextValue());
+    for  (#E#Iterator ii : this) {
+      builder.append(sep).append(ii.value());
       sep = ",";
     }
     builder.append("]");
@@ -122,9 +121,8 @@ public abstract class Abstract#E#List implements #E#List {
 
   public int hashCode() {
     int hashCode = 1;
-    #E#Iterator ii = iterator();
-    while (ii.hasNext()) {
-      hashCode = 31 * hashCode + (int)ii.nextValue();
+    for (#E#Iterator ii : this) {
+      hashCode = 31 * hashCode + (int)ii.value();
     }
     return hashCode;
   }
