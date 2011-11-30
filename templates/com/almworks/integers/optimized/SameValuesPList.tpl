@@ -429,7 +429,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       } else myNextChangeIndex = size();
     }
 
-    public #e# nextValue() throws ConcurrentModificationException, NoSuchElementException {
+    public WritableIndexIterator next() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
@@ -438,6 +438,12 @@ public class SameValues#E#List extends AbstractWritable#E#List {
         advanceToNextChange();
       }
       setNext(getNextIndex() + 1);
+      return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+      if (getNextIndex() <= getFrom())
+        throw new NoSuchElementException();
       return myValue;
     }
 
