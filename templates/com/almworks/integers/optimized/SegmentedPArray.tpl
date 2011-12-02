@@ -176,7 +176,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return;
     doExpand(index, count);
     for (Writable#E#ListIterator ii = iterator(index, index + count); ii.hasNext();) {
-      ii.nextValue();
+      ii.next();
       ii.set(0, value);
     }
     assert checkInvariants();
@@ -683,7 +683,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   public void setRange(int from, int to, #e# value) {
     assert checkInvariants();
     for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.nextValue();
+      ii.next();
       ii.set(0, value);
     }
     assert checkInvariants();

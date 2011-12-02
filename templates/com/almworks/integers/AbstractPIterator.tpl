@@ -20,6 +20,10 @@ import java.util.NoSuchElementException;
 
 public abstract class Abstract#E#Iterator implements #E#Iterator {
 
+  public #E#Iterator iterator() {
+    return this;
+  }
+
   public #e# nextValue() {
     next();
     return value();
@@ -42,12 +46,15 @@ public abstract class Abstract#E#Iterator implements #E#Iterator {
     }
 
     public #E#Iterator next() throws NoSuchElementException {
-      if (myIterated) throw new NoSuchElementException();
+      if (myIterated)
+        throw new NoSuchElementException();
       myIterated = true;
       return this;
     }
 
-    public #e# value() {
+    public #e# value() throws NoSuchElementException {
+      if (!myIterated)
+        throw new NoSuchElementException();
       return myValue;
     }
   }

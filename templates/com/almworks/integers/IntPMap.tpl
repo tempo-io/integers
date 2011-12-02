@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.Nullable;
-import java.util.NoSuchElementException;
 
 public class Int#E#Map {
   private final WritableIntList myKeys;
@@ -125,19 +124,19 @@ public class Int#E#Map {
     myValues.set(index, value);
   }
 
-  public Iterator iterator() {
+  public PairInt#E#Iterator iterator() {
     checkMutatorPresence();
     return iterator(0, size());
   }
 
-  public Iterator iterator(int from) {
+  public PairInt#E#Iterator iterator(int from) {
     checkMutatorPresence();
     return iterator(from, size());
   }
 
-  public Iterator iterator(int from, int to) {
+  public PairInt#E#Iterator iterator(int from, int to) {
     checkMutatorPresence();
-    return new Iterator(myKeys.iterator(from, to), myValues.iterator(from, to));
+    return new PairInt#E#Iterator(myKeys.iterator(from, to), myValues.iterator(from, to));
   }
 
   public boolean containsKey(int key) {
@@ -237,39 +236,4 @@ public class Int#E#Map {
     }
   }
 
-  public static class Iterator {
-    private final IntIterator myKeyIt;
-    private final #E#Iterator mValueIt;
-    private #e# myCurrentValue;
-    private int myCurrentKey;
-    private boolean myAdvanced = false;
-
-    private Iterator(IntIterator keyIt, #E#Iterator valueIt) {
-      myKeyIt = keyIt;
-      mValueIt = valueIt;
-    }
-
-    public boolean hasNext() {
-      boolean r = myKeyIt.hasNext();
-      assert r == mValueIt.hasNext();
-      return r;
-    }
-
-    public void next() {
-      myAdvanced = false;
-      myCurrentKey = myKeyIt.nextValue();
-      myCurrentValue = mValueIt.nextValue();
-      myAdvanced = true;
-    }
-
-    public #e# value() {
-      if (!myAdvanced) throw new NoSuchElementException();
-      return myCurrentValue;
-    }
-
-    public int key() {
-      if (!myAdvanced) throw new NoSuchElementException();
-      return myCurrentKey;
-    }
-  }
 }

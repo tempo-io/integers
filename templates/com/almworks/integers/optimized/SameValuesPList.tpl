@@ -18,6 +18,7 @@ package com.almworks.integers.optimized;
 
 import com.almworks.integers.AbstractWritable#E#List;
 import com.almworks.integers.Int#E#Map;
+import com.almworks.integers.PairInt#E#Iterator;
 import com.almworks.integers.Writable#E#ListIterator;
 import org.jetbrains.annotations.NotNull;
 
@@ -397,7 +398,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
 
   private final class SameValuesIterator extends WritableIndexIterator {
-    private Int#E#Map.Iterator myIterator;
+    private PairInt#E#Iterator myIterator;
     private #e# myValue;
     private int myNextChangeIndex;
 
@@ -417,7 +418,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
           p = -p - 2;
         myIterator = myMap.iterator(p);
         myIterator.next();
-        myValue = myIterator.value();
+        myValue = myIterator.value2();
       }
       advanceToNextChange();
     }
@@ -425,7 +426,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     private void advanceToNextChange() {
       if (myIterator.hasNext()) {
         myIterator.next();
-        myNextChangeIndex = myIterator.key();
+        myNextChangeIndex = myIterator.value1();
       } else myNextChangeIndex = size();
     }
 
@@ -434,7 +435,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       if (getNextIndex() == myNextChangeIndex) {
-        myValue = myIterator.value();
+        myValue = myIterator.value2();
         advanceToNextChange();
       }
       setNext(getNextIndex() + 1);

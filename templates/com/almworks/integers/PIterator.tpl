@@ -23,11 +23,13 @@ import java.util.NoSuchElementException;
 /**
 * @see #E#Iterable
 */
-public interface #E#Iterator extends Iterator<#E#Iterator> {
+public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
   /**
   * Constant value for empty Iterators
   */
   Writable#E#ListIterator EMPTY = new Empty#E#Iterator();
+
+
 
   /**
    * @return true next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
@@ -35,8 +37,8 @@ public interface #E#Iterator extends Iterator<#E#Iterator> {
   boolean hasNext() throws ConcurrentModificationException;
 
   /**
-   * @throws NoSuchElementException if there is no next element and iterator has reached its end or if iterator
-   * wasn't ever advanced ({@link #next()} or {@link #nextValue()} have never been called)
+   * @throws NoSuchElementException if iterator has never been advanced
+   * ({@link #next()} or {@link #nextValue()} have never been called)
    */
   #e# value() throws NoSuchElementException;
 

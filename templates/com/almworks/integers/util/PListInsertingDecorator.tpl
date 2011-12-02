@@ -124,7 +124,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
 
   private class LocalIterator extends Abstract#E#ListIndexIterator {
     private #E#Iterator myBaseIterator = base().iterator();
-    private Int#E#Map.Iterator myInsertedIterator;
+    private PairInt#E#Iterator myInsertedIterator;
     private int myNextInsert = -1;
 
     private LocalIterator(int from, int to) {
@@ -144,7 +144,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
     private void advanceToNextInsert() {
       if (myInsertedIterator.hasNext()) {
         myInsertedIterator.next();
-        myNextInsert = myInsertedIterator.key();
+        myNextInsert = myInsertedIterator.value1();
       } else myNextInsert = -1;
     }
 
@@ -171,7 +171,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
       if (getNextIndex() <= getFrom())
         throw new NoSuchElementException();
       if (myNextInsert >= 0 && myNextInsert == getNextIndex()-1)
-        return myInsertedIterator.value();
+        return myInsertedIterator.value2();
       else
         return myBaseIterator.value();
     }

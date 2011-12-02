@@ -53,6 +53,7 @@ templates/com/almworks/integers/PIterator.tpl -text
 templates/com/almworks/integers/PList.tpl -text
 templates/com/almworks/integers/PListIterator.tpl -text
 templates/com/almworks/integers/PProgression.tpl -text
+templates/com/almworks/integers/PairIntPIterator.tpl -text
 templates/com/almworks/integers/ParallelPList.tpl -text
 templates/com/almworks/integers/TwoWayPMap.tpl -text
 templates/com/almworks/integers/WritablePList.tpl -text

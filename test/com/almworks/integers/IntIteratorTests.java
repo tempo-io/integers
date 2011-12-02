@@ -1,6 +1,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.optimized.SameValuesIntList;
+import com.almworks.integers.optimized.SegmentedIntArray;
 import com.almworks.integers.util.IntListInsertingDecorator;
 import com.almworks.integers.util.ReadonlyIntListRemovingDecorator;
 import com.almworks.integers.util.SortedIntListIntersectionIterator;
@@ -141,7 +142,7 @@ public class IntIteratorTests extends TestCase {
       int b = i.value();
     }
     
-    SameValuesIntList result, expected, source;
+    WritableIntList result, expected, source;
 
     source = new SameValuesIntList();
     source.addAll(1,1,1,2,2,3,3,3,3);
@@ -152,6 +153,17 @@ public class IntIteratorTests extends TestCase {
     for (WritableIntListIterator i: source.writableListIterable()) {
       result.add(i.value());
       i.set(0, 3);
+    }
+    assertEquals(expected, result);
+
+    expected = new SameValuesIntList();
+    expected.addAll(1,2);
+    result = new SegmentedIntArray();
+    result.addAll(1,2,3,4,5);
+    for (WritableIntListIterator i: result.writableListIterable()) {
+      if (i.value() == 4)
+        i.removeRange(-1,2);
+      i.value();
     }
     assertEquals(expected, result);
 

@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 public abstract class Finding#E#Iterator extends Abstract#E#Iterator {
   private boolean myFound;
   private boolean mySought;
+  private boolean myIterated;
 
   public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
     if (myFound)
@@ -45,10 +46,13 @@ public abstract class Finding#E#Iterator extends Abstract#E#Iterator {
       throw new NoSuchElementException();
     mySought = false;
     myFound = false;
+    myIterated = true;
     return this;
   }
 
-  public #e# value() {
+  public #e# value() throws NoSuchElementException {
+    if (!myIterated)
+      throw new NoSuchElementException();
     return getNext();
   }
 

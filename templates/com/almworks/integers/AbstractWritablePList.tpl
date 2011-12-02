@@ -223,7 +223,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     for (int i = 0; i < count; i++) {
       assert si.hasNext();
       assert di.hasNext();
-      di.nextValue();
+      di.next();
       di.set(0, si.nextValue());
     }
   }
