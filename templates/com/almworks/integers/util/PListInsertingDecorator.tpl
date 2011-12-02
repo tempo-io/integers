@@ -150,9 +150,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
 
     public boolean hasNext() {
       boolean r = super.hasNext();
-      if (r) {
-        assert myNextInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext() : this;
-      }
+      assert !r || (myNextInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
       return r;
     }
 
