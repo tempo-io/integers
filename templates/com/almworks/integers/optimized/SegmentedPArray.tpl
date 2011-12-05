@@ -809,6 +809,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       int p = myNext - 1 + offset;
       if (p < myFrom || p >= myTo)
         throw new NoSuchElementException(offset + " " + this);
@@ -864,6 +866,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     public #e# get(int relativeOffset) throws IndexOutOfBoundsException, NoSuchElementException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       int idx = myNext - 1 + relativeOffset;
       if (idx < myFrom || idx >= myTo)
         throw new NoSuchElementException(relativeOffset + " " + this);
@@ -885,13 +889,18 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public int index() throws NoSuchElementException {
-      if (myNext <= myFrom) throw new NoSuchElementException();
+      if (myNext < 0)
+        throw new IllegalStateException();
+      if (myNext <= myFrom)
+        throw new NoSuchElementException();
       return myNext - 1;
     }
 
     public void set(int offset, #e# value) throws NoSuchElementException, IndexOutOfBoundsException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       int idx = myNext - 1 + offset;
       if (idx < myFrom || idx >= myTo)
         throw new NoSuchElementException(offset + " " + this);
@@ -915,6 +924,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
 
     public void removeRange(int offsetFrom, int offsetTo) throws NoSuchElementException {
       assert checkIterator();
+      if (myNext < 0)
+        throw new IllegalStateException();
       if (offsetFrom >= offsetTo) {
         assert offsetFrom == offsetTo : offsetFrom + " " + offsetTo;
         return;

@@ -313,11 +313,15 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public #e# get(int relativeOffset) throws NoSuchElementException {
       checkMod();
+      if (justRemoved())
+        throw new IllegalStateException();
       return super.get(relativeOffset);
     }
 
     public int index() throws NoSuchElementException {
       checkMod();
+      if (justRemoved())
+        throw new IllegalStateException();
       return super.index();
     }
 
@@ -336,11 +340,15 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
+      if (justRemoved())
+        throw new IllegalStateException();
       super.move(count);
     }
 
     public void removeRange(int fromOffset, int toOffset) throws NoSuchElementException {
       checkMod();
+      if (justRemoved())
+        throw new IllegalStateException();
       if (fromOffset >= toOffset) {
         assert fromOffset == toOffset : fromOffset + " " + toOffset + " " + this;
         return;
@@ -376,6 +384,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public void set(int offset, #e# value) throws NoSuchElementException {
       checkMod();
+      if (justRemoved())
+        throw new IllegalStateException();
       int p = getNextIndex() - 1 + offset;
       if (p < getFrom() || p >= getTo())
         throw new NoSuchElementException();

@@ -22,34 +22,51 @@ import java.util.NoSuchElementException;
 public interface Writable#E#ListIterator extends #E#ListIterator {
 
   /**
-   * @throws IllegalStateException if remove() was called without subsequent advance.
+   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  // todo must throw ISE if called after remove() without subsequent next()
   #e# value() throws NoSuchElementException, IllegalStateException;
+
+  /**
+   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   */
+  void move(int offset) throws NoSuchElementException, IllegalStateException;
+
+  /**
+   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   */
+  #e# get(int offset) throws NoSuchElementException, IllegalStateException;
+
+  /**
+   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   */
+  int index() throws NoSuchElementException, IllegalStateException;
 
   /**
    * Will set the value in the list at a position relative to the current position.
    * <p>
    * set(0, X) will set the value at {@link #index()}, set(-1, X) will set the value at index()-1, etc
+   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  // todo must throw ISE if called after remove() without subsequent next()
   void set(int offset, #e# value) throws NoSuchElementException;
 
   /**
    * Removes a number of items from the collection. Boundaries fromOffset and toOffset are relative to current
    * position, element at toOffset will not be removed (if there's any). <p>
-   * Iterator position will be placed at fromOffset-1. If fromOffset is the starting index,
-   * then index() and value() would throw NoSuchElementException until iterator is advanced <p>
+   * After subsequent advance, iterator would point at toOffset.
    * Example: removeRange(-1,2) will remove the current element, elements at index()-1 and at index()+1,
-   * and will position iterator at index()-2.
+   * and nextValue() will return an element at index()+2.
+   * <p>After calling this method, subsequent calls to any methods except hasNext(), next(), and nextValue()
+   * would throw NoSuchElementException until iterator is advanced.
+   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
   void removeRange(int fromOffset, int toOffset) throws NoSuchElementException;
 
   /**
-  * Removes element at current iterator position. After calling this method,
-  * subsequent calls to value() or remove() will throw NoSuchElementException until iterator is advanced.
-  * @throws NoSuchElementException if iterator has never been advanced or this method was already called without
-  * subsequent advance.
+  * Removes an element at the current iterator position.
+  * <p>After calling this method, subsequent calls to any methods except hasNext(), next(), and nextValue()
+  * would throw NoSuchElementException until iterator is advanced.
+  * @throws NoSuchElementException if iterator has never been advanced.
+  * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
   */
   void remove() throws NoSuchElementException, ConcurrentModificationException;
 }
