@@ -157,13 +157,13 @@ public class IntIteratorTests extends TestCase {
     assertEquals(expected, result);
 
     expected = new SameValuesIntList();
-    expected.addAll(1,2);
+    expected.addAll(1,2,3,5);
     result = new SegmentedIntArray();
     result.addAll(1,2,3,4,5);
     for (WritableIntListIterator i: result.writableListIterable()) {
-      if (i.value() == 4)
-        i.removeRange(-1,2);
-      i.value();
+      if (i.value() == 4) {
+        i.remove();
+      }
     }
     assertEquals(expected, result);
 

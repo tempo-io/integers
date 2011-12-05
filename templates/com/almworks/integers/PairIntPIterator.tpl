@@ -38,6 +38,7 @@ public class PairInt#E#Iterator implements Iterable<PairInt#E#Iterator>, Iterato
   }
 
   public PairInt#E#Iterator next() {
+    myIterated = false;
     myIt2.next();
     myIt1.next();
     myIterated = true;

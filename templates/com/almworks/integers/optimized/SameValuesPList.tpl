@@ -432,6 +432,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
     public WritableIndexIterator next() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
+      setNotRemoved();
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       if (getNextIndex() == myNextChangeIndex) {
@@ -443,6 +444,8 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     }
 
     public #e# value() throws NoSuchElementException {
+      if (justRemoved())
+        throw new IllegalStateException();
       if (getNextIndex() <= getFrom())
         throw new NoSuchElementException();
       return myValue;

@@ -20,6 +20,12 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public interface Writable#E#ListIterator extends #E#ListIterator {
+
+  /**
+   * @throws IllegalStateException if remove() was called without subsequent advance.
+   */
+  #e# value() throws NoSuchElementException, IllegalStateException;
+
   /**
    * Will set the value in the list at a position relative to the current position.
    * <p>
@@ -38,9 +44,10 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
   void removeRange(int fromOffset, int toOffset) throws NoSuchElementException;
 
   /**
-  * Removes element at current iterator position. If it was the last element, further call to value() or index()
-  * will throw NoSuchElementException.
-  * @throws NoSuchElementException if iterator has never been advanced.
+  * Removes element at current iterator position. After calling this method,
+  * subsequent calls to value() or remove() will throw NoSuchElementException until iterator is advanced.
+  * @throws NoSuchElementException if iterator has never been advanced or this method was already called without
+  * subsequent advance.
   */
   void remove() throws NoSuchElementException, ConcurrentModificationException;
 }

@@ -825,6 +825,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        myNext = -myNext;
       if (myNext < myFrom || myNext >= myTo)
         throw new NoSuchElementException(String.valueOf(this));
       if (mySegment == null)
@@ -838,6 +840,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public #e# value() throws NoSuchElementException {
+    if (myNext < 0)
+      throw new IllegalStateException();
     if (myNext <= myFrom) throw new NoSuchElementException();
       return myCurrent;
     }
@@ -855,7 +859,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public boolean hasNext() {
-      return myNext < myTo;
+      return (myNext < 0) ? -myNext < myTo : myNext < myTo;
     }
 
     public #e# get(int relativeOffset) throws IndexOutOfBoundsException, NoSuchElementException {
@@ -936,6 +940,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     public void remove() throws NoSuchElementException, ConcurrentModificationException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       if (myNext <= myFrom)
         throw new NoSuchElementException();
       int p = myNext - 1;
@@ -964,6 +970,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
         }
       }
       myIterationModCount = modCount();
+      myNext = -myNext;
       assert checkIterator();
     }
 
@@ -978,8 +985,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
 
     final boolean checkIterator() {
       assert myFrom <= myTo : this;
-      assert myNext >= myFrom && myNext <= myTo : this;
-      int p = myLeftOffset + myNext;
+      assert myNext >= myFrom && myNext <= myTo || myNext < 0 : this;
+      int p = (myNext < 0) ? myLeftOffset - myNext : myLeftOffset + myNext;
       assert p >> mySegmentBits == mySegmentIndex : mySegmentIndex + " " + myLeftOffset + " " + this;
       assert (p & mySegmentMask) == myOffset : myOffset + " " + myLeftOffset + " " + this;
       assert mySegment == null || size() > 0 : size() + " " + mySegment + " " + this;

@@ -307,7 +307,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public boolean hasNext() {
       checkMod();
-      return super.hasNext();
+      int index = getNextIndex();
+      return (index < 0) ? -index < getTo() : index < getTo();
     }
 
     public #e# get(int relativeOffset) throws NoSuchElementException {
@@ -322,11 +323,14 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
+      setNotRemoved();
       return (Writable#E#ListIterator)super.next();
     }
 
     public #e# value() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
+      if (justRemoved())
+        throw new IllegalStateException();
       return super.value();
     }
 
@@ -357,6 +361,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public void remove() {
       checkMod();
+      if (justRemoved())
+        throw new IllegalStateException();
       int p = getNextIndex() - 1;
       if (p < getFrom())
         throw new NoSuchElementException(String.valueOf(this));
@@ -364,6 +370,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
       removeAt(p);
       setNext(p);
       decrementTo(1);
+      setJustRemoved();
       sync();
     }
 
@@ -379,6 +386,20 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     protected void checkMod() {
       if (myIterationModCount != myModCount)
         throw new ConcurrentModificationException(myIterationModCount + " " + myModCount);
+    }
+
+    protected boolean justRemoved() {
+      return (getNextIndex() < 0);
+    }
+
+    protected void setJustRemoved() {
+      if (getNextIndex() > 0)
+        setNext(-getNextIndex());
+    }
+
+    protected void setNotRemoved() {
+      if (getNextIndex() < 0)
+        setNext(-getNextIndex());
     }
   }
 }
