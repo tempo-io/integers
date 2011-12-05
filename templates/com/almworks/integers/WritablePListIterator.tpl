@@ -24,6 +24,7 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
   /**
    * @throws IllegalStateException if remove() was called without subsequent advance.
    */
+  // todo must throw ISE if called after remove() without subsequent next()
   #e# value() throws NoSuchElementException, IllegalStateException;
 
   /**
@@ -31,6 +32,7 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
    * <p>
    * set(0, X) will set the value at {@link #index()}, set(-1, X) will set the value at index()-1, etc
    */
+  // todo must throw ISE if called after remove() without subsequent next()
   void set(int offset, #e# value) throws NoSuchElementException;
 
   /**

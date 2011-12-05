@@ -840,9 +840,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public #e# value() throws NoSuchElementException {
-    if (myNext < 0)
-      throw new IllegalStateException();
-    if (myNext <= myFrom) throw new NoSuchElementException();
+      if (myNext < 0) throw new IllegalStateException();
+      if (myNext <= myFrom) throw new NoSuchElementException();
       return myCurrent;
     }
 
