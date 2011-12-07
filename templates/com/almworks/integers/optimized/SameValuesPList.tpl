@@ -456,5 +456,10 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       if (count != 0)
         sync();
     }
+
+    @Override
+    public void removeRange() {
+      // todo 
+    }
   }
 }

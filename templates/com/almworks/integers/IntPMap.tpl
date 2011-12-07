@@ -203,7 +203,6 @@ public class Int#E#Map {
     }
 
     public void setKey(int index, int key) {
-      checkIndex(index);
       myKeys.set(index, key);
     }
 
@@ -212,7 +211,6 @@ public class Int#E#Map {
     }
 
     public void setValue(int index, #e# val) {
-      checkIndex(index);
       myValues.set(index, val);
     }
 

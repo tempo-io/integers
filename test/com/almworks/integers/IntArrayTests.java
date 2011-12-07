@@ -111,10 +111,11 @@ public class IntArrayTests extends NativeIntFixture {
     for (int i = 0; i < 10; i++)
       ii.nextValue();
     ii.removeRange(-9, 1);
+    assertEquals(100, ii.index());
     try {
       ii.removeRange(-9, 1);
       fail();
-    } catch (NoSuchElementException e) {
+    } catch (IllegalStateException e) {
       // ok
     }
     ii.move(20);
@@ -201,6 +202,20 @@ public class IntArrayTests extends NativeIntFixture {
     CHECK.order(array.iterator(), 1, 2, 3);
     array.retain(IntArray.create(2));
     CHECK.order(array.iterator(), 2);
+  }
+
+  public void testRemoveAll() {
+    array.addAll(2, 0, 2, 1, 2, 2, 2, 2, 3, 2);
+    CHECK.order(array.iterator(), 2, 0, 2, 1, 2, 2, 2, 2, 3, 2);
+    array.removeAll();
+    array.removeAll(2);
+    CHECK.order(array.iterator(), 0, 1, 3);
+    array.removeAll(2);
+    CHECK.order(array.iterator(), 0, 1, 3);
+    array.removeAll(0, 3);
+    CHECK.order(array.iterator(), 1);
+    array.removeAll(1);
+    CHECK.empty(array);
   }
 
   public void testFromCollection() {

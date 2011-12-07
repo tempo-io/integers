@@ -353,8 +353,9 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
         assert fromOffset == toOffset : fromOffset + " " + toOffset + " " + this;
         return;
       }
-      int f = getNextIndex() - 1 + fromOffset;
-      int t = getNextIndex() - 1 + toOffset;
+      int curPos = getNextIndex() - 1;
+      int f = curPos + fromOffset;
+      int t = curPos + toOffset;
       if (f < getFrom() || t > getTo())
         throw new NoSuchElementException(fromOffset + " " + toOffset + " " + this);
       AbstractWritable#E#List.this.removeRange(f, t);
@@ -378,8 +379,8 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
       removeAt(p);
       setNext(p);
       decrementTo(1);
-      setJustRemoved();
       sync();
+      setJustRemoved();
     }
 
     public void set(int offset, #e# value) throws NoSuchElementException {

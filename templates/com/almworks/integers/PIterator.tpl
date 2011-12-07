@@ -29,8 +29,6 @@ public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
   */
   Writable#E#ListIterator EMPTY = new Empty#E#Iterator();
 
-
-
   /**
    * @return true next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
    */
@@ -43,9 +41,9 @@ public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
   #e# value() throws NoSuchElementException;
 
   /**
-  * @return next element and advances iterator.
+  * @return next element and advances the iterator
   * @throws NoSuchElementException if there is no next element and iterator has reached an end
-  * @throws ConcurrentModificationException if underlaying collection is concurrently modified
+  * @throws ConcurrentModificationException if underlying collection is concurrently modified
   */
   #e# nextValue() throws ConcurrentModificationException, NoSuchElementException;
 

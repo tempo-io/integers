@@ -1,6 +1,7 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.NativeIntFixture;
+import com.almworks.integers.WritableIntListIterator;
 
 public class SameValuesIntListTest extends NativeIntFixture {
   private SameValuesIntList array;
@@ -232,5 +233,14 @@ public class SameValuesIntListTest extends NativeIntFixture {
     testReverse(new int[]{0, 0, 0}, new int[]{0, 0, 0});
     testReverse(new int[]{1, 1, 1}, new int[]{1, 1, 1});
     testReverse(new int[]{2, 2, 3, 3, 3}, new int[]{3, 3, 3, 2, 2});
+  }
+
+  public void testIterator() {
+    array.addAll(1, 1, 1, 2, 2, 3, 3, 3);
+    WritableIntListIterator i = array.iterator();
+    i.next().next().next().next();
+    assertEquals(2, i.value());
+    i.remove();
+    assertEquals(2, i.nextValue());
   }
 }
