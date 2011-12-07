@@ -32,30 +32,4 @@ public abstract class Abstract#E#Iterator implements #E#Iterator {
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
-
-  class Single extends Abstract#E#Iterator {
-    private #e# myValue;
-    private boolean myIterated;
-
-    public Single(#e# value) {
-      myValue = value;
-    }
-
-    public boolean hasNext() {
-      return !myIterated;
-    }
-
-    public #E#Iterator next() throws NoSuchElementException {
-      if (myIterated)
-        throw new NoSuchElementException();
-      myIterated = true;
-      return this;
-    }
-
-    public #e# value() throws NoSuchElementException {
-      if (!myIterated)
-        throw new NoSuchElementException();
-      return myValue;
-    }
-  }
 }

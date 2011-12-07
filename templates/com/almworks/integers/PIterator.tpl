@@ -48,4 +48,30 @@ public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
   * @throws ConcurrentModificationException if underlaying collection is concurrently modified
   */
   #e# nextValue() throws ConcurrentModificationException, NoSuchElementException;
+
+  class Single extends Abstract#E#Iterator {
+    private #e# myValue;
+    private boolean myIterated;
+
+    public Single(#e# value) {
+      myValue = value;
+    }
+
+    public boolean hasNext() {
+      return !myIterated;
+    }
+
+    public #E#Iterator next() throws NoSuchElementException {
+      if (myIterated)
+        throw new NoSuchElementException();
+      myIterated = true;
+      return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+      if (!myIterated)
+        throw new NoSuchElementException();
+      return myValue;
+    }
+  }
 }
