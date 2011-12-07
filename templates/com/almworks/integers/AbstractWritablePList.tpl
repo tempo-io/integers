@@ -308,7 +308,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     public boolean hasNext() {
       checkMod();
       int index = getNextIndex();
-      return (index < 0) ? -index < getTo() : index < getTo();
+      return (index < 0) ? -index - 1 < getTo() : index < getTo();
     }
 
     public #e# get(int relativeOffset) throws NoSuchElementException {
@@ -400,17 +400,17 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     }
 
     protected boolean justRemoved() {
-      return (getNextIndex() < 0);
+      return getNextIndex() < 0;
     }
 
     protected void setJustRemoved() {
-      if (getNextIndex() > 0)
-        setNext(-getNextIndex());
+      if (getNextIndex() >= 0)
+        setNext(-getNextIndex() - 1);
     }
 
     protected void setNotRemoved() {
       if (getNextIndex() < 0)
-        setNext(-getNextIndex());
+        setNext(-getNextIndex() - 1);
     }
   }
 }
