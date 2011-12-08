@@ -1,5 +1,6 @@
 package com.almworks.integers;
 
+import com.almworks.util.RandomHolder;
 import java.util.*;
 
 public class IntArrayTests extends NativeIntFixture {
@@ -36,10 +37,9 @@ public class IntArrayTests extends NativeIntFixture {
     int COUNT = 10000;
     for (int i = 0; i < COUNT; i++)
       array.add(COUNT - i);
-    WritableIntListIterator ii = array.iterator();
     int x = 10000;
-    while (ii.hasNext()) {
-      assertEquals(x, ii.next());
+    for (WritableIntListIterator ii : array.writableListIterable()) {
+      assertEquals(x, ii.value());
       assertEquals(x, ii.get(0));
       if (x > 1)
         assertEquals(x - 1, ii.get(1));
@@ -109,18 +109,20 @@ public class IntArrayTests extends NativeIntFixture {
       array.add(i);
     WritableIntListIterator ii = array.iterator(100, 600);
     for (int i = 0; i < 10; i++)
-      ii.next();
+      ii.nextValue();
     ii.removeRange(-9, 1);
     try {
       ii.removeRange(-9, 1);
       fail();
-    } catch (NoSuchElementException e) {
+    } catch (IllegalStateException e) {
       // ok
     }
-    ii.move(20);
+    ii.next();
+    ii.move(19);
     ii.removeRange(-9, 1);
     checkList(array, ap(0, 1, 100), ap(110, 1, 10), ap(130, 1, 9870));
-    ii.removeRange(-9, 1);
+    ii.next();
+    ii.removeRange(-10, 0);
     checkList(array, ap(0, 1, 100), ap(130, 1, 9870));
   }
 
@@ -128,9 +130,9 @@ public class IntArrayTests extends NativeIntFixture {
     for (int i = 0; i < 10000; i++)
       array.add(i);
     WritableIntListIterator ii = array.iterator(8191, 9192);
-    ii.next();
+    ii.nextValue();
     while (ii.hasNext()) {
-      ii.next();
+      ii.nextValue();
       ii.remove();
     }
     checkList(array, ap(0, 1, 8192), ap(9192, 1, 808));
@@ -142,7 +144,7 @@ public class IntArrayTests extends NativeIntFixture {
     WritableIntListIterator ii = array.iterator();
     for (int i = 0; i < 100; i++) {
       assertTrue(ii.hasNext());
-      assertEquals(100 * i, ii.next());
+      assertEquals(100 * i, ii.nextValue());
       ii.move(99);
     }
     assertFalse(ii.hasNext());
@@ -203,6 +205,20 @@ public class IntArrayTests extends NativeIntFixture {
     CHECK.order(array.iterator(), 2);
   }
 
+  public void testRemoveAll() {
+    array.addAll(2, 0, 2, 1, 2, 2, 2, 2, 3, 2);
+    CHECK.order(array.iterator(), 2, 0, 2, 1, 2, 2, 2, 2, 3, 2);
+    array.removeAll();
+    array.removeAll(2);
+    CHECK.order(array.iterator(), 0, 1, 3);
+    array.removeAll(2);
+    CHECK.order(array.iterator(), 0, 1, 3);
+    array.removeAll(0, 3);
+    CHECK.order(array.iterator(), 1);
+    array.removeAll(1);
+    CHECK.empty(array);
+  }
+
   public void testFromCollection() {
     List<Integer> l = new ArrayList<Integer>();
     l.add(2);
@@ -212,5 +228,34 @@ public class IntArrayTests extends NativeIntFixture {
     CHECK.order(a.toNativeArray(), 2, 3, 9);
     IntList il = IntCollections.asIntList(l);
     CHECK.order(il.toNativeArray(), 2, 3, 9);
+  }
+
+  private void testReverse(int[] a, int[] b) {
+    IntArray lst = new IntArray();
+    lst.addAll(a);
+    IntArray referenceLst = new IntArray();
+    referenceLst.addAll(b);
+    lst.reverseInPlace();
+    assertEquals(lst, referenceLst);
+  }
+
+  public void testReverse() {
+    testReverse(new int[]{}, new int[]{});
+    testReverse(new int[]{0}, new int[]{0});
+    testReverse(new int[]{1,1,0}, new int[]{0,1,1});
+    testReverse(new int[]{0,1,3,6,10,15,21,28,36}, new int[]{36,28,21,15,10,6,3,1,0});
+
+    IntArray lst = new IntArray();
+    Random r = new RandomHolder().getRandom();
+    for (int i = 0; i < 20; i++) {
+      lst.add(r.nextInt(200));
+    }
+    lst.sortUnique();
+    lst.reverseInPlace();
+    for (int i = 1; i < lst.size(); i++) {
+      if (lst.get(i-1)<=lst.get(i)) {
+        fail();
+      }
+    }
   }
 }

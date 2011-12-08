@@ -17,6 +17,7 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.#E#Iterator;
+import com.almworks.integers.#E#Iterable;
 
 /**
  * Iterates through two sorted #e# lists in O(N+M), providing values that exist in the
@@ -35,10 +36,14 @@ public class Sorted#E#ListMinusIterator extends Finding#E#Iterator {
     myExclude = exclude;
   }
 
+  public static Sorted#E#ListMinusIterator create(#E#Iterable include, #E#Iterable exclude) {
+    return new Sorted#E#ListMinusIterator(include.iterator(), exclude.iterator());
+  }
+
   protected boolean findNext() {
     #e# last = myNext;
     while (myInclude.hasNext()) {
-      #e# v = myInclude.next();
+      #e# v = myInclude.nextValue();
       assert v >= last : last + " " + v + " " + myInclude;
       if (accept(v)) {
         myNext = v;
@@ -57,7 +62,7 @@ public class Sorted#E#ListMinusIterator extends Finding#E#Iterator {
         return true;
     }
     while (myExclude.hasNext()) {
-      #e# n = myExclude.next();
+      #e# n = myExclude.nextValue();
       assert n >= myLastExclude : myLastExclude + " " + n + " " + myExclude;
       myLastExclude = n;
       myExcludeIterated = true;

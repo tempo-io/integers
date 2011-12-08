@@ -29,6 +29,13 @@ public interface Writable#E#List extends #E#List, #E#Collector {
   @NotNull
   Writable#E#ListIterator iterator(int from, int to);
 
+  /**
+   * Use this method in FOR-EACH statement if you want to iterate using Writable#E#ListIterator.
+   * Example:<br>
+   *   {@code for {Writable#E#ListIterator i: myList.writableListIterable()} ...}
+   */
+  @NotNull Iterable<Writable#E#ListIterator> writableListIterable();
+
   void removeRange(int from, int to);
 
   #e# removeAt(int index);
@@ -60,6 +67,14 @@ public interface Writable#E#List extends #E#List, #E#Collector {
   void sort(Writable#E#List... sortAlso);
 
   void swap(int index1, int index2);
+
+  /**
+   * This method reverses the order in which elements appear in the list, striving to use
+   * mimimum of additional memory while reversing.
+   * <p>Most implementations will occupy the same memory after calling this method.
+   * However, certain optimized implementations may end up occupying more memory after calling this method.
+   */
+  void reverseInPlace();
 
   /**
    * Assumes that list is sorted.

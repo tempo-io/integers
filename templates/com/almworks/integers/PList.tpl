@@ -81,13 +81,13 @@ public interface #E#List extends #E#Iterable {
   #E#List subList(int from, int to);
 
   /**
-  * Performs binary search. This method assumes that list is sorted. If not sorted the result is unpredicable.
+  * Performs binary search. This method assumes that list is sorted. If not sorted the result is unpredictable.
   * @return index of occurence or insertion point -index-1 if not found
   */
   int binarySearch(#e# value);
 
   /**
-  * Performs binary search on list slice. This method assumes that list slice is sorted. If not sorted the result is unpredicable.
+  * Performs binary search on list slice. This method assumes that list slice is sorted. If not sorted the result is unpredictable.
   * @return index of occurence or insertion point -index-1 if not found
   */
   int binarySearch(#e# value, int from, int to);

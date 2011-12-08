@@ -17,6 +17,7 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.#E#Iterator;
+import com.almworks.integers.#E#Iterable;
 
 /**
  * Iterates through two sorted int lists in O(N+M), providing values that exist in
@@ -35,10 +36,14 @@ public class Sorted#E#ListIntersectionIterator extends Finding#E#Iterator {
     mySecond = second;
   }
 
+  public static Sorted#E#ListIntersectionIterator create(#E#Iterable include, #E#Iterable exclude) {
+    return new Sorted#E#ListIntersectionIterator(include.iterator(), exclude.iterator());
+  }
+
   protected boolean findNext() {
     #e# last = myNext;
     while (myFirst.hasNext()) {
-      #e# v = myFirst.next();
+      #e# v = myFirst.nextValue();
       assert v >= last : last + " " + v + " " + myFirst;
       if (accept(v)) {
         myNext = v;
@@ -57,7 +62,7 @@ public class Sorted#E#ListIntersectionIterator extends Finding#E#Iterator {
         return false;
     }
     while (mySecond.hasNext()) {
-      #e# n = mySecond.next();
+      #e# n = mySecond.nextValue();
       assert n >= myLastSecond : myLastSecond + " " + n + " " + mySecond;
       myLastSecond = n;
       mySecondIterated = true;

@@ -19,9 +19,10 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class Indexed#E#Iterator implements #E#Iterator {
+public class Indexed#E#Iterator extends Abstract#E#Iterator {
   private final #E#List myList;
   private final IntIterator myIndexIterator;
+  private boolean myIterated;
 
   public Indexed#E#Iterator(#E#List list, IntIterator indexIterator) {
     myList = list;
@@ -32,7 +33,14 @@ public class Indexed#E#Iterator implements #E#Iterator {
     return myIndexIterator.hasNext();
   }
 
-  public #e# next() throws ConcurrentModificationException, NoSuchElementException {
-    return myList.get(myIndexIterator.next());
+  public #E#Iterator next() throws ConcurrentModificationException, NoSuchElementException {
+    myIndexIterator.next();
+    myIterated = true;
+    return this;
+  }
+
+  public #e# value() {
+    if (!myIterated) throw new IllegalStateException();
+    return myList.get(myIndexIterator.value());
   }
 }

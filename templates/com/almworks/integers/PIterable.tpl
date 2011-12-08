@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 * For such algorithms simplified implementations of collection is sufficient.<br>
 * This class is designed to provide simple way to define such simple collection.
 */
-public interface #E#Iterable {
+public interface #E#Iterable extends Iterable<#E#Iterator> {
   /**
    * @return fail-fast read-only iterator for the collection. If Iterable represents empty collection it
    * should return {@link #E#Iterator#EMPTY}

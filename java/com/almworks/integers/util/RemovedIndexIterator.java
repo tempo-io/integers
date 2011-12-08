@@ -16,12 +16,14 @@
 
 package com.almworks.integers.util;
 
+import com.almworks.integers.AbstractIntIterator;
 import com.almworks.integers.IntListIterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-class RemovedIndexIterator implements IntListIterator  {
+class RemovedIndexIterator extends AbstractIntIterator implements IntListIterator  {
+  private boolean myIterated;
   private final IntListIterator myRemovedLocations;
 
   RemovedIndexIterator(IntListIterator removedLocations) {
@@ -32,9 +34,15 @@ class RemovedIndexIterator implements IntListIterator  {
     return myRemovedLocations.hasNext();
   }
 
-  public int next() throws ConcurrentModificationException, NoSuchElementException {
-    int value = myRemovedLocations.next();
-    return value + myRemovedLocations.lastIndex();
+  public IntListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    myRemovedLocations.next();
+    myIterated = true;
+    return this;
+  }
+
+  public int value() throws NoSuchElementException {
+    if (!myIterated) throw new NoSuchElementException();
+    return myRemovedLocations.value() + myRemovedLocations.index();
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
@@ -43,11 +51,11 @@ class RemovedIndexIterator implements IntListIterator  {
 
   public int get(int relativeOffset) throws NoSuchElementException {
     int value = myRemovedLocations.get(relativeOffset);
-    return value + myRemovedLocations.lastIndex() + relativeOffset;
+    return value + myRemovedLocations.index() + relativeOffset;
   }
 
-  public int lastIndex() {
-    return myRemovedLocations.lastIndex();
+  public int index() {
+    return myRemovedLocations.index();
   }
 
 }

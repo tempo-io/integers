@@ -70,10 +70,9 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     int COUNT = 10000;
     for (int i = 0; i < COUNT; i++)
       array.add(COUNT - i);
-    WritableIntListIterator ii = array.iterator();
     int x = 10000;
-    while (ii.hasNext()) {
-      assertEquals(x, ii.next());
+    for (WritableIntListIterator ii : array.writableListIterable()) {
+      assertEquals(x, ii.value());
       assertEquals(x, ii.get(0));
       if (x > 1)
         assertEquals(x - 1, ii.get(1));
@@ -166,18 +165,20 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
       array.add(i);
     WritableIntListIterator ii = array.iterator(100, 600);
     for (int i = 0; i < 10; i++)
-      ii.next();
+      ii.nextValue();
     ii.removeRange(-9, 1);
     try {
       ii.removeRange(-9, 1);
       fail();
-    } catch (NoSuchElementException e) {
+    } catch (IllegalStateException e) {
       // ok
     }
-    ii.move(20);
+    ii.next();
+    ii.move(19);
     ii.removeRange(-9, 1);
     checkList(array, ap(0, 1, 100), ap(110, 1, 10), ap(130, 1, 9870));
-    ii.removeRange(-9, 1);
+    ii.next();
+    ii.removeRange(-10, 0);
     checkList(array, ap(0, 1, 100), ap(130, 1, 9870));
   }
 
@@ -185,9 +186,9 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     for (int i = 0; i < 10000; i++)
       array.add(i);
     WritableIntListIterator ii = array.iterator(8191, 9192);
-    ii.next();
+    ii.nextValue();
     while (ii.hasNext()) {
-      ii.next();
+      ii.nextValue();
       ii.remove();
     }
     checkList(array, ap(0, 1, 8192), ap(9192, 1, 808));
@@ -199,7 +200,7 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     WritableIntListIterator ii = array.iterator();
     for (int i = 0; i < 100; i++) {
       assertTrue(ii.hasNext());
-      assertEquals(100 * i, ii.next());
+      assertEquals(100 * i, ii.nextValue());
       ii.move(99);
     }
     assertFalse(ii.hasNext());
@@ -279,5 +280,21 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     checkList(array, ap(0, 1, 2000), ap(100, 1, 10000), ap(2000, 1, 8240));
     array.setAll(5000, list);
     checkList(array, ap(0, 1, 2000), ap(100, 1, 3000), ap(0, 1, 10240), ap(5240, 1, 5000));
+  }
+
+  private void testReverse(int[] a, int[] b) {
+    SegmentedIntArray lst = new SegmentedIntArray();
+    lst.addAll(a);
+    SegmentedIntArray referenceLst = new SegmentedIntArray();
+    referenceLst.addAll(b);
+    lst.reverseInPlace();
+    assertEquals(lst, referenceLst);
+  }
+
+  public void testReverse() {
+    testReverse(new int[]{}, new int[]{});
+    testReverse(new int[]{0}, new int[]{0});
+    testReverse(new int[]{1,1,0}, new int[]{0,1,1});
+    testReverse(new int[]{0,1,3,6,10,15,21,28,36}, new int[]{36,28,21,15,10,6,3,1,0});
   }
 }

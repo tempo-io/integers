@@ -23,7 +23,7 @@ public abstract class #E#CollectorAdapter implements #E#Collector {
 
   public void addAll(#E#Iterator iterator) {
     while (iterator.hasNext())
-      add(iterator.next());
+      add(iterator.nextValue());
   }
 
   public void addAll(#e#... values) {

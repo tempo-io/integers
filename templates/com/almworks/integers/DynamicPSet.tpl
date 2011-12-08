@@ -131,15 +131,15 @@ public class Dynamic#E#Set {
     #e#[] arr = new #e#[size()];
     int i = 0;
     for (LURIterator it = new LURIterator(); it.hasNext(); ) {
-      arr[i++] = myKeys[it.next()];
+      arr[i++] = myKeys[it.nextValue()];
     }
     return new #E#Array(arr);
   }
 
   public void addAll(#E#List keys) {
     int[] ps = prepareAdd(keys.size());
-    for (#E#Iterator i = keys.iterator(); i.hasNext(); ) {
-      add0(i.next(), ps);
+    for (#E#Iterator i : keys) {
+      add0(i.value(), ps);
     }
   }
 
@@ -452,7 +452,8 @@ public class Dynamic#E#Set {
     });
   }
 
-  private class LURIterator implements IntIterator {
+  private class LURIterator extends AbstractIntIterator {
+    private int myCurrent;
     private int x = myRoot;
     private final int[] xs;
     private int xsi;
@@ -468,8 +469,7 @@ public class Dynamic#E#Set {
       return x != 0 || xsi > 0;
     }
 
-    @Override
-    public int next() throws ConcurrentModificationException, NoSuchElementException {
+    public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (!hasNext()) throw new NoSuchElementException();
       if (x == 0) x = xs[--xsi];
       else {
@@ -480,9 +480,14 @@ public class Dynamic#E#Set {
           l = myLeft[x];
         }
       }
-      int ret = x;
+      myCurrent = x;
       x = myRight[x];
-      return ret;
+      return this;
+    }
+
+    public int value() throws IllegalStateException {
+      if (x == myRoot) throw new IllegalStateException();
+      return myCurrent;
     }
   }
 }

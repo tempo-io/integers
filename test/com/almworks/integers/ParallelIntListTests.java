@@ -81,9 +81,9 @@ public class ParallelIntListTests extends TestCase {
 
     it.removeRange(0, 1);
     checkStorage(-2, -3, 1, 2, 3, 4, 30, 40);
-    it.get(0, vals);
-    CHECK.order(vals, 1, 2);
     it.next(null);
+    it.get(-1, vals);
+    CHECK.order(vals, 1, 2);
     it.get(0, vals);
     CHECK.order(vals, 3, 4);
 
@@ -96,13 +96,12 @@ public class ParallelIntListTests extends TestCase {
     CHECK.order(vals, -2, -3);
     it.removeRange(-1, 0);
     checkStorage(1, 2, 3, 4, 30, 40);
-    it.get(1, vals);
-    CHECK.order(vals, 1, 2);
-
-    it.removeRange(2, 4);
-    checkStorage(1, 2);
+    it.next(null);
     it.get(0, vals);
     CHECK.order(vals, 1, 2);
+
+    it.removeRange(1, 3);
+    checkStorage(1, 2);
   }
 
   private void checkStorage(int ... expected) {

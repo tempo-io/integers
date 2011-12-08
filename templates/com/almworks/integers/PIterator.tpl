@@ -17,31 +17,38 @@
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
 * @see #E#Iterable
 */
-public interface #E#Iterator {
+public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
   /**
   * Constant value for empty Iterators
   */
   Writable#E#ListIterator EMPTY = new Empty#E#Iterator();
 
   /**
-   * @return true next call to {@link #next()} won't throw NoSuchElementException
+   * @return true next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
    */
   boolean hasNext() throws ConcurrentModificationException;
 
   /**
-  * @return next element and advances iterator.
-  * @throws NoSuchElementException if there is no next element, iterator has reached end
-  * @throws ConcurrentModificationException if underlaying collection is concurrently modified
-  */
-  #e# next() throws ConcurrentModificationException, NoSuchElementException;
+   * @throws NoSuchElementException if iterator has never been advanced
+   * ({@link #next()} or {@link #nextValue()} have never been called)
+   */
+  #e# value() throws NoSuchElementException;
 
-  class Single implements #E#Iterator {
-    private final #e# myValue;
+  /**
+  * @return next element and advances the iterator
+  * @throws NoSuchElementException if there is no next element and iterator has reached an end
+  * @throws ConcurrentModificationException if underlying collection is concurrently modified
+  */
+  #e# nextValue() throws ConcurrentModificationException, NoSuchElementException;
+
+  class Single extends Abstract#E#Iterator {
+    private #e# myValue;
     private boolean myIterated;
 
     public Single(#e# value) {
@@ -52,10 +59,16 @@ public interface #E#Iterator {
       return !myIterated;
     }
 
-    public #e# next() throws NoSuchElementException {
+    public #E#Iterator next() throws NoSuchElementException {
       if (myIterated)
         throw new NoSuchElementException();
       myIterated = true;
+      return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+      if (!myIterated)
+        throw new NoSuchElementException();
       return myValue;
     }
   }

@@ -273,8 +273,8 @@ public class #E#Collections {
     int szb = b.size();
     #e# v;
     boolean add;
-    for (#E#ListIterator iiw = intersectWith.iterator(); iiw.hasNext(); ) {
-      v = iiw.next();
+    for (#E#Iterator iiw : intersectWith) {
+      v = iiw.value();
       add = false;
       ia = a.binarySearch(v, ia, sza);
       if (ia >= 0) {
@@ -329,8 +329,8 @@ public class #E#Collections {
     int rangeStart = -1;
     int rangeFinish = -2;
     int diff = 0;
-    for (IntIterator it = indexes.iterator(); it.hasNext(); ) {
-      int ind = it.next();
+    for (IntIterator it : indexes) {
+      int ind = it.value();
       if (rangeFinish < 0) {
         rangeStart = ind;
       } else if (ind != rangeFinish) {

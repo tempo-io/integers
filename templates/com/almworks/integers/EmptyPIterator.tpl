@@ -19,7 +19,7 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class Empty#E#Iterator implements Writable#E#ListIterator {
+public class Empty#E#Iterator extends Abstract#E#Iterator implements Writable#E#ListIterator {
   public void set(int offset, #e# value) throws NoSuchElementException {
     throw new NoSuchElementException();
   }
@@ -28,6 +28,7 @@ public class Empty#E#Iterator implements Writable#E#ListIterator {
     throw new NoSuchElementException();
   }
 
+  @Override
   public void remove() throws NoSuchElementException, ConcurrentModificationException {
     throw new NoSuchElementException();
   }
@@ -36,7 +37,11 @@ public class Empty#E#Iterator implements Writable#E#ListIterator {
     return false;
   }
 
-  public #e# next() throws ConcurrentModificationException, NoSuchElementException {
+  public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    throw new NoSuchElementException();
+  }
+
+  public #e# value() throws NoSuchElementException {
     throw new NoSuchElementException();
   }
 
@@ -48,7 +53,7 @@ public class Empty#E#Iterator implements Writable#E#ListIterator {
     throw new NoSuchElementException();
   }
 
-  public int lastIndex() {
-    return -1;
+  public int index() throws NoSuchElementException {
+    throw new NoSuchElementException();
   }
 }

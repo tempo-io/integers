@@ -18,6 +18,15 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A square array, which is internally stored as one {@code Writable#E#List}. <br>
+ * Size of the first dimension, {@code myListCount} (a number of sublists),
+ * is set during object initialization, and is final. <br>
+ * Size of the second dimension (a size of any sublist) is changeable. <br>
+ * Sublist elements are stored in parallel. For example,
+ * three lists, {a1,a2,a3}, {b1,b2,b3}, {c1,c2,c3},
+ * would be stored as {a1,b1,c1,a2,b2,c2,a3,b3,c3}
+ */
 public class Parallel#E#List {
   private final Writable#E#List myStorage;
   private final int myListCount;
@@ -108,7 +117,7 @@ public class Parallel#E#List {
       if (dst != null && dst.length < getListCount())
         throw new IllegalArgumentException();
       for (int i = 0; i < getListCount(); i++) {
-        #e# val = myIt.next();
+        #e# val = myIt.nextValue();
         if (dst != null)
           dst[i] = val;
       }

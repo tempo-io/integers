@@ -21,22 +21,24 @@ import java.util.NoSuchElementException;
 
 public interface #E#ListIterator extends #E#Iterator {
   /**
-   * Moves current position of the iterator relative to current position. Positive value means move to greate indexes,
-   * negative - to smaller indexes. Zero doesn't change iterator state.
+   * Changes the current position of the iterator.
+   * @param offset the difference between new and old iterator indexes.
+   * Zero won't change iterator state. Positive value will move it to greater indexes, negative - to smaller indexes.
    */
   void move(int offset) throws ConcurrentModificationException, NoSuchElementException;
 
   /**
-   * Returns the value at a position relative to the last returned item.
+   * Returns the value at a position relative to the current position.
    * <p>
-   * get(0) will return the same value as the last call to next(), get(-1) will return previous value, get(1) will return
-   * the next value to be returned by next()
+   * get(0) will return the same value as value(), get(-1) will return value at index()-1, etc.
    */
   #e# get(int offset) throws ConcurrentModificationException, NoSuchElementException;
 
   /**
-   * @return current position of the iterator. The index of last returned element by call to {@link #next()} if iterator isn't moved.
-   * @throws NoSuchElementException if iterator isn't ever advanced ({@link #next()} isn't ever called)
+   * @return The current position of the iterator.
+   * <br>{@code move(p)} would change index by {@code p}, {@link #next()} and {@link #nextValue()} would change it by 1.
+   * @throws NoSuchElementException if iterator has never been advanced
+   * ({@link #next()} or {@link #nextValue()} weren't ever called)
    */
-  int lastIndex() throws NoSuchElementException;
+  int index() throws NoSuchElementException;
 }

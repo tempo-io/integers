@@ -17,7 +17,6 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
-import static com.almworks.integers.IntegersUtils.*;
 import com.almworks.integers.func.#E#Function;
 import com.almworks.integers.func.#E#Function2;
 import org.jetbrains.annotations.NotNull;
@@ -736,7 +735,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return;
     checkRange(from, to);
     for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.next()));
+      ii.set(0, function.invoke(ii.nextValue()));
     }
     assert checkInvariants();
   }
@@ -747,7 +746,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return;
     checkRange(from, to);
     for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.next(), secondArgument));
+      ii.set(0, function.invoke(ii.nextValue(), secondArgument));
     }
     assert checkInvariants();
   }
@@ -778,10 +777,11 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
 
 
 
-  private class SegmentedIterator implements Writable#E#ListIterator {
+  private class SegmentedIterator extends Abstract#E#Iterator implements Writable#E#ListIterator {
     private final int myFrom;
     private int myTo;
     private int myNext;
+    private #e# myCurrent;
 
     /**
      * The segment of the current value
@@ -809,6 +809,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       int p = myNext - 1 + offset;
       if (p < myFrom || p >= myTo)
         throw new NoSuchElementException(offset + " " + this);
@@ -822,19 +824,27 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       assert checkIterator();
     }
 
-    public #e# next() throws ConcurrentModificationException, NoSuchElementException {
+    public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        myNext = -myNext-1;
       if (myNext < myFrom || myNext >= myTo)
         throw new NoSuchElementException(String.valueOf(this));
       if (mySegment == null)
         mySegment = mySegments.segments[mySegmentIndex];
-      #e# r = mySegment.data[myOffset];
+      myCurrent = mySegment.data[myOffset];
       myNext++;
       myOffset++;
       adjustOffset();
       assert checkIterator();
-      return r;
+      return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+      if (myNext < 0) throw new IllegalStateException();
+      if (myNext <= myFrom) throw new NoSuchElementException();
+      return myCurrent;
     }
 
     private void adjustOffset() {
@@ -850,12 +860,14 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public boolean hasNext() {
-      return myNext < myTo;
+      return (myNext < 0) ? -myNext-1 < myTo : myNext < myTo;
     }
 
     public #e# get(int relativeOffset) throws IndexOutOfBoundsException, NoSuchElementException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       int idx = myNext - 1 + relativeOffset;
       if (idx < myFrom || idx >= myTo)
         throw new NoSuchElementException(relativeOffset + " " + this);
@@ -876,7 +888,9 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       return seg.data[off];
     }
 
-    public int lastIndex() {
+    public int index() throws NoSuchElementException {
+      if (myNext < 0)
+        throw new IllegalStateException();
       if (myNext <= myFrom)
         throw new NoSuchElementException();
       return myNext - 1;
@@ -885,6 +899,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     public void set(int offset, #e# value) throws NoSuchElementException, IndexOutOfBoundsException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       int idx = myNext - 1 + offset;
       if (idx < myFrom || idx >= myTo)
         throw new NoSuchElementException(offset + " " + this);
@@ -908,6 +924,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
 
     public void removeRange(int offsetFrom, int offsetTo) throws NoSuchElementException {
       assert checkIterator();
+      if (myNext < 0)
+        throw new IllegalStateException();
       if (offsetFrom >= offsetTo) {
         assert offsetFrom == offsetTo : offsetFrom + " " + offsetTo;
         return;
@@ -925,12 +943,16 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       mySegment = null;
       myOffset = p & mySegmentMask;
       myIterationModCount = modCount();
+      myNext = -myNext-1;
       assert checkIterator();
     }
 
+    @Override
     public void remove() throws NoSuchElementException, ConcurrentModificationException {
       assert checkIterator();
       checkMod();
+      if (myNext < 0)
+        throw new IllegalStateException();
       if (myNext <= myFrom)
         throw new NoSuchElementException();
       int p = myNext - 1;
@@ -959,6 +981,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
         }
       }
       myIterationModCount = modCount();
+      myNext = -myNext-1;
       assert checkIterator();
     }
 
@@ -973,8 +996,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
 
     final boolean checkIterator() {
       assert myFrom <= myTo : this;
-      assert myNext >= myFrom && myNext <= myTo : this;
-      int p = myLeftOffset + myNext;
+      assert myNext >= myFrom && myNext <= myTo || myNext < 0 : this;
+      int p = (myNext < 0) ? myLeftOffset - myNext-1 : myLeftOffset + myNext;
       assert p >> mySegmentBits == mySegmentIndex : mySegmentIndex + " " + myLeftOffset + " " + this;
       assert (p & mySegmentMask) == myOffset : myOffset + " " + myLeftOffset + " " + this;
       assert mySegment == null || size() > 0 : size() + " " + mySegment + " " + this;

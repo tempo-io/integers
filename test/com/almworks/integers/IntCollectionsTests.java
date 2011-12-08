@@ -6,6 +6,9 @@ import com.almworks.integers.util.IntListConcatenation;
 import com.almworks.integers.util.IntListInsertingDecorator;
 import com.almworks.integers.util.ModifyingIntListRemovingDecorator;
 import com.almworks.integers.util.ReadonlyIntListRemovingDecorator;
+import com.almworks.util.RandomHolder;
+
+import java.util.Random;
 
 
 public class IntCollectionsTests extends NativeIntFixture {
@@ -68,6 +71,41 @@ public class IntCollectionsTests extends NativeIntFixture {
     assertEquals(4, ins.getInsertCount());
     checkInsertIndexes(ins, 0, 1, 2, 5);
     CHECK.order(ins.insertValueIterator(), 0, 1, 2, 5);
+  }
+
+  public void testInsertingDecoratorIterator() {
+//    myArray.addAll(1, 2, 4, 7, 8, 9);
+    myArray.addAll(1, 2, 4, 7, 8, 9, 11);
+    IntListInsertingDecorator dec = new IntListInsertingDecorator(myArray);
+    dec.insert(0, 0);
+    dec.insert(3, 3);
+    dec.insert(5, 5);
+    dec.insert(6, 6);
+/*
+    dec.insert(10, 10);
+    dec.insert(11, 11);
+    assertEquals(12, dec.size());
+    int x = 0;
+    for (IntIterator i : dec) {
+      assertEquals(x++, i.value());
+    }
+    assertEquals(12, x);
+*/
+    dec.insert(10, 10);
+    assertEquals(12, dec.size());
+    int x = 0;
+    for (IntIterator i : dec) {
+      assertEquals(x++, i.value());
+    }
+    assertEquals(12, x);
+
+    myArray.clear();
+    myArray.addAll(1, 2);
+    dec = new IntListInsertingDecorator(myArray);
+    dec.insert(0, 0);
+    x = 0;
+    for (IntIterator i : dec) assertEquals(x++, i.value());
+    
   }
 
   public void testConcatenation() {

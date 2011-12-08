@@ -161,7 +161,7 @@ public class #E#Functions {
       #E#Iterator it = iterable.iterator();
       @Override
       public #e# invoke(#e# a) {
-        return it.next();
+        return it.nextValue();
       }
   
       @Override

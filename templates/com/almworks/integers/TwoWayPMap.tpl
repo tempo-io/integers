@@ -392,13 +392,13 @@ public class TwoWay#E#Map {
     int ki = 0;
     // Remove mappings and keys; values will be removed after we fix the rest of the index map
     for (#E#ListIterator kIt = keys.iterator(); kIt.hasNext(); ) {
-      #e# k = kIt.next();
+      #e# k = kIt.nextValue();
       keysSorted &= k > lastK;
       lastK = k;
       if (!keysSorted) ki = 0;
       ki = myKeys.binarySearch(k, ki, myKeys.size());
       if (ki < 0) {
-        if (!keys.subList(0, kIt.lastIndex()).contains(k))
+        if (!keys.subList(0, kIt.index()).contains(k))
           (notInMap == null ? notInMap = new #E#Array() : notInMap).add(k);
         ki = -ki - 1;
       } else {

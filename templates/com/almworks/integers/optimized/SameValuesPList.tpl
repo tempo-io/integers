@@ -18,6 +18,7 @@ package com.almworks.integers.optimized;
 
 import com.almworks.integers.AbstractWritable#E#List;
 import com.almworks.integers.Int#E#Map;
+import com.almworks.integers.PairInt#E#Iterator;
 import com.almworks.integers.Writable#E#ListIterator;
 import org.jetbrains.annotations.NotNull;
 
@@ -306,9 +307,98 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     return ki < myMap.size() ? myMap.getKey(ki) : -1;
   }
 
+  /**
+   * Due to the leading-zeros optimization, a list starting with zeros and ending with nonzeros
+   * might be allocated in less amount of memory compared to its reversion.
+   * Hence, calling this method on such lists might result in additional (possibly huge) memory allocation.
+   */
+  public void reverseInPlace() {
+    int sz = size();
+    int msz = myMap.size();
+    if (msz == 0) return;
+    int i = 0;
+    int keySwp;
+    #e# valSwp;
+
+    // Shorthands used in comments:
+    // k[i] - myMap.myKeys.get(i) before reversion.
+    // k'[i] - myMap.myKeys.get(i) after reversion.
+    // v[i], v'[i] - respectively, myMap.myValues
+
+    Int#E#Map.ConsistencyViolatingMutator m = myMap.startMutation();
+
+    // Initial adjustments section.
+    //
+    // SameValues#E#List is designed in such a way, that, if it starts with zeros,
+    // then normally k[0] != 0 && v[0] != 0, i.e starting zeros are omitted in myMap.
+    // Hence, 4 variants are possible:
+    //   a) List starts with zeros and ends with zeros:
+    //     No adjustments needed, main loop will do all the work.
+    //   b) List starts with zeros and ends with non-zeros:
+    //     A list will have to be expanded by one element. k[] will be expanded
+    //     with sz, and main loop will still work correctly.
+    //   c) List starts with non-zeros and ends with zeros:
+    //     A list will have to be shrinked by one element.
+    //     After main loop is finished, a last element will contain unnecesary data,
+    //     which is to be removed.
+    //   d) List starts with non-zeros and ends with non-zeros:
+    //     First element won't be used in a loop, edge values will be swapped outside the loop.
+    if (m.getValue(msz-1) != 0) {
+      if (m.getKey(0) != 0) {
+        // Case b.
+        m.insertAt(msz, sz, 0);
+        msz++;
+      } else {
+        // Case d.
+        i++;
+        valSwp = m.getValue(0);
+        m.setValue(0, m.getValue(msz-1));
+        m.setValue(msz-1, valSwp);
+      }
+    }
+    int j = msz - 1;
+
+    // Main loop section.
+    //
+    // Given the values of i, j after the initial adjustment, it can be shown by induction on x that
+    // k'[i+x] == sz - k[j-x].
+    // for any non-negative x such that i + x < j - x.
+    // To prove it, note that k'[i+x+1]-k'[i+x] is the length of the (i+x)-th block in the reversed array,
+    // but it is also (j-(i+x)-1)-th block in the initial array, and its length is k[j-(i+x)]-k[j-(i+x)-1];
+    // equaling these expressions gives the expression above.
+    // Similarly, k'[j-x] == sz - k[i+x], so the loop modifies k[] "simultaneously" from both ends.
+    //
+    // Also, loop performs a simple reversion of v[].
+    // Note that v[] are taken with shifted index, j-1 instead of j.
+    // This way, v[msz-1] is not engaged in the reversion here.
+    // Depending on a case, there are different explanations:
+    //   a) v[msz-1] is 0, and only v[0 .. msz-2] should be engaged.
+    //   b) It's inserted manually and is 0, and only native values should be reversed.
+    //   c) It will be removed, and only v[0 .. msz-2] should be engaged.
+    //   d) It should be swapped with v[0], but in this case v[0] is skipped in a loop,
+    //     so they are swapped in initial adjustments section separately.
+    for (; i < j; i++, j--) {
+      keySwp = m.getKey(i);
+      m.setKey(i, sz - m.getKey(j));
+      m.setKey(j, sz - keySwp);
+
+      valSwp = m.getValue(i);
+      m.setValue(i, m.getValue(j-1));
+      m.setValue(j-1, valSwp);
+    }
+
+    if (i == j) m.setKey(i, sz - m.getKey(i));
+
+    // Case c.
+    if (m.getKey(msz-1) == sz) m.removeAt(msz-1);
+    
+    m.commit();
+    assert checkInvariants();
+  }
+
 
   private final class SameValuesIterator extends WritableIndexIterator {
-    private Int#E#Map.Iterator myIterator;
+    private PairInt#E#Iterator myIterator;
     private #e# myValue;
     private int myNextChangeIndex;
 
@@ -328,7 +418,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
           p = -p - 2;
         myIterator = myMap.iterator(p);
         myIterator.next();
-        myValue = myIterator.value();
+        myValue = myIterator.value2();
       }
       advanceToNextChange();
     }
@@ -336,19 +426,28 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     private void advanceToNextChange() {
       if (myIterator.hasNext()) {
         myIterator.next();
-        myNextChangeIndex = myIterator.key();
+        myNextChangeIndex = myIterator.value1();
       } else myNextChangeIndex = size();
     }
 
-    public #e# next() throws ConcurrentModificationException, NoSuchElementException {
+    public WritableIndexIterator next() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
+      setNotRemoved();
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       if (getNextIndex() == myNextChangeIndex) {
-        myValue = myIterator.value();
+        myValue = myIterator.value2();
         advanceToNextChange();
       }
       setNext(getNextIndex() + 1);
+      return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+      if (justRemoved())
+        throw new IllegalStateException();
+      if (getNextIndex() <= getFrom())
+        throw new NoSuchElementException();
       return myValue;
     }
 

@@ -19,9 +19,10 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class Indexed#E#ListIterator implements #E#ListIterator {
+public class Indexed#E#ListIterator extends Abstract#E#Iterator implements #E#ListIterator {
   private final IntListIterator myIndexes;
   private final #E#List mySource;
+  private boolean myIterated;
 
   public Indexed#E#ListIterator(#E#List source, IntListIterator indexIterator) {
     mySource = source;
@@ -32,8 +33,15 @@ public class Indexed#E#ListIterator implements #E#ListIterator {
     return myIndexes.hasNext();
   }
 
-  public #e# next() throws ConcurrentModificationException, NoSuchElementException {
-    return mySource.get(myIndexes.next());
+  public #E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    myIndexes.next();
+    myIterated = true;
+    return this;
+  }
+
+  public #e# value() throws NoSuchElementException {
+    if (!myIterated) throw new NoSuchElementException();
+    return mySource.get(myIndexes.value());
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
@@ -44,7 +52,8 @@ public class Indexed#E#ListIterator implements #E#ListIterator {
     return mySource.get(myIndexes.get(relativeOffset));
   }
 
-  public int lastIndex() {
-    return myIndexes.lastIndex();
+  public int index() throws NoSuchElementException {
+    if (!myIterated) throw new NoSuchElementException();
+    return myIndexes.index();
   }
 }

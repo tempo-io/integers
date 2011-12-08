@@ -42,7 +42,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     int n = Integer.parseInt(args[1]);
     int nAttempts = Integer.parseInt(args[2]);
     System.err.println("Starting perf test #" + testN + " with n = " + n + ", nCycles = " + nAttempts);
-    DynamicLongSetPerf perf = new DynamicLongSetPerf(n, nAttempts){};
+    DynamicLongSetPerf perf = new DynamicLongSetPerf(n, nAttempts) {};
     switch (testN) {
     case 1: perf.testPerf(); break;
     case 2: perf.testPerf2(); break;

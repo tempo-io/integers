@@ -115,7 +115,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
     if (idx < 0)
       idx = -idx - 1;
     for (IntListIterator ii = myInserted.keysIterator(idx, myInserted.size()); ii.hasNext(); idx++) {
-      if (ii.next() - idx > baseIndex)
+      if (ii.nextValue() - idx > baseIndex)
         break;
     }
     return baseIndex + idx;
@@ -124,8 +124,8 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
 
   private class LocalIterator extends Abstract#E#ListIndexIterator {
     private #E#Iterator myBaseIterator = base().iterator();
-    private Int#E#Map.Iterator myInsertedIterator;
-    private int myNextInsert = -1;
+    private PairInt#E#Iterator myInsertedIterator;
+    private int myCurInsert = -1;
 
     private LocalIterator(int from, int to) {
       super(from, to);
@@ -144,30 +144,34 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
     private void advanceToNextInsert() {
       if (myInsertedIterator.hasNext()) {
         myInsertedIterator.next();
-        myNextInsert = myInsertedIterator.key();
-      } else myNextInsert = -1;
+        myCurInsert = myInsertedIterator.value1();
+      } else myCurInsert = -1;
     }
 
     public boolean hasNext() {
       boolean r = super.hasNext();
-      if (r) {
-        assert myNextInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext() : this;
-      }
+      assert !r || (myCurInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
       return r;
     }
 
-    public #e# next() {
+    public #E#ListIterator next() throws NoSuchElementException {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
-      #e# r;
-      if (myNextInsert >= 0 && myNextInsert == getNextIndex()) {
-        r = myInsertedIterator.value();
+      if (myCurInsert >= 0 && myCurInsert == getNextIndex()-1)
         advanceToNextInsert();
-      } else {
-        r = myBaseIterator.next();
-      }
+      else if (myBaseIterator.hasNext())
+        myBaseIterator.next();
       setNext(getNextIndex()+1);
-      return r;
+      return this;
+    }
+
+    public #e# value() throws NoSuchElementException {
+      if (getNextIndex() <= getFrom())
+        throw new NoSuchElementException();
+      if (myCurInsert >= 0 && myCurInsert == getNextIndex()-1)
+        return myInsertedIterator.value2();
+      else
+        return myBaseIterator.value();
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {

@@ -273,9 +273,9 @@ public final class #E#Array extends AbstractWritable#E#List {
       return false;
     #E#Iterator ownIt = iterator();
     #e# prevOther = #EW#.MIN_VALUE;
-    for (#E#Iterator it = collection.iterator(); it.hasNext();) {
-      #e# own = ownIt.next();
-      #e# other = it.next();
+    for (#E#Iterator it : collection) {
+      #e# own = ownIt.nextValue();
+      #e# other = it.value();
       if (other <= prevOther) {
         assert false : collection; // Not sorted
         return false;
@@ -302,7 +302,7 @@ public final class #E#Array extends AbstractWritable#E#List {
   }
 
   /**
-   * Adds first maxCount elements from iterator or all if iterator end reached first
+   * Adds elements from iterator until maxCount elements are added or iterator reaches its end.
    * @param iterator
    * @param maxCount
    * @return number of added elements
@@ -310,7 +310,7 @@ public final class #E#Array extends AbstractWritable#E#List {
   public int addAllNotMore(#E#Iterator iterator, int maxCount) {
     int counter = 0;
     while (iterator.hasNext() && counter < maxCount) {
-      add(iterator.next());
+      add(iterator.nextValue());
       counter++;
     }
     return counter;

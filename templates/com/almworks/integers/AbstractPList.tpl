@@ -19,6 +19,7 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 import static com.almworks.integers.IntegersUtils.*;
 
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class Abstract#E#List implements #E#List {
@@ -28,10 +29,9 @@ public abstract class Abstract#E#List implements #E#List {
 
   public StringBuilder toString(StringBuilder builder) {
     builder.append(IntegersUtils.substringAfterLast(getClass().getName(), ".")).append(" ").append(size()).append(" [");
-    #E#Iterator ii = iterator();
     String sep = "";
-    while (ii.hasNext()) {
-      builder.append(sep).append(ii.next());
+    for  (#E#Iterator ii : this) {
+      builder.append(sep).append(ii.value());
       sep = ",";
     }
     builder.append("]");
@@ -63,9 +63,10 @@ public abstract class Abstract#E#List implements #E#List {
 
   public int indexOf(#e# value) {
     int i = 0;
-    for (#E#Iterator ii = iterator(); ii.hasNext(); i++)
-      if (ii.next() == value)
-        return i;
+    for (#E#Iterator ii : Abstract#E#List.this) {
+      if (ii.value() == value) return i;
+      i++;
+    }
     return -1;
   }
 
@@ -79,7 +80,7 @@ public abstract class Abstract#E#List implements #E#List {
       int e = destOffset + length;
       for (int i = destOffset; i < e; i++) {
         assert ii.hasNext();
-        dest[i] = ii.next();
+        dest[i] = ii.nextValue();
       }
     }
     return dest;
@@ -112,7 +113,7 @@ public abstract class Abstract#E#List implements #E#List {
     #E#Iterator ii1 = iterator();
     #E#Iterator ii2 = that.iterator();
     while (ii1.hasNext() && ii2.hasNext()) {
-      if (ii1.next() != ii2.next())
+      if (ii1.nextValue() != ii2.nextValue())
         return false;
     }
     return !(ii1.hasNext() || ii2.hasNext());
@@ -120,9 +121,8 @@ public abstract class Abstract#E#List implements #E#List {
 
   public int hashCode() {
     int hashCode = 1;
-    #E#Iterator ii = iterator();
-    while (ii.hasNext()) {
-      hashCode = 31 * hashCode + (int)ii.next();
+    for (#E#Iterator ii : this) {
+      hashCode = 31 * hashCode + (int)ii.value();
     }
     return hashCode;
   }
@@ -137,9 +137,9 @@ public abstract class Abstract#E#List implements #E#List {
   protected boolean checkSorted(boolean checkUnique) {
     #E#Iterator it = iterator();
     if (!it.hasNext()) return true;
-    #e# prev = it.next();
+    #e# prev = it.nextValue();
     while (it.hasNext()) {
-      #e# next = it.next();
+      #e# next = it.nextValue();
       if (next < prev || (checkUnique && next == prev)) return false;
       prev = next;
     }
@@ -252,8 +252,8 @@ public abstract class Abstract#E#List implements #E#List {
   @Override
   public List<#EW#> toList() {
     List<#EW#> list = IntegersUtils.arrayList();
-    for(#E#Iterator ii = iterator(); ii.hasNext();) {
-      list.add(ii.next());
+    for(#E#Iterator ii : Abstract#E#List.this) {
+      list.add(ii.value());
     }
     return list;
   }
