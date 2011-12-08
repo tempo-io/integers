@@ -24,22 +24,22 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
   /**
    * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  #e# value() throws NoSuchElementException, ConcurrentModificationException, IllegalStateException;
+  #e# value() throws NoSuchElementException, IllegalStateException;
 
   /**
    * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  void move(int offset) throws NoSuchElementException, ConcurrentModificationException, IllegalStateException;
+  void move(int offset) throws NoSuchElementException, IllegalStateException;
 
   /**
    * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  #e# get(int offset) throws NoSuchElementException, ConcurrentModificationException, IllegalStateException;
+  #e# get(int offset) throws NoSuchElementException, IllegalStateException;
 
   /**
    * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  int index() throws NoSuchElementException, ConcurrentModificationException, IllegalStateException;
+  int index() throws NoSuchElementException, IllegalStateException;
 
   /**
    * Will set the value in the list at a position relative to the current position.
@@ -47,7 +47,7 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
    * set(0, X) will set the value at {@link #index()}, set(-1, X) will set the value at index()-1, etc
    * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  void set(int offset, #e# value) throws NoSuchElementException, ConcurrentModificationException, IllegalStateException;
+  void set(int offset, #e# value) throws NoSuchElementException, IllegalStateException;
 
   /**
    * Removes a number of items from the collection. Boundaries fromOffset and toOffset are relative to current
@@ -58,7 +58,7 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
    * and the iterator will point at the element at index()+2 after it is advanced.
    * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
    */
-  void removeRange(int fromOffset, int toOffset) throws NoSuchElementException, ConcurrentModificationException, IllegalStateException;
+  void removeRange(int fromOffset, int toOffset) throws NoSuchElementException, IllegalStateException;
 
   /**
   * Removes an element at the current iterator position.
@@ -68,5 +68,5 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
   * @throws NoSuchElementException if iterator has never been advanced.
   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
   */
-  void remove() throws NoSuchElementException, ConcurrentModificationException, IllegalStateException;
+  void remove() throws NoSuchElementException, IllegalStateException;
 }
