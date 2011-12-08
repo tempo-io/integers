@@ -70,7 +70,7 @@ public interface Writable#E#List extends #E#List, #E#Collector {
 
   /**
    * This method reverses the order in which elements appear in the list, striving to use
-   * a mimimum of additional memory while reversing.
+   * mimimum of additional memory while reversing.
    * <p>Most implementations will occupy the same memory after calling this method.
    * However, certain optimized implementations may end up occupying more memory after calling this method.
    */

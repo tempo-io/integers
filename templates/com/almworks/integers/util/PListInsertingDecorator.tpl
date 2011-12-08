@@ -125,7 +125,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
   private class LocalIterator extends Abstract#E#ListIndexIterator {
     private #E#Iterator myBaseIterator = base().iterator();
     private PairInt#E#Iterator myInsertedIterator;
-    private int myNextInsert = -1;
+    private int myCurInsert = -1;
 
     private LocalIterator(int from, int to) {
       super(from, to);
@@ -144,20 +144,20 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
     private void advanceToNextInsert() {
       if (myInsertedIterator.hasNext()) {
         myInsertedIterator.next();
-        myNextInsert = myInsertedIterator.value1();
-      } else myNextInsert = -1;
+        myCurInsert = myInsertedIterator.value1();
+      } else myCurInsert = -1;
     }
 
     public boolean hasNext() {
       boolean r = super.hasNext();
-      assert !r || (myNextInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
+      assert !r || (myCurInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
       return r;
     }
 
     public #E#ListIterator next() throws NoSuchElementException {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
-      if (myNextInsert >= 0 && myNextInsert == getNextIndex()-1)
+      if (myCurInsert >= 0 && myCurInsert == getNextIndex()-1)
         advanceToNextInsert();
       else if (myBaseIterator.hasNext())
         myBaseIterator.next();
@@ -168,7 +168,7 @@ public class #E#ListInsertingDecorator extends Abstract#E#ListDecorator {
     public #e# value() throws NoSuchElementException {
       if (getNextIndex() <= getFrom())
         throw new NoSuchElementException();
-      if (myNextInsert >= 0 && myNextInsert == getNextIndex()-1)
+      if (myCurInsert >= 0 && myCurInsert == getNextIndex()-1)
         return myInsertedIterator.value2();
       else
         return myBaseIterator.value();
