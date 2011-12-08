@@ -111,17 +111,18 @@ public class IntArrayTests extends NativeIntFixture {
     for (int i = 0; i < 10; i++)
       ii.nextValue();
     ii.removeRange(-9, 1);
-    assertEquals(100, ii.index());
     try {
       ii.removeRange(-9, 1);
       fail();
     } catch (IllegalStateException e) {
       // ok
     }
-    ii.move(20);
+    ii.next();
+    ii.move(19);
     ii.removeRange(-9, 1);
     checkList(array, ap(0, 1, 100), ap(110, 1, 10), ap(130, 1, 9870));
-    ii.removeRange(-9, 1);
+    ii.next();
+    ii.removeRange(-10, 0);
     checkList(array, ap(0, 1, 100), ap(130, 1, 9870));
   }
 

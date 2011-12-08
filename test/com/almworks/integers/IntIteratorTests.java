@@ -167,6 +167,7 @@ public class IntIteratorTests extends TestCase {
     }
     assertEquals(expected, result);
 
+
     source.clear();
     source.addAll(8,9);
     expected.clear();

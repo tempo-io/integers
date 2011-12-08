@@ -362,6 +362,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
       setNext(f);
       decrementTo(t - f);
       sync();
+      setJustRemoved();
     }
 
     protected void sync() {
