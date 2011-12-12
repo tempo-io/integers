@@ -211,7 +211,7 @@ public class TwoWayIntMapTests extends TestCase {
   private void removeDuplicates(IntArray keys) {
     for (int i = 0; i < keys.size(); ++i) {
       int k1 = keys.get(i);
-      for (WritableIntListIterator keyIt : keys.writableListIterable()) {
+      for (WritableIntListIterator keyIt : keys.write()) {
         int k2 = keyIt.value();
         if (keyIt.index() != i && k1 == k2) keyIt.remove();
       }

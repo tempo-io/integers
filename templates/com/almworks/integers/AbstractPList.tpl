@@ -63,7 +63,7 @@ public abstract class Abstract#E#List implements #E#List {
 
   public int indexOf(#e# value) {
     int i = 0;
-    for (#E#Iterator ii : Abstract#E#List.this) {
+    for (#E#Iterator ii : this) {
       if (ii.value() == value) return i;
       i++;
     }

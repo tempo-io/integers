@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/DynamicPSet.tpl
-
-
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntFunction2;
@@ -51,13 +48,13 @@ public class Dynamic#E#Set implements #E#Iterable {
   private int myRoot;
 
   //see shrink() method
-  private static final int SHRINK_FACTOR = -1; //testing. actual should be, say, 3
-  private static final int SHRINK_MIN_LENGTH = 0; //8
-  // this one is used in from#E#Iterable(). A new myKeys array is created in this method, and its size is
+  private static final int SHRINK_FACTOR = 6; //testing. actual should be less, say, 3
+  private static final int SHRINK_MIN_LENGTH = 4; //8
+  // this one is used in fromSorted#E#Iterable(). A new myKeys array is created in this method, and its size is
   // the size of the given #E#Iterable multiplied by this constant (it's the space for new elements to be added later).
   private static final int EXPAND_FACTOR = 2;
   // these three costants are used in building a tree from a given list of values.
-  // See from#E#Iterable paramcompactifyType.
+  // See fromSorted#E#Iterable paramcompactifyType.
   private static final int COMPACTIFY_TO_ADD = -1;
   private static final int COMPACTIFY_TO_REMOVE = 1;
   private static final int COMPACTIFY_BALANCED = 3;
@@ -156,8 +153,8 @@ public class Dynamic#E#Set implements #E#Iterable {
 
   public void addAll(Dynamic#E#Set keys) {
     int[] ps = prepareAdd(keys.size());
-    for (#E#Iterator i : keys) {
-      add0(i.value(), ps);
+    for (#E#Iterator ii : keys) {
+      add0(ii.value(), ps);
     }
   }
 
@@ -493,7 +490,8 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   private void shrink() {
-    if (myKeys.length > SHRINK_MIN_LENGTH && size()*SHRINK_FACTOR < myKeys.length)
+    int s = size();
+    if (s > SHRINK_MIN_LENGTH && s*SHRINK_FACTOR < myKeys.length)
       compactify();
   }
 
@@ -518,6 +516,8 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   private boolean remove0(#e# key) {
+    if (isEmpty()) return false;
+
     int[] parentsStack = fetchStackCache(0);
     int xsi = -1;
 
@@ -622,7 +622,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    * Actually, it will use memory which is needed to hold EXPAND_FACTOR*size() elements.
    */
   public void compactify() {
-    from#E#Iterable(this, size(), COMPACTIFY_BALANCED);
+    fromSorted#E#Iterable(this, size(), COMPACTIFY_BALANCED);
   }
 
   /**
@@ -639,7 +639,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    *       In this mode every 4-th level will be entirely red (except last 2 levels)
    *    The constants values are not conventional, they're actually used in the logic.
    */
-  private void from#E#Iterable(#E#Iterable src, int srcSize, int compactifyType) {
+  private void fromSorted#E#Iterable(#E#Iterable src, int srcSize, int compactifyType) {
     #e#[] newKeys;
     if (srcSize == 0)
       newKeys = EMPTY_KEYS;
@@ -648,10 +648,11 @@ public class Dynamic#E#Set implements #E#Iterable {
       int i = 0;
       for (#E#Iterator ii : src) {
         newKeys[++i] = ii.value();
+        assert (i==1 || newKeys[i] >= newKeys[i-1]);
       }
     }
     fromPreparedArray(newKeys, srcSize, compactifyType);
-    assert checkRedBlackTreeInvariants("from#E#Iterable");
+    assert checkRedBlackTreeInvariants("fromSorted#E#Iterable");
   }
 
   /**
@@ -726,7 +727,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   private static Dynamic#E#Set fromSortedList0(#E#List src, int compactifyType) {
     assert #E#Collections.isSorted(src.toNativeArray());
     Dynamic#E#Set res = new Dynamic#E#Set();
-    res.from#E#Iterable(src, src.size(), compactifyType);
+    res.fromSorted#E#Iterable(src, src.size(), compactifyType);
     return res;
   }
 

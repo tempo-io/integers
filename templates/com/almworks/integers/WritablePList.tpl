@@ -32,9 +32,9 @@ public interface Writable#E#List extends #E#List, #E#Collector {
   /**
    * Use this method in FOR-EACH statement if you want to iterate using Writable#E#ListIterator.
    * Example:<br>
-   *   {@code for {Writable#E#ListIterator i: myList.writableListIterable()} ...}
+   *   {@code for {Writable#E#ListIterator ii : myList.write()} ...}
    */
-  @NotNull Iterable<Writable#E#ListIterator> writableListIterable();
+  @NotNull Iterable<Writable#E#ListIterator> write();
 
   void removeRange(int from, int to);
 
@@ -74,7 +74,7 @@ public interface Writable#E#List extends #E#List, #E#Collector {
    * <p>Most implementations will occupy the same memory after calling this method.
    * However, certain optimized implementations may end up occupying more memory after calling this method.
    */
-  void reverseInPlace();
+  void reverse();
 
   /**
    * Assumes that list is sorted.

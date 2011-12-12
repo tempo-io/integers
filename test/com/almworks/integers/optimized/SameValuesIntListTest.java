@@ -214,7 +214,7 @@ public class SameValuesIntListTest extends NativeIntFixture {
     lst.addAll(a);
     SameValuesIntList referenceLst = new SameValuesIntList();
     referenceLst.addAll(b);
-    lst.reverseInPlace();
+    lst.reverse();
     assertEquals(lst, referenceLst);
   }
 

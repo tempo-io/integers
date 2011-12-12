@@ -18,7 +18,6 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
 import com.almworks.integers.optimized.SameValuesLongList;
-import com.almworks.integers.optimized.SegmentedLongArray;
 import com.almworks.integers.util.LongSetBuilder;
 import com.almworks.util.RandomHolder;
 import junit.framework.TestCase;
@@ -42,13 +41,18 @@ public class DynamicLongSetTests extends TestCase {
     set.addAll(3, 1, 5, 2, 0, 4);
     set.debugPrintTreeStructure(System.out);
     System.err.println(set.dumpArrays(0));
-    compare.order(LongProgression.arithmetic(0, 6), set.toSortedLongArray());
+    LongList expected = LongProgression.arithmetic(0, 6);
+    compare.order(expected, set.toSortedLongArray());
+    set.removeAll(expected);
+    assertTrue(set.isEmpty());
 
     set.clear();
     set.addAll(1, 2, 5, 7, 8, 11, 14, 15);
     set.debugPrintTreeStructure(System.out);
     set.add(4);
     set.debugPrintTreeStructure(System.out);
+    set.remove(11);
+    set.remove(256);
   }
 
   /** Prefixed with _ because it runs fairly long. */
@@ -94,7 +98,16 @@ public class DynamicLongSetTests extends TestCase {
     return baos.toString();
   }
 
-  public void testNil() {
+  public void testEdgeCases() {
+    assertFalse(set.remove(Long.MIN_VALUE));
+    assertFalse(set.remove(0));
+    set.removeAll(12, 23, 12, 51);
+    assertTrue(set.isEmpty());
+    set.compactify();
+    assertTrue(set.isEmpty());
+    LongList ll = new LongArray();
+    DynamicLongSet set2 = DynamicLongSet.fromSortedList(ll);
+    assertTrue(set2.isEmpty());
     set.addAll(1, 3, 2, Long.MIN_VALUE, Long.MAX_VALUE);
     assertTrue(set.toSortedLongArray().checkSorted(true));
     assertTrue(set.contains(1));
@@ -109,9 +122,9 @@ public class DynamicLongSetTests extends TestCase {
     int nAttempts = 5;
     LongSetBuilder anotherSet = new LongSetBuilder();
     DynamicLongSet dynamicSet = new DynamicLongSet(n*nAttempts);
-    long[] toAdd = new long[n];
+    WritableLongList toAdd = new LongArray();
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      for (int i = 0; i < n; ++i) toAdd[i] = r.nextLong();
+      for (int i = 0; i < n; ++i) toAdd.add(r.nextLong());
       dynamicSet.addAll(toAdd);
       dynamicSet.compactify();
       anotherSet.addAll(toAdd);
@@ -119,7 +132,26 @@ public class DynamicLongSetTests extends TestCase {
       LongList setList = dynamicSet.toSortedLongArray();
       System.err.println("attempt #" + attempt);
       compare.order(anotherSetList, setList);
+
+      // testRemove runs long, so it's ran only twice
+      if (attempt > 1) continue;
+      testRemove(toAdd, toAdd);
+      testRemove(toAdd, anotherSetList);
+      testRemove(anotherSetList, toAdd);
+      testRemove(anotherSetList, anotherSetList);
     }
+  }
+
+  private void testRemove(LongList srcAdd, LongList srcRemove) {
+    DynamicLongSet dynamicSet = new DynamicLongSet();
+
+    dynamicSet.addAll(srcAdd);
+    dynamicSet.removeAll(srcRemove);
+    assertTrue(dynamicSet.isEmpty());
+
+    dynamicSet.addAll(srcAdd);
+    for (LongIterator ii : srcRemove) dynamicSet.remove(ii.value());
+    assertTrue(dynamicSet.isEmpty());
   }
 
   public void printPerm() {
@@ -151,70 +183,31 @@ public class DynamicLongSetTests extends TestCase {
   }
 
   public void testIterator() {
-    SameValuesLongList src = new SameValuesLongList();
-    src.addAll(14,12,15,11,13,16);
-    SameValuesLongList expected = new SameValuesLongList();
-    expected.addAll(11,12,13,14,15,16);
-    SameValuesLongList res = new SameValuesLongList();
-    DynamicLongSet dls = new DynamicLongSet();
-    dls.addAll(src);
-    for (LongIterator i : dls) {
+    LongList expected = LongArray.create(11,12,13,14,15,16);
+    WritableLongList res = new SameValuesLongList();
+    set.addAll(14,12,15,11,13,16);
+    for (LongIterator i : set) {
       res.add(i.value());
     }
     assertEquals(expected, res);
   }
 
-  public void testRemoveCompactify() {
-    WritableLongList source = new LongArray();
-    WritableLongList result;
+  public void testAddRemove() {
+    WritableLongList sourceAdd = LongArray.create(   14,7,3, 12,6,2, 13,8,5, 15,4,0, -1,10,-2, 20,-6,32);
+    WritableLongList sourceRemove = LongArray.create(7,3,    6,14,   5,8,    2,-7,   0,15,     3,1);
+    LongList expected = LongArray.create(-6,-2,-1,4,10,12,13,20,32);
 
-    DynamicLongSet dls, dls2;
-    source.addAll(14, 7, 3, 12, 6, 2, 13, 8, 5, 15, 4, 0, -1, 10, -2, 20, -6, 32);
-    result = new LongArray(LongCollections.toSortedNativeArray(source));
-    dls = DynamicLongSet.fromSortedList(result);
-    for (LongIterator i: source) {
-      dls.remove(i.value());
-    }
-
-    result.clear();
-    for (LongIterator ii : source) {
-      dls.clear();
-      dls = DynamicLongSet.fromSortedListToAdd(result);
-      dls2 = DynamicLongSet.fromSortedListToRemove(result);
-      dls2.compactify();
-      assertEquals(dls.toSortedLongArray(), dls2.toSortedLongArray());
-      result.add(ii.value());
-      result = new LongArray(LongCollections.toSortedNativeArray(result));
-    }
-
-    dls.clear();
-    result.clear();
-    result.addAll(7,3,6,14,5,8,2,-7,0,15,3,1);
-    int statecount = 0;
-    LongIterator i1 = source.iterator();
-    LongIterator i2 = result.iterator();
+    int stateCount = 0;
+    LongIterator iiAdd = sourceAdd.iterator();
+    LongIterator iiRemove = sourceRemove.iterator();
     for (int i = 0; i<30;i++) {
-      if (statecount >= 0)
-        dls.add(i1.nextValue());
+      if (stateCount >= 0)
+        set.add(iiAdd.nextValue());
       else
-        dls.remove(i2.nextValue());
-      statecount++;
-      if (statecount == 3) statecount = -2;
+        set.remove(iiRemove.nextValue());
+      stateCount++;
+      if (stateCount == 3) stateCount = -2;
     }
-
-    dls.clear();
-    dls.addAll(1, 2, 3);
-    dls2 = new DynamicLongSet();
-    dls2.addAll(3,4,5);
-    dls2.removeAll(dls);
-    source = new SegmentedLongArray();
-    source.addAll(4,5);
-    assertEquals(source, dls2.toSortedLongArray());
-    dls2 = new DynamicLongSet();
-    dls2.addAll(3,4,5);
-    dls2.addAll(dls);
-    source = new SegmentedLongArray();
-    source.addAll(1,2,3,4,5);
-    assertEquals(source, dls2.toSortedLongArray());
+    assertEquals(expected, set.toSortedLongArray());
   }
 }
