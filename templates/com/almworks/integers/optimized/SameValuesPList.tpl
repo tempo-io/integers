@@ -312,7 +312,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
    * might be allocated in less amount of memory compared to its reversion.
    * Hence, calling this method on such lists might result in additional (possibly huge) memory allocation.
    */
-  public void reverseInPlace() {
+  public void reverse() {
     int sz = size();
     int msz = myMap.size();
     if (msz == 0) return;
@@ -343,7 +343,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     //     which is to be removed.
     //   d) List starts with non-zeros and ends with non-zeros:
     //     First element won't be used in a loop, edge values will be swapped outside the loop.
-    if (m.getValue(msz-1) != 0) {
+    if (m.getValue(msz - 1) != 0) {
       if (m.getKey(0) != 0) {
         // Case b.
         m.insertAt(msz, sz, 0);
@@ -352,8 +352,8 @@ public class SameValues#E#List extends AbstractWritable#E#List {
         // Case d.
         i++;
         valSwp = m.getValue(0);
-        m.setValue(0, m.getValue(msz-1));
-        m.setValue(msz-1, valSwp);
+        m.setValue(0, m.getValue(msz - 1));
+        m.setValue(msz - 1, valSwp);
       }
     }
     int j = msz - 1;
@@ -383,14 +383,14 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       m.setKey(j, sz - keySwp);
 
       valSwp = m.getValue(i);
-      m.setValue(i, m.getValue(j-1));
-      m.setValue(j-1, valSwp);
+      m.setValue(i, m.getValue(j - 1));
+      m.setValue(j - 1, valSwp);
     }
 
     if (i == j) m.setKey(i, sz - m.getKey(i));
 
     // Case c.
-    if (m.getKey(msz-1) == sz) m.removeAt(msz-1);
+    if (m.getKey(msz - 1) == sz) m.removeAt(msz - 1);
     
     m.commit();
     assert checkInvariants();
@@ -444,7 +444,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     }
 
     public #e# value() throws NoSuchElementException {
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       if (getNextIndex() <= getFrom())
         throw new NoSuchElementException();

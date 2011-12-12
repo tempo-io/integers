@@ -138,8 +138,8 @@ public class Dynamic#E#Set {
 
   public void addAll(#E#List keys) {
     int[] ps = prepareAdd(keys.size());
-    for (#E#Iterator i : keys) {
-      add0(i.value(), ps);
+    for (#E#Iterator ii : keys) {
+      add0(ii.value(), ps);
     }
   }
 

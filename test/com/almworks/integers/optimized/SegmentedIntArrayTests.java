@@ -71,7 +71,7 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     for (int i = 0; i < COUNT; i++)
       array.add(COUNT - i);
     int x = 10000;
-    for (WritableIntListIterator ii : array.writableListIterable()) {
+    for (WritableIntListIterator ii : array.write()) {
       assertEquals(x, ii.value());
       assertEquals(x, ii.get(0));
       if (x > 1)
@@ -287,7 +287,7 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     lst.addAll(a);
     SegmentedIntArray referenceLst = new SegmentedIntArray();
     referenceLst.addAll(b);
-    lst.reverseInPlace();
+    lst.reverse();
     assertEquals(lst, referenceLst);
   }
 

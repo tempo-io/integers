@@ -68,7 +68,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     return new WritableIndexIterator(from, to);
   }
 
-  @NotNull public Iterable<Writable#E#ListIterator> writableListIterable() {
+  @NotNull public Iterable<Writable#E#ListIterator> write() {
     return #E#Iterables.fromWritableListIterator(iterator());
   }
 
@@ -113,7 +113,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   public void removeAll(#e# value) {
-    for (Writable#E#ListIterator ii : writableListIterable()) {
+    for (Writable#E#ListIterator ii : write()) {
       if (ii.value() == value) {
         ii.remove();
       }
@@ -293,7 +293,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     return result;
   }
 
-  public void reverseInPlace() {
+  public void reverse() {
     int j = size() - 1;
     for (int i = 0; i < j; i++, j--) swap(i,j);
   }
@@ -313,14 +313,14 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public #e# get(int relativeOffset) throws NoSuchElementException {
       checkMod();
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       return super.get(relativeOffset);
     }
 
     public int index() throws NoSuchElementException {
       checkMod();
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       return super.index();
     }
@@ -333,21 +333,21 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public #e# value() throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       return super.value();
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       super.move(count);
     }
 
     public void removeRange(int fromOffset, int toOffset) throws NoSuchElementException {
       checkMod();
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       if (fromOffset >= toOffset) {
         assert fromOffset == toOffset : fromOffset + " " + toOffset + " " + this;
@@ -371,7 +371,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public void remove() {
       checkMod();
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       int p = getNextIndex() - 1;
       if (p < getFrom())
@@ -386,7 +386,7 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
     public void set(int offset, #e# value) throws NoSuchElementException {
       checkMod();
-      if (justRemoved())
+      if (isJustRemoved())
         throw new IllegalStateException();
       int p = getNextIndex() - 1 + offset;
       if (p < getFrom() || p >= getTo())
@@ -400,18 +400,20 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
         throw new ConcurrentModificationException(myIterationModCount + " " + myModCount);
     }
 
-    protected boolean justRemoved() {
+    protected boolean isJustRemoved() {
       return getNextIndex() < 0;
     }
 
     protected void setJustRemoved() {
-      if (getNextIndex() >= 0)
-        setNext(-getNextIndex() - 1);
+      int next = getNextIndex();
+      if (next >= 0)
+        setNext(-next - 1);
     }
 
     protected void setNotRemoved() {
-      if (getNextIndex() < 0)
-        setNext(-getNextIndex() - 1);
+      int next = getNextIndex();
+      if (next < 0)
+        setNext(-next - 1);
     }
   }
 }

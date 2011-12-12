@@ -38,7 +38,7 @@ public class IntArrayTests extends NativeIntFixture {
     for (int i = 0; i < COUNT; i++)
       array.add(COUNT - i);
     int x = 10000;
-    for (WritableIntListIterator ii : array.writableListIterable()) {
+    for (WritableIntListIterator ii : array.write()) {
       assertEquals(x, ii.value());
       assertEquals(x, ii.get(0));
       if (x > 1)
@@ -235,7 +235,7 @@ public class IntArrayTests extends NativeIntFixture {
     lst.addAll(a);
     IntArray referenceLst = new IntArray();
     referenceLst.addAll(b);
-    lst.reverseInPlace();
+    lst.reverse();
     assertEquals(lst, referenceLst);
   }
 
@@ -251,7 +251,7 @@ public class IntArrayTests extends NativeIntFixture {
       lst.add(r.nextInt(200));
     }
     lst.sortUnique();
-    lst.reverseInPlace();
+    lst.reverse();
     for (int i = 1; i < lst.size(); i++) {
       if (lst.get(i-1)<=lst.get(i)) {
         fail();

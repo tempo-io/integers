@@ -138,8 +138,8 @@ public class IntIteratorTests extends TestCase {
 
   public void testCursor() {
     IntProgression.Arithmetic rO = new IntProgression.Arithmetic(1,5,1);
-    for (IntIterator i: rO){
-      int b = i.value();
+    for (IntIterator ii : rO){
+      int b = ii.value();
     }
     
     WritableIntList result, expected, source;
@@ -150,9 +150,9 @@ public class IntIteratorTests extends TestCase {
     expected = new SameValuesIntList();
     expected.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
     result = new SameValuesIntList();
-    for (WritableIntListIterator i: source.writableListIterable()) {
-      result.add(i.value());
-      i.set(0, 3);
+    for (WritableIntListIterator ii : source.write()) {
+      result.add(ii.value());
+      ii.set(0, 3);
     }
     assertEquals(expected, result);
 
@@ -160,9 +160,9 @@ public class IntIteratorTests extends TestCase {
     expected.addAll(1,2,3,5);
     result = new SegmentedIntArray();
     result.addAll(1,2,3,4,5);
-    for (WritableIntListIterator i: result.writableListIterable()) {
-      if (i.value() == 4) {
-        i.remove();
+    for (WritableIntListIterator ii : result.write()) {
+      if (ii.value() == 4) {
+        ii.remove();
       }
     }
     assertEquals(expected, result);
