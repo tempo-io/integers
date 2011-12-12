@@ -35,7 +35,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   private static final #e# NIL_DUMMY_KEY = #EW#.MIN_VALUE;
   private static final #e#[] EMPTY_KEYS = new #e#[] { #EW#.MIN_VALUE };
   private static final int[] EMPTY_INDEXES = new int[] { 0 };
-  // index in arrays where the new element will be added if myRemoved is null.
+  /** Index into the backing arrays of the last entry plus 1. It is the insertion point when {@code myRemoved == null}. */
   private int myFront;
   /** Key values. */
   private #e#[] myKeys;
@@ -281,7 +281,7 @@ public class Dynamic#E#Set implements #E#Iterable {
 
   /**
    *
-   * @param n difference between futuse size and actual size
+   * @param n difference between future size and actual size
    * @return
    */
   private int[] fetchStackCache(int n) {
@@ -629,7 +629,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    * This method replaces this set's keys with values given in src and rebuilds its tree.
    * The tree is built in such a way that the difference between heights of any two leafs is 0 or 1.
    * In other words, graphical representation of a tree would look as a triangle.
-   * @param compacifyType Type of tree coloring.
+   * @param compactifyType Type of tree coloring.
    *    Tree colors can be set in different ways, 3 modes are provided (see constants):
    *    1. If there's a minimum of red nodes, adding would be fast and removing would be slow.
    *       In this mode only last-level nodes would be red (if the last level is unfilled)
@@ -639,7 +639,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    *       In this mode every 4-th level will be entirely red (except last 2 levels)
    *    The constants values are not conventional, they're actually used in the logic.
    */
-  private void from#E#Iterable(#E#Iterable src, int srcSize, int compacifyType) {
+  private void from#E#Iterable(#E#Iterable src, int srcSize, int compactifyType) {
     #e#[] newKeys;
     if (srcSize == 0)
       newKeys = EMPTY_KEYS;
@@ -650,7 +650,7 @@ public class Dynamic#E#Set implements #E#Iterable {
         newKeys[++i] = ii.value();
       }
     }
-    fromPreparedArray(newKeys, srcSize, compacifyType);
+    fromPreparedArray(newKeys, srcSize, compactifyType);
     assert checkRedBlackTreeInvariants("from#E#Iterable");
   }
 
