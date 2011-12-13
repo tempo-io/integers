@@ -105,6 +105,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   public void clear() {
     myBlack.clear();
     init();
+    modified();
     assert checkRedBlackTreeInvariants("clear");
   }
 
@@ -147,6 +148,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public void addAll(#E#List keys) {
+    modified();
     int[] ps = prepareAdd(keys.size());
     for (#E#Iterator i : keys) {
       add0(i.value(), ps);
@@ -154,6 +156,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public void addAll(Dynamic#E#Set keys) {
+    modified();
     int[] ps = prepareAdd(keys.size());
     for (#E#Iterator ii : keys) {
       add0(ii.value(), ps);
@@ -161,6 +164,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public void addAll(#e#... keys) {
+    modified();
     int[] ps = prepareAdd(keys.length);
     for (#e# key : keys) {
       add0(key, ps);
@@ -168,6 +172,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public boolean add(#e# key) {
+    modified();
     return add0(key, prepareAdd(1));
   }
 
@@ -460,10 +465,10 @@ public class Dynamic#E#Set implements #E#Iterable {
     String keyFormat = "%" + keyWidth + "d";
     for (int i = 1; i < size(); ++i) {
       sb.append(String.format(idFormat, i)).append(" | ")
-        .append(String.format(keyFormat, myKeys[i])).append(" | ")
-        .append(String.format(idFormat, myLeft[i])).append(" | ")
-        .append(String.format(idFormat, myRight[i]))
-        .append("\n");
+          .append(String.format(keyFormat, myKeys[i])).append(" | ")
+          .append(String.format(idFormat, myLeft[i])).append(" | ")
+          .append(String.format(idFormat, myRight[i]))
+          .append("\n");
     }
     return sb;
   }
@@ -471,10 +476,10 @@ public class Dynamic#E#Set implements #E#Iterable {
   private StringBuilder debugPrintNode(int node, StringBuilder sb) {
     return sb
         .append("node  ").append(node)
-      .append("\nkey   ").append(myKeys[node])
-      .append("\nleft  ").append(myLeft[node])
-      .append("\nright ").append(myRight[node])
-      .append("\ncolor ").append(myBlack.get(node) ? "BLACK\n" : "RED\n");
+        .append("\nkey   ").append(myKeys[node])
+        .append("\nleft  ").append(myLeft[node])
+        .append("\nright ").append(myRight[node])
+        .append("\ncolor ").append(myBlack.get(node) ? "BLACK\n" : "RED\n");
   }
 
   final void debugPrintTreeStructure(final PrintStream out) {
@@ -499,6 +504,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public void removeAll(#E#Iterable keys) {
+    modified();
     for (#E#Iterator i : keys) {
       remove0(i.value());
     }
@@ -506,6 +512,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public void removeAll(#e#... keys) {
+    modified();
     for (#e# key : keys) {
       remove0(key);
     }
@@ -513,6 +520,7 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public boolean remove(#e# key) {
+    modified();
     boolean ret = remove0(key);
     shrink();
     return ret;
@@ -628,6 +636,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    * (Usually it uses more memory before this method is ran)
    */
   public void compactify() {
+    modified();
     fromSorted#E#Iterable(this, size(), COMPACTIFY_BALANCED);
     assert checkRedsAmount(COMPACTIFY_BALANCED);
   }
@@ -682,10 +691,10 @@ public class Dynamic#E#Set implements #E#Iterable {
     myRight = new int[myKeys.length];
 
     int top = (int)Math.pow(2, log(2, usedSize+1));
-    // Definitoin: last pair is any pair of nodes which be#e# to one parent and don't have children.
+    // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
     // If the last level contains only left children, then, due to the way the last level is filled,
-    // last pairs (if there are any) be#e# entirely to pre-last level, and therefore are black.
-    // Otherwise they be#e# entirely to the last level and are red.
+    // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
+    // Otherwise they belong entirely to the last level and are red.
     boolean lastPairsAreBlack = (usedSize < 3*top/4);
     // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
     int startingCounter = (compactifyType == COMPACTIFY_TO_ADD) ? 0 : 2;
@@ -771,24 +780,29 @@ public class Dynamic#E#Set implements #E#Iterable {
     return new LURIterator();
   }
 
+  protected final void modified() {
+    myModCount++;
+  }
+
   private class LURIterator extends Abstract#E#Iterator {
     private #e# myValue;
     private int x = myRoot;
     private final int[] xs;
     private int xsi;
-    private final int myModCountAtCreation;
+    private final int myModCountAtCreation = myModCount;
 
     public LURIterator() {
       xs = new int[height(size())];
-      myModCountAtCreation = myModCount;
     }
 
     @Override
     public boolean hasNext() throws ConcurrentModificationException {
+      checkMod();
       return x != 0 || xsi > 0;
     }
 
     public #E#Iterator next() throws ConcurrentModificationException, NoSuchElementException {
+      checkMod();
       if (!hasNext()) throw new NoSuchElementException();
       if (x == 0) x = xs[--xsi];
       else {
@@ -805,8 +819,14 @@ public class Dynamic#E#Set implements #E#Iterable {
     }
 
     public #e# value() throws IllegalStateException {
+      checkMod();
       if (x == myRoot) throw new IllegalStateException();
       return myValue;
+    }
+
+    private void checkMod() {
+      if (myModCountAtCreation != myModCount)
+        throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
     }
   }
 }

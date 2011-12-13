@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -196,9 +197,13 @@ public class DynamicLongSetTests extends TestCase {
     LongList expected = LongArray.create(11,12,13,14,15,16);
     WritableLongList res = new SameValuesLongList();
     set.addAll(14,12,15,11,13,16);
-    for (LongIterator i : set) {
-      res.add(i.value());
-    }
+    try {
+      for (LongIterator i : set) {
+        res.add(i.value());
+        if (i.value() == 16) set.add(99);
+      }
+      fail();
+    } catch (ConcurrentModificationException e) {}
     assertEquals(expected, res);
   }
 
