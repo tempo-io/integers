@@ -133,6 +133,7 @@ public class DynamicLongSetTests extends TestCase {
       System.err.println("attempt #" + attempt);
       compare.order(anotherSetList, setList);
 
+      testFromSorted(anotherSetList);
       // testRemove runs long, so it's ran only twice
       if (attempt > 1) continue;
       testRemove(toAdd, toAdd);
@@ -140,6 +141,15 @@ public class DynamicLongSetTests extends TestCase {
       testRemove(anotherSetList, toAdd);
       testRemove(anotherSetList, anotherSetList);
     }
+  }
+
+  private void testFromSorted(LongList sorted) {
+    DynamicLongSet dynamicSet = DynamicLongSet.fromSortedList(sorted);
+    assertEquals(sorted, dynamicSet.toSortedLongArray());
+    dynamicSet = DynamicLongSet.fromSortedListToAdd(sorted);
+    assertEquals(sorted, dynamicSet.toSortedLongArray());
+    dynamicSet = DynamicLongSet.fromSortedListToRemove(sorted);
+    assertEquals(sorted, dynamicSet.toSortedLongArray());
   }
 
   private void testRemove(LongList srcAdd, LongList srcRemove) {

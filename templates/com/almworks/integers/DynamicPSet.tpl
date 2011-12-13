@@ -47,6 +47,8 @@ public class Dynamic#E#Set implements #E#Iterable {
   /** Index into key, left, right, black that denotes the current root node. */
   private int myRoot;
 
+  private int myModCount = 0;
+
   //see shrink() method
   private static final int SHRINK_FACTOR = 6; //testing. actual should be less, say, 3
   private static final int SHRINK_MIN_LENGTH = 4; //8
@@ -55,9 +57,9 @@ public class Dynamic#E#Set implements #E#Iterable {
   private static final int EXPAND_FACTOR = 2;
   // these three costants are used in building a tree from a given list of values.
   // See fromSorted#E#Iterable paramcompactifyType.
-  private static final int COMPACTIFY_TO_ADD = -1;
-  private static final int COMPACTIFY_TO_REMOVE = 1;
-  private static final int COMPACTIFY_BALANCED = 3;
+  private static final int COMPACTIFY_TO_ADD = 0;
+  private static final int COMPACTIFY_TO_REMOVE = 2;
+  private static final int COMPACTIFY_BALANCED = 4;
 
   private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
 
@@ -354,10 +356,11 @@ public class Dynamic#E#Set implements #E#Iterable {
     }
   }
 
-  private static int log10(#e# n) {
-    int log10 = 0;
-    do { log10 += 1; n /= 10L; } while (n > 0L);
-    return log10;
+  // returns the logarithm rounded up.
+  private static int log(int base, #e# n) {
+    int ret = 0;
+    do { ret += 1; n /= base; } while (n > 0L);
+    return ret;
   }
 
   private boolean checkRedBlackTreeInvariants(final String whatWasDoing) {
@@ -449,9 +452,9 @@ public class Dynamic#E#Set implements #E#Iterable {
   final StringBuilder dumpArrays(int problematicNode) {
     StringBuilder sb = new StringBuilder();
     if (problematicNode > 0) sb = debugPrintNode(problematicNode, sb);
-    int idWidth = max(log10(myFront), 4);
+    int idWidth = max(log(10, myFront), 4);
     #e# longestKey = max(abs(getMax()), abs(getMin()));
-    int keyWidth = max(log10(longestKey), 3);
+    int keyWidth = max(log(10, longestKey), 3);
     sb.append(String.format("%" + idWidth + "s | %" + keyWidth + "s | %" + idWidth + "s | %" + idWidth + "s\n", "id", "key", "left", "right"));
     String idFormat = "%" + idWidth + "d";
     String keyFormat = "%" + keyWidth + "d";
@@ -565,7 +568,10 @@ public class Dynamic#E#Set implements #E#Iterable {
       myRemoved.set(y);
     }
 
-    if (myBlack.get(y)) balanceAfterRemove(x, parentsStack, xsi);
+    if (myBlack.get(y)) {
+      balanceAfterRemove(x, parentsStack, xsi);
+      myBlack.clear(y);
+    }
 
     assert checkRedBlackTreeInvariants("remove key:" + key);
     return true;
@@ -618,33 +624,39 @@ public class Dynamic#E#Set implements #E#Iterable {
 
   /**
    * This method rebuilds this Dynamic#E#Set.
-   * After running this method, this object might use a different amount of memory than it used before.
-   * Actually, it will use memory which is needed to hold EXPAND_FACTOR*size() elements.
+   * After running this method, this object will use memory which is needed to hold size() elements.
+   * (Usually it uses more memory before this method is ran)
    */
   public void compactify() {
     fromSorted#E#Iterable(this, size(), COMPACTIFY_BALANCED);
+    assert checkRedsAmount(COMPACTIFY_BALANCED);
   }
 
   /**
-   * This method replaces this set's keys with values given in src and rebuilds its tree.
-   * The tree is built in such a way that the difference between heights of any two leafs is 0 or 1.
-   * In other words, graphical representation of a tree would look as a triangle.
+   * This method replaces this set's keys with values given in src and builds a new tree.
+   * All levels of the new tree are filled, except, probably, the last one.
+   * Levels are filled firstly with all possible left children, and only then
+   * with right children, all starting from the left side.
+   * To follow rb-restrictions, if there's an unfilled level,
+   * it's made completely red and pre-last is made completely black.
    * @param compactifyType Type of tree coloring.
-   *    Tree colors can be set in different ways, 3 modes are provided (see constants):
+   *    Definition: internal levels are all levels of a tree, except the last two if the last level is unfilled.
+   *    Internal levels can be colored in different ways, depending on how a tree will be used further.
+   *    3 modes are provided (see relevant contants):
    *    1. If there's a minimum of red nodes, adding would be fast and removing would be slow.
-   *       In this mode only last-level nodes would be red (if the last level is unfilled)
    *    2. If there's a maximum of red nodes, adding would be slow and removing would be fast.
-   *       In this mode even levels will be entirely red (except last 2 levels, whose colors are set according to rb-restrictions)
+   *       In this mode all internal even levels will be entirely red.
    *    3. If an amount of red nodes is between min and max, there'll be a balance between remove and add average timing.
-   *       In this mode every 4-th level will be entirely red (except last 2 levels)
-   *    The constants values are not conventional, they're actually used in the logic.
+   *       In this mode every (2+4*k)-th internal level will be entirely red
+   *    Values of the constants were not chosen randomly, they're actually used in the logic.
    */
   private void fromSorted#E#Iterable(#E#Iterable src, int srcSize, int compactifyType) {
     #e#[] newKeys;
     if (srcSize == 0)
       newKeys = EMPTY_KEYS;
     else {
-      newKeys = new #e#[Math.max(SHRINK_MIN_LENGTH, srcSize*EXPAND_FACTOR)];
+      int arraySize = (compactifyType == COMPACTIFY_TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
+      newKeys = new #e#[Math.max(SHRINK_MIN_LENGTH, arraySize)];
       int i = 0;
       for (#E#Iterator ii : src) {
         newKeys[++i] = ii.value();
@@ -669,11 +681,15 @@ public class Dynamic#E#Set implements #E#Iterable {
     myLeft = new int[myKeys.length];
     myRight = new int[myKeys.length];
 
-    int top = 2;
-    while (top <= usedSize) top *= 2;
-    // todo explain
-    boolean lastPairsAreBlack = (usedSize < 3*top/4) || usedSize == 1;
-    myRoot = rearrangeStep(1, usedSize, compactifyType, compactifyType, lastPairsAreBlack);
+    int top = (int)Math.pow(2, log(2, usedSize+1));
+    // Definitoin: last pair is any pair of nodes which be#e# to one parent and don't have children.
+    // If the last level contains only left children, then, due to the way the last level is filled,
+    // last pairs (if there are any) be#e# entirely to pre-last level, and therefore are black.
+    // Otherwise they be#e# entirely to the last level and are red.
+    boolean lastPairsAreBlack = (usedSize < 3*top/4);
+    // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
+    int startingCounter = (compactifyType == COMPACTIFY_TO_ADD) ? 0 : 2;
+    myRoot = rearrangeStep(1, usedSize, startingCounter, compactifyType, lastPairsAreBlack);
   }
 
   private int rearrangeStep(int offset, int length, int colorCounter, int maxCounter, boolean lpab) {
@@ -687,12 +703,12 @@ public class Dynamic#E#Set implements #E#Iterable {
     } else {
       // calculating the node color
       boolean isBlack = true;
-      if (colorCounter == 0) {
+      if (colorCounter == 1) {
         isBlack = false;
         colorCounter = maxCounter;
-      } else if (colorCounter > 0)
+      } else if (colorCounter > 1)
         colorCounter--;
-      
+
       if (length == 3 && !lpab)
         myBlack.set(index);
       else
@@ -723,12 +739,32 @@ public class Dynamic#E#Set implements #E#Iterable {
   public static Dynamic#E#Set fromSortedListToRemove(#E#List src) {
     return fromSortedList0(src, COMPACTIFY_TO_REMOVE);
   }
-  
+
   private static Dynamic#E#Set fromSortedList0(#E#List src, int compactifyType) {
     assert #E#Collections.isSorted(src.toNativeArray());
     Dynamic#E#Set res = new Dynamic#E#Set();
     res.fromSorted#E#Iterable(src, src.size(), compactifyType);
+    assert res.checkRedsAmount(compactifyType);
     return res;
+  }
+
+  private boolean checkRedsAmount(int compactifyType) {
+    int sz = size();
+    int redsExpected = 0;
+    if (compactifyType == COMPACTIFY_BALANCED || compactifyType == COMPACTIFY_TO_REMOVE) {
+      int internalRedLevels = (log(2, sz+1))/compactifyType + compactifyType/2 - 2;
+      while (internalRedLevels > 0) {
+        int levelHeight = (internalRedLevels-1)*compactifyType + 2;
+        redsExpected += Math.pow(2, levelHeight-1);
+        internalRedLevels--;
+      }
+    }
+    int top = (int)Math.pow(2, log(2, sz));
+    if (top != sz)
+      redsExpected += sz - top/2 + 1;
+    int redsActual = sz - myBlack.cardinality() + 1;
+    assert redsExpected == redsActual : "reds amount is " + redsActual + ", should be " + redsExpected;
+    return true;
   }
 
   public #E#Iterator iterator() {
@@ -740,9 +776,11 @@ public class Dynamic#E#Set implements #E#Iterable {
     private int x = myRoot;
     private final int[] xs;
     private int xsi;
+    private final int myModCountAtCreation;
 
     public LURIterator() {
       xs = new int[height(size())];
+      myModCountAtCreation = myModCount;
     }
 
     @Override
