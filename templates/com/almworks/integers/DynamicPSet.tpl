@@ -325,7 +325,8 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   /**
-   * Visits the tree in the ULR order (up-left-right.)
+   * Visits the tree in the ULR order (up-left-right.)<br/>
+   * <strong>Warning:</strong> its initial purpose was to create a visual representation of the tree, so the visitor can be invoked on NIL elements (in case when an element has only one child, for completeness of the visual representation.)
    * @param auxInit initial value for the auxiliary function accumulated on the paths from root to leaves
    * @param visitor arguments:
    * <ol>
@@ -336,6 +337,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    * */
   private void visitULR(int auxInit, IntFunction2 visitor) {
     int x = myRoot;
+    if (x == 0) return;
     int auxVal = auxInit;
     int height = height(size());
     IntArray xs = new IntArray(height);
@@ -429,20 +431,21 @@ public class Dynamic#E#Set implements #E#Iterable {
     });
 
     // 6. any unreachable node should be contained in myRemoved
-    BitSet unremoved = new BitSet(myFront);
-    if (myRoot != 0) unremoved.set(myRoot);
-    for (int i = 1; i < myFront; i++) {
-      if (myLeft[i] > 0) unremoved.set(myLeft[i]);
-      if (myRight[i] > 0) unremoved.set(myRight[i]);
-    }
-    if (myRemoved == null)
-      assert unremoved.cardinality() == size();
+    final BitSet unremoved = new BitSet(myFront);
+    visitULR(0, new IntFunction2() {
+      @Override
+      public int invoke(int x, int _) {
+        if (x != 0) unremoved.set(x);
+        return _;
+      }
+    });
+    if (myRemoved == null) assert unremoved.cardinality() == size() : whatWasDoing + "\n" + size() + ' ' + unremoved.cardinality() + '\n' + unremoved + '\n' + dumpArrays(0);
     else {
-      assert myRemoved.length() <= myFront;
+      assert myRemoved.length() <= myFront : myFront + "\n" + myRemoved + "\n" + debugMegaPrint(whatWasDoing, 0);
       BitSet xor = new BitSet(myFront);
       xor.or(myRemoved);
       xor.xor(unremoved);
-      assert (xor.nextClearBit(1) == myFront);
+      assert xor.nextClearBit(1) == myFront : myFront + " " + xor.nextClearBit(1) + '\n' + xor + '\n' + myRemoved + '\n' + unremoved + '\n' + debugMegaPrint(whatWasDoing, 0);
     }
 
     return true;
