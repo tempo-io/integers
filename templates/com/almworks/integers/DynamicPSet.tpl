@@ -109,6 +109,10 @@ public class Dynamic#E#Set implements #E#Iterable {
     assert checkRedBlackTreeInvariants("clear");
   }
 
+  private void modified() {
+    myModCount++;
+  }
+
   /** @return {@link #EW##MIN_VALUE} in case the set is empty */
   public #e# getMax() {
     return myKeys[traverseToEnd(myRight)];
@@ -272,11 +276,11 @@ public class Dynamic#E#Set implements #E#Iterable {
 
   /** @return array for holding the stack for tree traversal */
   private int[] prepareAdd(int n) {
-    grow(n);
+    maybeGrow(n);
     return fetchStackCache(n);
   }
 
-  private void grow(int n) {
+  private void maybeGrow(int n) {
     int futureSize = size() + n + 1;
     myKeys = #E#Collections.ensureCapacity(myKeys, futureSize);
     myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
@@ -310,6 +314,285 @@ public class Dynamic#E#Set implements #E#Iterable {
       n >>= 1;
     }
     return lg2 << 1;
+  }
+
+  /**
+   * This method rebuilds this Dynamic#E#Set.
+   * After running this method, this object will use memory which is needed to hold size() elements.
+   * (Usually it uses more memory before this method is ran)
+   * This method builds a new tree based on the same keyset.
+   * All levels of the new tree are filled, except, probably, the last one.
+   * Levels are filled firstly with all possible left children, and only then
+   * with right children, all starting from the left side.
+   * To follow rb-restrictions, if there's an unfilled level,
+   * it's made completely red and pre-last is made completely black.
+   * All the other levels are made black, except every 4-th level, starting from level 2,
+   * which are made red. This type of coloring guarantees a balance between average times taken
+   * by subsequent add and remove operations.
+   */
+  public void compactify() {
+    modified();
+    fromSorted#E#Iterable(this, size(), COMPACTIFY_BALANCED);
+    assert checkRedsAmount(COMPACTIFY_BALANCED);
+  }
+
+  /**
+   * This method replaces this set's keys with values given in src and builds a new tree.
+   * All levels of the new tree are filled, except, probably, the last one.
+   * Levels are filled firstly with all possible left children, and only then
+   * with right children, all starting from the left side.
+   * To follow rb-restrictions, if there's an unfilled level,
+   * it's made completely red and pre-last is made completely black.
+   * @param compactifyType Type of tree coloring.
+   *    Definition: internal levels are all levels of a tree, except the last two if the last level is unfilled.
+   *    Internal levels can be colored in different ways, depending on how a tree will be used further.
+   *    3 modes are provided (see relevant contants):
+   *    1. If there's a minimum of red nodes, adding would be fast and removing would be slow.
+   *       In this mode no internal levels will be red.
+   *    2. If there's a maximum of red nodes, adding would be slow and removing would be fast.
+   *       In this mode all internal even levels will be entirely red.
+   *    3. If an amount of red nodes is between min and max, there'll be a balance between remove and add average timing.
+   *       In this mode every (2+4*k)-th internal level will be entirely red
+   *    Values of the constants were not chosen randomly, they're actually used in the logic.
+   */
+  private void fromSorted#E#Iterable(#E#Iterable src, int srcSize, int compactifyType) {
+    #e#[] newKeys;
+    if (srcSize == 0)
+      newKeys = EMPTY_KEYS;
+    else {
+      int arraySize = (compactifyType == COMPACTIFY_TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
+      newKeys = new #e#[Math.max(SHRINK_MIN_LENGTH, arraySize)];
+      int i = 0;
+      for (#E#Iterator ii : src) {
+        newKeys[++i] = ii.value();
+        assert (i==1 || newKeys[i] >= newKeys[i-1]) : newKeys;
+      }
+    }
+    fromPreparedArray(newKeys, srcSize, compactifyType);
+    assert checkRedBlackTreeInvariants("fromSorted#E#Iterable");
+  }
+
+  /**
+   * @param newKeys array which will become the new myKeys
+   * @param usedSize a number of actual elements in newKeys
+   */
+  private void fromPreparedArray(#e#[] newKeys, int usedSize, int compactifyType) {
+    myBlack.clear();
+    init();
+    myKeys = newKeys;
+    myFront = usedSize+1;
+    if (usedSize == 0)
+      return;
+    myLeft = new int[myKeys.length];
+    myRight = new int[myKeys.length];
+
+    int levels = log(2, usedSize);
+    int top = (int)Math.pow(2, levels);
+    // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
+    // If the last level contains only left children, then, due to the way the last level is filled,
+    // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
+    // Otherwise they belong entirely to the last level and are red.
+    boolean lastPairsAreBlack;
+    if (top != usedSize + 1)
+      lastPairsAreBlack = (usedSize < 3*top/4);
+    else
+      lastPairsAreBlack = (compactifyType == COMPACTIFY_TO_ADD) || (levels + compactifyType - 2) % compactifyType != 0;
+    // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
+    int startingCounter = (compactifyType == COMPACTIFY_TO_ADD) ? 0 : 2;
+    myRoot = rearrangeStep(1, usedSize, startingCounter, compactifyType, lastPairsAreBlack);
+  }
+
+  private int rearrangeStep(int offset, int length, int colorCounter, int maxCounter, boolean lpab) {
+    int halfLength = length/2;
+    int index = offset + halfLength;
+    if (length == 1)
+      myBlack.set(index, lpab);
+    else if (length == 2) {
+      myBlack.set(index);
+      myLeft[index] = offset;
+    } else {
+      // calculating the node color
+      boolean isBlack = true;
+      if (colorCounter == 1) {
+        isBlack = false;
+        colorCounter = maxCounter;
+      } else if (colorCounter > 1)
+        colorCounter--;
+
+      if (length == 3 && !lpab)
+        myBlack.set(index);
+      else
+        myBlack.set(index, isBlack);
+      myLeft[index] = rearrangeStep(offset, halfLength, colorCounter, maxCounter, lpab);
+      myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, colorCounter, maxCounter, lpab);
+    }
+    return index;
+  }
+
+  public static Dynamic#E#Set fromSortedList(#E#List src) {
+    return fromSortedList0(src, COMPACTIFY_BALANCED);
+  }
+
+  public static Dynamic#E#Set fromSortedListToAdd(#E#List src) {
+    return fromSortedList0(src, COMPACTIFY_TO_ADD);
+  }
+
+  public static Dynamic#E#Set fromSortedListToRemove(#E#List src) {
+    return fromSortedList0(src, COMPACTIFY_TO_REMOVE);
+  }
+
+  private static Dynamic#E#Set fromSortedList0(#E#List src, int compactifyType) {
+    Dynamic#E#Set res = new Dynamic#E#Set();
+    res.fromSorted#E#Iterable(src, src.size(), compactifyType);
+    assert res.checkRedsAmount(compactifyType);
+    return res;
+  }
+
+  public #E#Iterator iterator() {
+    return new KeysIterator();
+  }
+
+  public void removeAll(#E#Iterable keys) {
+    modified();
+    int[] parentsStack = fetchStackCache(0);
+    for (#E#Iterator i : keys) {
+      remove0(i.value(), parentsStack);
+    }
+    maybeShrink();
+  }
+
+  public void removeAll(#e#... keys) {
+    modified();
+    int[] parentsStack = fetchStackCache(0);
+    for (#e# key : keys) {
+      remove0(key, parentsStack);
+    }
+    maybeShrink();
+  }
+
+  public boolean remove(#e# key) {
+    modified();
+    boolean ret = remove0(key, fetchStackCache(0));
+    maybeShrink();
+    return ret;
+  }
+
+  private void maybeShrink() {
+    int s = size();
+    if (s > SHRINK_MIN_LENGTH && s*SHRINK_FACTOR < myKeys.length)
+      compactify();
+  }
+
+  private boolean remove0(#e# key, int[] parentsStack) {
+    if (isEmpty()) return false;
+
+    int xsi = -1;
+
+    //searching for an index Z which contains the key.
+    int z = myRoot;
+    while (myKeys[z] != key) {
+      if (z == 0)
+        return false;
+      parentsStack[++xsi] = z;
+      z = key < myKeys[z] ? myLeft[z] : myRight[z];
+    }
+
+    // searching for an index Y which will be actually cleared.
+    int y = z;
+    if (myLeft[z] != 0 && myRight[z] != 0) {
+      parentsStack[++xsi] = y;
+      y = myRight[y];
+      while (myLeft[y] != 0) {
+        parentsStack[++xsi] = y;
+        y = myLeft[y];
+      }
+    }
+    // if actually other node was removed, then we should copy its content.
+    if (z != y) myKeys[z] = myKeys[y];
+
+    // searching for Y's child X. Y can't have 2 children.
+    int x = (myLeft[y] != 0) ? myLeft[y] : myRight[y];
+
+    // Removing a node.
+    // Linking parent of Y to X (or myRoot if there's no parent). This way Y becomes "removed" (unreachable)
+    if (y == myRoot) myRoot = x;
+    else {
+      int parentOfY = parentsStack[xsi];
+      if (myLeft[parentOfY] == y)
+        myLeft[parentOfY] = x;
+      else myRight[parentOfY] = x;
+    }
+    myKeys[y] = 0;
+    myLeft[y] = 0;
+    myRight[y] = 0;
+    if (y == myFront-1)
+      myFront--;
+    else {
+      if (myRemoved == null) myRemoved = new BitSet(y+1);
+      myRemoved.set(y);
+    }
+
+    if (myBlack.get(y)) {
+      balanceAfterRemove(x, parentsStack, xsi);
+      myBlack.clear(y);
+    }
+
+    assert checkRedBlackTreeInvariants("remove key:" + key);
+    return true;
+  }
+
+  private void balanceAfterRemove(int x, int[] parentsStack, int xsi) {
+    int[] mainBranch, otherBranch;
+    int parentOfX, grandParentOfX, w;
+    while (x != myRoot && myBlack.get(x)) {
+      parentOfX = parentsStack[xsi];
+      if (myLeft[parentOfX] == x) {
+        mainBranch = myLeft;
+        otherBranch = myRight;
+      } else {
+        mainBranch = myRight;
+        otherBranch = myLeft;
+      }
+      // W is X's uncle
+      w = otherBranch[parentOfX];
+      if (!myBlack.get(w)) {
+        myBlack.set(w);
+        myBlack.clear(parentOfX);
+        grandParentOfX = (xsi == 0) ? 0 : parentsStack[xsi-1];
+        rotate(parentOfX, grandParentOfX, mainBranch, otherBranch);
+        parentsStack[xsi] = w;
+        parentsStack[++xsi] = parentOfX;
+        w = otherBranch[parentOfX];
+      }
+      if (myBlack.get(mainBranch[w]) && myBlack.get(otherBranch[w])) {
+        myBlack.clear(w);
+        x = parentOfX;
+        xsi--;
+      } else {
+        if (myBlack.get(otherBranch[w])) {
+          myBlack.set(mainBranch[w]);
+          myBlack.clear(w);
+          rotate(w, parentOfX, otherBranch, mainBranch);
+          w = otherBranch[parentOfX];
+        }
+        myBlack.set(w, myBlack.get(parentOfX));
+        myBlack.set(parentOfX);
+        myBlack.set(otherBranch[w]);
+        grandParentOfX = (xsi == 0) ? 0 : parentsStack[xsi-1];
+        rotate(parentOfX, grandParentOfX, mainBranch, otherBranch);
+        x = myRoot;
+      }
+    }
+    myBlack.set(x);
+  }
+
+  public #E#Array toSorted#E#Array() {
+    #e#[] arr = new #e#[size()];
+    int i = 0;
+    for (IntIterator it : new LURIterator()) {
+      arr[i++] = myKeys[it.value()];
+    }
+    return new #E#Array(arr);
   }
 
   @Override
@@ -363,7 +646,7 @@ public class Dynamic#E#Set implements #E#Iterable {
     }
   }
 
-  // returns the logarithm rounded up.
+  // returns the logarithm of n+1, rounded up.
   private static int log(int base, #e# n) {
     int ret = 0;
     do { ret += 1; n /= base; } while (n > 0L);
@@ -500,271 +783,14 @@ public class Dynamic#E#Set implements #E#Iterable {
     });
   }
 
-  private void shrink() {
-    int s = size();
-    if (s > SHRINK_MIN_LENGTH && s*SHRINK_FACTOR < myKeys.length)
-      compactify();
-  }
-
-  public void removeAll(#E#Iterable keys) {
-    modified();
-    for (#E#Iterator i : keys) {
-      remove0(i.value());
-    }
-    shrink();
-  }
-
-  public void removeAll(#e#... keys) {
-    modified();
-    for (#e# key : keys) {
-      remove0(key);
-    }
-    shrink();
-  }
-
-  public boolean remove(#e# key) {
-    modified();
-    boolean ret = remove0(key);
-    shrink();
-    return ret;
-  }
-
-  private boolean remove0(#e# key) {
-    if (isEmpty()) return false;
-
-    int[] parentsStack = fetchStackCache(0);
-    int xsi = -1;
-
-    //searching for an index Z which contains the key.
-    int z = myRoot;
-    while (myKeys[z] != key) {
-      if (z == 0)
-        return false;
-      parentsStack[++xsi] = z;
-      z = key < myKeys[z] ? myLeft[z] : myRight[z];
-    }
-
-    // searching for an index Y which will be actually cleared.
-    int y = z;
-    if (myLeft[z] != 0 && myRight[z] != 0) {
-      parentsStack[++xsi] = y;
-      y = myRight[y];
-      while (myLeft[y] != 0) {
-        parentsStack[++xsi] = y;
-        y = myLeft[y];
-      }
-    }
-    // if actually other node was removed, then we should copy its content.
-    if (z != y) myKeys[z] = myKeys[y];
-
-    // searching for Y's child X. Y can't have 2 children.
-    int x = (myLeft[y] != 0) ? myLeft[y] : myRight[y];
-
-    // Removing a node.
-    // Linking parent of Y to X (or myRoot if there's no parent). This way Y becomes "removed" (unreachable)
-    if (y == myRoot) myRoot = x;
-    else {
-      int parentOfY = parentsStack[xsi];
-      if (myLeft[parentOfY] == y)
-        myLeft[parentOfY] = x;
-      else myRight[parentOfY] = x;
-    }
-    myKeys[y] = 0;
-    myLeft[y] = 0;
-    myRight[y] = 0;
-    if (y == myFront-1)
-      myFront--;
-    else {
-      if (myRemoved == null) myRemoved = new BitSet(y+1);
-      myRemoved.set(y);
-    }
-
-    if (myBlack.get(y)) {
-      balanceAfterRemove(x, parentsStack, xsi);
-      myBlack.clear(y);
-    }
-
-    assert checkRedBlackTreeInvariants("remove key:" + key);
-    return true;
-  }
-
-  private void balanceAfterRemove(int x, int[] parentsStack, int xsi) {
-    int[] mainBranch, otherBranch;
-    int parentOfX, grandParentOfX, w;
-    while (x != myRoot && myBlack.get(x)) {
-      parentOfX = parentsStack[xsi];
-      if (myLeft[parentOfX] == x) {
-        mainBranch = myLeft;
-        otherBranch = myRight;
-      } else {
-        mainBranch = myRight;
-        otherBranch = myLeft;
-      }
-      // W is X's uncle
-      w = otherBranch[parentOfX];
-      if (!myBlack.get(w)) {
-        myBlack.set(w);
-        myBlack.clear(parentOfX);
-        grandParentOfX = (xsi == 0) ? 0 : parentsStack[xsi-1];
-        rotate(parentOfX, grandParentOfX, mainBranch, otherBranch);
-        parentsStack[xsi] = w;
-        parentsStack[++xsi] = parentOfX;
-        w = otherBranch[parentOfX];
-      }
-      if (myBlack.get(mainBranch[w]) && myBlack.get(otherBranch[w])) {
-        myBlack.clear(w);
-        x = parentOfX;
-        xsi--;
-      } else {
-        if (myBlack.get(otherBranch[w])) {
-          myBlack.set(mainBranch[w]);
-          myBlack.clear(w);
-          rotate(w, parentOfX, otherBranch, mainBranch);
-          w = otherBranch[parentOfX];
-        }
-        myBlack.set(w, myBlack.get(parentOfX));
-        myBlack.set(parentOfX);
-        myBlack.set(otherBranch[w]);
-        grandParentOfX = (xsi == 0) ? 0 : parentsStack[xsi-1];
-        rotate(parentOfX, grandParentOfX, mainBranch, otherBranch);
-        x = myRoot;
-      }
-    }
-    myBlack.set(x);
-  }
-
-  /**
-   * This method rebuilds this Dynamic#E#Set.
-   * After running this method, this object will use memory which is needed to hold size() elements.
-   * (Usually it uses more memory before this method is ran)
-   */
-  public void compactify() {
-    modified();
-    fromSorted#E#Iterable(this, size(), COMPACTIFY_BALANCED);
-    assert checkRedsAmount(COMPACTIFY_BALANCED);
-  }
-
-  /**
-   * This method replaces this set's keys with values given in src and builds a new tree.
-   * All levels of the new tree are filled, except, probably, the last one.
-   * Levels are filled firstly with all possible left children, and only then
-   * with right children, all starting from the left side.
-   * To follow rb-restrictions, if there's an unfilled level,
-   * it's made completely red and pre-last is made completely black.
-   * @param compactifyType Type of tree coloring.
-   *    Definition: internal levels are all levels of a tree, except the last two if the last level is unfilled.
-   *    Internal levels can be colored in different ways, depending on how a tree will be used further.
-   *    3 modes are provided (see relevant contants):
-   *    1. If there's a minimum of red nodes, adding would be fast and removing would be slow.
-   *    2. If there's a maximum of red nodes, adding would be slow and removing would be fast.
-   *       In this mode all internal even levels will be entirely red.
-   *    3. If an amount of red nodes is between min and max, there'll be a balance between remove and add average timing.
-   *       In this mode every (2+4*k)-th internal level will be entirely red
-   *    Values of the constants were not chosen randomly, they're actually used in the logic.
-   */
-  private void fromSorted#E#Iterable(#E#Iterable src, int srcSize, int compactifyType) {
-    #e#[] newKeys;
-    if (srcSize == 0)
-      newKeys = EMPTY_KEYS;
-    else {
-      int arraySize = (compactifyType == COMPACTIFY_TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
-      newKeys = new #e#[Math.max(SHRINK_MIN_LENGTH, arraySize)];
-      int i = 0;
-      for (#E#Iterator ii : src) {
-        newKeys[++i] = ii.value();
-        assert (i==1 || newKeys[i] >= newKeys[i-1]);
-      }
-    }
-    fromPreparedArray(newKeys, srcSize, compactifyType);
-    assert checkRedBlackTreeInvariants("fromSorted#E#Iterable");
-  }
-
-  /**
-   * @param newKeys array which will become the new myKeys
-   * @param usedSize a number of actual elements in newKeys
-   */
-  private void fromPreparedArray(#e#[] newKeys, int usedSize, int compactifyType) {
-    myBlack.clear();
-    init();
-    myKeys = newKeys;
-    myFront = usedSize+1;
-    if (usedSize == 0)
-      return;
-    myLeft = new int[myKeys.length];
-    myRight = new int[myKeys.length];
-
-    int top = (int)Math.pow(2, log(2, usedSize+1));
-    // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
-    // If the last level contains only left children, then, due to the way the last level is filled,
-    // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
-    // Otherwise they belong entirely to the last level and are red.
-    boolean lastPairsAreBlack = (usedSize < 3*top/4);
-    // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
-    int startingCounter = (compactifyType == COMPACTIFY_TO_ADD) ? 0 : 2;
-    myRoot = rearrangeStep(1, usedSize, startingCounter, compactifyType, lastPairsAreBlack);
-  }
-
-  private int rearrangeStep(int offset, int length, int colorCounter, int maxCounter, boolean lpab) {
-    int halfLength = length/2;
-    int index = offset + halfLength;
-    if (length == 1)
-      myBlack.set(index, lpab);
-    else if (length == 2) {
-      myBlack.set(index);
-      myLeft[index] = offset;
-    } else {
-      // calculating the node color
-      boolean isBlack = true;
-      if (colorCounter == 1) {
-        isBlack = false;
-        colorCounter = maxCounter;
-      } else if (colorCounter > 1)
-        colorCounter--;
-
-      if (length == 3 && !lpab)
-        myBlack.set(index);
-      else
-        myBlack.set(index, isBlack);
-      myLeft[index] = rearrangeStep(offset, halfLength, colorCounter, maxCounter, lpab);
-      myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, colorCounter, maxCounter, lpab);
-    }
-    return index;
-  }
-
-  public #E#Array toSorted#E#Array() {
-    #e#[] arr = new #e#[size()];
-    int i = 0;
-    for (#E#Iterator it : this) {
-      arr[i++] = it.value();
-    }
-    return new #E#Array(arr);
-  }
-
-  public static Dynamic#E#Set fromSortedList(#E#List src) {
-    return fromSortedList0(src, COMPACTIFY_BALANCED);
-  }
-
-  public static Dynamic#E#Set fromSortedListToAdd(#E#List src) {
-    return fromSortedList0(src, COMPACTIFY_TO_ADD);
-  }
-
-  public static Dynamic#E#Set fromSortedListToRemove(#E#List src) {
-    return fromSortedList0(src, COMPACTIFY_TO_REMOVE);
-  }
-
-  private static Dynamic#E#Set fromSortedList0(#E#List src, int compactifyType) {
-    assert #E#Collections.isSorted(src.toNativeArray());
-    Dynamic#E#Set res = new Dynamic#E#Set();
-    res.fromSorted#E#Iterable(src, src.size(), compactifyType);
-    assert res.checkRedsAmount(compactifyType);
-    return res;
-  }
-
   private boolean checkRedsAmount(int compactifyType) {
     int sz = size();
     int redsExpected = 0;
     if (compactifyType == COMPACTIFY_BALANCED || compactifyType == COMPACTIFY_TO_REMOVE) {
-      int internalRedLevels = (log(2, sz+1))/compactifyType + compactifyType/2 - 2;
+      int internalLevels = log(2, sz);
+      if (Math.pow(2,internalLevels) != sz + 1)
+        internalLevels = internalLevels - 2;
+      int internalRedLevels = (internalLevels+compactifyType-2)/compactifyType;
       while (internalRedLevels > 0) {
         int levelHeight = (internalRedLevels-1)*compactifyType + 2;
         redsExpected += Math.pow(2, levelHeight-1);
@@ -772,40 +798,56 @@ public class Dynamic#E#Set implements #E#Iterable {
       }
     }
     int top = (int)Math.pow(2, log(2, sz));
-    if (top != sz)
+    if (top != sz+1)
       redsExpected += sz - top/2 + 1;
     int redsActual = sz - myBlack.cardinality() + 1;
-    assert redsExpected == redsActual : "reds amount is " + redsActual + ", should be " + redsExpected;
+    assert redsExpected == redsActual : sz + " " + redsActual + " " + redsExpected;
+    System.out.println(sz + ": " + redsActual);
     return true;
   }
 
-  public #E#Iterator iterator() {
-    return new LURIterator();
+  private class KeysIterator extends Abstract#E#Iterator {
+    private LURIterator myIterator = new LURIterator();
+    private final int myModCountAtCreation = myModCount;
+
+    @Override
+    public boolean hasNext() throws ConcurrentModificationException {
+      checkMod();
+      return myIterator.hasNext();
+    }
+
+    public #E#Iterator next() throws ConcurrentModificationException, NoSuchElementException {
+      checkMod();
+      myIterator.next();
+      return this;
+    }
+
+    public #e# value() throws IllegalStateException {
+      checkMod();
+      return myKeys[myIterator.value()];
+    }
+
+    private void checkMod() {
+      if (myModCountAtCreation != myModCount)
+        throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
+    }
   }
 
-  protected final void modified() {
-    myModCount++;
-  }
-
-  private class LURIterator extends Abstract#E#Iterator {
-    private #e# myValue;
+  private class LURIterator extends AbstractIntIterator {
+    private int myValue;
     private int x = myRoot;
     private final int[] xs;
     private int xsi;
-    private final int myModCountAtCreation = myModCount;
 
     public LURIterator() {
       xs = new int[height(size())];
     }
 
-    @Override
     public boolean hasNext() throws ConcurrentModificationException {
-      checkMod();
       return x != 0 || xsi > 0;
     }
 
-    public #E#Iterator next() throws ConcurrentModificationException, NoSuchElementException {
-      checkMod();
+    public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (!hasNext()) throw new NoSuchElementException();
       if (x == 0) x = xs[--xsi];
       else {
@@ -816,20 +858,14 @@ public class Dynamic#E#Set implements #E#Iterable {
           l = myLeft[x];
         }
       }
-      myValue = myKeys[x];
+      myValue = x;
       x = myRight[x];
       return this;
     }
 
-    public #e# value() throws IllegalStateException {
-      checkMod();
+    public int value() throws IllegalStateException {
       if (x == myRoot) throw new IllegalStateException();
       return myValue;
-    }
-
-    private void checkMod() {
-      if (myModCountAtCreation != myModCount)
-        throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
     }
   }
 }
