@@ -219,6 +219,10 @@ target(name: 'javadoc') {
       pathelement(path: generatedJavaDir)
       pathelement(path: javaDir)
     }
+    classpath {
+      pathelement(path: "$rootDir/lib/junit.jar")
+      pathelement(path: "$rootDir/lib/annotations.jar")
+    }
   }
   ant.jar(basedir: "$buildDir/javadoc", destfile: "$deliverDir/$jarName-javadoc.jar",)
 }
