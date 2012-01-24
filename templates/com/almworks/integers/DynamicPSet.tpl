@@ -57,9 +57,9 @@ public class Dynamic#E#Set implements #E#Iterable {
   private static final int EXPAND_FACTOR = 2;
   // these three costants are used in building a tree from a given list of values.
   // See fromSorted#E#Iterable paramcompactifyType.
-  private static final int COMPACTIFY_TO_ADD = 0;
-  private static final int COMPACTIFY_TO_REMOVE = 2;
-  private static final int COMPACTIFY_BALANCED = 4;
+  public static final int COMPACTIFY_TO_ADD = 0;
+  public static final int COMPACTIFY_TO_REMOVE = 2;
+  public static final int COMPACTIFY_BALANCED = 4;
 
   private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
 
@@ -363,6 +363,7 @@ public class Dynamic#E#Set implements #E#Iterable {
       int arraySize = (compactifyType == COMPACTIFY_TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
       newKeys = new #e#[Math.max(SHRINK_MIN_LENGTH, arraySize)];
       int i = 0;
+      newKeys[0] = #EW#.MIN_VALUE;
       for (#E#Iterator ii : src) {
         newKeys[++i] = ii.value();
         assert (i==1 || newKeys[i] >= newKeys[i-1]) : newKeys;
@@ -507,14 +508,11 @@ public class Dynamic#E#Set implements #E#Iterable {
         y = myLeft[y];
       }
     }
-    // if actually other node was removed, then we should copy its content.
     if (z != y) myKeys[z] = myKeys[y];
 
-    // searching for Y's child X. Y can't have 2 children.
+    // Child of Y. Y can't have 2 children.
     int x = (myLeft[y] != 0) ? myLeft[y] : myRight[y];
 
-    // Removing a node.
-    // Linking parent of Y to X (or myRoot if there's no parent). This way Y becomes "removed" (unreachable)
     if (y == myRoot) myRoot = x;
     else {
       int parentOfY = parentsStack[xsi];
@@ -522,15 +520,7 @@ public class Dynamic#E#Set implements #E#Iterable {
         myLeft[parentOfY] = x;
       else myRight[parentOfY] = x;
     }
-    myKeys[y] = 0;
-    myLeft[y] = 0;
-    myRight[y] = 0;
-    if (y == myFront-1)
-      myFront--;
-    else {
-      if (myRemoved == null) myRemoved = new BitSet(y+1);
-      myRemoved.set(y);
-    }
+    free(y);
 
     if (myBlack.get(y)) {
       balanceAfterRemove(x, parentsStack, xsi);
@@ -541,9 +531,21 @@ public class Dynamic#E#Set implements #E#Iterable {
     return true;
   }
 
+  private void free(int y) {
+    myKeys[y] = 0;
+    myLeft[y] = 0;
+    myRight[y] = 0;
+    if (y == myFront-1)
+      myFront--;
+    else {
+      if (myRemoved == null) myRemoved = new BitSet(y+1);
+      myRemoved.set(y);
+    }
+  }
+
   private void balanceAfterRemove(int x, int[] parentsStack, int xsi) {
     int[] mainBranch, otherBranch;
-    int parentOfX, grandParentOfX, w;
+    int parentOfX, w;
     while (x != myRoot && myBlack.get(x)) {
       parentOfX = parentsStack[xsi];
       if (myLeft[parentOfX] == x) {
@@ -553,13 +555,12 @@ public class Dynamic#E#Set implements #E#Iterable {
         mainBranch = myRight;
         otherBranch = myLeft;
       }
-      // W is X's uncle
       w = otherBranch[parentOfX];
       if (!myBlack.get(w)) {
+        // then loop is also finished
         myBlack.set(w);
         myBlack.clear(parentOfX);
-        grandParentOfX = (xsi == 0) ? 0 : parentsStack[xsi-1];
-        rotate(parentOfX, grandParentOfX, mainBranch, otherBranch);
+        rotate(parentOfX, getLastOrNil(parentsStack, xsi-1), mainBranch, otherBranch);
         parentsStack[xsi] = w;
         parentsStack[++xsi] = parentOfX;
         w = otherBranch[parentOfX];
@@ -578,8 +579,7 @@ public class Dynamic#E#Set implements #E#Iterable {
         myBlack.set(w, myBlack.get(parentOfX));
         myBlack.set(parentOfX);
         myBlack.set(otherBranch[w]);
-        grandParentOfX = (xsi == 0) ? 0 : parentsStack[xsi-1];
-        rotate(parentOfX, grandParentOfX, mainBranch, otherBranch);
+        rotate(parentOfX, getLastOrNil(parentsStack, xsi-1), mainBranch, otherBranch);
         x = myRoot;
       }
     }
@@ -659,6 +659,13 @@ public class Dynamic#E#Set implements #E#Iterable {
     assert myFront >= 1 : whatWasDoing + " " + myFront;
     assert (size() == 0) == isEmpty() : whatWasDoing + " " + myFront + ' ' + myRoot;
 
+    // unnecessary requirements, though following them makes the structure more clear.
+    assert myKeys[0] == #EW#.MIN_VALUE : whatWasDoing + "\n" + myKeys[0];
+    assert myLeft[0] == 0  : whatWasDoing + "\n" + myLeft[0];
+    assert myRight[0] == 0 : whatWasDoing + "\n" + myRight[0];
+    assert myBlack.get(0) : whatWasDoing;
+
+
     final int[] lastBlackHeight = new int[] {-1};
     visitULR(0, new IntFunction2() {
       @Override
@@ -713,7 +720,7 @@ public class Dynamic#E#Set implements #E#Iterable {
       }
     });
 
-    // 6. any unreachable node should be contained in myRemoved
+    // any unreachable node should be contained in myRemoved
     final BitSet unremoved = new BitSet(myFront);
     visitULR(0, new IntFunction2() {
       @Override
@@ -722,7 +729,8 @@ public class Dynamic#E#Set implements #E#Iterable {
         return _;
       }
     });
-    if (myRemoved == null) assert unremoved.cardinality() == size() : whatWasDoing + "\n" + size() + ' ' + unremoved.cardinality() + '\n' + unremoved + '\n' + dumpArrays(0);
+    if (myRemoved == null)
+      assert unremoved.cardinality() == size() : whatWasDoing + "\n" + size() + ' ' + unremoved.cardinality() + '\n' + unremoved + '\n' + dumpArrays(0);
     else {
       assert myRemoved.length() <= myFront : myFront + "\n" + myRemoved + "\n" + debugMegaPrint(whatWasDoing, 0);
       BitSet xor = new BitSet(myFront);
@@ -783,9 +791,11 @@ public class Dynamic#E#Set implements #E#Iterable {
     });
   }
 
-  private boolean checkRedsAmount(int compactifyType) {
-    int sz = size();
-    int redsExpected = 0;
+  /**
+   Calculates the expected amount of red nodes in a tree of a size sz after it is compactified with compactifyType.
+   */
+  static int redsExpected(int sz, int compactifyType) {
+    int result = 0;
     if (compactifyType == COMPACTIFY_BALANCED || compactifyType == COMPACTIFY_TO_REMOVE) {
       int internalLevels = log(2, sz);
       if (Math.pow(2,internalLevels) != sz + 1)
@@ -793,16 +803,22 @@ public class Dynamic#E#Set implements #E#Iterable {
       int internalRedLevels = (internalLevels+compactifyType-2)/compactifyType;
       while (internalRedLevels > 0) {
         int levelHeight = (internalRedLevels-1)*compactifyType + 2;
-        redsExpected += Math.pow(2, levelHeight-1);
+        result += Math.pow(2, levelHeight-1);
         internalRedLevels--;
       }
     }
     int top = (int)Math.pow(2, log(2, sz));
     if (top != sz+1)
-      redsExpected += sz - top/2 + 1;
-    int redsActual = sz - myBlack.cardinality() + 1;
-    assert redsExpected == redsActual : sz + " " + redsActual + " " + redsExpected;
-    System.out.println(sz + ": " + redsActual);
+      result += sz - top/2 + 1;
+    return result;
+  }
+
+  private boolean checkRedsAmount(int compactifyType) {
+    int sz = size();
+    int expected = redsExpected(sz, compactifyType);
+    int actual = sz - myBlack.cardinality() + 1;
+    assert expected == actual : sz + " " + actual + " " + expected;
+    System.out.println("size: " + sz + ", reds: " + actual);
     return true;
   }
 

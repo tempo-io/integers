@@ -21,14 +21,10 @@ import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.util.LongSetBuilder;
 import com.almworks.util.RandomHolder;
 import junit.framework.TestCase;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-import java.util.Random;
+import java.util.*;
 
 public class DynamicLongSetTests extends TestCase {
   protected final DynamicLongSet set = new DynamicLongSet();
@@ -121,7 +117,7 @@ public class DynamicLongSetTests extends TestCase {
 
   public void testRandom() {
     Random r = new RandomHolder().getRandom();
-    int[] ns = new int[]{510,513,1025,2049,4097};
+    int[] ns = new int[]{510,513,1025,2049,4097}; // testing sizes near 2^n
     int nAttempts = 5;
     LongSetBuilder anotherSet = new LongSetBuilder();
     DynamicLongSet dynamicSet = new DynamicLongSet(510);
@@ -145,46 +141,92 @@ public class DynamicLongSetTests extends TestCase {
     }
   }
   
+  private enum DlsOperation {
+    REMOVE, ADD
+  }
+  
   public void testFromSorted() {
+    int attempts = 20; //2000;
+    int sz = 82; //8200;
     Random r = new RandomHolder().getRandom();
-    int n = 1023; //16777215;
-    long[] src = new long[n];
-    long[] add = new long[n];
-    for (int i = 0; i < n; i++) {
-      src[i] = r.nextLong();
-      add[i] = r.nextLong();
+
+    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_BALANCED, DlsOperation.ADD);
+//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_ADD, DlsOperation.ADD);
+//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_REMOVE, DlsOperation.ADD);
+//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_BALANCED, DlsOperation.REMOVE);
+//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_ADD, DlsOperation.REMOVE);
+//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_REMOVE, DlsOperation.REMOVE);
+  }
+
+  private void _testFromSorted(Random r, int attempts, int sz, int cT, DlsOperation oper) {
+    String opName;
+    if (oper == DlsOperation.REMOVE) {
+      switch (cT) {
+        case DynamicLongSet.COMPACTIFY_TO_ADD: opName = "type=toAdd, op=remove, time="; break;
+        case DynamicLongSet.COMPACTIFY_BALANCED: opName = "type=balanced, op=remove, time="; break;
+        default: opName = "type=toRemove, op=remove, time=";
+      }
+    } else {
+      switch (cT) {
+        case DynamicLongSet.COMPACTIFY_TO_ADD: opName = "type=toAdd, op=add, time="; break;
+        case DynamicLongSet.COMPACTIFY_BALANCED: opName = "type=balanced, op=add, time="; break;
+        default: opName = "type=toRemove, op=add, time=";
+      }
     }
-    Arrays.sort(src);
-    LongList srcList = new LongArray(src);
-    LongList addList = new LongArray(add);
-    testFromSorted(srcList, null);
-    testFromSorted(srcList, addList);
-  }
+    List<DynamicLongSet> list = new ArrayList<DynamicLongSet>(attempts);
+    List<WritableLongList> list2 = new ArrayList<WritableLongList>(attempts);
+    for (int att = 0; att < attempts; att++) {
+      WritableLongList srcList = new LongArray();
+      WritableLongList addList = new LongArray();
+      for (int i = 0; i < sz; i++) {
+        srcList.add(r.nextLong());
+        addList.add(r.nextLong());
+      }
+      srcList.sort();
+      DynamicLongSet dls;
+      if (oper == DlsOperation.REMOVE) {
+        list2.add(srcList);
+        switch (cT) {
+          case DynamicLongSet.COMPACTIFY_TO_ADD: dls=DynamicLongSet.fromSortedListToAdd(srcList); break;
+          case DynamicLongSet.COMPACTIFY_BALANCED: dls=DynamicLongSet.fromSortedList(srcList); break;
+          default: dls=DynamicLongSet.fromSortedListToRemove(srcList);
+        }
+      } else {
+        list2.add(addList);
+        switch (cT) {
+          case DynamicLongSet.COMPACTIFY_TO_ADD: dls=DynamicLongSet.fromSortedListToAdd(srcList); break;
+          case DynamicLongSet.COMPACTIFY_BALANCED: dls=DynamicLongSet.fromSortedList(srcList); break;
+          default: dls=DynamicLongSet.fromSortedListToRemove(srcList);
+        }
+      }
+      list.add(dls);
+    }
 
-  private void testFromSorted(LongList sortedSrc, @Nullable LongList sortedAdd) {
-    boolean rem = (sortedAdd == null);
-    LongList opList = rem? sortedSrc : sortedAdd;
-    DynamicLongSet dynamicSet = DynamicLongSet.fromSortedList(sortedSrc);
-    float[] tm = new float[3];
-    tm[0] = getTime(dynamicSet, opList, rem);
-    dynamicSet = DynamicLongSet.fromSortedListToAdd(sortedSrc);
-    tm[1] = getTime(dynamicSet, opList, rem);
-    dynamicSet = DynamicLongSet.fromSortedListToRemove(sortedSrc);
-    tm[2] = getTime(dynamicSet, opList, rem);
-    String op = rem ? "Remove" : "Add";
-    System.out.println(op + ". Size = " + sortedSrc.size() + ", balanced = " + tm[0] + " seconds, toAdd = " +
-        tm[1] + " seconds, toRemove = " + tm[2] + " seconds.");
-  }
-
-  private float getTime(DynamicLongSet dynamicSet, LongList src, boolean rem) {
-    if (rem)
-      assertEquals(src, dynamicSet.toSortedLongArray());
-    long start = System.currentTimeMillis();
-    if (rem)
-      dynamicSet.removeAll(src);
-    else
-      dynamicSet.addAll(src);
-    return (System.currentTimeMillis() - start)/1000F;
+    int i = 0;
+    long res = 0, t = 0;
+    Iterator<WritableLongList> it = list2.iterator();
+    for (DynamicLongSet dls: list) {
+      t = System.currentTimeMillis();
+      if (oper == DlsOperation.REMOVE)
+        dls.removeAll(it.next());
+      else
+        dls.addAll(it.next());
+      t = System.currentTimeMillis() - t;
+      res += t;
+      if (i == 5) {
+        res = 0;
+        System.out.println("waiting before start");
+        t = System.currentTimeMillis();
+        do{} while (System.currentTimeMillis() - t < 000);
+        System.out.println("started");
+      }
+      i++;
+    }
+    System.out.println(opName + res);
+    System.out.println("waiting after finish");
+    t = System.currentTimeMillis();
+    do{} while (System.currentTimeMillis() - t < 000);
+    System.out.println("resuming");
   }
 
   public void testAdd() {
@@ -254,8 +296,8 @@ public class DynamicLongSetTests extends TestCase {
   }
 
   public void testAddRemove() {
-    WritableLongList sourceAdd = LongArray.create(14, 7, 3, 12, 6, 2, 13, 8, 5, 15,4,0, -1,10,-2, 20,-6,32);
-    WritableLongList sourceRemove = LongArray.create(7,3,    6,14,   5,8,    2,-7,   0,15,     3,1);
+    WritableLongList sourceAdd = LongArray.create(14,7,3,12,6,2,13,8,5,15,4,0,-1,10,-2,20,-6,32);
+    WritableLongList sourceRemove = LongArray.create(7,3,6,14,5,8,2,-7,0,15,3,1);
     LongList expected = LongArray.create(-6,-2,-1,4,10,12,13,20,32);
 
     int stateCount = 0;
