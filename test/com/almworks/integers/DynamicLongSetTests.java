@@ -133,7 +133,7 @@ public class DynamicLongSetTests extends TestCase {
       compare.order(anotherSetList, setList);
 
       // testRemove runs long, so it's ran only twice
-      if (attempt > 2) continue;
+      if (attempt > 1) continue;
       testRemove(toAdd, toAdd);
       testRemove(toAdd, anotherSetList);
       testRemove(anotherSetList, toAdd);
@@ -145,31 +145,32 @@ public class DynamicLongSetTests extends TestCase {
     REMOVE, ADD
   }
   
-  public void testFromSorted() {
-    int attempts = 2; //2000;
+  public void testColoringTypes() {
+    int attempts = 7; //2000;
     int sz = 8; //8200;
+    int waitTime = 000;
     Random r = new RandomHolder().getRandom();
 
-    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_BALANCED, DlsOperation.ADD);
-//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_ADD, DlsOperation.ADD);
-//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_REMOVE, DlsOperation.ADD);
-//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_BALANCED, DlsOperation.REMOVE);
-//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_ADD, DlsOperation.REMOVE);
-//    _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_TO_REMOVE, DlsOperation.REMOVE);
+    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
+    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
+//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
+//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
+//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
+//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
   }
 
-  private void _testFromSorted(Random r, int attempts, int sz, int cT, DlsOperation oper) {
+  private void testColoringTypes(Random r, int waitTime, int attempts, int sz, DynamicLongSet.ColoringType cT, DlsOperation oper) {
     String opName;
     if (oper == DlsOperation.REMOVE) {
       switch (cT) {
-        case DynamicLongSet.COMPACTIFY_TO_ADD: opName = "type=toAdd, op=remove, time="; break;
-        case DynamicLongSet.COMPACTIFY_BALANCED: opName = "type=balanced, op=remove, time="; break;
+        case TO_ADD: opName = "type=toAdd, op=remove, time="; break;
+        case BALANCED: opName = "type=balanced, op=remove, time="; break;
         default: opName = "type=toRemove, op=remove, time=";
       }
     } else {
       switch (cT) {
-        case DynamicLongSet.COMPACTIFY_TO_ADD: opName = "type=toAdd, op=add, time="; break;
-        case DynamicLongSet.COMPACTIFY_BALANCED: opName = "type=balanced, op=add, time="; break;
+        case TO_ADD: opName = "type=toAdd, op=add, time="; break;
+        case BALANCED: opName = "type=balanced, op=add, time="; break;
         default: opName = "type=toRemove, op=add, time=";
       }
     }
@@ -186,38 +187,33 @@ public class DynamicLongSetTests extends TestCase {
       DynamicLongSet dls;
       if (oper == DlsOperation.REMOVE) {
         list2.add(srcList);
-        switch (cT) {
-          case DynamicLongSet.COMPACTIFY_TO_ADD: dls=DynamicLongSet.fromSortedListToAdd(srcList); break;
-          case DynamicLongSet.COMPACTIFY_BALANCED: dls=DynamicLongSet.fromSortedList(srcList); break;
-          default: dls=DynamicLongSet.fromSortedListToRemove(srcList);
-        }
+        dls = DynamicLongSet.fromSortedList(srcList, cT);
       } else {
         list2.add(addList);
-        switch (cT) {
-          case DynamicLongSet.COMPACTIFY_TO_ADD: dls=DynamicLongSet.fromSortedListToAdd(srcList); break;
-          case DynamicLongSet.COMPACTIFY_BALANCED: dls=DynamicLongSet.fromSortedList(srcList); break;
-          default: dls=DynamicLongSet.fromSortedListToRemove(srcList);
-        }
+        dls = DynamicLongSet.fromSortedList(srcList, cT);
       }
       list.add(dls);
     }
 
     int i = 0;
-    long res = 0, t = 0;
-    Iterator<WritableLongList> it = list2.iterator();
-    for (DynamicLongSet dls: list) {
+    long res = 0, t;
+    Iterator<DynamicLongSet> it = list.iterator();
+    Iterator<WritableLongList> it2 = list2.iterator();
+    for (int att = 0; att < attempts; att++) {
+      DynamicLongSet dls = it.next();
+      WritableLongList nx = it2.next();
       t = System.currentTimeMillis();
       if (oper == DlsOperation.REMOVE)
-        dls.removeAll(it.next());
+        dls.removeAll(nx);
       else
-        dls.addAll(it.next());
+        dls.addAll(nx);
       t = System.currentTimeMillis() - t;
       res += t;
       if (i == 5) {
         res = 0;
         System.out.println("waiting before start");
         t = System.currentTimeMillis();
-        while (System.currentTimeMillis() - t < 000);
+        while (System.currentTimeMillis() - t < waitTime);
         System.out.println("started");
       }
       i++;
@@ -225,7 +221,7 @@ public class DynamicLongSetTests extends TestCase {
     System.out.println(opName + res);
     System.out.println("waiting after finish");
     t = System.currentTimeMillis();
-    while (System.currentTimeMillis() - t < 000);
+    while (System.currentTimeMillis() - t < waitTime);
     System.out.println("resuming");
   }
 

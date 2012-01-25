@@ -49,17 +49,29 @@ public class Dynamic#E#Set implements #E#Iterable {
 
   private int myModCount = 0;
 
-  //see shrink() method
   private static final int SHRINK_FACTOR = 6; //testing. actual should be less, say, 3
   private static final int SHRINK_MIN_LENGTH = 4; //8
-  // this one is used in fromSorted#E#Iterable(). A new myKeys array is created in this method, and its size is
-  // the size of the given #E#Iterable multiplied by this constant (it's the space for new elements to be added later).
+  // used in fromSorted#E#Iterable(). A new myKeys array is created in this method, and its size is
+  // the size of the given #E#Iterable multiplied by this constant (additional space for new elements to be added later).
   private static final int EXPAND_FACTOR = 2;
-  // these three costants are used in building a tree from a given list of values.
-  // See fromSorted#E#Iterable paramcompactifyType.
-  static final int COMPACTIFY_TO_ADD = 0;
-  static final int COMPACTIFY_TO_REMOVE = 2;
-  static final int COMPACTIFY_BALANCED = 4;
+
+  /**
+   * This enum is used in {@link Dynamic#E#Set#compactify(com.almworks.integers.Dynamic#E#Set.ColoringType)} and
+   * {@link Dynamic#E#Set#fromSortedList(#E#List, com.almworks.integers.Dynamic#E#Set.ColoringType)}
+   * methods to determine the way the new tree will be colored.
+   */
+  public enum ColoringType {
+    TO_ADD {
+      public int redLevelsDensity() {return 0;}
+    },
+    TO_REMOVE {
+      public int redLevelsDensity() {return 2;}
+    },
+    BALANCED {
+      public int redLevelsDensity() {return 4;}
+    };
+    public abstract int redLevelsDensity();
+  }
 
   private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
 
@@ -331,36 +343,30 @@ public class Dynamic#E#Set implements #E#Iterable {
    * by subsequent add and remove operations.
    */
   public void compactify() {
-    modified();
-    fromSorted#E#Iterable(this, size(), COMPACTIFY_BALANCED);
-    assert checkRedsAmount(COMPACTIFY_BALANCED);
+    compactify(ColoringType.BALANCED);
   }
 
   /**
-   * This method replaces this set's keys with values given in src and builds a new tree.
-   * All levels of the new tree are filled, except, probably, the last one.
-   * Levels are filled firstly with all possible left children, and only then
-   * with right children, all starting from the left side.
-   * To follow rb-restrictions, if there's an unfilled level,
-   * it's made completely red and pre-last is made completely black.
-   * @param compactifyType Type of tree coloring.
-   *    Definition: internal levels are all levels of a tree, except the last two if the last level is unfilled.
-   *    Internal levels can be colored in different ways, depending on how a tree will be used further.
-   *    3 modes are provided (see relevant contants):
-   *    1. If there's a minimum of red nodes, adding would be fast and removing would be slow.
-   *       In this mode no internal levels will be red.
-   *    2. If there's a maximum of red nodes, adding would be slow and removing would be fast.
-   *       In this mode all internal even levels will be entirely red.
-   *    3. If an amount of red nodes is between min and max, there'll be a balance between remove and add average timing.
-   *       In this mode every (2+4*k)-th internal level will be entirely red
-   *    Values of the constants were not chosen randomly, they're actually used in the logic.
+   * This method is similar to {@link com.almworks.integers.Dynamic#E#Set#compactify()},
+   * except the way the internal levels are colored.
+   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
+   *                     if the last one is unfilled.
+   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
+   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.Dynamic#E#Set#compactify()};
+   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
    */
-  private void fromSorted#E#Iterable(#E#Iterable src, int srcSize, int compactifyType) {
+  public void compactify(ColoringType coloringType) {
+    modified();
+    fromSorted#E#Iterable(this, size(), coloringType);
+    assert checkRedsAmount(coloringType);
+  }
+
+  private void fromSorted#E#Iterable(#E#Iterable src, int srcSize, ColoringType coloringType) {
     #e#[] newKeys;
     if (srcSize == 0)
       newKeys = EMPTY_KEYS;
     else {
-      int arraySize = (compactifyType == COMPACTIFY_TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
+      int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
       newKeys = new #e#[Math.max(SHRINK_MIN_LENGTH, arraySize)];
       int i = 0;
       newKeys[0] = #EW#.MIN_VALUE;
@@ -369,7 +375,7 @@ public class Dynamic#E#Set implements #E#Iterable {
         assert (i==1 || newKeys[i] >= newKeys[i-1]) : newKeys;
       }
     }
-    fromPreparedArray(newKeys, srcSize, compactifyType);
+    fromPreparedArray(newKeys, srcSize, coloringType);
     assert checkRedBlackTreeInvariants("fromSorted#E#Iterable");
   }
 
@@ -377,7 +383,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    * @param newKeys array which will become the new myKeys
    * @param usedSize a number of actual elements in newKeys
    */
-  private void fromPreparedArray(#e#[] newKeys, int usedSize, int compactifyType) {
+  private void fromPreparedArray(#e#[] newKeys, int usedSize, ColoringType coloringType) {
     myBlack.clear();
     init();
     myKeys = newKeys;
@@ -389,6 +395,7 @@ public class Dynamic#E#Set implements #E#Iterable {
 
     int levels = log(2, usedSize);
     int top = (int)Math.pow(2, levels);
+    int redLevelsDensity = coloringType.redLevelsDensity();
     // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
     // If the last level contains only left children, then, due to the way the last level is filled,
     // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
@@ -397,10 +404,10 @@ public class Dynamic#E#Set implements #E#Iterable {
     if (top != usedSize + 1)
       lastPairsAreBlack = (usedSize < 3*top/4);
     else
-      lastPairsAreBlack = (compactifyType == COMPACTIFY_TO_ADD) || (levels + compactifyType - 2) % compactifyType != 0;
+      lastPairsAreBlack = (coloringType == ColoringType.TO_ADD) || (levels + redLevelsDensity - 2) % redLevelsDensity != 0;
     // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
-    int startingCounter = (compactifyType == COMPACTIFY_TO_ADD) ? 0 : 2;
-    myRoot = rearrangeStep(1, usedSize, startingCounter, compactifyType, lastPairsAreBlack);
+    int startingCounter = (coloringType == ColoringType.TO_ADD) ? 0 : 2;
+    myRoot = rearrangeStep(1, usedSize, startingCounter, redLevelsDensity, lastPairsAreBlack);
   }
 
   private int rearrangeStep(int offset, int length, int colorCounter, int maxCounter, boolean lpab) {
@@ -430,22 +437,30 @@ public class Dynamic#E#Set implements #E#Iterable {
     return index;
   }
 
+  /**
+   * Builds a new Dynamic#E#Set based on values of src. src isn't used internally, its contents are copied.
+   */
   public static Dynamic#E#Set fromSortedList(#E#List src) {
-    return fromSortedList0(src, COMPACTIFY_BALANCED);
+    return fromSortedList0(src, ColoringType.BALANCED);
   }
 
-  public static Dynamic#E#Set fromSortedListToAdd(#E#List src) {
-    return fromSortedList0(src, COMPACTIFY_TO_ADD);
+  /**
+   * This method is similar to {@link com.almworks.integers.Dynamic#E#Set#fromSortedList(#E#List)},
+   * except the way the internal levels are colored.
+   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
+   *                     if the last one is unfilled.
+   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
+   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.Dynamic#E#Set#fromSortedList(#E#List)};
+   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+   */
+  public static Dynamic#E#Set fromSortedList(#E#List src, ColoringType coloringType) {
+    return fromSortedList0(src, coloringType);
   }
 
-  public static Dynamic#E#Set fromSortedListToRemove(#E#List src) {
-    return fromSortedList0(src, COMPACTIFY_TO_REMOVE);
-  }
-
-  private static Dynamic#E#Set fromSortedList0(#E#List src, int compactifyType) {
+  private static Dynamic#E#Set fromSortedList0(#E#List src, ColoringType coloringType) {
     Dynamic#E#Set res = new Dynamic#E#Set();
-    res.fromSorted#E#Iterable(src, src.size(), compactifyType);
-    assert res.checkRedsAmount(compactifyType);
+    res.fromSorted#E#Iterable(src, src.size(), coloringType);
+    assert res.checkRedsAmount(coloringType);
     return res;
   }
 
@@ -792,17 +807,18 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   /**
-   Calculates the expected amount of red nodes in a tree of a size sz after it is compactified with compactifyType.
+   Calculates the expected amount of red nodes in a tree of a size sz after it is compactified with coloringType.
    */
-  static int redsExpected(int sz, int compactifyType) {
+  static int redsExpected(int sz, ColoringType coloringType) {
     int result = 0;
-    if (compactifyType == COMPACTIFY_BALANCED || compactifyType == COMPACTIFY_TO_REMOVE) {
+    if (coloringType == ColoringType.BALANCED || coloringType == ColoringType.TO_REMOVE) {
+      int redLevelsDensity = coloringType.redLevelsDensity();
       int internalLevels = log(2, sz);
       if (Math.pow(2,internalLevels) != sz + 1)
         internalLevels = internalLevels - 2;
-      int internalRedLevels = (internalLevels+compactifyType-2)/compactifyType;
+      int internalRedLevels = (internalLevels+redLevelsDensity-2)/redLevelsDensity;
       while (internalRedLevels > 0) {
-        int levelHeight = (internalRedLevels-1)*compactifyType + 2;
+        int levelHeight = (internalRedLevels-1)*redLevelsDensity + 2;
         result += Math.pow(2, levelHeight-1);
         internalRedLevels--;
       }
@@ -813,9 +829,9 @@ public class Dynamic#E#Set implements #E#Iterable {
     return result;
   }
 
-  private boolean checkRedsAmount(int compactifyType) {
+  private boolean checkRedsAmount(ColoringType coloringType) {
     int sz = size();
-    int expected = redsExpected(sz, compactifyType);
+    int expected = redsExpected(sz, coloringType);
     int actual = sz - myBlack.cardinality() + 1;
     assert expected == actual : sz + " " + actual + " " + expected;
     System.out.println("size: " + sz + ", reds: " + actual);
