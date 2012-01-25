@@ -57,9 +57,9 @@ public class Dynamic#E#Set implements #E#Iterable {
   private static final int EXPAND_FACTOR = 2;
   // these three costants are used in building a tree from a given list of values.
   // See fromSorted#E#Iterable paramcompactifyType.
-  public static final int COMPACTIFY_TO_ADD = 0;
-  public static final int COMPACTIFY_TO_REMOVE = 2;
-  public static final int COMPACTIFY_BALANCED = 4;
+  static final int COMPACTIFY_TO_ADD = 0;
+  static final int COMPACTIFY_TO_REMOVE = 2;
+  static final int COMPACTIFY_BALANCED = 4;
 
   private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
 

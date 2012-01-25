@@ -146,8 +146,8 @@ public class DynamicLongSetTests extends TestCase {
   }
   
   public void testFromSorted() {
-    int attempts = 20; //2000;
-    int sz = 82; //8200;
+    int attempts = 2; //2000;
+    int sz = 8; //8200;
     Random r = new RandomHolder().getRandom();
 
     _testFromSorted(r, attempts, sz, DynamicLongSet.COMPACTIFY_BALANCED, DlsOperation.ADD);
@@ -217,7 +217,7 @@ public class DynamicLongSetTests extends TestCase {
         res = 0;
         System.out.println("waiting before start");
         t = System.currentTimeMillis();
-        do{} while (System.currentTimeMillis() - t < 000);
+        while (System.currentTimeMillis() - t < 000);
         System.out.println("started");
       }
       i++;
@@ -225,7 +225,7 @@ public class DynamicLongSetTests extends TestCase {
     System.out.println(opName + res);
     System.out.println("waiting after finish");
     t = System.currentTimeMillis();
-    do{} while (System.currentTimeMillis() - t < 000);
+    while (System.currentTimeMillis() - t < 000);
     System.out.println("resuming");
   }
 
