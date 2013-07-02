@@ -101,6 +101,7 @@ test/com/almworks/integers/util/IntMapTests.java -text
 test/com/almworks/integers/util/IntSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/IntSetBuilderTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
+test/com/almworks/integers/util/SortedLongListUnionIteratorTests.java -text
 test/com/almworks/util/RandomHolder.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text

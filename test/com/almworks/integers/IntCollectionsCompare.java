@@ -17,6 +17,14 @@ public class IntCollectionsCompare extends CollectionsCompare {
     Compare.order(IntCollections.toNativeArray(actual), IntCollections.toNativeArray(expected));
   }
 
+  public void order(LongIterator actual, long ... expected) {
+    Compare.order(LongCollections.toNativeArray(actual), expected);
+  }
+
+  public void order(LongIterator actual, LongIterator expected) {
+    Compare.order(LongCollections.toNativeArray(actual), LongCollections.toNativeArray(expected));
+  }
+
   public void unordered(IntList actual, IntList expected) {
     unordered(actual.toNativeArray(), expected.toNativeArray());
   }
