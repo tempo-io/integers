@@ -36,7 +36,6 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
     my[0] = first;
     my[1] = second;
 
-
     for(int index = 0; index < 2; index++) {
       my[index].next();
       myIterated[index] = true;
@@ -53,12 +52,16 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
 
     //System.out.print(valueOrMax(0) + " " + valueOrMax(1));
     myNext = Math.min(valueOrMax(0), valueOrMax(1));
-    //System.out.println(" " + myNext);
+    //System.out.println(" :" + myNext);
 
     for (int i = 0; i < 2; i++) {
-      if (myIterated[i] && my[i].value() == myNext) {
-        if (my[i].hasNext())
+      if (myIterated[i] && (my[i].value() == myNext)) {
+        //System.out.printf("%d %d %b %d\n", i , my[i].value(), my[i].hasNext(), myNext);
+        if (my[i].hasNext()) {
+          long prev = my[i].value();
           my[i].next();
+          assert prev < my[i].value() : i + " " + prev + " " + my[i].value();
+        }
         else
           myIterated[i] = false;
       }
