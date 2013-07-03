@@ -36,10 +36,10 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
     my[0] = first;
     my[1] = second;
 
-    for(int index = 0; index < 2; index++) {
-      my[index].next();
-      myIterated[index] = true;
-    }
+//    for(int index = 0; index < 2; index++) {
+//      my[index].next();
+//      myIterated[index] = true;
+//    }
   }
 
   public static SortedLongListUnionIterator create(LongIterable include, LongIterable exclude) {
@@ -47,6 +47,12 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
   }
 
   protected boolean findNext() {
+    for(int i = 0; i < 2; i++) {
+      if (!myIterated[i] && my[i].hasNext()) {
+        myIterated[i] = true;
+        my[i].next();
+      }
+    }
     if (!myIterated[0] && !myIterated[1])
       return false;
 
