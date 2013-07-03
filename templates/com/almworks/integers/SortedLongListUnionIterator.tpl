@@ -81,7 +81,7 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
     if (myIterated[index])
       result = my[index].value();
     else
-      result = Long.MAX_VALUE;
+      result = Long.MAX_VALUE;      //
     return result;
   }
 
