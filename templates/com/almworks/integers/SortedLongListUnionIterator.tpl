@@ -23,23 +23,18 @@ import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 
 /**
- * Iterates through two sorted int lists in O(N+M), providing values that exist in
- * both lists
+ * Iterates through two unique sorted int lists in O(N+M), providing unique sorted values that exist in
+ * either of lists
  */
 public class SortedLongListUnionIterator extends FindingLongIterator {
   private final LongIterator my[] = new LongIterator[2];
   private long myNext = Long.MIN_VALUE;
   private boolean myIterated[] = {false, false};
-//  private boolean
 
   public SortedLongListUnionIterator(LongIterator first, LongIterator second) {
     my[0] = first;
     my[1] = second;
 
-//    for(int index = 0; index < 2; index++) {
-//      my[index].next();
-//      myIterated[index] = true;
-//    }
   }
 
   public static SortedLongListUnionIterator create(LongIterable include, LongIterable exclude) {
@@ -47,7 +42,7 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
   }
 
   protected boolean findNext() {
-    for(int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
       if (!myIterated[i] && my[i].hasNext()) {
         myIterated[i] = true;
         my[i].next();
@@ -67,9 +62,9 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
           long prev = my[i].value();
           my[i].next();
           assert prev < my[i].value() : i + " " + prev + " " + my[i].value();
-        }
-        else
+        } else {
           myIterated[i] = false;
+        }
       }
     }
     return true;
@@ -81,13 +76,11 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
     if (myIterated[index])
       result = my[index].value();
     else
-      result = Long.MAX_VALUE;      //
+      result = Long.MAX_VALUE;
     return result;
   }
 
   protected long getNext() {
-    //System.out.println(myNext);
-    //return 1;
     return myNext;
   }
 }
