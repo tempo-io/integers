@@ -4,6 +4,7 @@ import com.almworks.integers.IntArray;
 import com.almworks.integers.LongArray;
 import com.almworks.integers.LongIterator;
 import com.almworks.integers.NativeIntFixture;
+import com.almworks.util.RandomHolder;
 
 import java.util.Random;
 
@@ -41,14 +42,20 @@ public class SortedLongListUnionIteratorTests extends NativeIntFixture {
 
 
   public void testRandomCase() {
-    Random r = new Random();
-    int resLength = 10;
-    int maxValue = 1000;
+    Random r = new RandomHolder().getRandom();
+    int resLength = 100;
+    int maxArrayLength = 2000;
+    int maxValue = 200000;
+
+    LongArray test = create(1,4,4);
+    test.sortUnique();
+    //System.out.println("test(%d): %d %d %d\n", test.length, test.get(0), test.get(1), test.get(2));
+
     LongArray res[] = new LongArray[resLength];
     LongArray expected = create();
 
     for (int i = 0; i < resLength; i++) {
-      int arrayLength = r.nextInt(20);
+      int arrayLength = r.nextInt(maxArrayLength);
       res[i] = create();
       for (int j = 0; j < arrayLength; j++) {
         res[i].add((long)r.nextInt(maxValue));
@@ -56,12 +63,21 @@ public class SortedLongListUnionIteratorTests extends NativeIntFixture {
       res[i].sortUnique();
 
       for (int j = 0; j < arrayLength; j++) {
+//        System.out.print(res[i].get(j) + ", ");
         expected.add(res[i].get(j));
       }
-    }
+//      System.out.println();
 
+    }
     expected.sortUnique();
-    templateCase(res, expected.iterator());
+
+//    LongIterator iter = expected.iterator();
+//    for ( ; iter.hasNext(); ) {
+//      System.out.print(iter.nextValue() + " ");
+//    }
+//    System.out.println();
+
+   templateCase(res, expected.iterator());
 
   }
 //  public void testMinMaxCase() {

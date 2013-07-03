@@ -29,15 +29,37 @@ import com.almworks.integers.LongIterator;
 public class SortedLongListUnionIterator extends FindingLongIterator {
   private final LongIterator my[];
   private long myNext = Long.MIN_VALUE;
-  private boolean myIterated[];
+  //private boolean myIterated[];
+  private int heap[];
+  private int heapLength;
+  private boolean isHeapBuilded = false;
 
   public SortedLongListUnionIterator(LongIterator iterators[]) {
+    //? len = iterators.length;
     my = new LongIterator[iterators.length];
-    myIterated = new boolean[iterators.length];
+//    myIterated = new boolean[iterators.length];
+    int size = 1;
+    while (size < iterators.length) size <<= 1; //fix it
+    size++;
+    //System.out.println(size);
+
+    heap = new int[size];
+    heapLength = 0;
     for (int i = 0; i < iterators.length; i++) {
       my[i] = iterators[i];
     }
   }
+
+  static int PARENT(int i) {
+    return i/2;
+  }
+  static int LEFT(int i) {
+    return i<<1;
+  }
+  static int RIGHT(int i) {
+    return (i<<1) + 1;
+  }
+
 
   public static SortedLongListUnionIterator create(LongIterable includes[]) {
     LongIterator result[] = new LongIterator[includes.length];
@@ -48,56 +70,85 @@ public class SortedLongListUnionIterator extends FindingLongIterator {
     return new SortedLongListUnionIterator(result);
   }
 
+  private void swap(int i, int j) {
+    int t = heap[i];
+    heap[i] = heap[j];
+    heap[j] = t;
+  }
+
+  private void heapify(int i) {
+    int l = LEFT(i);
+    int r = RIGHT(i);
+//    System.out.printf("heapify: %d %d %d %d ", i, heapLength, l, r);
+    int least;
+    if (l <= heapLength && my[heap[l]].value() < my[heap[i]].value()) {
+      least = l;
+    } else {
+      least = i;
+    }
+//    //System.out.printf("%d %d %d\n", r, least, my.length);
+    if (r <= heapLength && my[heap[r]].value() < my[heap[least]].value()) {
+      least = r;
+    }
+//    System.out.println(least);
+    if (least != i) {
+      swap(i, least);
+      heapify(least);
+    }
+//    //System.out.println("Im here!");
+  }
+
+  private void buildHeap() {
+    for (int i = PARENT(heapLength); i >= 1; i--) {
+      heapify(i);
+//      System.out.println("build!");
+    }
+  }
+
+  private void outputHeap() {
+    System.out.print("output: " + heapLength + " : ");
+    for (int i = 1; i <= heapLength; i++) {
+      System.out.printf(" (%d %d)", heap[i], my[heap[i]].value());
+    }
+    System.out.println();
+  }
+
   protected boolean findNext() {
-    for (int i = 0; i < my.length; i++) {
-      if (!myIterated[i] && my[i].hasNext()) {
-        myIterated[i] = true;
-        my[i].next();
-      }
-    }
-
-    boolean someIterated = false;
-    for (int i = 0; i < my.length && !someIterated; i++)
-      if (myIterated[i])
-        someIterated = true;
-
-    if (!someIterated)
-      return false;
-
-    long min = Long.MAX_VALUE;
-    for (int i = 0; i < my.length; i++) {
-//      System.out.println("valormax " + i + " " + valueOrMax(i));
-      min = Math.min(valueOrMax(i), min);
-    }
-    myNext = min;
-    //System.out.println(" :" + myNext);
-
-    for (int i = 0; i < my.length; i++) {
-//      System.out.printf("%d %d %b %d\n", i , my[i].value(), my[i].hasNext(), myNext);
-      if (myIterated[i] && (my[i].value() == myNext)) {
+    if (!isHeapBuilded) {
+      isHeapBuilded = true;
+      for (int i = 0; i < my.length; i++) {
         if (my[i].hasNext()) {
-          long prev = my[i].value();
           my[i].next();
-          assert prev < my[i].value() : i + " " + prev + " " + my[i].value();
-        } else {
-          myIterated[i] = false;
+          heapLength++;
+          //System.out.println(heapLength);
+          heap[heapLength] = i;
         }
       }
+      //System.out.println("heapLength: " + heapLength);
+      buildHeap();
+    }
+//    outputHeap();
+    assert heapLength >= 0 : "heapLength: " + heapLength;
+    if (heapLength == 0)
+      return false;
+//    System.out.printf("%d %d %d %d %d\n", heap[1], heap[2], my[heap[1]].value(), my[heap[2]].value(), heapLength);
+    myNext = my[heap[1]].value();
+    while (my[heap[1]].value() == myNext && heapLength > 0) {
+      if (my[heap[1]].hasNext()) {
+        long prev = my[heap[1]].value();
+        my[heap[1]].next();
+        assert prev < my[heap[1]].value() : heap[1] + " " + prev + " " + my[heap[1]].value();
+      } else {
+        swap(1, heapLength);
+        heapLength--;
+      }
+      heapify(1);
     }
     return true;
   }
 
-  private long valueOrMax(int index) {
-    long result;
-    //System.out.println(index + " " + my[index].hasNext());
-    if (myIterated[index])
-      result = my[index].value();
-    else
-      result = Long.MAX_VALUE;
-    return result;
-  }
-
   protected long getNext() {
+    //System.out.print(myNext + " ");
     return myNext;
   }
 }
