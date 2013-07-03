@@ -27,37 +27,54 @@ import com.almworks.integers.LongIterator;
  * either of lists
  */
 public class SortedLongListUnionIterator extends FindingLongIterator {
-  private final LongIterator my[] = new LongIterator[2];
+  private final LongIterator my[];
   private long myNext = Long.MIN_VALUE;
-  private boolean myIterated[] = {false, false};
+  private boolean myIterated[];
 
-  public SortedLongListUnionIterator(LongIterator first, LongIterator second) {
-    my[0] = first;
-    my[1] = second;
-
+  public SortedLongListUnionIterator(LongIterator iterators[]) {
+    my = new LongIterator[iterators.length];
+    myIterated = new boolean[iterators.length];
+    for (int i = 0; i < iterators.length; i++) {
+      my[i] = iterators[i];
+    }
   }
 
-  public static SortedLongListUnionIterator create(LongIterable include, LongIterable exclude) {
-    return new SortedLongListUnionIterator(include.iterator(), exclude.iterator());
+  public static SortedLongListUnionIterator create(LongIterable includes[]) {
+    LongIterator result[] = new LongIterator[includes.length];
+    for (int i = 0; i < includes.length; i++) {
+      result[i] = includes[i].iterator();
+    }
+
+    return new SortedLongListUnionIterator(result);
   }
 
   protected boolean findNext() {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < my.length; i++) {
       if (!myIterated[i] && my[i].hasNext()) {
         myIterated[i] = true;
         my[i].next();
       }
     }
-    if (!myIterated[0] && !myIterated[1])
+
+    boolean someIterated = false;
+    for (int i = 0; i < my.length && !someIterated; i++)
+      if (myIterated[i])
+        someIterated = true;
+
+    if (!someIterated)
       return false;
 
-    //System.out.print(valueOrMax(0) + " " + valueOrMax(1));
-    myNext = Math.min(valueOrMax(0), valueOrMax(1));
+    long min = Long.MAX_VALUE;
+    for (int i = 0; i < my.length; i++) {
+//      System.out.println("valormax " + i + " " + valueOrMax(i));
+      min = Math.min(valueOrMax(i), min);
+    }
+    myNext = min;
     //System.out.println(" :" + myNext);
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < my.length; i++) {
+//      System.out.printf("%d %d %b %d\n", i , my[i].value(), my[i].hasNext(), myNext);
       if (myIterated[i] && (my[i].value() == myNext)) {
-        //System.out.printf("%d %d %b %d\n", i , my[i].value(), my[i].hasNext(), myNext);
         if (my[i].hasNext()) {
           long prev = my[i].value();
           my[i].next();
