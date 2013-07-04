@@ -55,6 +55,8 @@ templates/com/almworks/integers/PListIterator.tpl -text
 templates/com/almworks/integers/PProgression.tpl -text
 templates/com/almworks/integers/PairIntPIterator.tpl -text
 templates/com/almworks/integers/ParallelPList.tpl -text
+templates/com/almworks/integers/SortedLongListIntersectionIterator.tpl -text
+templates/com/almworks/integers/SortedLongListOperationsIterator.tpl -text
 templates/com/almworks/integers/SortedLongListUnionIterator.tpl -text
 templates/com/almworks/integers/TwoWayPMap.tpl -text
 templates/com/almworks/integers/WritablePList.tpl -text
@@ -101,6 +103,7 @@ test/com/almworks/integers/util/IntMapTests.java -text
 test/com/almworks/integers/util/IntSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/IntSetBuilderTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
+test/com/almworks/integers/util/SortedLongListIntersectionIteratorTests.java -text
 test/com/almworks/integers/util/SortedLongListUnionIteratorTests.java -text
 test/com/almworks/util/RandomHolder.java -text
 test/com/almworks/util/TestUtil.java -text

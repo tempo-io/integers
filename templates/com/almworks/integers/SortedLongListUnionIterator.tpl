@@ -1,154 +1,74 @@
-/*
- * Copyright 2010 ALM Works Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-// CODE GENERATED FROM com/almworks/integers/util/SortedPListIntersectionIterator.tpl
-
-
 package com.almworks.integers.util;
 
-import com.almworks.integers.LongIterable;
+import com.almworks.integers.IntArray;
+import com.almworks.integers.LongArray;
 import com.almworks.integers.LongIterator;
+import com.almworks.integers.NativeIntFixture;
+import com.almworks.util.RandomHolder;
 
-/**
- * Iterates through two unique sorted int lists in O(N+M), providing unique sorted values that exist in
- * either of lists
- */
-public class SortedLongListUnionIterator extends FindingLongIterator {
-  private final LongIterator my[];
-  private long myNext = Long.MIN_VALUE;
-  //private boolean myIterated[];
-  private int heap[];
-  private int heapLength;
-  private boolean isHeapBuilded = false;
+import java.util.Random;
 
-  public SortedLongListUnionIterator(LongIterator iterators[]) {
-    //? len = iterators.length;
-    my = new LongIterator[iterators.length];
-//    myIterated = new boolean[iterators.length];
-    int size = 1;
-    while (size < iterators.length) size <<= 1; //fix it
-    size++;
-    //System.out.println(size);
+import static com.almworks.integers.LongArray.create;
 
-    heap = new int[size];
-    heapLength = 0;
-    for (int i = 0; i < iterators.length; i++) {
-      my[i] = iterators[i];
+public class SortedLongListUnionIteratorTests extends NativeIntFixture {
+  long max = Long.MAX_VALUE, min = Long.MIN_VALUE;
+
+
+  public void templateCase(LongArray arrays[], LongIterator expected) {
+    LongIterator iterators[] = new LongIterator[arrays.length];
+    IntegersDebug.println(arrays.length);
+    for (int i = 0; i < arrays.length; i++) {
+      iterators[i] = arrays[i].iterator();
+      IntegersDebug.println("iterator ", i, " : ", arrays[i]);
     }
+    SortedLongListUnionIterator res = new SortedLongListUnionIterator(iterators);
+    CHECK.order(res, expected);
   }
 
-  static int PARENT(int i) {
-    return i/2;
-  }
-  static int LEFT(int i) {
-    return i<<1;
-  }
-  static int RIGHT(int i) {
-    return (i<<1) + 1;
-  }
+  public void testSimpleCase() {
+    LongArray res[] = {
+        create(1, 3, 5, 7),
+        create(2, 3, 4, 6, 100)};
+    templateCase(res, create(1, 2, 3, 4, 5, 6, 7, 100).iterator());
 
+    res[0] = create(1, 2, 3, 4);
+    res[1] = create(5, 6, 7, 8);
+    templateCase(res, create(1, 2, 3, 4, 5, 6, 7, 8).iterator());
 
-  public static SortedLongListUnionIterator create(LongIterable includes[]) {
-    LongIterator result[] = new LongIterator[includes.length];
-    for (int i = 0; i < includes.length; i++) {
-      result[i] = includes[i].iterator();
-    }
-
-    return new SortedLongListUnionIterator(result);
+    res[0] = create();
+    res[1] = create(2, 8);
+    templateCase(res, create(2, 8).iterator());
   }
 
-  private void swap(int i, int j) {
-    int t = heap[i];
-    heap[i] = heap[j];
-    heap[j] = t;
-  }
 
-  private void heapify(int i) {
-    int l = LEFT(i);
-    int r = RIGHT(i);
-//    System.out.printf("heapify: %d %d %d %d ", i, heapLength, l, r);
-    int least;
-    if (l <= heapLength && my[heap[l]].value() < my[heap[i]].value()) {
-      least = l;
-    } else {
-      least = i;
-    }
-//    //System.out.printf("%d %d %d\n", r, least, my.length);
-    if (r <= heapLength && my[heap[r]].value() < my[heap[least]].value()) {
-      least = r;
-    }
-//    System.out.println(least);
-    if (least != i) {
-      swap(i, least);
-      heapify(least);
-    }
-//    //System.out.println("Im here!");
-  }
+  public void testRandomCase() {
+    Random r = new RandomHolder().getRandom();
+    int resLength = 200;
+    int maxArrayLength = 5000;
+    int maxValue = 2000000000;
 
-  private void buildHeap() {
-    for (int i = PARENT(heapLength); i >= 1; i--) {
-      heapify(i);
-//      System.out.println("build!");
-    }
-  }
+    LongArray res[] = new LongArray[resLength];
+    LongArray expected = create();
 
-  private void outputHeap() {
-    System.out.print("output: " + heapLength + " : ");
-    for (int i = 1; i <= heapLength; i++) {
-      System.out.printf(" (%d %d)", heap[i], my[heap[i]].value());
-    }
-    System.out.println();
-  }
-
-  protected boolean findNext() {
-    if (!isHeapBuilded) {
-      isHeapBuilded = true;
-      for (int i = 0; i < my.length; i++) {
-        if (my[i].hasNext()) {
-          my[i].next();
-          heapLength++;
-          //System.out.println(heapLength);
-          heap[heapLength] = i;
-        }
+    for (int i = 0; i < resLength; i++) {
+      int arrayLength = r.nextInt(maxArrayLength);
+      res[i] = create();
+      for (int j = 0; j < arrayLength; j++) {
+        res[i].add((long)r.nextInt(maxValue));
       }
-      //System.out.println("heapLength: " + heapLength);
-      buildHeap();
-    }
-//    outputHeap();
-    assert heapLength >= 0 : "heapLength: " + heapLength;
-    if (heapLength == 0)
-      return false;
-//    System.out.printf("%d %d %d %d %d\n", heap[1], heap[2], my[heap[1]].value(), my[heap[2]].value(), heapLength);
-    myNext = my[heap[1]].value();
-    while (my[heap[1]].value() == myNext && heapLength > 0) {
-      if (my[heap[1]].hasNext()) {
-        long prev = my[heap[1]].value();
-        my[heap[1]].next();
-        assert prev < my[heap[1]].value() : heap[1] + " " + prev + " " + my[heap[1]].value();
-      } else {
-        swap(1, heapLength);
-        heapLength--;
+      res[i].sortUnique();
+      IntegersDebug.println(res[i]);
+
+      for (LongIterator iter = res[i].iterator(); iter.hasNext(); ) {
+        long val = iter.nextValue();
+        expected.add(val);
       }
-      heapify(1);
     }
-    return true;
+    expected.sortUnique();
+
+    IntegersDebug.println(expected);
+    templateCase(res, expected.iterator());
+
   }
 
-  protected long getNext() {
-    //System.out.print(myNext + " ");
-    return myNext;
-  }
 }
