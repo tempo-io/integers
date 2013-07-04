@@ -88,6 +88,7 @@ test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
 test/com/almworks/integers/DynamicLongSetPerf.java -text
 test/com/almworks/integers/DynamicLongSetTests.java -text
+test/com/almworks/integers/IndexedIntIteratorTests.java -text
 test/com/almworks/integers/IntArrayTests.java -text
 test/com/almworks/integers/IntCollectionsCompare.java -text
 test/com/almworks/integers/IntCollectionsTests.java -text

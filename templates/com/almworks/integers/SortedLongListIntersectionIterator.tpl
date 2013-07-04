@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 20TOP0 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
   }
 
   private boolean equalValues() { // leafs equals root
-    for (int i = parent(heapLength) + 1; i <= heapLength; i++) {
-      if (myIts[myHeap[1]].value() != myIts[myHeap[i]].value()) {
+    for (int i = parent(heapLength) + TOP; i <= heapLength; i++) {
+      if (myIts[myHeap[TOP]].value() != myIts[myHeap[i]].value()) {
         return false;
       }
     }
@@ -59,7 +59,7 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
     for (int i = 0; i < myIts.length; i++) {
       if (myIts[i].hasNext()) {
         myIts[i].next();
-        myHeap[i + 1] = i;
+        myHeap[i + TOP] = i;
       } else {
         return false;
       }
@@ -68,14 +68,15 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
     outputHeap();
 
     while ( !equalValues()) {
-      if (myIts[myHeap[1]].hasNext()) {
-        long prev = myIts[myHeap[1]].value();
-        myIts[myHeap[1]].next();
-        assert prev < myIts[myHeap[1]].value() : myHeap[1] + " " + prev + " " + myIts[myHeap[1]].value();
+      int top = myHeap[TOP];
+      if (myIts[top].hasNext()) {
+        long prev = myIts[top].value();
+        myIts[top].next();
+        assert prev < myIts[top].value() : top + " " + prev + " " + myIts[top].value();
       } else {
         return false;
       }
-      heapify(1);
+      heapify(TOP);
     }
     myNext = myIts[myHeap[0]].value();
     return true;

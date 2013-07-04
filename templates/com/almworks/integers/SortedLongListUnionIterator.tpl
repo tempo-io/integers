@@ -35,8 +35,6 @@ public class SortedLongListUnionIterator extends SortedLongListOperationsIterato
   }
 
   public static SortedLongListUnionIterator create(LongIterable ... includes) {
-    if (includes.length == 0)
-      throw new NullPointerException("No elements");
 
     List<LongIterator> result = new ArrayList<LongIterator>(includes.length);
     for (int i = 0; i < includes.length; i++) {
@@ -64,17 +62,18 @@ public class SortedLongListUnionIterator extends SortedLongListOperationsIterato
     assert heapLength >= 0 : "heapLength<0: " + heapLength;
     if (heapLength == 0)
       return false;
-    myNext = myIts[myHeap[1]].value();
-    while (myIts[myHeap[1]].value() == myNext && heapLength > 0) {
-      if (myIts[myHeap[1]].hasNext()) {
-        long prev = myIts[myHeap[1]].value();
-        myIts[myHeap[1]].next();
-        assert prev < myIts[myHeap[1]].value() : myHeap[1] + " " + prev + " " + myIts[myHeap[1]].value();
+    myNext = myIts[myHeap[TOP]].value();
+    while (myIts[myHeap[TOP]].value() == myNext && heapLength > 0) {
+      int top = myHeap[TOP];
+      if (myIts[top].hasNext()) {
+        long prev = myIts[top].value();
+        myIts[top].next();
+        assert prev < myIts[top].value() : myHeap[TOP] + " " + prev + " " + myIts[top].value();
       } else {
-        swap(1, heapLength);
+        swap(TOP, heapLength);
         heapLength--;
       }
-      heapify(1);
+      heapify(TOP);
     }
     return true;
   }

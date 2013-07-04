@@ -29,6 +29,7 @@ public abstract class SortedLongListOperationsIterator extends FindingLongIterat
   protected final int[] myHeap;
   protected int heapLength;
   protected long myNext = Long.MIN_VALUE;
+  protected final int TOP = 1;
 
   public SortedLongListOperationsIterator(List<LongIterator> iterators) {
 
