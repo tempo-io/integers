@@ -16,45 +16,51 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
+
+import java.util.List;
+
 
 public abstract class SortedLongListOperationsIterator extends FindingLongIterator {
   protected final LongIterator[] myIts;
-  protected int[] heap;
+  /**
+   * myHeap elements start from index 1, index 0 is unused
+   **/
+  protected final int[] myHeap;
   protected int heapLength;
   protected long myNext = Long.MIN_VALUE;
 
-  public SortedLongListOperationsIterator(LongIterator iterators[]) {
-    myIts = new LongIterator[iterators.length];
+  public SortedLongListOperationsIterator(List<LongIterator> iterators) {
+
+    myIts = new LongIterator[iterators.size()];
 
     heapLength = myIts.length;
-    heap = new int[heapLength + 1];
-    for (int i = 0; i < iterators.length; i++) {
-      myIts[i] = iterators[i];
+    myHeap = new int[heapLength + 1];
+    for (int i = 0; i < iterators.size(); i++) {
+      myIts[i] = iterators.get(i);
     }
   }
 
-  static int parent(int i) { return i/2;  }
+  protected static int parent(int i) { return i/2;  }
 
-  static int left(int i) {   return i<<1; }
+  private static int left(int i) {   return i*2; }
 
-  static int right(int i) {  return (i<<1) + 1;  }
+  private static int right(int i) {  return i*2 + 1; }
 
   protected void swap(int i, int j) {
-    int t = heap[i];
-    heap[i] = heap[j];
-    heap[j] = t;
+    int t = myHeap[i];
+    myHeap[i] = myHeap[j];
+    myHeap[j] = t;
   }
 
   protected void heapify(int i) {
     int l = left(i), r = right(i), least;
-    if (l <= heapLength && myIts[heap[l]].value() < myIts[heap[i]].value()) {
+    if (l <= heapLength && myIts[myHeap[l]].value() < myIts[myHeap[i]].value()) {
       least = l;
     } else {
       least = i;
     }
-    if (r <= heapLength && myIts[heap[r]].value() < myIts[heap[least]].value()) {
+    if (r <= heapLength && myIts[myHeap[r]].value() < myIts[myHeap[least]].value()) {
       least = r;
     }
     if (least != i) {
@@ -73,7 +79,7 @@ public abstract class SortedLongListOperationsIterator extends FindingLongIterat
   protected void outputHeap() {
     IntegersDebug.print("output: " + heapLength + " : ");
     for (int i = 1; i <= heapLength; i++) {
-      IntegersDebug.print(heap[i], myIts[heap[i]].value());
+      IntegersDebug.print("(", myHeap[i], myIts[myHeap[i]].value(), ")");
     }
     IntegersDebug.println();
   }

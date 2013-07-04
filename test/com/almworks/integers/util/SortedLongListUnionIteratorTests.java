@@ -6,6 +6,8 @@ import com.almworks.integers.LongIterator;
 import com.almworks.integers.NativeIntFixture;
 import com.almworks.util.RandomHolder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static com.almworks.integers.LongArray.create;
@@ -15,10 +17,11 @@ public class SortedLongListUnionIteratorTests extends NativeIntFixture {
 
 
   public void templateCase(LongArray arrays[], LongIterator expected) {
-    LongIterator iterators[] = new LongIterator[arrays.length];
+    List<LongIterator> iterators = new ArrayList<LongIterator>(arrays.length);
     IntegersDebug.println(arrays.length);
+
     for (int i = 0; i < arrays.length; i++) {
-      iterators[i] = arrays[i].iterator();
+      iterators.add(arrays[i].iterator());
       IntegersDebug.println("iterator ", i, " : ", arrays[i]);
     }
     SortedLongListUnionIterator res = new SortedLongListUnionIterator(iterators);

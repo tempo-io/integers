@@ -22,27 +22,33 @@ package com.almworks.integers.util;
 import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Iterates through two sorted int lists in O(N+M), providing values that exist in
  * both lists
  */
 public class SortedLongListIntersectionIterator extends SortedLongListOperationsIterator {
 
-  public SortedLongListIntersectionIterator(LongIterator iterators[]) {
+  public SortedLongListIntersectionIterator(List<LongIterator> iterators) {
     super(iterators);
   }
 
   public static SortedLongListIntersectionIterator create(LongIterable... includes) {
-    LongIterator result[] = new LongIterator[includes.length];
+    if (includes.length == 0)
+      throw new NullPointerException("No elements");
+
+    List<LongIterator> result = new ArrayList<LongIterator>(includes.length);
     for (int i = 0; i < includes.length; i++) {
-      result[i] = includes[i].iterator();
+      result.add(includes[i].iterator());
     }
     return new SortedLongListIntersectionIterator(result);
   }
 
   private boolean equalValues() { // leafs equals root
     for (int i = parent(heapLength) + 1; i <= heapLength; i++) {
-      if (myIts[heap[1]].value() != myIts[heap[i]].value()) {
+      if (myIts[myHeap[1]].value() != myIts[myHeap[i]].value()) {
         return false;
       }
     }
@@ -53,7 +59,7 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
     for (int i = 0; i < myIts.length; i++) {
       if (myIts[i].hasNext()) {
         myIts[i].next();
-        heap[i + 1] = i;
+        myHeap[i + 1] = i;
       } else {
         return false;
       }
@@ -62,16 +68,16 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
     outputHeap();
 
     while ( !equalValues()) {
-      if (myIts[heap[1]].hasNext()) {
-        long prev = myIts[heap[1]].value();
-        myIts[heap[1]].next();
-        assert prev < myIts[heap[1]].value() : heap[1] + " " + prev + " " + myIts[heap[1]].value();
+      if (myIts[myHeap[1]].hasNext()) {
+        long prev = myIts[myHeap[1]].value();
+        myIts[myHeap[1]].next();
+        assert prev < myIts[myHeap[1]].value() : myHeap[1] + " " + prev + " " + myIts[myHeap[1]].value();
       } else {
         return false;
       }
       heapify(1);
     }
-    myNext = myIts[heap[0]].value();
+    myNext = myIts[myHeap[0]].value();
     return true;
   }
 
