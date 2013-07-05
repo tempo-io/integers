@@ -29,6 +29,7 @@ gen/IntegerCollectionsCodegen.java -text
 gen/SkipImportsRegex.groovy -text
 gen/TypeDescriptor.java -text
 java/com/almworks/integers/IntegersUtils.java -text
+java/com/almworks/integers/util/IntegersDebug.java -text
 java/com/almworks/integers/util/RemovedIndexIterator.java -text
 lib/annotations.jar -text
 lib/junit.jar -text
@@ -55,9 +56,6 @@ templates/com/almworks/integers/PListIterator.tpl -text
 templates/com/almworks/integers/PProgression.tpl -text
 templates/com/almworks/integers/PairIntPIterator.tpl -text
 templates/com/almworks/integers/ParallelPList.tpl -text
-templates/com/almworks/integers/SortedLongListIntersectionIterator.tpl -text
-templates/com/almworks/integers/SortedLongListOperationsIterator.tpl -text
-templates/com/almworks/integers/SortedLongListUnionIterator.tpl -text
 templates/com/almworks/integers/TwoWayPMap.tpl -text
 templates/com/almworks/integers/WritablePList.tpl -text
 templates/com/almworks/integers/WritablePListIterator.tpl -text
@@ -82,6 +80,9 @@ templates/com/almworks/integers/util/PListRemovingDecorator.tpl -text
 templates/com/almworks/integers/util/PObjMap.tpl -text
 templates/com/almworks/integers/util/PSetBuilder.tpl -text
 templates/com/almworks/integers/util/ReadonlyPListRemovingDecorator.tpl -text
+templates/com/almworks/integers/util/SortedLongListIntersectionIterator.java -text
+templates/com/almworks/integers/util/SortedLongListOperationsIterator.java -text
+templates/com/almworks/integers/util/SortedLongListUnionIterator.java -text
 templates/com/almworks/integers/util/SortedPListIntersectionIterator.tpl -text
 templates/com/almworks/integers/util/SortedPListMinusIterator.tpl -text
 test/com/almworks/integers/CollectionsCompare.java -text
