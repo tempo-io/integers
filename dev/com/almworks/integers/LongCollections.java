@@ -21,7 +21,9 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
@@ -61,6 +63,14 @@ public class LongCollections {
   }
 
   public static LongList toSortedUnique(long[] values) {
+    if (values.length == 0) {
+      return LongList.EMPTY;
+    } else {
+      return toWritableSortedUnique(values);
+    }
+  }
+
+  public static LongArray toWritableSortedUnique(long[] values) {
     int res = isSortedUnique(true, values, 0, values.length);
     if (res == 0) return new LongArray(values);
     if (res < 0) {
@@ -143,7 +153,7 @@ public class LongCollections {
    * @param from index to start search, inclusive
    * @param to   ending index, exclusive
    */
-  public static int binarySearch(long key, long[] a, int from, int to) {
+  public static int binarySearch(long val, long[] a, int from, int to) {
     int low = from;
     int high = to - 1;
 
@@ -151,21 +161,21 @@ public class LongCollections {
       int mid = (low + high) >> 1;
       long midVal = a[mid];
 
-      if (midVal < key)
+      if (midVal < val)
         low = mid + 1;
-      else if (midVal > key)
+      else if (midVal > val)
         high = mid - 1;
       else
-        return mid; // key found
+        return mid; // val found
     }
-    return -(low + 1);  // key not found.
+    return -(low + 1);  // val not found.
   }
 
   /**
-  * Replaces subsequences of equal elements with single element. Common usage is remove duplicates from
-  * sorted array and make all elements unique.
-  * @return new length of an array without duplicated elements 
-  */
+   * Replaces subsequences of equal elements with single element. Common usage is remove duplicates from
+   * sorted array and make all elements unique.
+   * @return new length of an array without duplicated elements
+   */
   public static int removeSubsequentDuplicates(long[] array, int offset, int length) {
     if (length < 2)
       return length;
@@ -187,8 +197,10 @@ public class LongCollections {
   /** @return index of a duplicate (not necessarily leftmost) or -1 if none */
   public static int findDuplicate(LongList unsorted) {
     LongArray sorted = new LongArray(unsorted);
-    sorted.sort();
-    return findDuplicateSorted(unsorted);
+    LongArray perms = new LongArray(LongProgression.arithmetic(0, sorted.size())); // perms is int
+    sorted.sort(perms);
+    int result = findDuplicateSorted(sorted);
+    return result == -1 ? -1 : (int)perms.get(result);
   }
 
   /** @return index of the leftmost duplicate or -1 if none*/
@@ -262,12 +274,14 @@ public class LongCollections {
         return coll.get(index);
       }
     };
+
   }
 
   /**
    * This algorithm supposes that the set to intersect with is usually shorter than the merged ones.
    * It also supposes that a and b have a great deal of common elements (this assumption is not very important, though).
    * */
+
   public static LongList uniteTwoLengthySortedSetsAndIntersectWithThirdShort(LongList a, LongList b, LongList intersectWith) {
     LongArray result = new LongArray(Math.min(intersectWith.size(), 16));
     int ia = 0;

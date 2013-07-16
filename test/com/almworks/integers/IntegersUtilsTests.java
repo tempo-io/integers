@@ -17,11 +17,12 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
-import junit.framework.TestCase;
+import com.almworks.util.RandomHolder;
 
 import java.util.HashSet;
+import java.util.Random;
 
-public class IntegersUtilsTests extends TestCase {
+public class IntegersUtilsTests extends IntegersFixture {
   public void testPermutationsSimple() {
     IntegersUtils.allPermutations(1, new IntProcedure() {
       @Override
@@ -75,5 +76,44 @@ public class IntegersUtilsTests extends TestCase {
     for (int i = 2; i <= c.length; ++i) {
       assertEquals(permCount[0] + " " + i, 0, permCount[0] % i);
     }
+  }
+
+  public void testArrayCopy() {
+    Random r = new RandomHolder().getRandom();
+    int arrayLength = 1000;
+    int maxValue = Integer.MAX_VALUE;
+
+    int[] res = new int[arrayLength];
+    int[] expected = new int[arrayLength];
+    for (int i = 0; i < arrayLength; i++) {
+      res[i] = r.nextInt(maxValue);
+      expected[i] = res[i];
+    }
+    int[] copy = IntegersUtils.arrayCopy(res);
+    CHECK.order(expected, copy);
+  }
+
+  public void testIndexOf() {
+    Random r = new RandomHolder().getRandom();
+    int arrayLength = 1000;
+    int maxValue = Integer.MAX_VALUE;
+
+    IntArray res = new IntArray(arrayLength);
+    int[] intArr = new int[arrayLength];
+
+    for (int i = 0; i < arrayLength; i++) {
+      int val = r.nextInt(maxValue);
+      res.add(val);
+      intArr[i] = val;
+    }
+
+    for (int i = 0; i < arrayLength; i++) {
+      int val = res.get(i);
+      assertEquals(res.indexOf(val), IntegersUtils.indexOf(intArr, val));
+    }
+  }
+
+  public void testSubstringAfterLast() {
+    System.out.println(IntegersUtils.substringAfterLast("woki toki", " "));
   }
 }

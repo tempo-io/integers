@@ -16,24 +16,17 @@
 
 package com.almworks.integers.util;
 
-import java.util.Arrays;
-
 public class IntegersDebug {
-  public static final String DEBUG_STATUS = "integers.debug";
+  private static final String DEBUG_STATUS = "integers.debug";
+  private static final String debugStatus = System.getProperty(DEBUG_STATUS);
+  public static final boolean DEBUG = Boolean.parseBoolean(debugStatus);
 
-  public static boolean isDebug() {
-    boolean res = false;
-    String debugStatus = System.getProperty(DEBUG_STATUS);
-    try {
-      res = Boolean.parseBoolean(debugStatus);
-    } catch (NumberFormatException ex) {
-      System.err.println("wrong debug format: " + ex);
-    }
-    return res;
-  }
+//  public static boolean isDebug() {
+//    return DEBUG;
+//  }
 
   public static void print(Object ... elements) {
-    if (isDebug()) {
+    if (DEBUG) {
       StringBuilder sb = new StringBuilder();
       if (elements == null) sb.append("null");
       else {
@@ -48,7 +41,7 @@ public class IntegersDebug {
   }
 
   public static void println(Object ... elements) {
-    if (isDebug()) {
+    if (DEBUG) {
       print(elements);
       System.out.println();
     }

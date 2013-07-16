@@ -3,15 +3,11 @@ package com.almworks.integers;
 import com.almworks.integers.optimized.SameValuesIntList;
 import com.almworks.integers.optimized.SegmentedIntArray;
 import com.almworks.integers.util.IntListConcatenation;
-import com.almworks.integers.util.IntListInsertingDecorator;
 import com.almworks.integers.util.ModifyingIntListRemovingDecorator;
 import com.almworks.integers.util.ReadonlyIntListRemovingDecorator;
-import com.almworks.util.RandomHolder;
-
-import java.util.Random;
 
 
-public class IntCollectionsTests extends NativeIntFixture {
+public class IntCollectionsTests extends IntegersFixture {
   private final IntArray myArray = new IntArray();
 
   public void testArray_RemoveSubsequentDuplicates() {
@@ -33,79 +29,6 @@ public class IntCollectionsTests extends NativeIntFixture {
     myArray.addAll(1, 1, 2, 2, 3, 3);
     myArray.sortUnique();
     checkCollection(myArray, 1, 2, 3);
-  }
-
-  public void testInsertDecorator() {
-    IntListInsertingDecorator ins = new IntListInsertingDecorator(myArray);
-    checkCollection(ins);
-    assertEquals(0, ins.getInsertCount());
-
-    ins.insert(0, 1);
-    checkCollection(ins, 1);
-    assertEquals(1, ins.getInsertCount());
-    checkInsertIndexes(ins, 0);
-    CHECK.order(ins.insertValueIterator(), 1);
-
-    myArray.insert(0, 3);
-    checkCollection(ins, 1, 3);
-    myArray.insert(1, 4);
-    checkCollection(ins, 1, 3, 4);
-    assertEquals(1, ins.getInsertCount());
-    checkInsertIndexes(ins, 0);
-    CHECK.order(ins.insertValueIterator(), 1);
-
-    ins.insert(1, 2);
-    checkCollection(ins, 1, 2, 3, 4);
-    assertEquals(2, ins.getInsertCount());
-    checkInsertIndexes(ins, 0, 1);
-    CHECK.order(ins.insertValueIterator(), 1, 2);
-
-    ins.insert(0, 0);
-    checkCollection(ins, 0, 1, 2, 3, 4);
-    assertEquals(3, ins.getInsertCount());
-    checkInsertIndexes(ins, 0, 1, 2);
-    CHECK.order(ins.insertValueIterator(), 0, 1, 2);
-
-    ins.insert(5, 5);
-    checkCollection(ins, 0, 1, 2, 3, 4, 5);
-    assertEquals(4, ins.getInsertCount());
-    checkInsertIndexes(ins, 0, 1, 2, 5);
-    CHECK.order(ins.insertValueIterator(), 0, 1, 2, 5);
-  }
-
-  public void testInsertingDecoratorIterator() {
-//    myArray.addAll(1, 2, 4, 7, 8, 9);
-    myArray.addAll(1, 2, 4, 7, 8, 9, 11);
-    IntListInsertingDecorator dec = new IntListInsertingDecorator(myArray);
-    dec.insert(0, 0);
-    dec.insert(3, 3);
-    dec.insert(5, 5);
-    dec.insert(6, 6);
-/*
-    dec.insert(10, 10);
-    dec.insert(11, 11);
-    assertEquals(12, dec.size());
-    int x = 0;
-    for (IntIterator i : dec) {
-      assertEquals(x++, i.value());
-    }
-    assertEquals(12, x);
-*/
-    dec.insert(10, 10);
-    assertEquals(12, dec.size());
-    int x = 0;
-    for (IntIterator i : dec) {
-      assertEquals(x++, i.value());
-    }
-    assertEquals(12, x);
-
-    myArray.clear();
-    myArray.addAll(1, 2);
-    dec = new IntListInsertingDecorator(myArray);
-    dec.insert(0, 0);
-    x = 0;
-    for (IntIterator i : dec) assertEquals(x++, i.value());
-    
   }
 
   public void testConcatenation() {
@@ -257,11 +180,4 @@ public class IntCollectionsTests extends NativeIntFixture {
     return resultingIndices.iterator();
   }
 
-  public void testRemoveAllAtSorted() {
-    IntArray a = new IntArray(IntProgression.arithmetic(0, 20));
-    IntCollections.removeAllAtSorted(a, IntArray.create(0, 3, 4, 7, 10, 11, 12, 13, 19));
-    CHECK.order(a.iterator(), 1, 2, 5, 6, 8, 9, 14, 15, 16, 17, 18);
-    IntCollections.removeAllAtSorted(a, IntArray.create(1, 2, 3, 4, 9));
-    CHECK.order(a.iterator(), 1, 9, 14, 15, 16, 18);
-  }
 }

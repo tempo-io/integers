@@ -1,8 +1,8 @@
 package com.almworks.integers.util;
 
+import com.almworks.integers.IntProgression;
 import com.almworks.util.TestUtil;
 import junit.framework.TestCase;
-import com.almworks.integers.IntProgression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class IntMapTests extends TestCase {
+public class IntObjMapTests extends TestCase {
   private IntObjMap<String> myMap = IntObjMap.create();
 
   public void testPutGet() {
@@ -126,5 +126,23 @@ public class IntMapTests extends TestCase {
   private void checkEntry(IntObjMap.Entry<String> e, int key) {
     assertEquals(key, e.getKey());
     assertEquals(String.valueOf(key), e.getValue());
+  }
+
+  public void testContainsKey() {
+    for (int i = 0; i < 10; i += 2) {
+      myMap.put(i, Integer.toString(i));
+    }
+    for (int i = 0; i < 10; i++) {
+      assertEquals(i % 2 == 0, myMap.containsKey(i));
+    }
+  }
+
+  public void testContainsKey2() {
+    for (int i = 0; i < 10; i += 2) {
+      myMap.put(i, Integer.toString(i));
+    }
+    List<IntObjMap.Entry<String>> res = myMap.toList();
+//    res.get(2).getValue()
+//    res
   }
 }

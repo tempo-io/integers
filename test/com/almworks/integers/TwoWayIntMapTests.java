@@ -346,16 +346,16 @@ public class TwoWayIntMapTests extends TestCase {
     map.insertAllRo(IntProgression.arithmetic(0, 10), apply(swap(MOD), 3));
     permute(IntArray.create(0, 1, /* { */6, 4, 3, 7, 2, 5/* } */, 8, 9));
     compare.order(pairs(
-      0, 0,
-      1, 1,
-      2, 0,
-      3, 1,
-      4, 0,
-      5, 1,
-      6, 2,
-      7, 2, 
-      8, 2, 
-      9, 0      
+        0, 0,
+        1, 1,
+        2, 0,
+        3, 1,
+        4, 0,
+        5, 1,
+        6, 2,
+        7, 2,
+        8, 2,
+        9, 0
     ), map.toList());
 
     map.clear();
@@ -427,5 +427,26 @@ public class TwoWayIntMapTests extends TestCase {
       }
       checkMapValsEqualKeysMod(PRIME);
     }
+
+  }
+  public void testNonInjectiveFunctionException() {
+    map.insertAll(new IntArray(arithmetic(0, 10)), apply(MULT, 10));
+    map.transformVals(apply(ADD, 1));
+//    System.out.println(map.size());
+    for (int i = 0; i < map.size(); ++i) assertEquals(i*10+1, map.get(i));
+
+    boolean caught = false;
+    try {
+      map.transformKeys(new IntFunction() {
+        public int invoke(int a) {
+          return a + 1 + a%2;
+        }
+      });
+    } catch (TwoWayIntMap.NonInjectiveFunctionException ex) {
+      caught = true;
+      assertEquals(3, ex.getDuplicateValue());
+    }
+    assertTrue(caught);
+
   }
 }

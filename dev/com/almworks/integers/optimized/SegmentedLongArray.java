@@ -21,7 +21,6 @@ package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
 import com.almworks.integers.func.LongFunction;
-import com.almworks.integers.func.LongFunction2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -166,6 +165,8 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   public void expand(int index, int count) {
+    if (index < 0 || index > size())
+      throw new IndexOutOfBoundsException(index + " " + this);
     assert checkInvariants();
     if (count <= 0)
       return;
@@ -739,17 +740,6 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     checkRange(from, to);
     for (WritableLongListIterator ii = iterator(from, to); ii.hasNext();) {
       ii.set(0, function.invoke(ii.nextValue()));
-    }
-    assert checkInvariants();
-  }
-
-  public void apply(int from, int to, LongFunction2 function, long secondArgument) {
-    assert checkInvariants();
-    if (from >= to)
-      return;
-    checkRange(from, to);
-    for (WritableLongListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.nextValue(), secondArgument));
     }
     assert checkInvariants();
   }

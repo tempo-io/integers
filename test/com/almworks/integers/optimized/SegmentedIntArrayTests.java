@@ -1,10 +1,10 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.*;
+import com.almworks.integers.IntCollectionsCompare;
+import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.func.IntFunction;
 
-import java.util.NoSuchElementException;
-
-public class SegmentedIntArrayTests extends NativeIntFixture {
+public class SegmentedIntArrayTests extends IntegersFixture {
   private TestEnvForSegmentedIntArray myEnv;
   private SegmentedIntArray array;
 
@@ -63,7 +63,7 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
     for (int i = 0; i < 10000; i++)
       array.insert(0, i);
     new IntCollectionsCompare().order(array.toNativeArray(),
-      new IntProgression.Arithmetic(9999, 10000, -1).toNativeArray());
+        new IntProgression.Arithmetic(9999, 10000, -1).toNativeArray());
   }
 
   public void testRemoveByIterator() {
@@ -294,7 +294,94 @@ public class SegmentedIntArrayTests extends NativeIntFixture {
   public void testReverse() {
     testReverse(new int[]{}, new int[]{});
     testReverse(new int[]{0}, new int[]{0});
-    testReverse(new int[]{1,1,0}, new int[]{0,1,1});
-    testReverse(new int[]{0,1,3,6,10,15,21,28,36}, new int[]{36,28,21,15,10,6,3,1,0});
+    testReverse(new int[]{1, 1, 0}, new int[]{0, 1, 1});
+    testReverse(new int[]{0, 1, 3, 6, 10, 15, 21, 28, 36}, new int[]{36, 28, 21, 15, 10, 6, 3, 1, 0});
+  }
+
+  public static void myCheck(IntList expected, IntList actual) {
+    assertEquals(expected.size(), actual.size());
+    for (int i = 0; i < expected.size(); i++) {
+      int val = expected.get(i);
+      assertTrue(val == -1 || val == actual.get(i));
+    }
+  }
+
+  // todo refactor, same testExpand for SVIL, IA
+  public void testExpand() {
+    int[] elements = {5, 10, 4, 2, 1};
+    int[] counts = {1, 2, 1, 1, 1};
+    for ( int i = 0; i < 5; i++) {
+      for ( int j = 0; j < counts[i]; j++) {
+        array.add(elements[i]);
+      }
+    }
+    IntArray expected = IntArray.create(5, 10, 10, 4, 2, 1);
+    CHECK.order(array.iterator(), expected.iterator());
+
+    for (int i = 0; i < 3; i++) {
+      expected.insert(3, -1);
+    }
+    array.expand(3, 3);
+    myCheck(expected, array);
+
+
+    for (int i = 0; i < 2; i++) {
+      expected.insert(3, -1);
+    }
+    array.expand(6, 2);
+    myCheck(expected, array);
+
+    boolean caught = false;
+    try {
+      array.expand(array.size() + 1, 5);
+    } catch (IndexOutOfBoundsException ex) {
+      caught = true;
+    }
+    assertTrue(caught);
+
+    caught = false;
+    try {
+      array.expand(-1, 3);
+    } catch (IndexOutOfBoundsException ex) {
+      caught = true;
+    }
+    assertTrue(caught);
+
+    array.expand(array.size(), 5);
+    for (int i = 0; i < 5; i++) {
+      expected.add(-1);
+    }
+    myCheck(expected, array);
+  }
+
+  public void testSetRange() {
+    IntArray expected = new IntArray(IntProgression.arithmetic(0, 20));
+    array.addAll(expected);
+
+    array.setRange(0, 5, -1);
+    expected.setRange(0, 5, -1);
+    assertEquals(expected, array);
+
+    array.setRange(5, 10, 4);
+    expected.setRange(5, 10, 4);
+    assertEquals(expected, array);
+
+//    IntProgression.arithmetic(5,
+  }
+
+  public void testApply() {
+    IntArray expected = new IntArray(IntProgression.arithmetic(0, 10));
+    array.addAll(expected);
+    array.apply(2, 8, new IntFunction() {
+      @Override
+      public int invoke(int a) {
+        return a * a - 1;
+      }
+    });
+    for (int i = 2; i < 8; i++) {
+      int val = expected.get(i);
+      expected.set(i, val * val - 1);
+    }
+    checkList(array, expected.toNativeArray());
   }
 }

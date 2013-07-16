@@ -1,9 +1,12 @@
 package com.almworks.integers;
 
 import com.almworks.util.RandomHolder;
-import java.util.*;
 
-public class IntArrayTests extends NativeIntFixture {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class IntArrayTests extends IntegersFixture {
   private IntArray array;
 
   protected void setUp() throws Exception {

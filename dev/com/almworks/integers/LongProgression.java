@@ -64,12 +64,12 @@ public abstract class LongProgression extends AbstractLongList {
       return new ArithmeticIterator(myInitial, myStep, myCount);
     }
 
-    public static long[] fillArray(long initial, long difference, int count) {
+    public static long[] fillArray(long initial, long step, int count) {
       long[] result = new long[count];
       long value = initial;
       for (int i = 0; i < result.length; i++) {
         result[i] = value;
-        value += difference;
+        value += step;
       }
       return result;
     }
@@ -80,10 +80,10 @@ public abstract class LongProgression extends AbstractLongList {
     private final long myInitial;
     private final long myDifference;
 
-    public ArithmeticIterator(long initial, long difference, int count) {
+    public ArithmeticIterator(long initial, long step, int count) {
       super(0, count);
       myInitial = initial;
-      myDifference = difference;
+      myDifference = step;
     }
 
     public long absget(int index) throws NoSuchElementException {

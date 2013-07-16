@@ -90,6 +90,8 @@ public interface WritableLongList extends LongList, LongCollector {
    *
    * @param index where to insert "hole"
    * @param count how much size increase is needed, must be >= 0
+   *
+   * @throws IndexOutOfBoundsException when index > size
    */
   void expand(int index, int count);
 

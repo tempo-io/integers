@@ -1,12 +1,16 @@
 package com.almworks.integers;
 
-import junit.framework.TestCase;
 import com.almworks.integers.util.AbstractIntListDecorator;
 import com.almworks.integers.util.IntListInsertingDecorator;
 import com.almworks.integers.util.IntListRemovingDecorator;
 import com.almworks.integers.util.IntSetBuilder;
+import com.almworks.util.RandomHolder;
+import junit.framework.TestCase;
 
-public abstract class NativeIntFixture extends TestCase {
+import java.util.Arrays;
+import java.util.Random;
+
+public abstract class IntegersFixture extends TestCase {
   protected static final IntCollectionsCompare CHECK = new IntCollectionsCompare();
 
   protected IntSetBuilder prog(int start, int step, int count) {
@@ -172,6 +176,59 @@ public abstract class NativeIntFixture extends TestCase {
       assertEquals(value, myCollection.get(index));
       index++;
       return true;
+    }
+  }
+
+  public static interface BinarySearcher {
+    void init(long... values);
+
+    long get(int index);
+
+    int binSearch(long value);
+
+    int size(); // fix it?
+  }
+
+  private static void checkBinarySearch(BinarySearcher bs, long ... values) {
+    assertTrue(LongArray.create(values).isSorted());
+    bs.init(values);
+
+    for (int index = 0; index < bs.size(); index++) {
+      for (long i = bs.get(index) - 1; i <= bs.get(index) + 1; i++) {
+        int res = bs.binSearch(i);
+        int res2 = -res - 1;
+        if (res >= 0) {
+          assertEquals(i, bs.get(res));
+        } else {
+          if (res2 == 0) {
+            assertTrue(res2 != 0 || i < bs.get(res2));
+          } else {
+            if (res2 == bs.size()) {
+              assertTrue(bs.get(res2 - 1) < i);
+            } else {
+              assertTrue(bs.get(res2 - 1) <= i && i < bs.get(res2));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public static void testBinarySearch(BinarySearcher bs) {
+    checkBinarySearch(bs, 0, 2, 5, 10);
+    checkBinarySearch(bs, 0, 5, 10, 11, 12, 14, 20, 25, 25);
+
+    int arrLength = 100;
+    long[] arr = new long[arrLength];
+    int maxValue = Integer.MAX_VALUE - 1;
+    Random r = new RandomHolder().getRandom();
+
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < arrLength; j++) {
+        arr[j] = r.nextInt();
+      }
+      Arrays.sort(arr);
+      checkBinarySearch(bs, arr);
     }
   }
 }

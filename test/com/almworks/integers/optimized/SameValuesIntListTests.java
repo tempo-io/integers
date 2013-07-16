@@ -1,9 +1,10 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.NativeIntFixture;
+import com.almworks.integers.IntArray;
+import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.WritableIntListIterator;
 
-public class SameValuesIntListTest extends NativeIntFixture {
+public class SameValuesIntListTests extends IntegersFixture {
   private SameValuesIntList array;
 
   protected void setUp() throws Exception {
@@ -242,5 +243,53 @@ public class SameValuesIntListTest extends NativeIntFixture {
     assertEquals(2, i.value());
     i.remove();
     assertEquals(2, i.nextValue());
+
+  }
+
+  public void testExpand() {
+    int[] elements = {5, 10, 4, 2, 1};
+    int[] counts = {1, 2, 1, 1, 1};
+    for ( int i = 0; i < 5; i++) {
+      for ( int j = 0; j < counts[i]; j++) {
+        array.add(elements[i]);
+      }
+    }
+    IntArray expected = IntArray.create(5, 10, 10, 4, 2, 1);
+    CHECK.order(array.iterator(), expected.iterator());
+
+    for (int i = 0; i < 3; i++) {
+      expected.insert(3, 4);
+    }
+    array.expand(3, 3);
+    CHECK.order(array.iterator(), expected.iterator());
+
+    for (int i = 0; i < 2; i++) {
+      expected.insert(3, 4);
+    }
+    array.expand(6, 2);
+    CHECK.order(array.iterator(), expected.iterator());
+
+    boolean caught = false;
+    try {
+      array.expand(array.size() + 1, 5);
+    } catch (IndexOutOfBoundsException ex) {
+      caught = true;
+    }
+    assertTrue(caught);
+
+    caught = false;
+    try {
+      array.expand(-1, 3);
+    } catch (IndexOutOfBoundsException ex) {
+      caught = true;
+    }
+    assertTrue(caught);
+
+    array.expand(array.size(), 5);
+    int val = expected.getLast(0);
+    for (int i = 0; i < 5; i++) {
+      expected.add(val);
+    }
+    CHECK.order(array.iterator(), expected.iterator());
   }
 }

@@ -1,10 +1,11 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.IntegersUtils;
 
 import java.util.Random;
 
-public class IntSetBuilderTests extends NativeIntFixture {
+public class IntSetBuilderTests extends IntegersFixture {
   private static final int TEMP_SIZE = 3;
 
   public void test() {
@@ -41,6 +42,7 @@ public class IntSetBuilderTests extends NativeIntFixture {
         set.add(v);
         builder.add(v);
       }
+      assertEquals(count, set.size());
       set.sortUnique();
       CHECK.order(builder.toSortedCollection().iterator(), set.toNativeArray());
     }
@@ -101,4 +103,28 @@ public class IntSetBuilderTests extends NativeIntFixture {
     b.mergeFrom(prog(190, 1, 20));
     checkSet(b, range(100, 209));
   }
+
+  public void testAdd() {
+    IntSetBuilder b = new IntSetBuilder();
+    assertTrue(b.isEmpty());
+    for (int i = 0; i < 8; i++) {
+      b.add(i * 2);
+    }
+    assertFalse(b.isEmpty());
+    b.addAll(10, 100, 200);
+    b.addAll(IntArray.create(-5, 9, 3));
+    b.addAll(IntArray.create(7, 15, 4).iterator());
+
+    IntArray expected = IntArray.create();
+    for (int i = 0; i < 8; i++) {
+      expected.add(i * 2);
+    }
+    expected.addAll(10, 100, 200, -5, 9, 3, 7, 15, 4);
+    expected.sortUnique();
+
+    IntList collection = b.toTemporaryReadOnlySortedCollection();
+
+    CHECK.order(collection.iterator(), expected.iterator());
+  }
+
 }

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/SortedPListIntersectionIterator.tpl
-
 
 package com.almworks.integers.util;
 
@@ -29,61 +27,60 @@ import java.util.List;
 
 /**
  * Iterates through two unique sorted int lists in O(N+M), providing unique sorted values that exist in
- * both lists
+ * either of lists
  */
-public class SortedLongListIntersectionIterator extends SortedLongListOperationsIterator {
+public class SortedLongListUnionIterator extends SortedLongListOperationsIterator {
+  private boolean myIsHeapBuilt = false;
 
-  public SortedLongListIntersectionIterator(List<LongIterator> iterators) {
+  public SortedLongListUnionIterator(List<LongIterator> iterators) {
     super(iterators);
   }
 
   @NotNull
-  public static SortedLongListIntersectionIterator create(LongIterable ... includes) {
+  public static SortedLongListUnionIterator create(LongIterable... includes) {
     return create(Arrays.asList(includes));
   }
 
   @NotNull
-  public static SortedLongListIntersectionIterator create(List<? extends LongIterable> includes) {
+  public static SortedLongListUnionIterator create(List<? extends LongIterable> includes) {
     List<LongIterator> result = new ArrayList<LongIterator>(includes.size());
     for (LongIterable arr : includes) {
       result.add(arr.iterator());
     }
-    return new SortedLongListIntersectionIterator(result);
-  }
-
-  private boolean equalValues() {
-    int topIterator = myHeap[TOP];
-    for (int i = parent(heapLength) + TOP; i <= heapLength; i++) {
-      if (myIts.get(topIterator).value() != myIts.get(myHeap[i]).value()) {
-        return false;
-      }
-    }
-    return true;
+    return new SortedLongListUnionIterator(result);
   }
 
   protected boolean findNext() {
-    for (int i = 0; i < myIts.size(); i++) {
-      if (myIts.get(i).hasNext()) {
-        myIts.get(i).next();
-        myHeap[i + TOP] = i;
-      } else {
-        return false;
+    if (!myIsHeapBuilt) {
+      myIsHeapBuilt = true;
+      if (IntegersDebug.DEBUG) IntegersDebug.println(myIts.size());
+      heapLength = 0;
+      for (int i = 0; i < myIts.size(); i++) {
+        if (myIts.get(i).hasNext()) {
+          myIts.get(i).next();
+          heapLength++;
+          myHeap[heapLength] = i;
+        }
       }
+
+      buildHeap();
     }
-    buildHeap();
     if (IntegersDebug.DEBUG) outputHeap();
-
-    while (!equalValues()) {
+    assert heapLength >= 0 : "heapLength < 0: " + heapLength;
+    if (heapLength == 0) return false;
+    myNext = myIts.get(myHeap[TOP]).value();
+    while (myIts.get(myHeap[TOP]).value() == myNext && heapLength > 0) {
       int top = myHeap[TOP];
-      if (!myIts.get(top).hasNext()) return false;
-
-      long prev = myIts.get(top).value();
-      myIts.get(top).next();
-      assert prev < myIts.get(top).value() : top + " " + prev + " " + myIts.get(top).value();
+      if (myIts.get(top).hasNext()) {
+        long prev = myIts.get(top).value();
+        myIts.get(top).next();
+        assert prev < myIts.get(top).value() : myHeap[TOP] + " " + prev + " " + myIts.get(top).value();
+      } else {
+        swap(TOP, heapLength);
+        heapLength--;
+      }
       heapify(TOP);
     }
-    // all values are the same as the TOP
-    myNext = myIts.get(myHeap[TOP]).value();
     return true;
   }
 }

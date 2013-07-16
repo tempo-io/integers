@@ -139,7 +139,7 @@ public class ParallelLongList {
 
     public long get(int offset, int list) {
       if (list < 0 || list >= getListCount()) throw new IllegalArgumentException();
-      return myIt.get(getListCount() * (offset - 1) + list);
+      return myIt.get(getListCount() * (offset - 1) + list + 1);
     }
 
     public void removeRange(int from, int to) {

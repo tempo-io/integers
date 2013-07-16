@@ -16,15 +16,19 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+import com.almworks.integers.CollectionsCompare;
+import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.LongArray;
+import com.almworks.integers.LongList;
 import com.almworks.util.Pair;
-import junit.framework.TestCase;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static com.almworks.integers.LongCollections.*;
 
-public class LongCollectionsTests extends TestCase {
+public class LongCollectionsTests extends IntegersFixture {
   public static final CollectionsCompare COMPARE = new CollectionsCompare();
   private Random myRandom;
   public static final String SEED = "com.almworks.integers.seed";
@@ -151,5 +155,18 @@ public class LongCollectionsTests extends TestCase {
     diff.addAll(nota);
     diff.addAll(notb);
     diff.sortUnique();
+  }
+
+  public void testAsLongList() {
+    List<Long> arr = new ArrayList<Long>();
+    for (int i = 0; i < 10; i += 2) {
+      arr.add(Long.valueOf(i));
+    }
+    LongList res = asLongList(arr);
+    CHECK.order(LongArray.create(0,2,4,6,8), res);
+
+    arr.clear();
+    res = asLongList(arr);
+    assertEquals(res, LongList.EMPTY);
   }
 }
