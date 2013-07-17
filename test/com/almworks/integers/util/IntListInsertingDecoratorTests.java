@@ -62,24 +62,14 @@ public class IntListInsertingDecoratorTests extends IntegersFixture {
   }
 
   public void testInsertingDecoratorIterator() {
-//    myArray.addAll(1, 2, 4, 7, 8, 9);
     myArray.addAll(1, 2, 4, 7, 8, 9, 11);
     IntListInsertingDecorator dec = new IntListInsertingDecorator(myArray);
     dec.insert(0, 0);
     dec.insert(3, 3);
     dec.insert(5, 5);
     dec.insert(6, 6);
-/*
     dec.insert(10, 10);
-    dec.insert(11, 11);
-    assertEquals(12, dec.size());
-    int x = 0;
-    for (IntIterator i : dec) {
-      assertEquals(x++, i.value());
-    }
-    assertEquals(12, x);
-*/
-    dec.insert(10, 10);
+
     assertEquals(12, dec.size());
     int x = 0;
     for (IntIterator i : dec) {

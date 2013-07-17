@@ -114,6 +114,7 @@ public class IntegersUtilsTests extends IntegersFixture {
   }
 
   public void testSubstringAfterLast() {
-    System.out.println(IntegersUtils.substringAfterLast("woki toki", " "));
+    assertEquals("b", IntegersUtils.substringAfterLast("a b", " "));
+    assertEquals("", IntegersUtils.substringAfterLast("a ", " "));
   }
 }

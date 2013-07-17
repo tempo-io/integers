@@ -136,13 +136,4 @@ public class IntObjMapTests extends TestCase {
       assertEquals(i % 2 == 0, myMap.containsKey(i));
     }
   }
-
-  public void testContainsKey2() {
-    for (int i = 0; i < 10; i += 2) {
-      myMap.put(i, Integer.toString(i));
-    }
-    List<IntObjMap.Entry<String>> res = myMap.toList();
-//    res.get(2).getValue()
-//    res
-  }
 }

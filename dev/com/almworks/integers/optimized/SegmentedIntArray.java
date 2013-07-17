@@ -167,6 +167,8 @@ public class SegmentedIntArray extends AbstractWritableIntList implements Clonea
 
   public void expand(int index, int count) {
     assert checkInvariants();
+    if (index < 0 || index > size())
+      throw new IndexOutOfBoundsException(index + " " + this);
     if (count <= 0)
       return;
     doExpand(index, count);

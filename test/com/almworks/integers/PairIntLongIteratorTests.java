@@ -19,23 +19,23 @@ package com.almworks.integers;
 import java.util.NoSuchElementException;
 
 public class PairIntLongIteratorTests extends IntegersFixture {
-  public void testCase() {
-    IntIterator arr1 = IntArray.create(1,2,3,4,5).iterator();
-    LongIterator arr2 = LongArray.create(5, 10, 15, 20, 25).iterator();
-    PairIntLongIterator res = new PairIntLongIterator(arr1,arr2);
+  private IntIterator arr1;
+  private LongIterator arr2;
+  private PairIntLongIterator res;
+  public void setUp() {
+    arr1 = IntArray.create(1, 2, 3, 4, 5).iterator();
+    arr2 = LongArray.create(5, 10, 15, 20, 25).iterator();
+    res = new PairIntLongIterator(arr1,arr2);
+  }
 
-
-    res = res.iterator();
-
-    assertTrue(res.hasNext());
-
+  public void testNoSuchElementException(){
     boolean caught = false;
     try {
       res.value1();
     } catch(NoSuchElementException ex) {
       caught = true;
     }
-    assertTrue("caught IOOBE", caught);
+    assertTrue("caught NSEE", caught);
 
     caught = false;
     try {
@@ -43,8 +43,35 @@ public class PairIntLongIteratorTests extends IntegersFixture {
     } catch(NoSuchElementException ex) {
       caught = true;
     }
-    assertTrue("caught IOOBE", caught);
+    assertTrue("caught NSEE", caught);
 
+    while (res.hasNext()) res.next();
+
+    caught = false;
+    try {
+      res.next();
+    } catch(NoSuchElementException ex) {
+      caught = true;
+    }
+    assertTrue("caught NSEE", caught);
+  }
+
+  public void testUOE() {
+    res = res.iterator();
+    res.next();
+    boolean caught = false;
+    try {
+      res.remove();
+    } catch(UnsupportedOperationException ex) {
+      caught = true;
+    }
+    assertTrue("caught UOE", caught);
+  }
+
+  public void testValue() {
+    res = res.iterator();
+
+    assertTrue(res.hasNext());
     int e1;
     long e2;
     for (int i = 1; i <= 5; i++) {
@@ -56,19 +83,5 @@ public class PairIntLongIteratorTests extends IntegersFixture {
     }
 
     assertFalse(res.hasNext());
-    caught = false;
-    try {
-      res.next();
-    } catch(NoSuchElementException ex) {
-      caught = true;
-    }
-
-    caught = false;
-    try {
-      res.remove();
-    } catch(UnsupportedOperationException ex) {
-      caught = true;
-    }
-    assertTrue("caught UOE", caught);
   }
 }

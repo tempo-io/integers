@@ -18,19 +18,15 @@ package com.almworks.integers;
 
 public class LongProgressionTests extends IntegersFixture {
   public void testCreator() {
-    IntProgression.Arithmetic progression = new IntProgression.Arithmetic(0, 5, 2);
-
-    IntProgression progression2 = IntProgression.arithmetic(0, 5, 2);
-//    progression2.a
-
-    IntList expected = IntArray.create(0, 2, 4, 6, 8);
+    LongProgression.Arithmetic progression = new LongProgression.Arithmetic(0, 5, 2);
+    LongList expected = LongArray.create(0, 2, 4, 6, 8);
     CHECK.order(expected.iterator(), progression.iterator());
   }
 
   public void testFillArray() {
-    int[] res = IntProgression.Arithmetic.fillArray(0, 2, 5);
+    long[] res = LongProgression.Arithmetic.fillArray(0, 2, 5);
     long[] expected = {0, 2, 4, 6, 8};
-//    CHECK.order(res, expected);
+    CHECK.order(res, expected);
   }
 
   public void testIndexOf() {

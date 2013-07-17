@@ -51,20 +51,11 @@ public class SubListTests extends LongListChecker{
     // ~[...]~
     newValues = new long[length + 6];
     System.arraycopy(values, 0, newValues, 3, length);
-//    outer(newValues);
     for (int i = 0; i < 3; i++) {
       newValues[i] = r.nextInt();
       newValues[i + 3 + length] = r.nextInt();
     }
-//    outer(newValues);
     result.add(new AbstractLongList.SubList(LongArray.create(newValues), 3, length + 3));
-
-//    System.out.println("result contains:");
-//    for(LongList i : result) {
-//      System.out.println(i);
-//    }
-//    System.out.println(">>>");
-
     return result;
   }
 }

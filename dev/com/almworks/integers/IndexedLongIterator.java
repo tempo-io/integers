@@ -43,7 +43,7 @@ public class IndexedLongIterator extends AbstractLongIterator {
   }
 
   public long value() {
-    if (!myIterated) throw new IllegalStateException();
+    if (!myIterated) throw new IndexOutOfBoundsException();
     return myList.get(myIndexIterator.value());
   }
 }

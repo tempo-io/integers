@@ -25,8 +25,6 @@ public class IndexedLongListIteratorTests extends IntegersFixture {
     IntListIterator indexes = IntArray.create(0, 2).iterator();
     IndexedLongListIterator res = new IndexedLongListIterator(list, indexes);
     CHECK.order(LongArray.create(2, 9).iterator(), res);
-
-
   }
 
   public void testListOperationsCase() {
@@ -62,24 +60,18 @@ public class IndexedLongListIteratorTests extends IntegersFixture {
     assertEquals(2, res.index());
   }
 
-  public void testIndexOutOfBoundsExceptionCase() {
+  public void testNoSuchElementExceptionCase() {
     LongArray list = LongArray.create(2, 3, 9);
     IntListIterator indexes = IntArray.create(0, 2).iterator();
     IndexedLongListIterator res = new IndexedLongListIterator(list, indexes);
 
-    // check for IOOBE
+    // check for NSEE
     boolean caught = false;
     try {
       res.value();
     } catch(NoSuchElementException ex) {
       caught = true;
     }
-    assertTrue("caught IOOBE", caught);
-  }
-  public void testRandomCase() {
-
-  }
-  public void testSpecificationCase() {
-
+    assertTrue("caught NSEE", caught);
   }
 }

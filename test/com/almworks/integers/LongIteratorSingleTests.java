@@ -18,8 +18,7 @@ package com.almworks.integers;
 import java.util.NoSuchElementException;
 
 public class LongIteratorSingleTests extends IntegersFixture {
-
-  public void testCase() {
+  public void testAll() {
   LongIterator.Single element = new LongIterator.Single(1);
   assertTrue(element.hasNext());
 
@@ -29,7 +28,7 @@ public class LongIteratorSingleTests extends IntegersFixture {
   } catch(NoSuchElementException ex) {
     caught = true;
   }
-  assertTrue("caught IOOBE", caught);
+  assertTrue("caught NSEE", caught);
 
   element.next();
   assertEquals(1, element.value());
@@ -39,11 +38,6 @@ public class LongIteratorSingleTests extends IntegersFixture {
   } catch(NoSuchElementException ex) {
     caught = true;
   }
-  assertTrue("caught IOOBE", caught);
-
-
+  assertTrue("caught NSEE", caught);
   }
-
-//  element.next();
-
 }

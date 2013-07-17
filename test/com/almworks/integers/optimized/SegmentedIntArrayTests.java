@@ -305,7 +305,6 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     }
   }
 
-  // todo refactor, same testExpand for SVIL, IA
   public void testExpand() {
     int[] elements = {5, 10, 4, 2, 1};
     int[] counts = {1, 2, 1, 1, 1};

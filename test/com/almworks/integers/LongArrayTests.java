@@ -23,9 +23,9 @@ import java.util.Random;
 
 public class LongArrayTests extends TestCase {
   private static final IntCollectionsCompare CHECK = new IntCollectionsCompare();
-  private final LongArray myArray = new LongArray();
+  private LongArray myArray = new LongArray();
 
-  public void testaddAll() {
+  public void testAdd() {
     myArray.addAll(0,1,2);
     CHECK.order(myArray, LongArray.create(0, 1, 2));
 
@@ -35,54 +35,57 @@ public class LongArrayTests extends TestCase {
     myArray.addAllNotMore(LongArray.create(5, 6, 10, 20), 2);
     CHECK.order(myArray, LongArray.create(0, 1, 2, 3, 4, 5, 6));
 
+    myArray.insert(3, 100);
+    CHECK.order(myArray, LongArray.create(0, 1, 2, 100, 3, 4, 5, 6));
 
+    myArray.insertMultiple(1, -1, 3);
+    CHECK.order(myArray, LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6));
+  }
+  public void testCopy() {
     LongArray copiedArray = LongArray.copy(new long[]{10, 20, 30});
     CHECK.order(copiedArray, LongArray.create(10, 20, 30));
+  }
 
+  public void testEqual() {
+    myArray = LongArray.create(0, 1, 2, 3, 4, 5, 6);
     assertTrue(myArray.equalOrder(new long[]{0,1,2,3,4,5,6}));
     assertFalse(myArray.equalOrder(new long[]{0,1,2,3,4,5,20}));
 
     assertTrue(myArray.equalSortedValues(LongArray.create(0, 1, 2, 3, 4, 5, 6)));
     assertFalse(myArray.equalSortedValues(LongArray.create(0, 1, 2, 3, 4, 5, 20)));
+  }
 
-    myArray.expand(3, 4);
-    CHECK.order(myArray, LongArray.create(0, 1, 2, 3, 4, 5, 6, 3, 4, 5, 6));
+  public void testExpand() {
+    myArray = LongArray.create(0, 1, 2, 3);
+    myArray.expand(1, 4);
+    CHECK.order(myArray, LongArray.create(0, 1, 2, 3, 0, 1, 2, 3));
+  }
 
-    int index = myArray.indexOf(2);
-    assertEquals(index, 2);
+  public void testIndexOf() {
+    myArray = new LongArray(LongProgression.arithmetic(99, 100, -1));
+    for (int i = 0; i < 100; i++) {
+      assertEquals(99 - i, myArray.indexOf(i));
+    }
+  }
 
-    myArray.insert(3, 100);
-    assertEquals(myArray.get(3), 100);
-
-    myArray.removeRange(4, 10);
-    CHECK.order(myArray, LongArray.create(0, 1, 2, 100, 5, 6));
-
-    myArray.insertMultiple(3, 10, 4);
-    CHECK.order(myArray, LongArray.create(0, 1, 2, 10, 10, 10, 10, 100, 5, 6));
+  public void testRemove() {
+    myArray = LongArray.create(0, -1, -1, -1, 1, 2, 3);
+    myArray.removeRange(1, 4);
+    CHECK.order(myArray, LongArray.create(0, 1, 2, 3));
 
     LongArray test = LongArray.create(0, 20, 21, 30, 35, 80);
-    CHECK.order(test, new LongArray(test.iterator()));
-
     test.removeSorted(20);
     CHECK.order(test, LongArray.create(0, 21, 30, 35, 80));
+  }
 
-    test.set(0, 10);
-    test.setAll(3, LongArray.create(5, 31, 36, 100), 1, 2);
-    CHECK.order(test, LongArray.create(10, 21, 30, 31, 36));
-    test.setRange(1, 3, -9);
-    CHECK.order(test, LongArray.create(10, -9, -9, 31, 36));
+  public void testSet() {
+    myArray = LongArray.create(0, 1, 2, 3, 4, 5);
+    myArray.set(0, 10);
+    myArray.setAll(3, LongArray.create(5, 31, 36, 100), 1, 2);
+    CHECK.order(myArray, LongArray.create(10, 1, 2, 31, 36, 5));
 
-    CHECK.order(LongArray.singleton(Long.valueOf(-239)), LongArray.create(-239));
-
-//    System.out.println(myArray.size());
-    long[] a = myArray.extractHostArray();
-//    System.out.println("size:" + a.length);
-
-//    long[] expected = {0, 1, 2, 3, 4, 5, 6, 3, 4, 5, 6};
-//    for (int i = 0; i < expected.length; i++) {
-//      assertEquals(expected[i], a[i]);
-//    }
-
+    myArray.setRange(1, 3, -9);
+    CHECK.order(myArray, LongArray.create(10, -9, -9, 31, 36));
   }
 
   public void testSort() {
@@ -95,19 +98,22 @@ public class LongArrayTests extends TestCase {
       res.add((long)r.nextInt(maxValue));
     }
 
-    LongArray expected = LongArray.copy(res);
+    myArray = LongArray.copy(res);
     for (int i = 0; i < arrayLength; i++) {
       for (int j = 0; j < arrayLength - 1; j++) {
-        if (expected.get(j) > expected.get(j+1)) {
-          expected.swap(j, j+1);
+        if (myArray.get(j) > myArray.get(j+1)) {
+          myArray.swap(j, j + 1);
         }
       }
     }
     res.sort();
-    CHECK.order(res, expected);
+    CHECK.order(res, myArray);
   }
 
-  public void test() {
-    WritableLongListIterator iter = LongArray.create(0, 2, 4).iterator();
+  public void testOthersMethods() {
+    CHECK.order(LongArray.singleton(Long.valueOf(-239)), LongArray.create(-239));
+
+    long[] a = myArray.extractHostArray();
+    CHECK.order(myArray, a);
   }
 }

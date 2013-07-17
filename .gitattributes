@@ -200,7 +200,6 @@ test/com/almworks/integers/IntegersUtilsTests.java -text
 test/com/almworks/integers/ListLongMapTests.java -text
 test/com/almworks/integers/LongArrayIteratorTests.java -text
 test/com/almworks/integers/LongArrayTests.java -text
-test/com/almworks/integers/LongCollectionsTests2.java -text
 test/com/almworks/integers/LongIteratorSingleTests.java -text
 test/com/almworks/integers/LongListChecker.java -text
 test/com/almworks/integers/LongProgressionTests.java -text
@@ -208,7 +207,6 @@ test/com/almworks/integers/PairIntLongIteratorTests.java -text
 test/com/almworks/integers/ParallelLongListTests.java -text
 test/com/almworks/integers/SubListTests.java -text
 test/com/almworks/integers/TwoWayIntMapTests.java -text
-test/com/almworks/integers/WritableIndexIteratorTests.java -text
 test/com/almworks/integers/optimized/SameValuesIntListTests.java -text
 test/com/almworks/integers/optimized/SegmentedIntArrayTests.java -text
 test/com/almworks/integers/optimized/TestEnvForSegmentedIntArray.java -text

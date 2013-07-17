@@ -30,8 +30,6 @@ public class ListLongMapTests extends TestCase {
     for (int i = 0; i < 5; i++) {
       myMap.put(i*2, i * 10 + 1);
     }
-//    System.out.println(new LongArray(myMap.keysIterator(0, myMap.size())));
-//    System.out.println(new LongArray(myMap.valuesIterator(0, myMap.size())));
   }
 
   public void testGet() {
@@ -226,7 +224,6 @@ public class ListLongMapTests extends TestCase {
 
   public void testIteratorSetValue() {
     ListLongMap.Iterator it = myMap.iterator(1);
-//    it.next();
     System.out.println(new LongArray(myMap.valuesIterator(0, myMap.size())));
 
     for (; it.hasNext(); it.next()) {

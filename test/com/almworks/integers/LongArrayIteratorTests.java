@@ -17,6 +17,14 @@
 package com.almworks.integers;
 
 public class LongArrayIteratorTests extends IntegersFixture {
+  private static LongArray arr;
+  private static WritableLongListIterator iter;
+
+  public void setUp() {
+    arr = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    iter = arr.iterator();
+  }
+
   public void testCreate() throws Exception {
     long[] longArray = {0,1,2,3,4};
     LongIterator iter = LongArrayIterator.create(longArray);
@@ -40,6 +48,43 @@ public class LongArrayIteratorTests extends IntegersFixture {
     for(int i = 0; i < 5; i++) {
       assertEquals("Not equal", arr[i], a.absget(i));
     }
+  }
 
+  public void testGetSet() {
+    iter.move(2);
+    assertEquals(0, iter.get(-1));
+    assertEquals(1, iter.get(0));
+    assertEquals(2, iter.get(1));
+
+    for(int i = -1; i < 2; i++) {
+      iter.set(i, i - 1);
+    }
+    CHECK.order(arr, LongArray.create(-2, -1, 0, 3, 4, 5, 6, 7, 8, 9));
+  }
+
+  public void testIndex() {
+    iter.move(2);
+    assertEquals(1, iter.index());
+    iter.move(4);
+    assertEquals(5, iter.index());
+  }
+
+  public void testRemove() {
+    iter.move(2);
+    iter.remove();
+
+    boolean caught = false;
+    try {
+      iter.move(1);
+    } catch (IllegalStateException ex) {
+      caught = true;
+    }
+    assertTrue(caught);
+
+    iter.next();
+    CHECK.order(arr, LongArray.create(0, 2, 3, 4, 5, 6, 7, 8, 9));
+
+    iter.removeRange(0, 4);
+    CHECK.order(arr, LongArray.create(0, 6, 7, 8, 9));
   }
 }

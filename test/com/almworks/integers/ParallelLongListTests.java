@@ -153,7 +153,6 @@ public class ParallelLongListTests extends TestCase {
     assertEquals(it.get(0, 0), 1);
     assertEquals(it.get(0, 1), 2);
 
-//    it.next(null);
     it.get(1, vals);
     CHECK.order(vals, 10, 20);
 
@@ -192,7 +191,6 @@ public class ParallelLongListTests extends TestCase {
 
     it.removeRange(1, 3);
     checkStorage(1, 2);
-//    System.out.println(it.get(0, 0) + " " + it.get(0, 1));
   }
 
 
@@ -207,14 +205,10 @@ public class ParallelLongListTests extends TestCase {
     myList.insert(2, 4, 5);
     checkStorage(0, 1, 2, 3, 4, 5);
 
-//    System.out.println(myList.get(0,0));
     LongList values = myList.createListAccessor(0);
     long[] res = values.toNativeArray();
     long[] expected = {0, 2, 4};
     CHECK.order(res, expected);
-
-//    IntegersDebug.println(values);
-//    System.out.println(values);
   }
 
   public void testRemoveClearIsEmpty() {
