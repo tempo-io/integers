@@ -36,8 +36,8 @@ public final class IntArray extends AbstractWritableIntList {
     myArray = EMPTY_INTS;
   }
 
-  public IntArray(int size) {
-    myArray = size <= 0 ? EMPTY_INTS : new int[size];
+  public IntArray(int capacity) {
+    myArray = capacity <= 0 ? EMPTY_INTS : new int[capacity];
   }
 
   public IntArray(IntList copyFrom) {
