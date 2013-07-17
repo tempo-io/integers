@@ -173,7 +173,7 @@ public class IntCollectionsTests extends IntegersFixture {
 
   private IntIterator getNextDifferentValueIndex(IntList list) {
     WritableIntList resultingIndices = new IntArray();
-    for (int i = 0; i != -1; i = list.getNextDifferentValueIndex(i)) {
+    for (int i = 0; i < list.size(); i = list.getNextDifferentValueIndex(i)) {
       assertTrue("exceeded the list size!", i < list.size());
       resultingIndices.add(i);
     }

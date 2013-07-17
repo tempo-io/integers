@@ -235,7 +235,7 @@ public abstract class AbstractLongList implements LongList {
         return i;
       }
     }
-    return -1;
+    return size();
   }
 
   public long getLast(int backwardIndex) {

@@ -116,4 +116,13 @@ public class LongArrayTests extends TestCase {
     long[] a = myArray.extractHostArray();
     CHECK.order(myArray, a);
   }
+
+  public void testGetNextDifferentValueIndex() {
+    myArray = LongArray.create(0, 1, 1, 2, 2, 2, 3, 4, 5, 5, 5);
+    assertEquals(1, myArray.getNextDifferentValueIndex(0));
+    assertEquals(3, myArray.getNextDifferentValueIndex(1));
+    assertEquals(6, myArray.getNextDifferentValueIndex(3));
+    assertEquals(7, myArray.getNextDifferentValueIndex(6));
+    assertEquals(myArray.size(), myArray.getNextDifferentValueIndex(8));
+  }
 }

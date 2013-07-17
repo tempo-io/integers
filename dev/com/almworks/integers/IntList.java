@@ -130,7 +130,7 @@ public interface IntList extends IntIterable {
    * <li>{@code j > i and a[i] != a[j]},</li>
    * </ul>
    * where {@code a} represents the list.
-   * @return Index of the next different value or -1 if all values starting from the specified index are the same.
+   * @return Index of the next different value or {@link #size()} if all values starting from the specified index are the same.
    */
   int getNextDifferentValueIndex(int curIndex);
 

@@ -188,8 +188,8 @@ public class SameValuesIntListTests extends IntegersFixture {
     assertEquals("for index 9", 10, array.getNextDifferentValueIndex(9));
     assertEquals("for index 10", 11, array.getNextDifferentValueIndex(10));
     assertEquals("for index 11", 16, array.getNextDifferentValueIndex(11));
-    assertEquals("for index 16", -1, array.getNextDifferentValueIndex(16));
-    assertEquals("for index 18", -1, array.getNextDifferentValueIndex(18));
+    assertEquals("for index 16", array.size(), array.getNextDifferentValueIndex(16));
+    assertEquals("for index 18", array.size(), array.getNextDifferentValueIndex(18));
     // check for OOBE
     boolean caught = false;
     try {

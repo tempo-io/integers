@@ -235,7 +235,7 @@ public abstract class AbstractIntList implements IntList {
         return i;
       }
     }
-    return -1;
+    return size();
   }
 
   public int getLast(int backwardIndex) {

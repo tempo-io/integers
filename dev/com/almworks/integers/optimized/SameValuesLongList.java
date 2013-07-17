@@ -305,9 +305,9 @@ public class SameValuesLongList extends AbstractWritableLongList {
     int ki = myMap.findKey(curIndex);
     // find key ki for the index from which start the values equal to a[curIndex]
     if(ki < 0) ki = -ki - 2;
-   // return index for the next differing value increasing the found key or -1 if the key todo[sank] text
+    // increase the found key to get the next different value
     ++ki;
-    return ki < myMap.size() ? myMap.getKey(ki) : -1;
+    return ki < myMap.size() ? myMap.getKey(ki) : size();
   }
 
   /**
