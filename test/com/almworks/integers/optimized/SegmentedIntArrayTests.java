@@ -1,7 +1,6 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.IntCollectionsCompare;
-import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.*;
 import com.almworks.integers.func.IntFunction;
 
 public class SegmentedIntArrayTests extends IntegersFixture {

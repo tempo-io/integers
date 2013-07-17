@@ -1,5 +1,7 @@
 package com.almworks.integers.util;
 
+import com.almworks.integers.IntArray;
+import com.almworks.integers.IntList;
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.IntegersUtils;
 

@@ -7,10 +7,12 @@
     <content url="file://$MODULE_DIR$/gen">
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" />
     </content>
+    <orderEntry type="library" name="Clover IDEA Plugin" level="application" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="groovy-1.6.0" level="application" />
     <orderEntry type="module" module-name="Util" />
+    <orderEntry type="library" name="lib1" level="project" />
   </component>
 </module>
 
