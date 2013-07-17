@@ -21,6 +21,7 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.IntArray;
 import com.almworks.integers.IntegersUtils;
+import com.almworks.integers.WritableIntListIterator;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
@@ -150,6 +151,15 @@ public class IntObjMap<E> implements Iterable<IntObjMap.Entry<E>> {
   @Override
   public IntMapIterator iterator() {
     return new IntMapIterator();
+  }
+
+  public WritableIntListIterator keysIterator(int from, int to) {
+    return myKeys.iterator(from, to);
+  }
+
+  public int size() {
+    assert myKeys.size() == myValues.size();
+    return myKeys.size();
   }
 
   @Override
