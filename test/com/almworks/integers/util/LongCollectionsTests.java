@@ -17,6 +17,7 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
+import com.almworks.integers.optimized.SameValuesIntList;
 import com.almworks.util.Pair;
 import com.almworks.util.RandomHolder;
 
@@ -279,5 +280,21 @@ public class LongCollectionsTests extends IntegersFixture {
     CHECK.order(a.iterator(), 1, 2, 5, 6, 8, 9, 14, 15, 16, 17, 18);
     LongCollections.removeAllAtSorted(a, IntArray.create(1, 2, 3, 4, 9));
     CHECK.order(a.iterator(), 1, 9, 14, 15, 16, 18);
+  }
+
+  public void testSameValues() {
+    LongList arr = LongCollections.sameValues(-5, 3);
+    LongList expected = LongArray.create(-5, -5, -5);
+    CHECK.order(arr, expected);
+
+    assertEquals(0, LongCollections.sameValues(3, 0).size());
+
+    boolean caught = false;
+    try {
+      LongCollections.sameValues(3, -1);
+    } catch(IllegalArgumentException ex) {
+      caught = true;
+    }
+    assertTrue("caught IAE", caught);
   }
 }

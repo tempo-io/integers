@@ -19,6 +19,7 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.optimized.SameValuesLongList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -216,6 +217,8 @@ public class LongCollections {
 
   public static long[] ensureCapacity(@Nullable long[] array, int capacity) {
     int length = array == null ? -1 : array.length;
+    if (capacity < 0)
+      throw new IllegalArgumentException();
     if (length >= capacity)
       return array;
     if (capacity == 0)
@@ -360,5 +363,16 @@ public class LongCollections {
       rangeFinish = ind + 1;
     }
     if (rangeFinish - rangeStart >= 1) list.removeRange(rangeStart - diff, rangeFinish - diff);
+  }
+
+  public static SameValuesLongList sameValues(long value, int count) {
+    if (count < 0)
+      throw new IllegalArgumentException();
+    SameValuesLongList array = new SameValuesLongList();
+    if (count == 0)
+      return array;
+    array.add(value);
+    array.expand(0, count - 1);
+    return array;
   }
 }
