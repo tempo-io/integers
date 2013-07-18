@@ -36,8 +36,10 @@ public final class LongArray extends AbstractWritableLongList {
     myArray = EMPTY_LONGS;
   }
 
-  public LongArray(int size) {
-    myArray = size <= 0 ? EMPTY_LONGS : new long[size];
+  public LongArray(int capacity) {
+    if (capacity < 0)
+      throw new IllegalArgumentException();
+    myArray = capacity == 0 ? EMPTY_LONGS : new long[capacity];
   }
 
   public LongArray(LongList copyFrom) {
@@ -118,8 +120,12 @@ public final class LongArray extends AbstractWritableLongList {
     return dest;
   }
 
-  private void ensureCapacity(int expectedSize) {
+  public void ensureCapacity(int expectedSize) {
     myArray = LongCollections.ensureCapacity(myArray, expectedSize);
+  }
+
+  public int getCapacity() {
+    return myArray.length;
   }
 
   public void set(int index, long value) {
@@ -258,11 +264,24 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   public void retain(LongList values) {
+    retain(values, false);
+  }
+
+  public void retainSorted(LongList values) {
+    retain(values, true);
+  }
+
+  private void retain(LongList values, boolean valuesSortedStatus) {
     if (values.isEmpty()) {
       clear();
       return;
     }
-    LongList sortedValues = LongCollections.toSorted(false, values);
+    LongList sortedValues = valuesSortedStatus ? values : LongCollections.toSorted(false, values);
+    if (valuesSortedStatus) {
+      sortedValues = values;
+    } else {
+      sortedValues = LongCollections.toSorted(false, values);
+    }
     for (int i = size() - 1; i >= 0; i--) {
       long v = myArray[i];
       if (sortedValues.binarySearch(v) >= 0) continue;

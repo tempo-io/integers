@@ -85,7 +85,7 @@ public class LongArrayTests extends TestCase {
     CHECK.order(myArray, LongArray.create(10, 1, 2, 31, 36, 5));
 
     myArray.setRange(1, 3, -9);
-    CHECK.order(myArray, LongArray.create(10, -9, -9, 31, 36));
+    CHECK.order(myArray, LongArray.create(10, -9, -9, 31, 36, 5));
   }
 
   public void testSort() {
@@ -124,5 +124,33 @@ public class LongArrayTests extends TestCase {
     assertEquals(6, myArray.getNextDifferentValueIndex(3));
     assertEquals(7, myArray.getNextDifferentValueIndex(6));
     assertEquals(myArray.size(), myArray.getNextDifferentValueIndex(8));
+  }
+
+  public void testEnsureCapacity() {
+    LongArray expected = new LongArray(LongProgression.arithmetic(0, 20, 1));
+    myArray = LongArray.copy(expected);
+    assertEquals(20, myArray.getCapacity());
+
+    myArray.ensureCapacity(3);
+    CHECK.order(myArray, expected);
+    assertEquals(20, myArray.getCapacity());
+
+    myArray.ensureCapacity(25);
+    CHECK.order(myArray, expected);
+    assertEquals(40, myArray.getCapacity());
+
+    boolean caught = false;
+    try {
+      myArray.ensureCapacity(-1);
+    } catch (IllegalArgumentException ex) {
+      caught = true;
+    }
+    assertTrue("caught IAE", caught);
+  }
+
+  public void testRetain() {
+    LongArray arr = new LongArray(LongProgression.arithmetic(0, 20, 1));
+    arr.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
+    CHECK.order(LongProgression.arithmetic(1, 10, 2), arr);
   }
 }
