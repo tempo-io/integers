@@ -42,45 +42,43 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
   }
 
   public void testSimpleCase() {
-    LongArray res[] = {
+    LongArray input[] = {
         create(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24),
         create(3, 6, 9, 12, 15, 18, 21, 24)};
-    templateCase(res, create(6, 12, 18, 24));
+    templateCase(input, create(6, 12, 18, 24));
 
-    res[0] = create(1, 2, 3, 4);
-    res[1] = create(5, 6, 7, 8);
-    templateCase(res, create());
+    input[0] = create(1, 2, 3, 4);
+    input[1] = create(5, 6, 7, 8);
+    templateCase(input, create());
 
-    res[0] = create(0, 2, 3, 4, 6, 7, 8, 9, 10, 16, 17, 18, 19, 20);
-    res[1] = create(0, 5, 10, 15, 20);
-    templateCase(res, create(0, 10, 20));
-
-    IntegersDebug.print("output: ", 234, " : ");
+    input[0] = create(0, 2, 3, 4, 6, 7, 8, 9, 10, 16, 17, 18, 19, 20);
+    input[1] = create(0, 5, 10, 15, 20);
+    templateCase(input, create(0, 10, 20));
   }
 
   public void testExtremeCase() {
     //All iterators are empty.
-    LongArray res[] = {
+    LongArray input[] = {
         create(),
         create()};
-    templateCase(res, create());
+    templateCase(input, create());
 
     long value = Long.MIN_VALUE;
-    res[0] = LongArray.create(value);
-    res[1] = LongArray.create(value, value + 1);
-    templateCase(res, create(value));
+    input[0] = LongArray.create(value);
+    input[1] = LongArray.create(value, value + 1);
+    templateCase(input, create(value));
 
     value = Long.MAX_VALUE;
-    res[0] = LongArray.create(value);
-    res[1] = LongArray.create(value - 1, value);
-    templateCase(res, create(value));
+    input[0] = LongArray.create(value);
+    input[1] = LongArray.create(value - 1, value);
+    templateCase(input, create(value));
 
-    res[0] = create();
-    templateCase(res, create());
+    input[0] = create();
+    templateCase(input, create());
 
-    res[0] = create(0, 2, 4, 6, 8);
-    res[1] = create(1, 3, 5, 7, 9);
-    templateCase(res, create());
+    input[0] = create(0, 2, 4, 6, 8);
+    input[1] = create(1, 3, 5, 7, 9);
+    templateCase(input, create());
 
 
   }
@@ -93,10 +91,10 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
     _testRandom(0, 1000, 1000, Integer.MAX_VALUE);
   }
 
-  public void _testRandom(int intersectionLength, int resLength, int maxArrayLength, int maxValue) {
+  public void _testRandom(int intersectionLength, int inputLength, int maxArrayLength, int maxValue) {
     Random r = new RandomHolder().getRandom();
 
-    LongArray[] res = new LongArray[resLength];
+    LongArray[] input = new LongArray[inputLength];
     LongArray expected;
 
     LongArray intersection = create();
@@ -104,26 +102,24 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
       intersection.add(r.nextInt(maxArrayLength));
     }
 
-    for (int i = 0; i < resLength; i++) {
+    for (int i = 0; i < inputLength; i++) {
       int arrayLength = r.nextInt(maxArrayLength);
-      res[i] = LongArray.copy(intersection);
+      input[i] = LongArray.copy(intersection);
 
       for (int j = 0; j < arrayLength; j++) {
-        res[i].add(r.nextInt(maxValue));
+        input[i].add(r.nextInt(maxValue));
       }
-      res[i].sortUnique();
-      IntegersDebug.println(res[i]);
+      input[i].sortUnique();
+      IntegersDebug.println(input[i]);
     }
 
-    expected = LongArray.copy(res[0]);
-    for (int i = 1; i < resLength; i++) {
-      expected.retain(res[i]);
+    expected = LongArray.copy(input[0]);
+    for (int i = 1; i < inputLength; i++) {
+      expected.retain(input[i]);
     }
     assert expected.isUniqueSorted();
     IntegersDebug.println("expected", expected);
-    int len = 0;
-    for (LongIterator iter = expected.iterator(); iter.hasNext(); iter.next()) len++;
-    templateCase(res, expected);
+    templateCase(input, expected);
   }
 
   public void testCreate() {

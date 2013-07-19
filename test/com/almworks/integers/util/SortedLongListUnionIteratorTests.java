@@ -28,40 +28,38 @@ public class SortedLongListUnionIteratorTests extends IntegersFixture {
 
   public void testExtremeCase() {
     //All iterators are empty.
-    LongArray res[] = {
+    LongArray[] input = {
         create(),
         create()};
-    templateCase(res, create());
+    templateCase(input, create());
 
-    //Iterators list is empty.
-//    res = null;
-//
-//    templateCase(res, create());
+    LongArray[] empty = {};
+    templateCase(empty, create());
 
     // Extreme values in the iterators
     long value = Long.MIN_VALUE;
-    res[0] = LongArray.create(value);
-    res[1] = LongArray.create(value + 1);
-    templateCase(res, create(value, value + 1));
+    input[0] = LongArray.create(value);
+    input[1] = LongArray.create(value + 1);
+    templateCase(input, create(value, value + 1));
   }
 
   public void testSimpleCase() {
-    LongArray res[] = {
+    LongArray input[] = {
         create(1, 3, 5, 7),
         create(2, 3, 4, 6, 100)};
-    templateCase(res, create(1, 2, 3, 4, 5, 6, 7, 100));
+    templateCase(input, create(1, 2, 3, 4, 5, 6, 7, 100));
 
-    res[0] = create(1, 2, 3, 4);
-    res[1] = create(5, 6, 7, 8);
-    templateCase(res, create(1, 2, 3, 4, 5, 6, 7, 8));
+    input[0] = create(1, 2, 3, 4);
+    input[1] = create(5, 6, 7, 8);
+    templateCase(input, create(1, 2, 3, 4, 5, 6, 7, 8));
 
-    res[0] = create();
-    res[1] = create(2, 8);
-    templateCase(res, create(2, 8));
+    input[0] = create();
+    input[1] = create(2, 8);
+    templateCase(input, create(2, 8));
 
-    res[0] = create(2, 8);
-    res[1] = create();
-    templateCase(res, create(2, 8));
+    input[0] = create(2, 8);
+    input[1] = create();
+    templateCase(input, create(2, 8));
 
   }
 
@@ -73,22 +71,22 @@ public class SortedLongListUnionIteratorTests extends IntegersFixture {
     _testRandom(0, 1000, 1000, Integer.MAX_VALUE);
   }
 
-  public void _testRandom(int intersectionLength, int resLength, int maxArrayLength, int maxValue) {
+  public void _testRandom(int intersectionLength, int inputLength, int maxArrayLength, int maxValue) {
     Random r = new RandomHolder().getRandom();
 
-    LongArray[] res = new LongArray[resLength];
+    LongArray[] input = new LongArray[inputLength];
     LongArray expected = create();
 
-    for (int i = 0; i < resLength; i++) {
+    for (int i = 0; i < inputLength; i++) {
       int arrayLength = r.nextInt(maxArrayLength);
-      res[i] = create();
+      input[i] = create();
       for (int j = 0; j < arrayLength; j++) {
-        res[i].add(r.nextInt(maxValue));
+        input[i].add(r.nextInt(maxValue));
       }
-      res[i].sortUnique();
-      IntegersDebug.println(res[i]);
+      input[i].sortUnique();
+      IntegersDebug.println(input[i]);
 
-      for (LongIterator iter = res[i].iterator(); iter.hasNext(); ) {
+      for (LongIterator iter = input[i].iterator(); iter.hasNext(); ) {
         long val = iter.nextValue();
         expected.add(val);
       }
@@ -96,7 +94,7 @@ public class SortedLongListUnionIteratorTests extends IntegersFixture {
     expected.sortUnique();
 
     IntegersDebug.println(expected);
-    templateCase(res, expected);
+    templateCase(input, expected);
 
   }
 

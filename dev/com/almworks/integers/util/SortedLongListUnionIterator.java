@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through two unique sorted int lists in O(N+M), providing unique sorted values that exist in
+ * Iterates through set of unique sorted int lists in O(N+M), providing unique sorted values that exist in
  * either of lists
  */
 public class SortedLongListUnionIterator extends SortedLongListOperationsIterator {
@@ -70,11 +70,11 @@ public class SortedLongListUnionIterator extends SortedLongListOperationsIterato
     if (heapLength == 0) return false;
     myNext = myIts.get(myHeap[TOP]).value();
     while (myIts.get(myHeap[TOP]).value() == myNext && heapLength > 0) {
-      int top = myHeap[TOP];
-      if (myIts.get(top).hasNext()) {
-        long prev = myIts.get(top).value();
-        myIts.get(top).next();
-        assert prev < myIts.get(top).value() : myHeap[TOP] + " " + prev + " " + myIts.get(top).value();
+      LongIterator topIterator = myIts.get(myHeap[TOP]);
+      if (topIterator.hasNext()) {
+        long prev = topIterator.value();
+        topIterator.next();
+        assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
       } else {
         swap(TOP, heapLength);
         heapLength--;

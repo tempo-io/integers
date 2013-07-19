@@ -73,7 +73,8 @@ public abstract class SortedLongListOperationsIterator extends FindingLongIterat
   }
 
   protected void outputHeap() {
-//    if IntegersDebug.isDebug
+    if (!IntegersDebug.DEBUG)
+      return;
     IntegersDebug.print("output:", heapLength, ": ");
     for (int i = 1; i <= heapLength; i++) {
       IntegersDebug.print("(", myHeap[i], myIts.get(myHeap[i]).value(), ")");

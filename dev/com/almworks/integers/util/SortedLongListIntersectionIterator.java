@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through two unique sorted int lists in O(N+M), providing unique sorted values that exist in
- * both lists
+ * Iterates through set of unique sorted lists in O(N+M), providing unique sorted values that exist in
+ * every list
  */
 public class SortedLongListIntersectionIterator extends SortedLongListOperationsIterator {
 
@@ -52,9 +52,9 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
   }
 
   private boolean equalValues() {
-    int topIterator = myHeap[TOP];
+    long topValue = myIts.get(myHeap[TOP]).value();
     for (int i = parent(heapLength) + TOP; i <= heapLength; i++) {
-      if (myIts.get(topIterator).value() != myIts.get(myHeap[i]).value()) {
+      if (topValue != myIts.get(myHeap[i]).value()) {
         return false;
       }
     }
@@ -74,12 +74,12 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
     if (IntegersDebug.DEBUG) outputHeap();
 
     while (!equalValues()) {
-      int top = myHeap[TOP];
-      if (!myIts.get(top).hasNext()) return false;
+      LongIterator topIterator = myIts.get(myHeap[TOP]);
+      if (!topIterator.hasNext()) return false;
 
-      long prev = myIts.get(top).value();
-      myIts.get(top).next();
-      assert prev < myIts.get(top).value() : top + " " + prev + " " + myIts.get(top).value();
+      long prev = topIterator.value();
+      topIterator.next();
+      assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
       heapify(TOP);
     }
     // all values are the same as the TOP
