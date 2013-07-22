@@ -19,6 +19,7 @@ package com.almworks.integers;
 import com.almworks.util.RandomHolder;
 import junit.framework.TestCase;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class LongArrayTests extends TestCase {

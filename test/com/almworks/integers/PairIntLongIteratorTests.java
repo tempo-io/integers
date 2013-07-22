@@ -16,12 +16,16 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntFunction;
+import com.almworks.integers.func.LongFunction;
+
 import java.util.NoSuchElementException;
 
 public class PairIntLongIteratorTests extends IntegersFixture {
   private IntIterator arr1;
   private LongIterator arr2;
   private PairIntLongIterator res;
+
   public void setUp() {
     arr1 = IntArray.create(1, 2, 3, 4, 5).iterator();
     arr2 = LongArray.create(5, 10, 15, 20, 25).iterator();
@@ -68,7 +72,7 @@ public class PairIntLongIteratorTests extends IntegersFixture {
     assertTrue("caught UOE", caught);
   }
 
-  public void testValue() {
+  public void testValueSimpleCase() {
     res = res.iterator();
 
     assertTrue(res.hasNext());
@@ -83,5 +87,27 @@ public class PairIntLongIteratorTests extends IntegersFixture {
     }
 
     assertFalse(res.hasNext());
+  }
+
+  public void testValueComplexCase() {
+    IntArray keys = new IntArray(IntProgression.arithmetic(0, 1000, 1));
+
+    LongArray values0 = new LongArray(LongProgression.arithmetic(0, 1000, 1));
+    LongArray values = new LongArray(values0.toNativeArray());
+    values.apply(0, 1000, new LongFunction() {
+      @Override
+      public long invoke(long a) {
+        return a * a - a;
+      }
+    });
+
+    res = new PairIntLongIterator(keys.iterator(), values.iterator());
+    for (int i = 0; i < 1000; i++) {
+      res.next();
+      int v1 = res.value1();
+      long v2 = res.value2();
+      assertEquals(i, v1);
+      assertEquals(i * i - i, v2);
+    }
   }
 }

@@ -1,14 +1,13 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.AbstractIntListDecorator;
-import com.almworks.integers.util.IntListInsertingDecorator;
-import com.almworks.integers.util.IntListRemovingDecorator;
-import com.almworks.integers.util.IntSetBuilder;
+import com.almworks.integers.util.*;
 import com.almworks.util.RandomHolder;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import static com.almworks.integers.LongArray.create;
 
 public abstract class IntegersFixture extends TestCase {
   protected static final IntCollectionsCompare CHECK = new IntCollectionsCompare();
@@ -230,5 +229,28 @@ public abstract class IntegersFixture extends TestCase {
       Arrays.sort(arr);
       checkBinarySearch(bs, arr);
     }
+  }
+
+  public static LongArray[] generateRandomArrays(int intersectionLength, int inputLength, int maxArrayLength, int maxValue) {
+    Random r = new RandomHolder().getRandom();
+
+    LongArray[] arrays = new LongArray[inputLength];
+
+    LongArray intersection = create();
+    for ( int i = 0; i < intersectionLength; i++) {
+      intersection.add(r.nextInt(maxArrayLength));
+    }
+
+    for (int i = 0; i < inputLength; i++) {
+      int arrayLength = r.nextInt(maxArrayLength);
+      arrays[i] = LongArray.copy(intersection);
+
+      for (int j = 0; j < arrayLength; j++) {
+        arrays[i].add(r.nextInt(maxValue));
+      }
+      arrays[i].sortUnique();
+      IntegersDebug.println(arrays[i]);
+    }
+    return arrays;
   }
 }

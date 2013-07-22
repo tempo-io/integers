@@ -40,18 +40,6 @@ public class IndexedLongIteratorTests extends IntegersFixture {
     IntIterator indexes = IntArray.create().iterator();
     IndexedLongIterator res = new IndexedLongIterator(list, indexes);
     CHECK.order(LongArray.create().iterator(), res);
-
-    list = LongArray.create();
-    indexes = IntArray.create(0, 1).iterator();
-    boolean caught = false;
-//    try {
-    res = new IndexedLongIterator(list, indexes);
-    res.next();
-//    } catch (ArrayIndexOutOfBoundsException ex) {
-//      caught = true;
-//    }
-//    assertTrue("caught AIOOBE", caught);
-
   }
 
   public void testNoSuchElementExceptionCase() {
@@ -66,28 +54,13 @@ public class IndexedLongIteratorTests extends IntegersFixture {
     // check for NSEE
     boolean caught = false;
     try {
-//      res.value();
-      System.out.println(res.nextValue());
+      res.nextValue();
     } catch(NoSuchElementException ex) {
       caught = true;
     }
     assertTrue("caught NSEE", caught);
   }
 
-  public void testIndexOutOfBoundsExceptionCase() {
-    LongArray list = LongArray.create(2, 3, 9);
-    IntIterator indexes = IntArray.create(0, 2).iterator();
-    IndexedLongIterator res = new IndexedLongIterator(list, indexes);
-
-    // check for IOOBE
-    boolean caught = false;
-    try {
-      res.value();
-    } catch(NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue("caught IOOBE", caught);
-  }
   public void testRandomCase() {
     Random r = new RandomHolder().getRandom();
     int arrayLength = 1000;
@@ -109,7 +82,6 @@ public class IndexedLongIteratorTests extends IntegersFixture {
     }
 
     IndexedLongIterator res = new IndexedLongIterator(list, arrayIndexes.iterator());
-//    IntegersDebug.print(list, "\n", arrayIndexes, "\n", res, "\n", expected);
     CHECK.order(res, expected.iterator());
 
   }

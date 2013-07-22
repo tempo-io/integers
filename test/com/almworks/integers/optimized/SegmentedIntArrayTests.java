@@ -297,7 +297,7 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     testReverse(new int[]{0, 1, 3, 6, 10, 15, 21, 28, 36}, new int[]{36, 28, 21, 15, 10, 6, 3, 1, 0});
   }
 
-  public static void myCheck(IntList expected, IntList actual) {
+  public static void segmentedIntArrayChecker(IntList expected, SegmentedIntArray actual) {
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
       int val = expected.get(i);
@@ -305,29 +305,25 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     }
   }
 
-  public void testExpand() {
+  public void testExpandSimpleCase() {
     int[] elements = {5, 10, 4, 2, 1};
-    int[] counts = {1, 2, 1, 1, 1};
     for ( int i = 0; i < 5; i++) {
-      for ( int j = 0; j < counts[i]; j++) {
-        array.add(elements[i]);
-      }
+      array.add(elements[i]);
     }
-    IntArray expected = IntArray.create(5, 10, 10, 4, 2, 1);
+    IntArray expected = IntArray.create(5, 10, 4, 2, 1);
     CHECK.order(array.iterator(), expected.iterator());
 
     for (int i = 0; i < 3; i++) {
       expected.insert(3, -1);
     }
     array.expand(3, 3);
-    myCheck(expected, array);
-
+    segmentedIntArrayChecker(expected, array);
 
     for (int i = 0; i < 2; i++) {
       expected.insert(3, -1);
     }
     array.expand(6, 2);
-    myCheck(expected, array);
+    segmentedIntArrayChecker(expected, array);
 
     boolean caught = false;
     try {
@@ -349,22 +345,36 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     for (int i = 0; i < 5; i++) {
       expected.add(-1);
     }
-    myCheck(expected, array);
+    segmentedIntArrayChecker(expected, array);
   }
 
-  public void testSetRange() {
+  public void testExpandComplexCase() {
+    IntList addedValues = IntProgression.arithmetic(1, 10000);
+    IntArray expected = new IntArray(addedValues);
+    array.addAll(addedValues);
+    CHECK.order(array.iterator(), expected.iterator());
+
+    // count, index
+    int[][] arguments = {{1000, 0}, {10000, 0}, {10000, 0}, {5000, 31000}};
+    for(int[] args : arguments) {
+      addedValues = IntCollections.sameValues(-1, args[0]);
+      expected.insertAll(args[1], addedValues);
+      array.expand(args[1], args[0]);
+      segmentedIntArrayChecker(expected, array);
+    }
+  }
+
+    public void testSetRange() {
     IntArray expected = new IntArray(IntProgression.arithmetic(0, 20));
     array.addAll(expected);
 
     array.setRange(0, 5, -1);
     expected.setRange(0, 5, -1);
-    assertEquals(expected, array);
+    segmentedIntArrayChecker(expected, array);
 
     array.setRange(5, 10, 4);
     expected.setRange(5, 10, 4);
-    assertEquals(expected, array);
-
-//    IntProgression.arithmetic(5,
+    segmentedIntArrayChecker(expected, array);
   }
 
   public void testApply() {

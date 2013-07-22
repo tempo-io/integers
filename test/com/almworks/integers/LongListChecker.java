@@ -105,7 +105,7 @@ public abstract class LongListChecker extends IntegersFixture {
       assertEquals(3, arr.getNextDifferentValueIndex(1));
       assertEquals(6, arr.getNextDifferentValueIndex(3));
       assertEquals(7, arr.getNextDifferentValueIndex(6));
-      assertEquals(-1, arr.getNextDifferentValueIndex(8));
+      assertEquals(arr.size(), arr.getNextDifferentValueIndex(8));
     }
   }
 

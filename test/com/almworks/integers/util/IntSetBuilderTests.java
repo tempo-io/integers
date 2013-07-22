@@ -1,9 +1,6 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntArray;
-import com.almworks.integers.IntList;
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.IntegersUtils;
+import com.almworks.integers.*;
 
 import java.util.Random;
 
@@ -38,7 +35,7 @@ public class IntSetBuilderTests extends IntegersFixture {
       int factor = r.nextInt(10) + 1;
       int count = size * factor / 2;
       IntArray set = new IntArray();
-      IntSetBuilder builder = new IntSetBuilder();
+      IntSetBuilder builder = new IntSetBuilder(5);
       for (int j = 0; j < count; j++) {
         int v = r.nextInt(size);
         set.add(v);
