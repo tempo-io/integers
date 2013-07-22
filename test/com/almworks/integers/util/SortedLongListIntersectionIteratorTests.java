@@ -84,42 +84,23 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
   }
 
   public void testRandomIntersectionExistsCase() {
-    _testRandom(10, 100, 200, 1000000);
-    _testRandom(1, 100, 200, 10000000);
-    _testRandom(5, 100, 1000, Integer.MAX_VALUE);
-    _testRandom(5, 100, 1000, 1000000);
-    _testRandom(0, 1000, 1000, Integer.MAX_VALUE);
+    testRandom(10, 100, 200, 1000000);
+    testRandom(1, 100, 200, 10000000);
+    testRandom(5, 100, 1000, Integer.MAX_VALUE);
+    testRandom(5, 100, 1000, 1000000);
+    testRandom(0, 1000, 1000, Integer.MAX_VALUE);
   }
 
-  public void _testRandom(int intersectionLength, int inputLength, int maxArrayLength, int maxValue) {
-    Random r = new RandomHolder().getRandom();
+  public void testRandom(int intersectionLength, int arraysNumber, int maxArrayLength, int maxValue) {
+    LongArray[] arrays = generateRandomArrays(intersectionLength, arraysNumber, maxArrayLength, maxValue);
+    LongArray expected = LongArray.copy(arrays[0]);
 
-    LongArray[] input = new LongArray[inputLength];
-    LongArray expected;
-
-    LongArray intersection = create();
-    for ( int i = 0; i < intersectionLength; i++) {
-      intersection.add(r.nextInt(maxArrayLength));
-    }
-
-    for (int i = 0; i < inputLength; i++) {
-      int arrayLength = r.nextInt(maxArrayLength);
-      input[i] = LongArray.copy(intersection);
-
-      for (int j = 0; j < arrayLength; j++) {
-        input[i].add(r.nextInt(maxValue));
-      }
-      input[i].sortUnique();
-      IntegersDebug.println(input[i]);
-    }
-
-    expected = LongArray.copy(input[0]);
-    for (int i = 1; i < inputLength; i++) {
-      expected.retain(input[i]);
+    for (int i = 1; i < arraysNumber; i++) {
+      expected.retain(arrays[i]);
     }
     assert expected.isUniqueSorted();
     IntegersDebug.println("expected", expected);
-    templateCase(input, expected);
+    templateCase(arrays, expected);
   }
 
   public void testCreate() {

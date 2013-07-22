@@ -1,9 +1,6 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongIterable;
-import com.almworks.integers.LongIterator;
+import com.almworks.integers.*;
 import com.almworks.util.RandomHolder;
 
 import java.util.ArrayList;
@@ -64,38 +61,25 @@ public class SortedLongListUnionIteratorTests extends IntegersFixture {
   }
 
   public void testRandomIntersectionExistsCase() {
-    _testRandom(10, 100, 200, 1000000);
-    _testRandom(1, 100, 200, 10000000);
-    _testRandom(5, 100, 1000, Integer.MAX_VALUE);
-    _testRandom(5, 100, 1000, 1000000);
-    _testRandom(0, 1000, 1000, Integer.MAX_VALUE);
+    testRandom(10, 100, 200, 1000000);
+    testRandom(1, 100, 200, 10000000);
+    testRandom(5, 100, 1000, Integer.MAX_VALUE);
+    testRandom(5, 100, 1000, 1000000);
+    testRandom(0, 1000, 1000, Integer.MAX_VALUE);
   }
 
-  public void _testRandom(int intersectionLength, int inputLength, int maxArrayLength, int maxValue) {
-    Random r = new RandomHolder().getRandom();
 
-    LongArray[] input = new LongArray[inputLength];
+  public void testRandom(int intersectionLength, int arraysNumber, int maxArrayLength, int maxValue) {
+    LongArray[] arrays = generateRandomArrays(intersectionLength, arraysNumber, maxArrayLength, maxValue);
     LongArray expected = create();
 
-    for (int i = 0; i < inputLength; i++) {
-      int arrayLength = r.nextInt(maxArrayLength);
-      input[i] = create();
-      for (int j = 0; j < arrayLength; j++) {
-        input[i].add(r.nextInt(maxValue));
-      }
-      input[i].sortUnique();
-      IntegersDebug.println(input[i]);
-
-      for (LongIterator iter = input[i].iterator(); iter.hasNext(); ) {
-        long val = iter.nextValue();
-        expected.add(val);
-      }
+    for (LongList array : arrays) {
+      expected.addAll(array);
     }
     expected.sortUnique();
 
     IntegersDebug.println(expected);
-    templateCase(input, expected);
-
+    templateCase(arrays, expected);
   }
 
   public void testCreate() {

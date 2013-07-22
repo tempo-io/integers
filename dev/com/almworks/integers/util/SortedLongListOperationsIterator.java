@@ -16,6 +16,7 @@
 
 package com.almworks.integers.util;
 
+import com.almworks.integers.IntCollections;
 import com.almworks.integers.LongIterator;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,12 +45,6 @@ public abstract class SortedLongListOperationsIterator extends FindingLongIterat
 
   private static int right(int i) {  return i*2 + 1; }
 
-  protected void swap(int i, int j) {
-    int t = myHeap[i];
-    myHeap[i] = myHeap[j];
-    myHeap[j] = t;
-  }
-
   protected void heapify(int i) {
     int l = left(i), r = right(i), least;
     if (l <= heapLength && myIts.get(myHeap[l]).value() < myIts.get(myHeap[i]).value()) {
@@ -61,7 +56,7 @@ public abstract class SortedLongListOperationsIterator extends FindingLongIterat
       least = r;
     }
     if (least != i) {
-      swap(i, least);
+      IntCollections.swap(myHeap, i, least);
       heapify(least);
     }
   }

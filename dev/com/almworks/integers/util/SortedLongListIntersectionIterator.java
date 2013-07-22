@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through set of unique sorted lists in O(N+M), providing unique sorted values that exist in
- * every list
+ * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size
+ * providing unique sorted values that exist in every list
  */
 public class SortedLongListIntersectionIterator extends SortedLongListOperationsIterator {
 

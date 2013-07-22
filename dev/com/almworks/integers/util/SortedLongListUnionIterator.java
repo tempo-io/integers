@@ -17,6 +17,7 @@
 
 package com.almworks.integers.util;
 
+import com.almworks.integers.IntCollections;
 import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through set of unique sorted int lists in O(N+M), providing unique sorted values that exist in
- * either of lists
+ * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size
+ * providing unique sorted values that exist in at least one of lists
  */
 public class SortedLongListUnionIterator extends SortedLongListOperationsIterator {
   private boolean myIsHeapBuilt = false;
@@ -76,7 +77,7 @@ public class SortedLongListUnionIterator extends SortedLongListOperationsIterato
         topIterator.next();
         assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
       } else {
-        swap(TOP, heapLength);
+        IntCollections.swap(myHeap, TOP, heapLength);
         heapLength--;
       }
       heapify(TOP);
