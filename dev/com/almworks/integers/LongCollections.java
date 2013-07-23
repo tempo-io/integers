@@ -19,6 +19,8 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.optimized.SameValuesLongList;
 import org.jetbrains.annotations.Nullable;
 
@@ -197,11 +199,24 @@ public class LongCollections {
 
   /** @return index of a duplicate (not necessarily leftmost) or -1 if none */
   public static int findDuplicate(LongList unsorted) {
-    LongArray sorted = new LongArray(unsorted);
-    LongArray perms = new LongArray(LongProgression.arithmetic(0, sorted.size())); // perms is int
-    sorted.sort(perms);
+    final LongArray sorted = new LongArray(unsorted);
+    final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size())); // perms is int
+    IntegersUtils.quicksort(sorted.size(),
+      new IntFunction2() {
+        @Override
+        public int invoke(int a, int b) {
+          return LongCollections.compare(sorted.get(a), sorted.get(b));
+        }
+      },
+      new IntProcedure2() {
+        @Override
+        public void invoke(int a, int b) {
+          sorted.swap(a, b);
+          perms.swap(a, b);
+        }
+      });
     int result = findDuplicateSorted(sorted);
-    return result == -1 ? -1 : (int)perms.get(result);
+    return result == -1 ? -1 : perms.get(result);
   }
 
   /** @return index of the leftmost duplicate or -1 if none*/
@@ -277,14 +292,12 @@ public class LongCollections {
         return coll.get(index);
       }
     };
-
   }
 
   /**
    * This algorithm supposes that the set to intersect with is usually shorter than the merged ones.
    * It also supposes that a and b have a great deal of common elements (this assumption is not very important, though).
    * */
-
   public static LongList uniteTwoLengthySortedSetsAndIntersectWithThirdShort(LongList a, LongList b, LongList intersectWith) {
     LongArray result = new LongArray(Math.min(intersectWith.size(), 16));
     int ia = 0;

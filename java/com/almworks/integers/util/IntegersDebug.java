@@ -17,13 +17,7 @@
 package com.almworks.integers.util;
 
 public class IntegersDebug {
-  private static final String DEBUG_STATUS = "integers.debug";
-  private static final String debugStatus = System.getProperty(DEBUG_STATUS);
-  public static final boolean DEBUG = Boolean.parseBoolean(debugStatus);
-
-//  public static boolean isDebug() {
-//    return DEBUG;
-//  }
+  public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("integers.debug"));
 
   public static void print(Object ... elements) {
     if (DEBUG) {

@@ -157,9 +157,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   public void expand(int index, int count) {
-    if (count > 0) {
-      makeSpaceForInsertion(index, index + count);
-    }
+    makeSpaceForInsertion(index, index + count);
   }
 
   public void insert(int index, long value) {
@@ -268,6 +266,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   public void retainSorted(LongList values) {
+    assert values.isSorted();
     retain(values, true);
   }
 
