@@ -20,11 +20,9 @@ import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
 import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
-import com.almworks.util.RandomHolder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static com.almworks.integers.LongArray.create;
 
@@ -92,7 +90,7 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
   }
 
   public void testRandom(int intersectionLength, int arraysNumber, int maxArrayLength, int maxValue) {
-    LongArray[] arrays = generateRandomArrays(intersectionLength, arraysNumber, maxArrayLength, maxValue);
+    LongArray[] arrays = generateRandomLongArrays(intersectionLength, arraysNumber, maxArrayLength, 0, maxValue);
     LongArray expected = LongArray.copy(arrays[0]);
 
     for (int i = 1; i < arraysNumber; i++) {
