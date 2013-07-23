@@ -2,9 +2,12 @@ package com.almworks.integers;
 
 import com.almworks.integers.optimized.SameValuesIntList;
 import com.almworks.integers.optimized.SegmentedIntArray;
-import com.almworks.integers.util.IntListConcatenation;
-import com.almworks.integers.util.ModifyingIntListRemovingDecorator;
-import com.almworks.integers.util.ReadonlyIntListRemovingDecorator;
+import com.almworks.integers.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.almworks.integers.LongArray.create;
 
 
 public class IntCollectionsTests extends IntegersFixture {
@@ -180,4 +183,27 @@ public class IntCollectionsTests extends IntegersFixture {
     return resultingIndices.iterator();
   }
 
+  public void testUnion() {
+    IntArray arr = IntArray.create(0, 2, 4, 6, 8);
+    IntArray add = IntArray.create(1, 3, 5, 7, 9);
+    IntArray expected = new IntArray(IntProgression.arithmetic(0, 10));
+    IntArray union = IntCollections.unionWithSmallArray(arr.toNativeArray(), 5, add.toNativeArray(), 5);
+    CHECK.order(union.iterator(), expected.iterator());
+    union = IntCollections.unionWithSameLengthList(arr.toNativeArray(), 5, add);
+    CHECK.order(union.iterator(), expected.iterator());
+
+    union.ensureCapacity(16);
+    System.out.println(union.getCapacity());
+    int unionSize = union.size();
+    union = IntCollections.unionWithSmallArray(union.toNativeArray(), unionSize, new int[]{5, 10, 15}, 3);
+    expected.addAll(10, 15);
+    CHECK.order(union.iterator(), expected.iterator());
+    union = IntCollections.unionWithSameLengthList(union.toNativeArray(), unionSize, IntArray.create(5, 10, 15));
+    CHECK.order(union.iterator(), expected.iterator());
+
+    union = IntCollections.unionWithSmallArray(null, 0, new int[]{1, 2, 3}, 3);
+    CHECK.order(union.iterator(), 1, 2, 3);
+    union = IntCollections.unionWithSameLengthList(null, 0, IntArray.create(1, 2, 3));
+    CHECK.order(union.iterator(), 1, 2, 3);
+  }
 }

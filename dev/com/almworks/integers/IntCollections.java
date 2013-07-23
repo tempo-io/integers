@@ -19,6 +19,7 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.optimized.SameValuesIntList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -346,5 +347,250 @@ public class IntCollections {
       rangeFinish = ind + 1;
     }
     if (rangeFinish - rangeStart >= 1) list.removeRange(rangeStart - diff, rangeFinish - diff);
+  }
+
+  public static SameValuesIntList sameValues(int value, int count) {
+    if (count < 0)
+      throw new IllegalArgumentException();
+    SameValuesIntList array = new SameValuesIntList();
+    if (count == 0)
+      return array;
+    array.add(value);
+    array.expand(0, count - 1);
+    return array;
+  }
+
+  /**
+   * Complexity: {@code O(N + T * log(N))}, where {@code N = destSize} and {@code T - otherSize}.
+   * @param  dest - sorted unique dest
+   * @param  destSize - size of dest
+   * @param  other - another array
+   * @param  otherSize - size of other
+   *
+   * @return union of dest and other. If there is enough memory, changing dest. Otherwise creating new array.
+   * */
+  public static IntArray unionWithSmallArray(int[] dest, int destSize, int[] other, int otherSize) {
+    return unionWithSmallArray(dest, destSize, other, otherSize, null);
+  }
+
+  /***
+   * @param insertionPoints is temprorary array, its length = otherSize
+   * @see #unionWithSmallArray(int[], int, int[], int, int[])
+   */
+  public static IntArray unionWithSmallArray(int[] dest, int destSize, int[] other, int otherSize, int[] insertionPoints) {
+    if (otherSize == 0)
+      return new IntArray(dest, destSize);
+    Arrays.sort(other, 0, otherSize);
+    if (dest == null || destSize + otherSize > dest.length) {
+      // merge with reallocation
+      int oldLength = dest == null ? 0 : dest.length;
+      int[] newSorted = new int[Math.max(destSize + otherSize, oldLength * 2)];
+      int last = 0;
+      int destP = 0;
+      int sourceP = 0;
+      for (int i = 0; i < otherSize; i++) {
+        int v = other[i];
+        if (i > 0 && v == last)
+          continue;
+        last = v;
+        if (dest != null && sourceP < destSize) {
+          int k = IntCollections.binarySearch(v, dest, sourceP, destSize);
+          if (k >= 0) {
+            // found
+            continue;
+          }
+          int insertion = -k - 1;
+          if (insertion < sourceP) {
+            assert false : insertion + " " + sourceP;
+            continue;
+          }
+          int chunkSize = insertion - sourceP;
+          System.arraycopy(dest, sourceP, newSorted, destP, chunkSize);
+          sourceP = insertion;
+          destP += chunkSize;
+        }
+        newSorted[destP++] = v;
+      }
+      if (dest != null && sourceP < destSize) {
+        int chunkSize = destSize - sourceP;
+        System.arraycopy(dest, sourceP, newSorted, destP, chunkSize);
+        destP += chunkSize;
+      }
+      return new IntArray(newSorted, destP);
+    } else {
+      // merge in place
+      // a) find insertion points and count how many to be inserted
+      if (insertionPoints == null)
+        insertionPoints = new int[other.length];
+      Arrays.fill(insertionPoints, 0, otherSize, -1);
+      int insertCount = 0;
+      int sourceP = 0;
+      int last = 0;
+      for (int i = 0; i < otherSize; i++) {
+        int v = other[i];
+        if (i > 0 && v == last)
+          continue;
+        last = v;
+        if (sourceP < destSize) {
+          int k = IntCollections.binarySearch(v, dest, sourceP, destSize);
+          if (k >= 0) {
+            // found
+            continue;
+          }
+          int insertion = -k - 1;
+          if (insertion < sourceP) {
+            assert false : insertion + " " + sourceP;
+            continue;
+          }
+          sourceP = insertion;
+        }
+        insertionPoints[i] = sourceP;
+        insertCount++;
+      }
+      // b) insertionPoints contains places in the old dest for insertion
+      // insertCount contains number of insertions
+      sourceP = destSize;
+      destSize += insertCount;
+      int i = otherSize - 1;
+      while (insertCount > 0) {
+        // get next to insert
+        while (i >= 0 && insertionPoints[i] == -1)
+          i--;
+        assert i >= 0 : i;
+        int insertion = insertionPoints[i];
+        if (sourceP > insertion) {
+          System.arraycopy(dest, insertion, dest, insertion + insertCount, sourceP - insertion);
+          sourceP = insertion;
+        }
+        dest[insertion + insertCount - 1] = other[i];
+        insertCount--;
+        i--;
+      }
+      return new IntArray(dest, destSize);
+    }
+  }
+
+  /**
+   * Complexity: {@code O(N + T)}, where {@code N = destSize} and T - size of other.
+   * @param  dest - sorted array
+   * @param  destSize - size of dest
+   * @param  other - sorted list of numbers (set)
+   *
+   * @return union of dest and other. If there is enough memory, changing dest. Otherwise creating new array.
+   * */
+  public static IntArray unionWithSameLengthList(int[] dest, int destSize, IntList other) {
+    int otherSize = other.size();
+    int totalLength = destSize + otherSize;
+    if (dest == null || totalLength > dest.length) {
+      // merge with reallocation
+      return merge0withReallocation(dest, destSize, other, otherSize, totalLength);
+    } else {
+      return merge0inPlace(dest, destSize, other, otherSize, totalLength);
+    }
+  }
+
+  private static IntArray merge0inPlace(int[] dest, int destSize, IntList other, int otherSize, int totalLength) {
+    // in place
+    // 1. find offset (scan for duplicates)
+    // 2. merge starting from the end
+    if (destSize > 0 && otherSize > 0 && dest[0] > other.get(otherSize - 1)) {
+      System.arraycopy(dest, 0, dest, otherSize, destSize);
+      other.toArray(0, dest, 0, otherSize);
+      destSize = totalLength;
+    } else if (destSize > 0 && otherSize > 0 && dest[destSize - 1] < other.get(0)) {
+      other.toArray(0, dest, destSize, otherSize);
+      destSize = totalLength;
+    } else {
+      int insertCount = 0;
+      int pi = 0, pj = 0;
+      while (pi < destSize && pj < otherSize) {
+        int vi = dest[pi];
+        int vj = other.get(pj);
+        if (vi < vj) {
+          pi++;
+        } else if (vi > vj) {
+          pj++;
+          insertCount++;
+        } else {
+          assert vi == vj;
+          pi++;
+          pj++;
+        }
+      }
+      insertCount += (otherSize - pj);
+      pi = destSize - 1;
+      pj = otherSize - 1;
+      int i = destSize + insertCount;
+      while (pi >= 0 && pj >= 0) {
+        assert i > pi : i + " " + pi;
+        int vi = dest[pi];
+        int vj = other.get(pj);
+        if (vi < vj) {
+          dest[--i] = vj;
+          pj--;
+        } else if (vi > vj) {
+          dest[--i] = vi;
+          pi--;
+        } else {
+          assert vi == vj;
+          dest[--i] = vi;
+          pi--;
+          pj--;
+        }
+      }
+      if (pj >= 0) {
+        int size = pj + 1;
+        other.toArray(0, dest, 0, size);
+        i -= size;
+      } else if (pi >= 0) {
+        i -= pi + 1;
+      }
+      assert i == 0 : i;
+      destSize += insertCount;
+    }
+    return new IntArray(dest, destSize);
+  }
+
+  private static IntArray merge0withReallocation(int[] dest, int destSize, IntList other, int otherSize, int totalLength) {
+    int newSize = Math.max(totalLength, dest == null ? 0 : dest.length * 2);
+    int[] newArray = new int[newSize];
+    int pi = 0, pj = 0;
+    int i = 0;
+    if (destSize > 0 && otherSize > 0) {
+      // boundary conditions: quickly merge disjoint sets
+      if (dest[0] > other.get(otherSize - 1)) {
+        other.toArray(0, newArray, 0, otherSize);
+        i = pj = otherSize;
+      } else if (dest[destSize - 1] < other.get(0)) {
+        System.arraycopy(dest, 0, newArray, 0, destSize);
+        i = pi = destSize;
+      }
+    }
+    while (pi < destSize && pj < otherSize) {
+      int vi = dest[pi];
+      int vj = other.get(pj);
+      if (vi < vj) {
+        newArray[i++] = vi;
+        pi++;
+      } else if (vi > vj) {
+        newArray[i++] = vj;
+        pj++;
+      } else {
+        assert vi == vj;
+        newArray[i++] = vi;
+        pi++;
+        pj++;
+      }
+    }
+    if (pi < destSize) {
+      int size = destSize - pi;
+      System.arraycopy(dest, pi, newArray, i, size);
+      i += size;
+    } else if (pj < otherSize) {
+      int size = otherSize - pj;
+      other.toArray(pj, newArray, i, size);
+      i += size;
+    }
+    return new IntArray(newArray, i);
   }
 }
