@@ -167,6 +167,14 @@ public final class IntegersUtils {
     return copy;
   }
 
+  public static long[] arrayCopy(long[] array, int offset, int length) {
+    if (length == 0)
+      return EMPTY_LONGS;
+    long[] copy = new long[length];
+    System.arraycopy(array, offset, copy, 0, length);
+    return copy;
+  }
+
   public static int indexOf(int[] ints, int value) {
     return indexOf(ints, 0, ints.length, value);
   }
