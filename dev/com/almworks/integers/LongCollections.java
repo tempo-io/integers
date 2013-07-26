@@ -388,4 +388,240 @@ public class LongCollections {
     array.expand(0, count - 1);
     return array;
   }
+
+  /**
+   * Complexity: {@code O(N + T * log(N))}, where {@code N = destSize} and {@code T - otherSize}.
+   * @param  dest - sorted unique dest
+   * @param  destSize - size of dest
+   * @param  other - another array
+   * @param  otherSize - size of other
+   *
+   * @return union of dest and other. If there is enough memory, changing dest. Otherwise creating new array.
+   * */
+  public static LongArray unionWithSmallArray(long[] dest, int destSize, long[] other, int otherSize) {
+    return unionWithSmallArray(dest, destSize, other, otherSize, null);
+  }
+
+  /***
+   * @param insertionPoints is temprorary array, its length = otherSize
+   * @see #unionWithSmallArray(long[], int, long[], int, int[])
+   */
+  public static LongArray unionWithSmallArray(long[] dest, int destSize, long[] other, int otherSize, int[] insertionPoints) {
+    if (otherSize == 0)
+      return new LongArray(dest, destSize);
+    Arrays.sort(other, 0, otherSize);
+    if (dest == null || destSize + otherSize > dest.length) {
+      // merge with reallocation
+      int oldLength = dest == null ? 0 : dest.length;
+      long[] newSorted = new long[Math.max(destSize + otherSize, oldLength * 2)];
+      long last = 0;
+      int destP = 0;
+      int sourceP = 0;
+      for (int i = 0; i < otherSize; i++) {
+        long v = other[i];
+        if (i > 0 && v == last)
+          continue;
+        last = v;
+        if (dest != null && sourceP < destSize) {
+          int k = LongCollections.binarySearch(v, dest, sourceP, destSize);
+          if (k >= 0) {
+            // found
+            continue;
+          }
+          int insertion = -k - 1;
+          if (insertion < sourceP) {
+            assert false : insertion + " " + sourceP;
+            continue;
+          }
+          int chunkSize = insertion - sourceP;
+          System.arraycopy(dest, sourceP, newSorted, destP, chunkSize);
+          sourceP = insertion;
+          destP += chunkSize;
+        }
+        newSorted[destP++] = v;
+      }
+      if (dest != null && sourceP < destSize) {
+        int chunkSize = destSize - sourceP;
+        System.arraycopy(dest, sourceP, newSorted, destP, chunkSize);
+        destP += chunkSize;
+      }
+      return new LongArray(newSorted, destP);
+    } else {
+      // merge in place
+      // a) find insertion points and count how many to be inserted
+      if (insertionPoints == null)
+        insertionPoints = new int[other.length];
+      Arrays.fill(insertionPoints, 0, otherSize, -1);
+      int insertCount = 0;
+      int sourceP = 0;
+      long last = 0;
+      for (int i = 0; i < otherSize; i++) {
+        long v = other[i];
+        if (i > 0 && v == last)
+          continue;
+        last = v;
+        if (sourceP < destSize) {
+          int k = LongCollections.binarySearch(v, dest, sourceP, destSize);
+          if (k >= 0) {
+            // found
+            continue;
+          }
+          int insertion = -k - 1;
+          if (insertion < sourceP) {
+            assert false : insertion + " " + sourceP;
+            continue;
+          }
+          sourceP = insertion;
+        }
+        insertionPoints[i] = sourceP;
+        insertCount++;
+      }
+      // b) insertionPoints contains places in the old dest for insertion
+      // insertCount contains number of insertions
+      sourceP = destSize;
+      destSize += insertCount;
+      int i = otherSize - 1;
+      while (insertCount > 0) {
+        // get next to insert
+        while (i >= 0 && insertionPoints[i] == -1)
+          i--;
+        assert i >= 0 : i;
+        int insertion = insertionPoints[i];
+        if (sourceP > insertion) {
+          System.arraycopy(dest, insertion, dest, insertion + insertCount, sourceP - insertion);
+          sourceP = insertion;
+        }
+        dest[insertion + insertCount - 1] = other[i];
+        insertCount--;
+        i--;
+      }
+      return new LongArray(dest, destSize);
+    }
+  }
+
+  /**
+   * Complexity: {@code O(N + T)}, where {@code N = destSize} and T - size of other.
+   * @param  dest - sorted array
+   * @param  destSize - size of dest
+   * @param  other - sorted list of numbers (set)
+   *
+   * @return union of dest and other. If there is enough memory, changing dest. Otherwise creating new array.
+   * */
+  public static LongArray unionWithSameLengthList(long[] dest, int destSize, LongList other) {
+    int otherSize = other.size();
+    int totalLength = destSize + otherSize;
+    if (dest == null || totalLength > dest.length) {
+      // merge with reallocation
+      if (dest == null && destSize > 0)
+        throw new IllegalArgumentException(String.valueOf(destSize));
+      return merge0withReallocation(dest, destSize, other, otherSize, totalLength);
+    } else {
+      return merge0inPlace(dest, destSize, other, otherSize, totalLength);
+    }
+  }
+
+  private static LongArray merge0inPlace(long[] dest, int destSize, LongList other, int otherSize, int totalLength) {
+    // in place
+    // 1. find offset (scan for duplicates)
+    // 2. merge starting from the end
+    if (destSize > 0 && otherSize > 0 && dest[0] > other.get(otherSize - 1)) {
+      System.arraycopy(dest, 0, dest, otherSize, destSize);
+      other.toArray(0, dest, 0, otherSize);
+      destSize = totalLength;
+    } else if (destSize > 0 && otherSize > 0 && dest[destSize - 1] < other.get(0)) {
+      other.toArray(0, dest, destSize, otherSize);
+      destSize = totalLength;
+    } else {
+      int insertCount = 0;
+      int pi = 0, pj = 0;
+      while (pi < destSize && pj < otherSize) {
+        long vi = dest[pi];
+        long vj = other.get(pj);
+        if (vi < vj) {
+          pi++;
+        } else if (vi > vj) {
+          pj++;
+          insertCount++;
+        } else {
+          assert vi == vj;
+          pi++;
+          pj++;
+        }
+      }
+      insertCount += (otherSize - pj);
+      pi = destSize - 1;
+      pj = otherSize - 1;
+      int i = destSize + insertCount;
+      while (pi >= 0 && pj >= 0) {
+        assert i > pi : i + " " + pi;
+        long vi = dest[pi];
+        long vj = other.get(pj);
+        if (vi < vj) {
+          dest[--i] = vj;
+          pj--;
+        } else if (vi > vj) {
+          dest[--i] = vi;
+          pi--;
+        } else {
+          assert vi == vj;
+          dest[--i] = vi;
+          pi--;
+          pj--;
+        }
+      }
+      if (pj >= 0) {
+        int size = pj + 1;
+        other.toArray(0, dest, 0, size);
+        i -= size;
+      } else if (pi >= 0) {
+        i -= pi + 1;
+      }
+      assert i == 0 : i;
+      destSize += insertCount;
+    }
+    return new LongArray(dest, destSize);
+  }
+
+  private static LongArray merge0withReallocation(long[] dest, int destSize, LongList other, int otherSize, int totalLength) {
+    int newSize = Math.max(totalLength, dest == null ? 0 : dest.length * 2);
+    long[] newArray = new long[newSize];
+    int pi = 0, pj = 0;
+    int i = 0;
+    if (destSize > 0 && otherSize > 0) {
+      // boundary conditions: quickly merge disjoint sets
+      if (dest[0] > other.get(otherSize - 1)) {
+        other.toArray(0, newArray, 0, otherSize);
+        i = pj = otherSize;
+      } else if (dest[destSize - 1] < other.get(0)) {
+        System.arraycopy(dest, 0, newArray, 0, destSize);
+        i = pi = destSize;
+      }
+    }
+    while (pi < destSize && pj < otherSize) {
+      long vi = dest[pi];
+      long vj = other.get(pj);
+      if (vi < vj) {
+        newArray[i++] = vi;
+        pi++;
+      } else if (vi > vj) {
+        newArray[i++] = vj;
+        pj++;
+      } else {
+        assert vi == vj;
+        newArray[i++] = vi;
+        pi++;
+        pj++;
+      }
+    }
+    if (pi < destSize) {
+      int size = destSize - pi;
+      System.arraycopy(dest, pi, newArray, i, size);
+      i += size;
+    } else if (pj < otherSize) {
+      int size = otherSize - pj;
+      other.toArray(pj, newArray, i, size);
+      i += size;
+    }
+    return new LongArray(newArray, i);
+  }
 }
