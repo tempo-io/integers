@@ -151,9 +151,15 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testRetain() {
-    LongArray arr = new LongArray(LongProgression.arithmetic(0, 20, 1));
-    arr.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
-    CHECK.order(LongProgression.arithmetic(1, 10, 2), arr);
+    array = new LongArray(LongProgression.arithmetic(0, 20, 1));
+    array.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
+    CHECK.order(LongProgression.arithmetic(1, 10, 2), array);
+
+    array = LongArray.create(1, 5, 2, 4, 3);
+    array.retain(LongArray.create(3, 1, 2));
+    CHECK.order(array.iterator(), 1, 2, 3);
+    array.retain(LongArray.create(2));
+    CHECK.order(array.iterator(), 2);
   }
 
   protected void tearDown() throws Exception {
@@ -340,14 +346,6 @@ public class LongArrayTests extends IntegersFixture {
     checkList(array, ap(0, 1, 2000), ap(100, 1, 10000), ap(2000, 1, 8240));
     array.setAll(5000, list);
     checkList(array, ap(0, 1, 2000), ap(100, 1, 3000), ap(0, 1, 10240), ap(5240, 1, 5000));
-  }
-
-  public void testRetain2() {
-    array.addAll(1, 5, 2, 4, 3);
-    array.retain(LongArray.create(3, 1, 2));
-    CHECK.order(array.iterator(), 1, 2, 3);
-    array.retain(LongArray.create(2));
-    CHECK.order(array.iterator(), 2);
   }
 
   public void testRemoveAll() {
