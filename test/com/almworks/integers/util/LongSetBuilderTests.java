@@ -4,11 +4,9 @@ import com.almworks.integers.*;
 
 import java.util.Random;
 
-public class IntSetBuilderTests extends IntegersFixture {
-  private static final int TEMP_SIZE = 3;
-
+public class LongSetBuilderTests extends IntegersFixture {
   public void test() {
-    check(IntegersUtils.EMPTY_INTS);
+    check(IntegersUtils.EMPTY_LONGS);
     check(range(0, 0));
     check(range(0, 0), range(0, 0), range(0, 0));
     check(range(0, 10));
@@ -17,10 +15,10 @@ public class IntSetBuilderTests extends IntegersFixture {
     check(range(0, 100), range(100, 0), range(50, 150), range(10, -200), range(0, 0));
   }
 
-  protected void check(int[] ... v) {
-    IntSetBuilder builder = new IntSetBuilder();
-    for (int[] ints : v) {
-      for (int value : ints) {
+  protected void check(long[] ... v) {
+    LongSetBuilder builder = new LongSetBuilder();
+    for (long[] ints : v) {
+      for (long value : ints) {
         builder.add(value);
       }
     }
@@ -34,8 +32,8 @@ public class IntSetBuilderTests extends IntegersFixture {
       int size = r.nextInt(16000) + 10;
       int factor = r.nextInt(10) + 1;
       int count = size * factor / 2;
-      IntArray set = new IntArray();
-      IntSetBuilder builder = new IntSetBuilder(5);
+      LongArray set = new LongArray();
+      LongSetBuilder builder = new LongSetBuilder(5);
       for (int j = 0; j < count; j++) {
         int v = r.nextInt(size);
         set.add(v);
@@ -48,53 +46,53 @@ public class IntSetBuilderTests extends IntegersFixture {
   }
 
   public void testMerge() {
-    IntSetBuilder b;
+    LongSetBuilder b;
 
-    b = new IntSetBuilder(5);
-    b.mergeFrom(new IntSetBuilder());
-    checkSet(b, IntegersUtils.EMPTY_INTS);
+    b = new LongSetBuilder(5);
+    b.mergeFrom(new LongSetBuilder());
+    checkSet(b, IntegersUtils.EMPTY_LONGS);
 
-    b = new IntSetBuilder(5);
+    b = new LongSetBuilder(5);
     b.mergeFrom(prog(0, 1, 10));
     checkSet(b, range(0, 9));
 
-    b = new IntSetBuilder(5);
+    b = new LongSetBuilder(5);
     b.mergeFrom(prog(0, 1, 10));
     b.mergeFrom(prog(0, 1, 10));
     checkSet(b, range(0, 9));
 
-    b = new IntSetBuilder(5);
+    b = new LongSetBuilder(5);
     b.mergeFrom(prog(0, 2, 10));
     b.mergeFrom(prog(1, 1, 5));
     b.mergeFrom(prog(4, 1, 25));
     checkSet(b, range(0, 28));
 
-    b = new IntSetBuilder(10);
+    b = new LongSetBuilder(10);
     b.mergeFrom(prog(0, 1, 10));
     b.mergeFrom(prog(10, 1, 1));
     b.mergeFrom(prog(11, 1, 1));
     checkSet(b, range(0, 11));
 
-    b = new IntSetBuilder();
+    b = new LongSetBuilder();
     b.mergeFrom(prog(100, 1, 100));
     b.mergeFrom(prog(0, 1, 100));
     checkSet(b, range(0, 199));
 
-    b = new IntSetBuilder();
+    b = new LongSetBuilder();
     b.mergeFrom(prog(100, 1, 100));
     checkSet(b, range(100, 199));
     b.mergeFrom(prog(200, 1, 1));
     checkSet(b, range(100, 200));
     b.mergeFrom(prog(80, 3, 20));
-    checkSet(b, range(100, 200), new int[] {80, 83, 86, 89, 92, 95, 98});
+    checkSet(b, range(100, 200), new long[] {80, 83, 86, 89, 92, 95, 98});
     b.mergeFrom(prog(70, 1, 5));
-    checkSet(b, range(100, 200), new int[] {80, 83, 86, 89, 92, 95, 98}, range(70, 74));
+    checkSet(b, range(100, 200), new long[] {80, 83, 86, 89, 92, 95, 98}, range(70, 74));
     b.mergeFrom(prog(201, 1, 10));
-    checkSet(b, range(100, 210), new int[] {80, 83, 86, 89, 92, 95, 98}, range(70, 74));
+    checkSet(b, range(100, 210), new long[] {80, 83, 86, 89, 92, 95, 98}, range(70, 74));
     b.mergeFrom(prog(70, 1, 30));
     checkSet(b, range(70, 210));
 
-    b = new IntSetBuilder();
+    b = new LongSetBuilder();
     b.mergeFrom(prog(100, 1, 100));
     // make sure mySorted is reallocated with lots of free space
     b.mergeFrom(prog(200, 1, 1));
@@ -104,24 +102,24 @@ public class IntSetBuilderTests extends IntegersFixture {
   }
 
   public void testAdd() {
-    IntSetBuilder b = new IntSetBuilder();
+    LongSetBuilder b = new LongSetBuilder();
     assertTrue(b.isEmpty());
     for (int i = 0; i < 8; i++) {
       b.add(i * 2);
     }
     assertFalse(b.isEmpty());
     b.addAll(10, 100, 200);
-    b.addAll(IntArray.create(-5, 9, 3));
-    b.addAll(IntArray.create(7, 15, 4).iterator());
+    b.addAll(LongArray.create(-5, 9, 3));
+    b.addAll(LongArray.create(7, 15, 4).iterator());
 
-    IntArray expected = IntArray.create();
+    LongArray expected = LongArray.create();
     for (int i = 0; i < 8; i++) {
       expected.add(i * 2);
     }
     expected.addAll(10, 100, 200, -5, 9, 3, 7, 15, 4);
     expected.sortUnique();
 
-    IntList collection = b.toTemporaryReadOnlySortedCollection();
+    LongList collection = b.toTemporaryReadOnlySortedCollection();
 
     CHECK.order(collection.iterator(), expected.iterator());
   }

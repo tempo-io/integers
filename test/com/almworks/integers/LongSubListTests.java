@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class SubListTests extends LongListChecker{
+public class LongSubListTests extends LongListChecker{
   @Override
   protected List<LongList> createLongList(long... values) {
     Random r = new RandomHolder().getRandom();

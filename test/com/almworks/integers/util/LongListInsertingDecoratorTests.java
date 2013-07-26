@@ -16,15 +16,13 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntArray;
-import com.almworks.integers.IntIterator;
-import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.*;
 
-public class IntListInsertingDecoratorTests extends IntegersFixture {
-  private final IntArray myArray = new IntArray();
+public class LongListInsertingDecoratorTests extends IntegersFixture {
+  private final LongArray myArray = new LongArray();
 
   public void testInsertDecorator() {
-    IntListInsertingDecorator ins = new IntListInsertingDecorator(myArray);
+    LongListInsertingDecorator ins = new LongListInsertingDecorator(myArray);
     checkCollection(ins);
     assertEquals(0, ins.getInsertCount());
 
@@ -63,7 +61,7 @@ public class IntListInsertingDecoratorTests extends IntegersFixture {
 
   public void testInsertingDecoratorIterator() {
     myArray.addAll(1, 2, 4, 7, 8, 9, 11);
-    IntListInsertingDecorator dec = new IntListInsertingDecorator(myArray);
+    LongListInsertingDecorator dec = new LongListInsertingDecorator(myArray);
     dec.insert(0, 0);
     dec.insert(3, 3);
     dec.insert(5, 5);
@@ -72,29 +70,29 @@ public class IntListInsertingDecoratorTests extends IntegersFixture {
 
     assertEquals(12, dec.size());
     int x = 0;
-    for (IntIterator i : dec) {
+    for (LongIterator i : dec) {
       assertEquals(x++, i.value());
     }
     assertEquals(12, x);
 
     myArray.clear();
     myArray.addAll(1, 2);
-    dec = new IntListInsertingDecorator(myArray);
+    dec = new LongListInsertingDecorator(myArray);
     dec.insert(0, 0);
     x = 0;
-    for (IntIterator i : dec) assertEquals(x++, i.value());
+    for (LongIterator i : dec) assertEquals(x++, i.value());
 
   }
 
   public void testIsEmpty() {
-    IntArray expected = IntArray.create(0, 1, 2, 5);
-    IntListInsertingDecorator res = new IntListInsertingDecorator(IntArray.create());
+    LongArray expected = LongArray.create(0, 1, 2, 5);
+    LongListInsertingDecorator res = new LongListInsertingDecorator(LongArray.create());
 
     assertTrue(res.isEmpty());
     res.insert(0, 5);
     assertFalse(res.isEmpty());
 
-    res = new IntListInsertingDecorator(expected);
+    res = new LongListInsertingDecorator(expected);
     assertFalse(res.isEmpty());
   }
 }

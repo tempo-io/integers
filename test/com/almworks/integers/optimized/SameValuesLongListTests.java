@@ -1,12 +1,9 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.IntArray;
-import com.almworks.integers.IntCollections;
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.WritableIntListIterator;
+import com.almworks.integers.*;
 
-public class SameValuesIntListTests extends IntegersFixture {
-  private SameValuesIntList list;
+public class SameValuesLongListTests extends IntegersFixture {
+  private SameValuesLongList list;
 
   protected void setUp() throws Exception {
     super.setUp();
@@ -207,39 +204,39 @@ public class SameValuesIntListTests extends IntegersFixture {
     assertTrue("caught OOBE for index = size", caught);
   }
 
-  private SameValuesIntList create() {
-    return new SameValuesIntList();
+  private SameValuesLongList create() {
+    return new SameValuesLongList();
   }
 
-  private void testReverse(int[] a, int[] b) {
-    SameValuesIntList lst = new SameValuesIntList();
+  private void testReverse(long[] a, long[] b) {
+    SameValuesLongList lst = new SameValuesLongList ();
     lst.addAll(a);
-    SameValuesIntList referenceLst = new SameValuesIntList();
+    SameValuesLongList referenceLst = new SameValuesLongList ();
     referenceLst.addAll(b);
     lst.reverse();
     assertEquals(lst, referenceLst);
   }
 
   public void testReverse() {
-    testReverse(new int[]{0,1,3,6,10,15,21,28,36}, new int[]{36,28,21,15,10,6,3,1,0});
-    testReverse(new int[]{2, 4, 4, 5, 5, 5, 7, 7, 7, 7}, new int[]{7, 7, 7, 7, 5, 5, 5, 4, 4, 2});
-    testReverse(new int[]{0,0,0,1,1}, new int[]{1,1,0,0,0});
-    testReverse(new int[]{1,1,0}, new int[]{0,1,1});
-    testReverse(new int[]{0,0,0,0,1,1,0}, new int[]{0,1,1,0,0,0,0});
-    testReverse(new int[]{0,0,1,2,2,2,3,3,3,3}, new int[]{3,3,3,3,2,2,2,1,0,0});
-    testReverse(new int[]{4,4,1,2,2,2,3,3,3,3}, new int[]{3,3,3,3,2,2,2,1,4,4});
-    testReverse(new int[]{0,0,1,2,2,2,0,0,0,0}, new int[]{0,0,0,0,2,2,2,1,0,0});
-    testReverse(new int[]{4,4,1,2,2,2,0,0,0,0}, new int[]{0,0,0,0,2,2,2,1,4,4});
-    testReverse(new int[]{}, new int[]{});
-    testReverse(new int[]{0}, new int[]{0});
-    testReverse(new int[]{0, 0, 0}, new int[]{0, 0, 0});
-    testReverse(new int[]{1, 1, 1}, new int[]{1, 1, 1});
-    testReverse(new int[]{2, 2, 3, 3, 3}, new int[]{3, 3, 3, 2, 2});
+    testReverse(new long[]{0,1,3,6,10,15,21,28,36}, new long[]{36,28,21,15,10,6,3,1,0});
+    testReverse(new long[]{2, 4, 4, 5, 5, 5, 7, 7, 7, 7}, new long[]{7, 7, 7, 7, 5, 5, 5, 4, 4, 2});
+    testReverse(new long[]{0,0,0,1,1}, new long[]{1,1,0,0,0});
+    testReverse(new long[]{1,1,0}, new long[]{0,1,1});
+    testReverse(new long[]{0,0,0,0,1,1,0}, new long[]{0,1,1,0,0,0,0});
+    testReverse(new long[]{0,0,1,2,2,2,3,3,3,3}, new long[]{3,3,3,3,2,2,2,1,0,0});
+    testReverse(new long[]{4,4,1,2,2,2,3,3,3,3}, new long[]{3,3,3,3,2,2,2,1,4,4});
+    testReverse(new long[]{0,0,1,2,2,2,0,0,0,0}, new long[]{0,0,0,0,2,2,2,1,0,0});
+    testReverse(new long[]{4,4,1,2,2,2,0,0,0,0}, new long[]{0,0,0,0,2,2,2,1,4,4});
+    testReverse(new long[]{}, new long[]{});
+    testReverse(new long[]{0}, new long[]{0});
+    testReverse(new long[]{0, 0, 0}, new long[]{0, 0, 0});
+    testReverse(new long[]{1, 1, 1}, new long[]{1, 1, 1});
+    testReverse(new long[]{2, 2, 3, 3, 3}, new long[]{3, 3, 3, 2, 2});
   }
 
   public void testIterator() {
     list.addAll(1, 1, 1, 2, 2, 3, 3, 3);
-    WritableIntListIterator i = list.iterator();
+    WritableLongListIterator i = list.iterator();
     i.next().next().next().next();
     assertEquals(2, i.value());
     i.remove();
@@ -254,7 +251,7 @@ public class SameValuesIntListTests extends IntegersFixture {
         list.add(elements[i]);
       }
     }
-    IntArray expected = IntArray.create(5, 10, 10, 4, 2, 1);
+    LongArray expected = LongArray.create(5, 10, 10, 4, 2, 1);
     CHECK.order(list.iterator(), expected.iterator());
 
     for (int i = 0; i < 3; i++) {
@@ -286,23 +283,23 @@ public class SameValuesIntListTests extends IntegersFixture {
     assertTrue(caught);
 
     list.expand(list.size(), 5);
-    int val = expected.getLast(0);
-    for (int i = 0; i < 5; i++) {
+    long val = expected.getLast(0);
+    for (long i = 0; i < 5; i++) {
       expected.add(val);
     }
     CHECK.order(list.iterator(), expected.iterator());
   }
 
   public void testExpandComplexCase() {
-    IntArray expected = IntArray.create(0, 1, 2, 3, 4, 5);
+    LongArray expected = LongArray.create(0, 1, 2, 3, 4, 5);
     list.addAll(expected.iterator());
     CHECK.order(list.iterator(), expected.iterator());
-    SameValuesIntList addedValues;
+    SameValuesLongList addedValues;
 
     // value, count > 0, index
     int[][] arguments = {{10, 1000, 0}, {99, 10000, 0}, {77, 10000, 1000}, {33, 5000, 21006}};
     for(int[] args : arguments) {
-      addedValues = IntCollections.sameValues(args[0], args[1]);
+      addedValues = LongCollections.sameValues(args[0], args[1]);
       expected.insertAll(args[2], addedValues);
       list.insert(args[2], args[0]);
       list.expand(args[2], args[1] - 1);

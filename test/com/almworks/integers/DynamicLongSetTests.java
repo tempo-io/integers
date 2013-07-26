@@ -28,7 +28,7 @@ import java.util.Random;
 
 public class DynamicLongSetTests extends TestCase {
   protected final DynamicLongSet set = new DynamicLongSet();
-  protected final IntCollectionsCompare compare = new IntCollectionsCompare();
+  protected final CollectionsCompare compare = new CollectionsCompare();
 
   @Override
   public void setUp() throws Exception {

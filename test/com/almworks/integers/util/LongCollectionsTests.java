@@ -18,6 +18,9 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 import com.almworks.integers.optimized.SameValuesIntList;
+import com.almworks.integers.optimized.SameValuesLongList;
+import com.almworks.integers.optimized.SegmentedIntArray;
+import com.almworks.integers.optimized.SegmentedLongArray;
 import com.almworks.util.Pair;
 import com.almworks.util.RandomHolder;
 
@@ -32,11 +35,155 @@ public class LongCollectionsTests extends IntegersFixture {
   public static final CollectionsCompare COMPARE = new CollectionsCompare();
   private Random myRandom;
   public static final String SEED = "com.almworks.integers.seed";
+  private final LongArray myArray = new LongArray();
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     setupRandom();
+  }
+
+  public void testArray_RemoveSubsequentDuplicates() {
+    myArray.addAll(1, 1, 2);
+    myArray.sortUnique();
+    checkCollection(myArray, 1, 2);
+    myArray.clear();
+
+    myArray.addAll(1, 2, 2, 3);
+    myArray.sortUnique();
+    checkCollection(myArray, 1, 2, 3);
+    myArray.clear();
+
+    myArray.addAll(1, 2, 3, 3);
+    myArray.sortUnique();
+    checkCollection(myArray, 1, 2, 3);
+    myArray.clear();
+
+    myArray.addAll(1, 1, 2, 2, 3, 3);
+    myArray.sortUnique();
+    checkCollection(myArray, 1, 2, 3);
+  }
+
+  public void testConcatenation() {
+    LongListConcatenation concat = new LongListConcatenation();
+    assertEquals(0, concat.getSliceCount());
+    checkCollection(concat);
+    concat.addSlice(LongList.EMPTY);
+    assertEquals(1, concat.getSliceCount());
+    checkCollection(concat);
+    concat.addSlice(myArray);
+    checkCollection(concat);
+    myArray.add(1);
+    checkCollection(concat, 1);
+    concat.addSlice(LongList.EMPTY);
+    checkCollection(concat, 1);
+    SegmentedLongArray segarray = new SegmentedLongArray();
+    concat.addSlice(segarray);
+    concat.addSlice(LongList.EMPTY);
+    checkCollection(concat, 1);
+    segarray.add(3);
+    checkCollection(concat, 1, 3);
+    myArray.add(2);
+    checkCollection(concat, 1, 2, 3);
+  }
+
+  public void testRemoveDecorator() {
+    ModifyingLongListRemovingDecorator rem = new ModifyingLongListRemovingDecorator(myArray);
+    checkCollection(rem);
+    checkRemovedIndexes(rem);
+    CHECK.order(rem.removedValueIterator());
+    assertEquals(0, rem.getRemoveCount());
+
+    myArray.add(-1);
+    checkCollection(rem, -1);
+    checkRemovedIndexes(rem);
+    CHECK.order(rem.removedValueIterator());
+    assertEquals(0, rem.getRemoveCount());
+
+    rem.removeAt(0);
+    checkCollection(rem);
+    CHECK.order(rem.removedValueIterator(), -1);
+    checkRemovedIndexes(rem, 0);
+    assertEquals(1, rem.getRemoveCount());
+
+    myArray.addAll(0, 1, 2, 3, 4, 5, 6);
+    checkRemovedIndexes(rem, 0);
+    rem.removeAt(6);
+    checkCollection(rem, 0, 1, 2, 3, 4, 5);
+    CHECK.order(rem.removedValueIterator(), -1, 6);
+    checkRemovedIndexes(rem, 0, 7);
+    assertEquals(2, rem.getRemoveCount());
+
+    rem.removeAt(0);
+    checkCollection(rem, 1, 2, 3, 4, 5);
+    CHECK.order(rem.removedValueIterator(), -1, 0, 6);
+    checkRemovedIndexes(rem, 0, 1, 7);
+    assertEquals(3, rem.getRemoveCount());
+
+    rem.removeAt(2);
+    checkCollection(rem, 1, 2, 4, 5);
+    CHECK.order(rem.removedValueIterator(), -1, 0, 3, 6);
+    checkRemovedIndexes(rem, 0, 1, 4, 7);
+    assertEquals(4, rem.getRemoveCount());
+
+    rem.removeAt(0);
+    checkCollection(rem, 2, 4, 5);
+    CHECK.order(rem.removedValueIterator(), -1, 0, 1, 3, 6);
+    checkRemovedIndexes(rem, 0, 1, 2, 4, 7);
+    assertEquals(5, rem.getRemoveCount());
+  }
+
+  public void testCreateModifyingRemoveDecorator() {
+    myArray.addAll(0, 1, 2, 3, 4, 5, 6);
+    ModifyingLongListRemovingDecorator rem = ModifyingLongListRemovingDecorator.createFromUnsorted(myArray, 0, 4, 1, 5);
+    checkCollection(rem, 2, 3, 6);
+    checkRemovedIndexes(rem, 0, 1, 4, 5);
+    assertEquals(4, rem.getRemoveCount());
+
+    rem = ModifyingLongListRemovingDecorator.createFromUnsorted(myArray, 2, 6, 1);
+    checkCollection(rem, 0, 3, 4, 5);
+    checkRemovedIndexes(rem, 1, 2, 6);
+    assertEquals(3, rem.getRemoveCount());
+
+    rem = ModifyingLongListRemovingDecorator.createFromUnsorted(myArray, 2, 6, 1, 2);
+    checkCollection(rem, 0, 3, 4, 5);
+    checkRemovedIndexes(rem, 1, 2, 6);
+    assertEquals(3, rem.getRemoveCount());
+  }
+
+  public void testCreateReadonlyRemoveDecorator() {
+    myArray.addAll(0, 1, 2, 3, 4, 5, 6);
+    LongList array2 = LongArray.create(10, 11, 12, 13, 14, 15, 16);
+
+    IntList removeIndices = ReadonlyLongListRemovingDecorator.prepareUnsortedIndices(0, 4, 1, 5);
+    ReadonlyLongListRemovingDecorator rem = ReadonlyLongListRemovingDecorator.createFromPrepared(myArray, removeIndices);
+    checkCollection(rem, 2, 3, 6);
+    checkRemovedIndexes(rem, 0, 1, 4, 5);
+    assertEquals(4, rem.getRemoveCount());
+    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(array2, removeIndices);
+    checkCollection(rem, 12, 13, 16);
+    checkRemovedIndexes(rem, 0, 1, 4, 5);
+    assertEquals(4, rem.getRemoveCount());
+
+    removeIndices = ReadonlyLongListRemovingDecorator.prepareUnsortedIndices(2, 6, 1);
+    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(myArray,removeIndices);
+    checkCollection(rem, 0, 3, 4, 5);
+    checkRemovedIndexes(rem, 1, 2, 6);
+    assertEquals(3, rem.getRemoveCount());
+    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(array2,removeIndices);
+    checkCollection(rem, 10, 13, 14, 15);
+    checkRemovedIndexes(rem, 1, 2, 6);
+    assertEquals(3, rem.getRemoveCount());
+
+    removeIndices = ReadonlyLongListRemovingDecorator.prepareUnsortedIndices(2, 6, 1, 2);
+    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(myArray, removeIndices);
+    checkCollection(rem, 0, 3, 4, 5);
+    checkRemovedIndexes(rem, 1, 2, 6);
+    assertEquals(3, rem.getRemoveCount());
+    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(array2, removeIndices);
+    checkCollection(rem, 10, 13, 14, 15);
+    checkRemovedIndexes(rem, 1, 2, 6);
+    assertEquals(3, rem.getRemoveCount());
   }
 
   private void setupRandom() {
@@ -296,5 +443,75 @@ public class LongCollectionsTests extends IntegersFixture {
       caught = true;
     }
     assertTrue("caught IAE", caught);
+  }
+
+  public void testGetNextDiffValueIndex() {
+    LongList testList1 = LongArray.create(1, 1, 2, 2, 2, 2, 3, 2);
+    IntList expectedIndexes = IntArray.create(0, 2, 6, 7);
+    CHECK.order(getNextDifferentValueIndex(testList1), expectedIndexes.iterator());
+
+    SameValuesLongList testList2 = new SameValuesLongList();
+    testList2.addAll(testList1);
+    CHECK.order(getNextDifferentValueIndex(testList2), expectedIndexes.iterator());
+
+    LongList testList3 = LongArray.create(0, 0, 1, 1, 1, 1, 10, 1);
+    CHECK.order(getNextDifferentValueIndex(testList3), expectedIndexes.iterator());
+
+    SameValuesLongList testList4 = new SameValuesLongList();
+    testList4.addAll(testList3);
+    CHECK.order(getNextDifferentValueIndex(testList4), expectedIndexes.iterator());
+  }
+
+  private IntIterator getNextDifferentValueIndex(LongList list) {
+    WritableIntList resultingIndices = new IntArray();
+    for (int i = 0; i < list.size(); i = list.getNextDifferentValueIndex(i)) {
+      assertTrue("exceeded the list size!", i < list.size());
+      resultingIndices.add(i);
+    }
+    return resultingIndices.iterator();
+  }
+
+  public void testUnion() {
+    // is likely to be launched branch with realloc
+    IntegersFixture.testUnion(new UnionCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        return LongCollections.unionWithSameLengthList(copy.extractHostArray(), arrays[0].size(),
+            arrays[1]).iterator();
+      }
+    }, true);
+
+    // guaranteed launch branch with replace
+    IntegersFixture.testUnion(new UnionCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
+        return LongCollections.unionWithSameLengthList(copy.extractHostArray(), arrays[0].size(),
+            arrays[1]).iterator();
+      }
+    }, true);
+
+    // is likely to be launched branch with realloc
+    IntegersFixture.testUnion(new UnionCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        return LongCollections.unionWithSmallArray(copy.extractHostArray(), arrays[0].size(),
+            arrays[1].toNativeArray(), arrays[1].size()).iterator();
+      }
+    }, true);
+
+    // guaranteed launch branch with replace
+    IntegersFixture.testUnion(new UnionCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
+        return LongCollections.unionWithSmallArray(copy.extractHostArray(), arrays[0].size(),
+            arrays[1].toNativeArray(), arrays[1].size()).iterator();
+      }
+    }, true);
   }
 }

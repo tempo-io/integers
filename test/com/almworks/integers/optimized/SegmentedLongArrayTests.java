@@ -2,15 +2,16 @@ package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
 import com.almworks.integers.func.IntFunction;
+import com.almworks.integers.func.LongFunction;
 
-public class SegmentedIntArrayTests extends IntegersFixture {
-  private TestEnvForSegmentedIntArray myEnv;
-  private SegmentedIntArray array;
+public class SegmentedLongArrayTests extends IntegersFixture {
+  private TestEnvForSegmentedLongArray myEnv;
+  private SegmentedLongArray array;
 
   protected void setUp() throws Exception {
     super.setUp();
-    myEnv = new TestEnvForSegmentedIntArray();
-    array = new SegmentedIntArray(myEnv);
+    myEnv = new TestEnvForSegmentedLongArray();
+    array = new SegmentedLongArray(myEnv);
   }
 
   protected void tearDown() throws Exception {
@@ -30,12 +31,12 @@ public class SegmentedIntArrayTests extends IntegersFixture {
   }
 
   public void testCopy() {
-    SegmentedIntArray a1 = array;
+    SegmentedLongArray a1 = array;
     for (int i = 100000; i > 0; i--) {
       a1.add(i);
     }
     myEnv.clear();
-    SegmentedIntArray a2 = a1.clone();
+    SegmentedLongArray a2 = a1.clone();
     assertEquals(0, myEnv.allocateCount);
     assertEquals(100000, a2.size());
     for (int i = 100000; i > 0; i--) {
@@ -61,8 +62,8 @@ public class SegmentedIntArrayTests extends IntegersFixture {
   public void testInsertOneByOneInTheBeginning() {
     for (int i = 0; i < 10000; i++)
       array.insert(0, i);
-    new IntCollectionsCompare().order(array.toNativeArray(),
-        new IntProgression.Arithmetic(9999, 10000, -1).toNativeArray());
+    new CollectionsCompare().order(array.toNativeArray(),
+        new LongProgression.Arithmetic(9999, 10000, -1).toNativeArray());
   }
 
   public void testRemoveByIterator() {
@@ -70,7 +71,7 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     for (int i = 0; i < COUNT; i++)
       array.add(COUNT - i);
     int x = 10000;
-    for (WritableIntListIterator ii : array.write()) {
+    for (WritableLongListIterator ii : array.write()) {
       assertEquals(x, ii.value());
       assertEquals(x, ii.get(0));
       if (x > 1)
@@ -86,7 +87,7 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     assertEquals(0, array.size());
     array.apply(0, 0, null);
     array.clear();
-    SegmentedIntArray clone = array.clone();
+    SegmentedLongArray clone = array.clone();
     assertEquals(array, clone);
     clone.clear();
     try {
@@ -98,7 +99,7 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     array.remove(0);
     array.removeRange(0, 0);
     assertEquals(array, array.subList(0, 0));
-    array.toArray(0, new int[0], 0, 0);
+    array.toArray(0, new long[0], 0, 0);
   }
 
   public void testInserts() {
@@ -106,9 +107,9 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     checkList(array, ap(1, 0, 2048));
     array.insert(0, 2);
     array.insert(array.size(), 3);
-    checkList(array, new int[] {2}, ap(1, 0, 2048), new int[] {3});
+    checkList(array, new long[] {2}, ap(1, 0, 2048), new long[] {3});
     array.insertMultiple(1, 2, 2000);
-    checkList(array, ap(2, 0, 2001), ap(1, 0, 2048), new int[] {3});
+    checkList(array, ap(2, 0, 2001), ap(1, 0, 2048), new long[] {3});
     array.clear();
 
     // test shifts reusing whole segments
@@ -162,7 +163,7 @@ public class SegmentedIntArrayTests extends IntegersFixture {
   public void testIteratorRemoveRange() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
-    WritableIntListIterator ii = array.iterator(100, 600);
+    WritableLongListIterator ii = array.iterator(100, 600);
     for (int i = 0; i < 10; i++)
       ii.nextValue();
     ii.removeRange(-9, 1);
@@ -184,7 +185,7 @@ public class SegmentedIntArrayTests extends IntegersFixture {
   public void testIteratorRemoveFromEnd() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
-    WritableIntListIterator ii = array.iterator(8191, 9192);
+    WritableLongListIterator ii = array.iterator(8191, 9192);
     ii.nextValue();
     while (ii.hasNext()) {
       ii.nextValue();
@@ -196,7 +197,7 @@ public class SegmentedIntArrayTests extends IntegersFixture {
   public void testIteratorSkip() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
-    WritableIntListIterator ii = array.iterator();
+    WritableLongListIterator ii = array.iterator();
     for (int i = 0; i < 100; i++) {
       assertTrue(ii.hasNext());
       assertEquals(100 * i, ii.nextValue());
@@ -222,9 +223,9 @@ public class SegmentedIntArrayTests extends IntegersFixture {
   public void testSubSubList() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
-    IntList sub = array.subList(1000, 2000);
+    LongList sub = array.subList(1000, 2000);
     checkList(sub, ap(1000, 1, 1000));
-    IntList subsub = sub.subList(200, 300);
+    LongList subsub = sub.subList(200, 300);
     checkList(subsub, ap(1200, 1, 100));
   }
 
@@ -272,8 +273,8 @@ public class SegmentedIntArrayTests extends IntegersFixture {
   }
 
   public void testCopyInsertList() {
-    array.addAll(IntProgression.arithmetic(0, 10240, 1));
-    IntArray list = new IntArray();
+    array.addAll(LongProgression.arithmetic(0, 10240, 1));
+    LongArray list = new LongArray();
     list.addAll(array);
     array.insertAll(2000, list, 100, 10000);
     checkList(array, ap(0, 1, 2000), ap(100, 1, 10000), ap(2000, 1, 8240));
@@ -297,10 +298,10 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     testReverse(new int[]{0, 1, 3, 6, 10, 15, 21, 28, 36}, new int[]{36, 28, 21, 15, 10, 6, 3, 1, 0});
   }
 
-  public static void segmentedIntArrayChecker(IntList expected, SegmentedIntArray actual) {
+  public static void segmentedLongArrayChecker(LongList expected, SegmentedLongArray actual) {
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
-      int val = expected.get(i);
+      long val = expected.get(i);
       assertTrue(val == -1 || val == actual.get(i));
     }
   }
@@ -310,20 +311,20 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     for ( int i = 0; i < 5; i++) {
       array.add(elements[i]);
     }
-    IntArray expected = IntArray.create(5, 10, 4, 2, 1);
+    LongArray expected = LongArray.create(5, 10, 4, 2, 1);
     CHECK.order(array.iterator(), expected.iterator());
 
     for (int i = 0; i < 3; i++) {
       expected.insert(3, -1);
     }
     array.expand(3, 3);
-    segmentedIntArrayChecker(expected, array);
+    segmentedLongArrayChecker(expected, array);
 
     for (int i = 0; i < 2; i++) {
       expected.insert(3, -1);
     }
     array.expand(6, 2);
-    segmentedIntArrayChecker(expected, array);
+    segmentedLongArrayChecker(expected, array);
 
     boolean caught = false;
     try {
@@ -345,49 +346,49 @@ public class SegmentedIntArrayTests extends IntegersFixture {
     for (int i = 0; i < 5; i++) {
       expected.add(-1);
     }
-    segmentedIntArrayChecker(expected, array);
+    segmentedLongArrayChecker(expected, array);
   }
 
   public void testExpandComplexCase() {
-    IntList addedValues = IntProgression.arithmetic(1, 10000);
-    IntArray expected = new IntArray(addedValues);
+    LongList addedValues = LongProgression.arithmetic(1, 10000);
+    LongArray expected = new LongArray(addedValues);
     array.addAll(addedValues);
     CHECK.order(array.iterator(), expected.iterator());
 
     // count, index
     int[][] arguments = {{1000, 0}, {10000, 0}, {10000, 0}, {5000, 31000}};
     for(int[] args : arguments) {
-      addedValues = IntCollections.sameValues(-1, args[0]);
+      addedValues = LongCollections.sameValues(-1, args[0]);
       expected.insertAll(args[1], addedValues);
       array.expand(args[1], args[0]);
-      segmentedIntArrayChecker(expected, array);
+      segmentedLongArrayChecker(expected, array);
     }
   }
 
     public void testSetRange() {
-    IntArray expected = new IntArray(IntProgression.arithmetic(0, 20));
+    LongArray expected = new LongArray(LongProgression.arithmetic(0, 20));
     array.addAll(expected);
 
     array.setRange(0, 5, -1);
     expected.setRange(0, 5, -1);
-    segmentedIntArrayChecker(expected, array);
+      segmentedLongArrayChecker(expected, array);
 
     array.setRange(5, 10, 4);
     expected.setRange(5, 10, 4);
-    segmentedIntArrayChecker(expected, array);
+      segmentedLongArrayChecker(expected, array);
   }
 
   public void testApply() {
-    IntArray expected = new IntArray(IntProgression.arithmetic(0, 10));
+    LongArray expected = new LongArray(LongProgression.arithmetic(0, 10));
     array.addAll(expected);
-    array.apply(2, 8, new IntFunction() {
+    array.apply(2, 8, new LongFunction() {
       @Override
-      public int invoke(int a) {
+      public long invoke(long a) {
         return a * a - 1;
       }
     });
     for (int i = 2; i < 8; i++) {
-      int val = expected.get(i);
+      long val = expected.get(i);
       expected.set(i, val * val - 1);
     }
     checkList(array, expected.toNativeArray());

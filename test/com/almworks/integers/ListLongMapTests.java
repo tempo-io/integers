@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 import java.util.NoSuchElementException;
 
 public class ListLongMapTests extends TestCase {
-  private static final IntCollectionsCompare CHECK = new IntCollectionsCompare();
+  private static final CollectionsCompare CHECK = new CollectionsCompare();
   private final LongArray myStorage = new LongArray();
   private final ListLongMap myMap = new ListLongMap(myStorage);
 

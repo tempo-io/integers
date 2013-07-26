@@ -16,21 +16,18 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntArray;
-import com.almworks.integers.IntList;
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.WritableIntList;
+import com.almworks.integers.*;
 import com.almworks.util.RandomHolder;
 
 import java.util.Random;
 
 
-public class ModifyingIntListRemovingDecoratorTests extends IntegersFixture {
+public class ModifyingLongListRemovingDecoratorTests extends IntegersFixture {
 
   public void _testSimpleCreateFromSorted() {
-    IntList base = IntArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    LongList base = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     WritableIntList indexes = IntArray.create(0, 2, 4, 6, 8);
-    ModifyingIntListRemovingDecorator arr = ModifyingIntListRemovingDecorator.createFromSorted(base, indexes);
+    ModifyingLongListRemovingDecorator arr = ModifyingLongListRemovingDecorator.createFromSorted(base, indexes);
     CHECK.order(arr.iterator(), 1, 3, 5, 7, 9);
   }
 
@@ -40,11 +37,11 @@ public class ModifyingIntListRemovingDecoratorTests extends IntegersFixture {
     int indexesLength = 50;
     int maxValue = 1000;
 
-    int[] values = new int[arrLength];
+    long[] values = new long[arrLength];
     for (int i = 0; i < arrLength; i++) {
       values[i] = r.nextInt(maxValue);
     }
-    IntList base = IntArray.create(values);
+    LongList base = LongArray.create(values);
 
     int[] nativeIndexes = new int[arrLength];
     for (int test = 0; test < 20; test++) {
@@ -54,12 +51,12 @@ public class ModifyingIntListRemovingDecoratorTests extends IntegersFixture {
       IntArray indexes = IntArray.create(nativeIndexes);
       indexes.sortUnique();
 
-      IntArray expected = IntArray.copy(base);
+      LongArray expected = LongArray.copy(base);
       for (int i = indexes.size() - 1; i >= 0; i--) {
         int val = indexes.get(i);
         expected.removeRange(val, val + 1);
       }
-      ModifyingIntListRemovingDecorator arr = ModifyingIntListRemovingDecorator.createFromSorted(base, indexes);
+      ModifyingLongListRemovingDecorator arr = ModifyingLongListRemovingDecorator.createFromSorted(base, indexes);
       CHECK.order(arr.iterator(), expected.iterator());
     }
   }

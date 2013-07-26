@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 import java.util.NoSuchElementException;
 
 public class ParallelLongListTests extends TestCase {
-  private static final IntCollectionsCompare CHECK = new IntCollectionsCompare();
+  private static final CollectionsCompare CHECK = new CollectionsCompare();
   private final LongArray myStorage = new LongArray();
   private final ParallelLongList myList = new ParallelLongList(myStorage, 2);
 

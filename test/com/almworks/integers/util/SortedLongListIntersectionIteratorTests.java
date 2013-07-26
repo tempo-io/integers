@@ -27,6 +27,52 @@ import java.util.List;
 import static com.almworks.integers.LongArray.create;
 
 public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
+  protected final long MIN = Long.MIN_VALUE;
+  protected final long MAX = Long.MAX_VALUE;
+
+  private LongArray a(long... values) {
+    return new LongArray(values);
+  }
+
+  public void testInterEmptyArrays() {
+    testInterSym(a(), a(), a());
+    testInterSym(a(), a(1, 3, 5), a());
+    testInterSym(a(1, 3, 5), a(), a());
+  }
+
+  public void testInterEmptyIntersection() {
+    testInterSym(a(1, 3, 5), a(0), a());
+    testInterSym(a(1, 3, 5), a(-2), a());
+    testInterSym(a(1, 3, 5), a(6), a());
+    testInterSym(a(1, 3, 5), a(-2, 0, 2, 6), a());
+  }
+
+  public void testInterNotEmptyIntersection() {
+    testInterSym(a(1, 3, 5), a(1), a(1));
+    testInterSym(a(1, 3, 5), a(3), a(3));
+    testInterSym(a(1, 3, 5), a(5), a(5));
+    testInterSym(a(1, 3, 5), a(1, 3, 5), a(1, 3, 5));
+    testInterSym(a(1, 3, 5), a(0, 1, 2, 3, 4, 5, 6), a(1, 3, 5));
+  }
+
+  public void testInterExtremeValues() {
+    testInterSym(a(1, 3, 5), a(MIN), a());
+    testInterSym(a(1, 3, 5), a(MAX), a());
+    testInterSym(a(MIN, 1, 3, 5, MAX), a(1, 3, 5), a(1, 3, 5));
+    testInterSym(a(MIN, 1, 3, 5, MAX), a(MIN, 3, MAX), a(MIN, 3, MAX));
+  }
+
+  private void testInterSym(LongArray array1, LongArray array2, LongArray intersection) {
+    // when intersection is symmetric
+    testInter(array1, array2, intersection);
+    testInter(array2, array1, intersection);
+  }
+
+  private void testInter(LongArray array1, LongArray array2, LongArray intersection) {
+    IntegersFixture.assertContents(new SortedLongListIntersectionIterator(array1.iterator(), array2.iterator()), intersection);
+  }
+
+
   public void templateCase(LongArray arrays[], LongIterable expected) {
     List<LongIterator> iterators = new ArrayList<LongIterator>(arrays.length);
     IntegersDebug.println(arrays.length);
