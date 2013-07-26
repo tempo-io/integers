@@ -276,11 +276,6 @@ public final class LongArray extends AbstractWritableLongList {
       return;
     }
     LongList sortedValues = valuesSortedStatus ? values : LongCollections.toSorted(false, values);
-    if (valuesSortedStatus) {
-      sortedValues = values;
-    } else {
-      sortedValues = LongCollections.toSorted(false, values);
-    }
     for (int i = size() - 1; i >= 0; i--) {
       long v = myArray[i];
       if (sortedValues.binarySearch(v) >= 0) continue;
