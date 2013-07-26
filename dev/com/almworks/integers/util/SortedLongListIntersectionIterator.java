@@ -37,18 +37,13 @@ public class SortedLongListIntersectionIterator extends SortedLongListOperations
     super(iterators);
   }
 
-  @NotNull
-  public static SortedLongListIntersectionIterator create(LongIterable ... includes) {
-    return create(Arrays.asList(includes));
+  public SortedLongListIntersectionIterator(LongIterable ... includes) {
+    super(longIterablesToIterators(Arrays.asList(includes)));
   }
 
   @NotNull
   public static SortedLongListIntersectionIterator create(List<? extends LongIterable> includes) {
-    List<LongIterator> result = new ArrayList<LongIterator>(includes.size());
-    for (LongIterable arr : includes) {
-      result.add(arr.iterator());
-    }
-    return new SortedLongListIntersectionIterator(result);
+    return new SortedLongListIntersectionIterator(longIterablesToIterators(includes));
   }
 
   private boolean equalValues() {

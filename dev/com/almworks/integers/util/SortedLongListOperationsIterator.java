@@ -16,10 +16,13 @@
 
 package com.almworks.integers.util;
 
+import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
 import com.almworks.integers.IntCollections;
+import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -37,6 +40,20 @@ public abstract class SortedLongListOperationsIterator extends FindingLongIterat
     myIts = iterators;
     heapLength = myIts.size();
     myHeap = new int[heapLength + 1];
+  }
+
+  public SortedLongListOperationsIterator(@NotNull LongIterator ... iterators) {
+    myIts = Arrays.asList(iterators);
+    heapLength = myIts.size();
+    myHeap = new int[heapLength + 1];
+  }
+
+  protected static List<LongIterator> longIterablesToIterators(List<? extends LongIterable> includes) {
+    List<LongIterator> result = new ArrayList<LongIterator>(includes.size());
+    for (LongIterable arr : includes) {
+      result.add(arr.iterator());
+    }
+    return result;
   }
 
   protected static int parent(int i) { return i/2;  }

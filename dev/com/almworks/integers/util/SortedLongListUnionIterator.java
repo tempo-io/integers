@@ -37,18 +37,13 @@ public class SortedLongListUnionIterator extends SortedLongListOperationsIterato
     super(iterators);
   }
 
-  @NotNull
-  public static SortedLongListUnionIterator create(LongIterable... includes) {
-    return create(Arrays.asList(includes));
+  public SortedLongListUnionIterator(LongIterable... includes) {
+    super(longIterablesToIterators(Arrays.asList(includes)));
   }
 
   @NotNull
   public static SortedLongListUnionIterator create(List<? extends LongIterable> includes) {
-    List<LongIterator> result = new ArrayList<LongIterator>(includes.size());
-    for (LongIterable arr : includes) {
-      result.add(arr.iterator());
-    }
-    return new SortedLongListUnionIterator(result);
+    return new SortedLongListUnionIterator(longIterablesToIterators(includes));
   }
 
   protected boolean findNext() {
