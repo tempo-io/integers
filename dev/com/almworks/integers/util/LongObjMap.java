@@ -21,6 +21,7 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.LongArray;
 import com.almworks.integers.IntegersUtils;
+import com.almworks.integers.WritableLongListIterator;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
@@ -150,6 +151,15 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   @Override
   public LongMapIterator iterator() {
     return new LongMapIterator();
+  }
+
+  public WritableLongListIterator keysIterator(int from, int to) {
+    return myKeys.iterator(from, to);
+  }
+
+  public int size() {
+    assert myKeys.size() == myValues.size();
+    return myKeys.size();
   }
 
   @Override
