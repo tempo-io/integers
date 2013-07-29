@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import com.almworks.util.RandomHolder;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,15 +150,16 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testRetain() {
-    array = new LongArray(LongProgression.arithmetic(0, 20, 1));
-    array.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
-    CHECK.order(LongProgression.arithmetic(1, 10, 2), array);
-
-    array = LongArray.create(1, 5, 2, 4, 3);
-    array.retain(LongArray.create(3, 1, 2));
-    CHECK.order(array.iterator(), 1, 2, 3);
-    array.retain(LongArray.create(2));
-    CHECK.order(array.iterator(), 2);
+    SetOperationsChecker.testSetOperations(new SetOperationsChecker.newSetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        LongArray res = LongArray.copy(arrays[0]);
+        for (int i = 0; i < arrays.length; i++) {
+          res.retainSorted(arrays[i]);
+        }
+        return res.iterator();
+      }
+    }, new SetOperationsChecker.IntersectionGetter(), false);
   }
 
   protected void tearDown() throws Exception {

@@ -17,9 +17,7 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
-import com.almworks.integers.optimized.SameValuesIntList;
 import com.almworks.integers.optimized.SameValuesLongList;
-import com.almworks.integers.optimized.SegmentedIntArray;
 import com.almworks.integers.optimized.SegmentedLongArray;
 import com.almworks.util.Pair;
 import com.almworks.util.RandomHolder;
@@ -29,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static com.almworks.integers.SetOperationsChecker.*;
 import static com.almworks.integers.LongCollections.*;
 
 public class LongCollectionsTests extends IntegersFixture {
@@ -398,7 +397,7 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testBinarySearch() {
-    IntegersFixture.testBinarySearch(new BinarySearcher() {
+    BinarySearchChecker.testBinarySearch(new BinarySearchChecker.BinarySearcher() {
       private long[] arr;
       private int length;
 
@@ -472,18 +471,19 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testUnion() {
+    newSetCreator unionGetter = new UnionGetter();
     // is likely to be launched branch with realloc
-    IntegersFixture.testUnion(new UnionCreator() {
+    testSetOperations(new newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         return LongCollections.unionWithSameLengthList(copy.extractHostArray(), arrays[0].size(),
             arrays[1]).iterator();
       }
-    }, true);
+    }, unionGetter, true);
 
     // guaranteed launch branch with replace
-    IntegersFixture.testUnion(new UnionCreator() {
+    testSetOperations(new newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -491,20 +491,20 @@ public class LongCollectionsTests extends IntegersFixture {
         return LongCollections.unionWithSameLengthList(copy.extractHostArray(), arrays[0].size(),
             arrays[1]).iterator();
       }
-    }, true);
+    }, unionGetter, true);
 
     // is likely to be launched branch with realloc
-    IntegersFixture.testUnion(new UnionCreator() {
+    testSetOperations(new newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         return LongCollections.unionWithSmallArray(copy.extractHostArray(), arrays[0].size(),
             arrays[1].toNativeArray(), arrays[1].size()).iterator();
       }
-    }, true);
+    }, unionGetter, true);
 
     // guaranteed launch branch with replace
-    IntegersFixture.testUnion(new UnionCreator() {
+    testSetOperations(new newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -512,6 +512,6 @@ public class LongCollectionsTests extends IntegersFixture {
         return LongCollections.unionWithSmallArray(copy.extractHostArray(), arrays[0].size(),
             arrays[1].toNativeArray(), arrays[1].size()).iterator();
       }
-    }, true);
+    }, unionGetter, true);
   }
 }

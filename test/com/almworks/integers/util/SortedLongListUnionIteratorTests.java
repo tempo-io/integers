@@ -17,13 +17,13 @@ public class SortedLongListUnionIteratorTests extends IntegersFixture {
   }
 
   public void testAllCases() {
-    IntegersFixture.testUnion(new UnionCreator() {
+    SetOperationsChecker.testSetOperations(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray res = new LongArray(new SortedLongListUnionIterator(arrays));
         return res.iterator();
       }
-    }, false);
+    }, new SetOperationsChecker.UnionGetter(), false);
   }
 
 }

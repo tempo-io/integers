@@ -185,6 +185,7 @@ templates/com/almworks/integers/util/SortedLongListOperationsIterator.java -text
 templates/com/almworks/integers/util/SortedLongListUnionIterator.java -text
 templates/com/almworks/integers/util/SortedPListIntersectionIterator.tpl -text
 templates/com/almworks/integers/util/SortedPListMinusIterator.tpl -text
+test/com/almworks/integers/BinarySearchChecker.java -text
 test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
 test/com/almworks/integers/DynamicLongSetPerf.java -text
@@ -203,6 +204,7 @@ test/com/almworks/integers/LongProgressionTests.java -text
 test/com/almworks/integers/LongSubListTests.java -text
 test/com/almworks/integers/PairIntLongIteratorTests.java -text
 test/com/almworks/integers/ParallelLongListTests.java -text
+test/com/almworks/integers/SetOperationsChecker.java -text
 test/com/almworks/integers/TwoWayLongMapTests.java -text
 test/com/almworks/integers/optimized/SameValuesLongListTests.java -text
 test/com/almworks/integers/optimized/SegmentedLongArrayTests.java -text

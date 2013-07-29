@@ -7,7 +7,7 @@ import com.almworks.integers.IntList;
 /**
  * This class is made abstract to avoid running very long tests
  */
-public class LongSetBuilderPerformanceComparison extends TestCase {
+public abstract class LongSetBuilderPerformanceComparison extends TestCase {
 
   public void testComparison() {
     int RUNS = 10;
@@ -18,7 +18,7 @@ public class LongSetBuilderPerformanceComparison extends TestCase {
     runLongSetBuilder(RUNS, CYCLES, CYCLE_LENGTH, LongSetBuilder.DEFAULT_TEMP_STORAGE_SIZE);
   }
 
-  public void testSize() {
+  public void _testSize() {
     int from = 10;
     int to = 1024;
     long[] r = new long[to - from + 1];

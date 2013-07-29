@@ -10,9 +10,11 @@ import java.util.Random;
 import static com.almworks.integers.LongArray.create;
 
 public abstract class IntegersFixture extends TestCase {
+  protected static int MIN = Integer.MIN_VALUE;
+  protected static int MAX = Integer.MAX_VALUE;
   protected static final CollectionsCompare CHECK = new CollectionsCompare();
 
-  private static LongArray a(long... values) {
+  protected static LongArray a(long... values) {
     return new LongArray(values);
   }
 
@@ -181,135 +183,6 @@ public abstract class IntegersFixture extends TestCase {
       return true;
     }
   }
-
-  public static interface BinarySearcher {
-    void init(long... values);
-
-    long get(int index);
-
-    int binSearch(long value);
-
-    int size(); // fix it?
-  }
-
-  private static void checkBinarySearch(BinarySearcher bs, long ... values) {
-    assertTrue(LongArray.create(values).isSorted());
-    bs.init(values);
-
-    for (int index = 0; index < bs.size(); index++) {
-      for (long i = bs.get(index) - 1; i <= bs.get(index) + 1; i++) {
-        int res = bs.binSearch(i);
-        int res2 = -res - 1;
-        if (res >= 0) {
-          assertEquals(i, bs.get(res));
-        } else {
-          if (res2 == 0) {
-            assertTrue(res2 != 0 || i < bs.get(res2));
-          } else {
-            if (res2 == bs.size()) {
-              assertTrue(bs.get(res2 - 1) < i);
-            } else {
-              assertTrue(bs.get(res2 - 1) <= i && i < bs.get(res2));
-            }
-          }
-        }
-      }
-    }
-  }
-
-  public static void testBinarySearch(BinarySearcher bs) {
-    checkBinarySearch(bs, 0, 2, 5, 10);
-    checkBinarySearch(bs, 0, 5, 10, 11, 12, 14, 20, 25, 25);
-
-    int arrLength = 100;
-    long[] arr = new long[arrLength];
-    int maxValue = Integer.MAX_VALUE - 1;
-    Random r = new RandomHolder().getRandom();
-
-    for (int i = 0; i < 10; i++) {
-      for (int j = 0; j < arrLength; j++) {
-        arr[j] = r.nextInt();
-      }
-      Arrays.sort(arr);
-      checkBinarySearch(bs, arr);
-    }
-  }
-
-  public static LongArray[] generateRandomLongArrays(int intersectionLength, int inputLength, int maxArrayLength, int minValue, int maxValue) {
-    assert minValue < maxValue;
-    int diff = maxValue - minValue;
-    Random r = new RandomHolder().getRandom();
-
-    LongArray[] arrays = new LongArray[inputLength];
-
-    LongArray intersection = create();
-    for ( int i = 0; i < intersectionLength; i++) {
-      intersection.add(r.nextInt(maxArrayLength));
-    }
-
-    for (int i = 0; i < inputLength; i++) {
-      int arrayLength = r.nextInt(maxArrayLength);
-      arrays[i] = LongArray.copy(intersection);
-
-      for (int j = 0; j < arrayLength; j++) {
-        arrays[i].add(minValue + r.nextInt(diff));
-      }
-      arrays[i].sortUnique();
-      IntegersDebug.println(arrays[i]);
-    }
-    return arrays;
-  }
-
-  public static interface UnionCreator {
-    LongIterator get(LongArray ... arrays);
-  }
-
-  private static void checkUnionCreator(UnionCreator uc, LongArray ... arrays) {
-    LongArray expected = new LongArray();
-    for (LongArray array : arrays) {
-      expected.addAll(array);
-    }
-    expected.sortUnique();
-    CHECK.order(expected.iterator(), uc.get(arrays));
-    if (arrays.length == 2) {
-      CHECK.order(expected.iterator(), uc.get(arrays[1], arrays[0]));
-    }
-  }
-
-  public static void testUnion(UnionCreator uc, boolean onlyTwo) {
-    checkUnionCreator(uc, a(1, 2, 3), a(4, 5, 6));
-    checkUnionCreator(uc, a(1, 2, 3, 4, 5), a(4, 5, 6, 7, 8));
-    checkUnionCreator(uc, a(1, 3, 5, 7, 9), a(2, 4, 6, 8, 10));
-    checkUnionCreator(uc, a(1, 3, 5, 7, 9, 11, 15), a(3, 7, 9));
-    checkUnionCreator(uc, a(1, 3, 5, 7, 9), a(1, 9));
-    checkUnionCreator(uc, a(1, 3, 5), a());
-    checkUnionCreator(uc, a(), a());
-    checkUnionCreator(uc, a(Long.MIN_VALUE), a(Long.MIN_VALUE + 1));
-    checkUnionCreator(uc, a(Long.MAX_VALUE), a(Long.MAX_VALUE - 1));
-
-    testUnionRandom(uc, 0, 2, 100, 1000000);
-    testUnionRandom(uc, 100, 2, 200, 1000000);
-    testUnionRandom(uc, 50, 2, 500, 10000000);
-    testUnionRandom(uc, 250, 2, 500, 10000000);
-    testUnionRandom(uc, 0, 2, 1000, 10000000);
-    testUnionRandom(uc, 1000, 2, 1000, 10000000);
-
-    if (!onlyTwo) {
-      testUnionRandom(uc, 10, 100, 200, 1000000);
-      testUnionRandom(uc, 10, 100, 200, 1000000);
-      testUnionRandom(uc, 1, 100, 200, 10000000);
-      testUnionRandom(uc, 5, 100, 1000, Integer.MAX_VALUE);
-      testUnionRandom(uc, 5, 100, 1000, 1000000);
-      testUnionRandom(uc, 0, 1000, 1000, Integer.MAX_VALUE);
-    }
-  }
-
-  private static void testUnionRandom(UnionCreator uc, int intersectionLength, int arraysNumber, int maxArrayLength, int maxValue) {
-    LongArray[] arrays = generateRandomLongArrays(intersectionLength, arraysNumber, maxArrayLength, 0, maxValue);
-    checkUnionCreator(uc, arrays);
-  }
-
-
 
   public static void assertContents(LongIterator it, LongArray values) {
     int index = 0;
