@@ -20,10 +20,12 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
+import org.jetbrains.annotations.NotNull;
+
 import static com.almworks.integers.IntegersUtils.*;
 import java.util.NoSuchElementException;
 
-public final class LongSetBuilder implements Cloneable, LongCollector {
+public final class LongSetBuilder implements Cloneable, LongCollector, LongIterable {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;
 
   private final int myTempLength;
@@ -191,5 +193,16 @@ public final class LongSetBuilder implements Cloneable, LongCollector {
   public int size() {
     mergeTemp();
     return mySortedSize;
+  }
+
+  public boolean contains(long value) {
+    return LongCollections.binarySearch(value, mySorted, 0, mySortedSize) >= 0 ||
+       LongCollections.indexOf(myTemp, 0, myTempSize, value) != -1;
+  }
+
+  @NotNull
+  public LongIterator iterator() {
+    mergeTemp();
+    return new LongArrayIterator(mySorted, 0, mySortedSize);
   }
 }
