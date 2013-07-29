@@ -150,6 +150,15 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testRetain() {
+    LongArray arr = LongArray.create(2, 3, 5, 6, 8, 9, 10, 13, 3, 4, 5, 3);
+    LongList values = LongArray.create(1, 4, 5, 6, 7, 8, 10, 15);
+    arr.retain(values);
+    CHECK.order(LongArray.create(5, 6, 8, 10, 4, 5), arr);
+
+    arr = new LongArray(LongProgression.arithmetic(0, 20, 1));
+    arr.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
+    CHECK.order(LongProgression.arithmetic(1, 10, 2), arr);
+
     SetOperationsChecker.testSetOperations(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
