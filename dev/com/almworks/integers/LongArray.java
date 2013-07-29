@@ -278,11 +278,12 @@ public final class LongArray extends AbstractWritableLongList {
     LongList sortedValues = valuesSortedStatus ? values : LongCollections.toSorted(false, values);
     int i = 0, i2;
     int insertionPoint = 0;
-    while ( i < size()) {
-      while(i < size() && sortedValues.binarySearch(myArray[i]) < 0) i++;
+    int mSize = size();
+    while ( i < mSize) {
+      while(i < mSize && sortedValues.binarySearch(myArray[i]) < 0) i++;
       i2 = i;
-      while(i2 < size() && sortedValues.binarySearch(myArray[i2]) >= 0) i2++;
-      if (i == size()) break;
+      while(i2 < mSize && sortedValues.binarySearch(myArray[i2]) >= 0) i2++;
+      if (i == mSize) break;
 
       int diff = i2 - i;
       System.arraycopy(myArray, i, myArray, insertionPoint, diff);
