@@ -276,11 +276,20 @@ public final class LongArray extends AbstractWritableLongList {
       return;
     }
     LongList sortedValues = valuesSortedStatus ? values : LongCollections.toSorted(false, values);
-    for (int i = size() - 1; i >= 0; i--) {
-      long v = myArray[i];
-      if (sortedValues.binarySearch(v) >= 0) continue;
-      removeAt(i);
+    int i = 0, i2;
+    int insertionPoint = 0;
+    while ( i < size()) {
+      while(i < size() && sortedValues.binarySearch(myArray[i]) < 0) i++;
+      i2 = i;
+      while(i2 < size() && sortedValues.binarySearch(myArray[i2]) >= 0) i2++;
+      if (i == size()) break;
+
+      int diff = i2 - i;
+      System.arraycopy(myArray, i, myArray, insertionPoint, diff);
+      insertionPoint += diff;
+      i = i2;
     }
+    updateSize(insertionPoint);
   }
 
   public boolean equalSortedValues(LongList collection) {
