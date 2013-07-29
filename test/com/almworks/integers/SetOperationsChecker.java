@@ -18,11 +18,20 @@ package com.almworks.integers;
 
 import com.almworks.integers.util.IntegersDebug;
 import com.almworks.util.RandomHolder;
+
 import java.util.Random;
 
 import static com.almworks.integers.LongArray.create;
 
-public class SetOperationsChecker extends IntegersFixture{
+public class SetOperationsChecker {
+
+  private static final int MIN= Integer.MIN_VALUE;
+  private static final int MAX = Integer.MAX_VALUE;
+  protected static final CollectionsCompare CHECK = new CollectionsCompare();
+
+  protected static LongArray a(long... values) {
+    return new LongArray(values);
+  }
 
   public static LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, int... minMaxValues) {
     final int mLen = minMaxValues.length;

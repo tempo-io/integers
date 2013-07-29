@@ -10,8 +10,6 @@ import java.util.Random;
 import static com.almworks.integers.LongArray.create;
 
 public abstract class IntegersFixture extends TestCase {
-  protected static int MIN = Integer.MIN_VALUE;
-  protected static int MAX = Integer.MAX_VALUE;
   protected static final CollectionsCompare CHECK = new CollectionsCompare();
 
   protected static LongArray a(long... values) {

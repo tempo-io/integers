@@ -397,7 +397,7 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testBinarySearch() {
-    BinarySearchChecker.testBinarySearch(new BinarySearchChecker.BinarySearcher() {
+    BinarySearchChecker.test(new BinarySearchChecker.BinarySearcher() {
       private long[] arr;
       private int length;
 

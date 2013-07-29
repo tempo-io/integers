@@ -39,7 +39,7 @@ public class DynamicLongSet implements LongIterable{
   /** Size of arrays, equal to the actual size of the set + 1 (for the NIL.) */
   private int mySize;
   /** Key values. */
-  private long[] myKeys;
+private long[] myKeys;
   /** Tree structure: contains indexes into key, left, right, black. */
   private int[] myLeft;
   /** Tree structure: contains indexes into key, left, right, black. */

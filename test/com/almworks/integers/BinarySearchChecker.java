@@ -17,13 +17,15 @@
 package com.almworks.integers;
 
 import com.almworks.util.RandomHolder;
-import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Random;
 
-public class BinarySearchChecker extends TestCase {
-  private static void checkBinarySearch(BinarySearcher bs, long ... values) {
+import static com.almworks.util.TestUtil.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
+public class BinarySearchChecker {
+  private static void check(BinarySearcher bs, long... values) {
     assertTrue(LongArray.create(values).isSorted());
     bs.init(values);
 
@@ -35,7 +37,7 @@ public class BinarySearchChecker extends TestCase {
           assertEquals(i, bs.get(res));
         } else {
           if (res2 == 0) {
-            assertTrue(res2 != 0 || i < bs.get(res2));
+            assertTrue(i < bs.get(res2));
           } else {
             if (res2 == bs.size()) {
               assertTrue(bs.get(res2 - 1) < i);
@@ -48,9 +50,9 @@ public class BinarySearchChecker extends TestCase {
     }
   }
 
-  public static void testBinarySearch(BinarySearcher bs) {
-    checkBinarySearch(bs, 0, 2, 5, 10);
-    checkBinarySearch(bs, 0, 5, 10, 11, 12, 14, 20, 25, 25);
+  public static void test(BinarySearcher bs) {
+    check(bs, 0, 2, 5, 10);
+    check(bs, 0, 5, 10, 11, 12, 14, 20, 25, 25);
 
     int arrLength = 100;
     long[] arr = new long[arrLength];
@@ -61,7 +63,7 @@ public class BinarySearchChecker extends TestCase {
         arr[j] = r.nextInt();
       }
       Arrays.sort(arr);
-      checkBinarySearch(bs, arr);
+      check(bs, arr);
     }
   }
 

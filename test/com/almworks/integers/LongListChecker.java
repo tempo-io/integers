@@ -110,7 +110,7 @@ public abstract class LongListChecker extends IntegersFixture {
   }
 
   public void testBinarySearch() {
-    BinarySearchChecker.testBinarySearch(new BinarySearchChecker.BinarySearcher() {
+    BinarySearchChecker.test(new BinarySearchChecker.BinarySearcher() {
       private LongArray arr;
       private int length;
 
