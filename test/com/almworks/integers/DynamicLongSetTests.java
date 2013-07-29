@@ -146,4 +146,12 @@ public class DynamicLongSetTests extends TestCase {
     });
     System.out.println("Distinct: " + ss.size());
   }
+
+  public void testIterator() {
+    for (int i = 0; i < 100; i++) {
+      LongArray array = SetOperationsChecker.generateRandomArrays(0, 10, 1, 0, Integer.MAX_VALUE)[0];
+      set.addAll(array);
+      compare.order(array.iterator(), set.iterator());
+    }
+  }
 }

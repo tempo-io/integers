@@ -20,6 +20,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.util.IntegersDebug;
 
 import java.io.*;
 import java.lang.ref.SoftReference;
@@ -30,7 +31,7 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class DynamicLongSet {
+public class DynamicLongSet implements LongIterable{
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { Long.MIN_VALUE };
@@ -89,7 +90,7 @@ public class DynamicLongSet {
     myRight = EMPTY_INDEXES;
     myBlack.clear();
     init(false);
-    assert checkRedBlackTreeInvariants("clear");
+    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("clear");
   }
 
   /** @return {@link Long#MIN_VALUE} in case the set is empty */
@@ -178,7 +179,7 @@ public class DynamicLongSet {
     if (psi == 0) myRoot = x;
     else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
     balanceAfterAdd(x, ps, psi, key);
-    assert checkRedBlackTreeInvariants("key " + key);
+    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("key " + key);
     return true;
   }
 
@@ -194,8 +195,8 @@ public class DynamicLongSet {
     // grandparent
     int pp = getLastOrNil(ps, --psi);
     while (!myBlack.get(p)) {
-      assert checkChildParent(p, pp, debugKey);
-      assert checkChildParent(x, p, debugKey);
+      assert !IntegersDebug.DEBUG || checkChildParent(p, pp, debugKey);
+      assert !IntegersDebug.DEBUG || checkChildParent(x, p, debugKey);
       boolean branch1IsLeft = p == myLeft[pp];
       int[] branch1 = branch1IsLeft ? myLeft : myRight;
       int[] branch2 = branch1IsLeft ? myRight : myLeft;
@@ -453,6 +454,10 @@ public class DynamicLongSet {
         return level + 1;
       }
     });
+  }
+
+  public LongIterator iterator() {
+    return new IndexedLongIterator(new LongArray(myKeys), new LURIterator());
   }
 
   private class LURIterator extends AbstractIntIterator {
