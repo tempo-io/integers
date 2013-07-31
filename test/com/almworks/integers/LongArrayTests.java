@@ -405,9 +405,7 @@ public class LongArrayTests extends IntegersFixture {
     lst.sortUnique();
     lst.reverse();
     for (int i = 1; i < lst.size(); i++) {
-      if (lst.get(i-1)<=lst.get(i)) {
-        fail();
-      }
+      assertFalse(lst.get(i - 1) <= lst.get(i));
     }
   }
 }
