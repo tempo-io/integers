@@ -14,7 +14,6 @@ import static com.almworks.integers.IntegersUtils.indexOf;
 @SuppressWarnings({"UnusedDeclaration"})
 public class CollectionsCompare {
   public static Object[] EMPTY_OBJECTS = new Object[]{};
-//  private final CollectionsCompare Compare = new CollectionsCompare();
 
   public void singleElement(Object element, Collection<?> collection) {
     Assert.assertNotNull("Collection is null", collection);
