@@ -110,10 +110,11 @@ public class DynamicLongSet implements LongIterable {
     myLeft[x] = 0;
     myRight[x] = 0;
     myBlack.clear(x);
-    if (myRemoved.cardinality() == 1)
-      myRemoved = null;
-    else
-      myRemoved.clear(x);
+    if (myRemoved != null)
+      if (myRemoved.cardinality() == 1)
+        myRemoved = null;
+      else
+        myRemoved.clear(x);
   }
 
   public void clear() {
@@ -856,6 +857,10 @@ public class DynamicLongSet implements LongIterable {
       return this;
     }
 
+    public boolean hasValue() {
+      return myIterator.hasValue();
+    }
+
     public long value() throws IllegalStateException {
       checkMod();
       return myKeys[myIterator.value()];
@@ -895,6 +900,10 @@ public class DynamicLongSet implements LongIterable {
       myValue = x;
       x = myRight[x];
       return this;
+    }
+
+    public boolean hasValue() {
+      return x != myRoot;
     }
 
     public int value() throws IllegalStateException {

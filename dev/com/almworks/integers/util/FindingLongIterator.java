@@ -53,8 +53,12 @@ public abstract class FindingLongIterator extends AbstractLongIterator {
     return this;
   }
 
+  public boolean hasValue() {
+    return myIterated;
+  }
+
   public long value() throws NoSuchElementException {
-    if (!myIterated)
+    if (!hasValue())
       throw new NoSuchElementException();
     return getNext();
   }

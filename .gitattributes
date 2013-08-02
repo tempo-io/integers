@@ -29,6 +29,7 @@ dev/com/almworks/integers/AbstractIntIterator.java -text
 dev/com/almworks/integers/AbstractIntList.java -text
 dev/com/almworks/integers/AbstractIntListIndexIterator.java -text
 dev/com/almworks/integers/AbstractLongIterator.java -text
+dev/com/almworks/integers/AbstractLongIteratorWithFlag.java -text
 dev/com/almworks/integers/AbstractLongList.java -text
 dev/com/almworks/integers/AbstractLongListIndexIterator.java -text
 dev/com/almworks/integers/AbstractWritableIntList.java -text

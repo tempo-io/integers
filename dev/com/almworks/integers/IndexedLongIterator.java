@@ -22,10 +22,9 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class IndexedLongIterator extends AbstractLongIterator {
+public class IndexedLongIterator extends AbstractLongIteratorWithFlag {
   private final LongList myList;
   private final IntIterator myIndexIterator;
-  private boolean myIterated;
 
   public IndexedLongIterator(LongList list, IntIterator indexIterator) {
     myList = list;
@@ -36,14 +35,11 @@ public class IndexedLongIterator extends AbstractLongIterator {
     return myIndexIterator.hasNext();
   }
 
-  public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
+  public void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
     myIndexIterator.next();
-    myIterated = true;
-    return this;
   }
 
-  public long value() {
-    if (!myIterated) throw new NoSuchElementException();
+  public long valueImpl() {
     return myList.get(myIndexIterator.value());
   }
 }

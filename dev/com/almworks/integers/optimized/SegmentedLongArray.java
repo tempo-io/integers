@@ -835,9 +835,13 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       return this;
     }
 
+    public boolean hasValue() {
+      return !(myNext <= myFrom);
+    }
+
     public long value() throws NoSuchElementException {
       if (myNext < 0) throw new IllegalStateException();
-      if (myNext <= myFrom) throw new NoSuchElementException();
+      if (!hasValue()) throw new NoSuchElementException();
       return myCurrent;
     }
 

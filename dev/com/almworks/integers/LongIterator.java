@@ -37,6 +37,12 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
    */
   boolean hasNext() throws ConcurrentModificationException;
 
+
+  /**
+   * @return false iterator has never been advanced otherwise true
+   */
+  boolean hasValue();
+
   /**
    * @throws NoSuchElementException if iterator has never been advanced
    * ({@link #next()} or {@link #nextValue()} have never been called)
@@ -50,9 +56,8 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
   */
   long nextValue() throws ConcurrentModificationException, NoSuchElementException;
 
-  class Single extends AbstractLongIterator {
+  class Single extends AbstractLongIteratorWithFlag {
     private long myValue;
-    private boolean myIterated;
 
     public Single(long value) {
       myValue = value;
@@ -62,16 +67,10 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
       return !myIterated;
     }
 
-    public LongIterator next() throws NoSuchElementException {
-      if (myIterated)
-        throw new NoSuchElementException();
-      myIterated = true;
-      return this;
+    public void nextImpl() throws NoSuchElementException {
     }
 
-    public long value() throws NoSuchElementException {
-      if (!myIterated)
-        throw new NoSuchElementException();
+    public long valueImpl() throws NoSuchElementException {
       return myValue;
     }
   }

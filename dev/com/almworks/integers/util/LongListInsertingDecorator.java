@@ -168,8 +168,12 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       return this;
     }
 
+    public boolean hasValue() {
+      return !(getNextIndex() <= getFrom());
+    }
+
     public long value() throws NoSuchElementException {
-      if (getNextIndex() <= getFrom())
+      if (!hasValue())
         throw new NoSuchElementException();
       if (myCurInsert >= 0 && myCurInsert == getNextIndex()-1)
         return myInsertedIterator.value2();

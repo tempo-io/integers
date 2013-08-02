@@ -183,7 +183,7 @@ public abstract class LongListRemovingDecorator extends AbstractLongListDecorato
     }
 
     public long value() {
-      if (getNextIndex() <= getFrom())
+      if (!hasValue())
         throw new NoSuchElementException();
       return myValue;
     }

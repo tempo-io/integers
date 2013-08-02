@@ -44,6 +44,10 @@ public class EmptyLongIterator extends AbstractLongIterator implements WritableL
     throw new NoSuchElementException();
   }
 
+  public boolean hasValue() {
+    return false;
+  }
+
   public long value() throws NoSuchElementException {
     throw new NoSuchElementException();
   }

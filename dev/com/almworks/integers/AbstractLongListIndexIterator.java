@@ -46,8 +46,13 @@ public abstract class AbstractLongListIndexIterator extends AbstractLongIterator
     return this;
   }
 
+  public boolean hasValue() {
+    return !(myNext <= myFrom);
+  }
+
   public long value() throws NoSuchElementException {
-    if (myNext <= myFrom) throw new NoSuchElementException();
+    if (!hasValue())
+      throw new NoSuchElementException();
     return absget(myNext-1);
   }
 

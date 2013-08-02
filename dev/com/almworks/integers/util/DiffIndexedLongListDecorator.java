@@ -60,9 +60,8 @@ public class DiffIndexedLongListDecorator extends AbstractLongList {
     return myIndexes;
   }
 
-  private class DiffIndexedIterator extends AbstractLongIterator implements LongListIterator {
+  private class DiffIndexedIterator extends AbstractLongIteratorWithFlag implements LongListIterator {
     private int myNext;
-    private boolean myIterated;
     private final IntListIterator myIndexIterator;
 
     public DiffIndexedIterator(int from, IntListIterator indexIterator) {
@@ -89,15 +88,12 @@ public class DiffIndexedLongListDecorator extends AbstractLongList {
       return myIndexIterator.hasNext();
     }
 
-    public LongListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    public void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
       myIndexIterator.next();
       myNext++;
-      myIterated = true;
-      return this;
     }
 
-    public long value() throws IllegalStateException {
-      if (!myIterated) throw new NoSuchElementException();
+    public long valueImpl() throws IllegalStateException {
       int index = myIndexIterator.value() + myNext - 1;
       return mySource.get(index);
     }
