@@ -1,7 +1,6 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
-import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.func.LongFunction;
 
 public class SegmentedLongArrayTests extends IntegersFixture {
@@ -358,7 +357,7 @@ public class SegmentedLongArrayTests extends IntegersFixture {
     // count, index
     int[][] arguments = {{1000, 0}, {10000, 0}, {10000, 0}, {5000, 31000}};
     for(int[] args : arguments) {
-      addedValues = LongCollections.sameValues(-1, args[0]);
+      addedValues = LongCollections.repeatValues(-1, args[0]);
       expected.insertAll(args[1], addedValues);
       array.expand(args[1], args[0]);
       segmentedLongArrayChecker(expected, array);

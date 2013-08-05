@@ -428,20 +428,18 @@ public class LongCollectionsTests extends IntegersFixture {
     CHECK.order(a.iterator(), 1, 9, 14, 15, 16, 18);
   }
 
-  public void testSameValues() {
-    LongList arr = LongCollections.sameValues(-5, 3);
-    LongList expected = LongArray.create(-5, -5, -5);
-    CHECK.order(arr, expected);
+  public void testRepeatValues() {
+    LongList array = LongCollections.repeatValues(-5, 3);
+    CHECK.order(array, -5, -5, -5);
+    array = LongCollections.repeatValues(0, 4);
+    CHECK.order(array, 0, 0, 0, 0);
 
-    assertEquals(0, LongCollections.sameValues(3, 0).size());
+    assertEquals(0, LongCollections.repeatValues(3, 0).size());
 
-    boolean caught = false;
     try {
-      LongCollections.sameValues(3, -1);
-    } catch(IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue("caught IAE", caught);
+      LongCollections.repeatValues(3, -1);
+      fail("must be IAE");
+    } catch(IllegalArgumentException ex) {}
   }
 
   public void testGetNextDiffValueIndex() {

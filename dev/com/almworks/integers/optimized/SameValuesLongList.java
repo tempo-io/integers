@@ -23,6 +23,7 @@ import com.almworks.integers.AbstractWritableLongList;
 import com.almworks.integers.IntLongMap;
 import com.almworks.integers.PairIntLongIterator;
 import com.almworks.integers.WritableLongListIterator;
+import com.almworks.integers.util.IntegersDebug;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
@@ -51,7 +52,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
   }
 
   public long get(int index) {
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
     if (index < 0 || index >= size())
       throw new IndexOutOfBoundsException(index + " " + this);
     int ki = myMap.findKey(index);
@@ -70,7 +71,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
   }
 
   public void add(long value) {
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
     int sz = size();
     int msz = myMap.size();
     long lastValue = msz == 0 ? 0 : myMap.getValueAt(msz - 1);
@@ -78,11 +79,11 @@ public class SameValuesLongList extends AbstractWritableLongList {
       myMap.insertAt(msz, sz, value);
     }
     updateSize(sz + 1);
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
   }
 
   public void insertMultiple(int index, long value, int count) {
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
     if (count <= 0)
       return;
     int size = size();
@@ -113,11 +114,11 @@ public class SameValuesLongList extends AbstractWritableLongList {
       }
     }
     updateSize(size + count);
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
   }
 
   public void expand(int index, int count) {
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
     if (count <= 0)
       return;
     int size = size();
@@ -132,12 +133,12 @@ public class SameValuesLongList extends AbstractWritableLongList {
       myMap.adjustKeys(shiftFrom, sz, count);
     }
     updateSize(size + count);
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
   }
 
 
   public void setRange(int from, int to, long value) {
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
 
     if (from >= to)
       return;
@@ -169,7 +170,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     }
 
     modified();
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
   }
 
   private long prevValueForFindIndex(int findIndex) {
@@ -199,7 +200,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
    * Remove range from the list, keeping optimal structure
    */
   public void removeRange(int from, int to) {
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
 
     if (from >= to)
       return;
@@ -280,7 +281,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     myMap.adjustKeys(removeFrom, myMap.size(), -count);
 
     updateSize(size - count);
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
   }
 
   @NotNull
@@ -396,7 +397,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     if (m.getKey(msz - 1) == sz) m.removeAt(msz - 1);
     
     m.commit();
-    assert checkInvariants();
+    assert !IntegersDebug.DEBUG || checkInvariants();
   }
 
 
