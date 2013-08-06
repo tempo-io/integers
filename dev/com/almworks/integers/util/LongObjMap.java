@@ -19,9 +19,7 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.LongArray;
-import com.almworks.integers.IntegersUtils;
-import com.almworks.integers.WritableLongListIterator;
+import com.almworks.integers.*;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
@@ -153,8 +151,19 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
     return new LongMapIterator();
   }
 
-  public WritableLongListIterator keysIterator(int from, int to) {
-    return myKeys.iterator(from, to);
+  public LongList keySet() {
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return myKeys.size();
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        if (index < 0 || index >= size()) throw new NoSuchElementException("" + index);
+        return myKeys.get(index);
+      }
+    };
   }
 
   public int size() {

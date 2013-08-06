@@ -1,14 +1,13 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.LongArray;
 import com.almworks.integers.LongProgression;
+import com.almworks.util.RandomHolder;
 import com.almworks.util.TestUtil;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class LongObjMapTests extends IntegersFixture {
   private LongObjMap<String> myMap = LongObjMap.create();
@@ -137,10 +136,21 @@ public class LongObjMapTests extends IntegersFixture {
     }
   }
 
-  public void testKeysIterator() {
+  public void testKeySet() {
     myMap.put(0, "0");
     myMap.put(100, "100");
     myMap.put(228, "228");
-    CHECK.order(myMap.keysIterator(0, myMap.size()), 0, 100, 228);
+    CHECK.order(myMap.keySet(), 0, 100, 228);
+
+    LongArray expected = new LongArray(10000);
+    expected.addAll(0, 100, 228);
+    Random r = new RandomHolder().getRandom();
+    for (int i = 0; i < 10000; i++) {
+      long value = r.nextInt();
+      expected.add(value);
+      myMap.put(value, Long.toString(value));
+    }
+    expected.sortUnique();
+    CHECK.order(myMap.keySet(), expected);
   }
 }
