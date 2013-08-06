@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Generate&amp;Make" type="GroovyScriptRunConfiguration" factoryName="Groovy Script">
+  <configuration default="false" name="Generate&amp;Make" type="GroovyScriptRunConfiguration" factoryName="Groovy">
     <module name="Build" />
-    <setting name="path" value="$PROJECT_DIR$/ant/build.gant" />
+    <setting name="path" value="file://$PROJECT_DIR$/ant/build.gant" />
     <setting name="vmparams" value="" />
     <setting name="params" value="make" />
-    <setting name="workDir" value="$PROJECT_DIR$/ant" />
+    <setting name="workDir" value="file://$PROJECT_DIR$/ant" />
     <setting name="debug" value="false" />
     <RunnerSettings RunnerId="Profile ">
       <option name="myExternalizedOptions" value="&#13;&#10;additional-options2=onexit\=snapshot&#13;&#10;" />
