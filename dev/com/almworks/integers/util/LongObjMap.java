@@ -152,18 +152,7 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   }
 
   public LongList keySet() {
-    return new AbstractLongList() {
-      @Override
-      public int size() {
-        return myKeys.size();
-      }
-
-      @Override
-      public long get(int index) throws NoSuchElementException {
-        if (index < 0 || index >= size()) throw new NoSuchElementException("" + index);
-        return myKeys.get(index);
-      }
-    };
+    return myKeys;
   }
 
   public int size() {
