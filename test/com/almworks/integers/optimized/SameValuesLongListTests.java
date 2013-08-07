@@ -299,7 +299,7 @@ public class SameValuesLongListTests extends IntegersFixture {
     // value, count > 0, index
     int[][] arguments = {{10, 1000, 0}, {99, 10000, 0}, {77, 10000, 1000}, {33, 5000, 21006}};
     for(int[] args : arguments) {
-      addedValues = LongCollections.repeatValues(args[0], args[1]);
+      addedValues = LongCollections.repeat(args[0], args[1]);
       expected.insertAll(args[2], addedValues);
       list.insert(args[2], args[0]);
       list.expand(args[2], args[1] - 1);

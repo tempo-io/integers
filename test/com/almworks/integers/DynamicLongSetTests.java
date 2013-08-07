@@ -182,14 +182,12 @@ public class DynamicLongSetTests extends IntegersFixture {
         addList.add(r.nextLong());
       }
       srcList.sort();
-      DynamicLongSet dls;
       if (oper == DlsOperation.REMOVE) {
         list2.add(srcList);
-        dls = DynamicLongSet.fromSortedList(srcList, cT);
       } else {
         list2.add(addList);
-        dls = DynamicLongSet.fromSortedList(srcList, cT);
       }
+      DynamicLongSet dls = DynamicLongSet.fromSortedList(srcList, cT);
       list.add(dls);
     }
 
