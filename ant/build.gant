@@ -159,7 +159,7 @@ target(name: 'make') {
 }
 
 target(name: 'test') {
-  depends(['init', 'make', 'utils'])
+  depends(['init', 'make', 'utils', 'checkCommits'])
   almMessage "compiling tests"
   ant.mkdir(dir: testsClassesDir)
   ant.javac(defaultCompileParams + [destdir: testsClassesDir, classpathref: "libs"]) {
@@ -210,13 +210,11 @@ target(name: 'fetchVersion') {
   almMessage "version=" + version
 }
 
-emptySvnSt = {String message ->
-    svnSt = "svn st $rootDir".execute().text
-    changes = svnSt.split('\n')
-    firstChars = changes.collect { i -> i[0]}
-    if (('M' in firstChars) || ('!' in firstChars)) {
+emptySvnSt = {String errorMessage ->
+    svnSt = "svn st $devDir".execute().text
+    if (!svnSt.isEmpty()) {
         println svnSt
-        ant.fail(message: message);
+        ant.fail(message: errorMessage);
     }
 }
 
@@ -226,12 +224,11 @@ target(name: 'checkCommits') {
 
     emptySvnSt("changes should be commited")
 
-    ant.copy(todir: deliverSources) {
+    ant.copy(todir: devDir) {
         fileset(dir: generatedJavaDir, excludes: "**/.svn")
-        fileset(dir: devDir, excludes: "**/.svn")
     }
 
-    emptySvnSt("templates are deprecated")
+    emptySvnSt("templates aren't compatible with dev")
     almMessage "checkCommits done"
 }
 
