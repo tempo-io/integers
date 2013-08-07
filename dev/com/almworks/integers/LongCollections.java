@@ -200,7 +200,7 @@ public class LongCollections {
   /** @return index of a duplicate (not necessarily leftmost) or -1 if none */
   public static int findDuplicate(LongList unsorted) {
     final LongArray sorted = new LongArray(unsorted);
-    final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size())); // perms is int
+    final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
       new IntFunction2() {
         @Override
@@ -378,7 +378,10 @@ public class LongCollections {
     if (rangeFinish - rangeStart >= 1) list.removeRange(rangeStart - diff, rangeFinish - diff);
   }
 
-  public static SameValuesLongList repeatValues(long value, int count) {
+  /**
+   * @return SameValuesLongList with element value, repeating count times.
+   * */
+  public static SameValuesLongList repeat(long value, int count) {
     if (count < 0)
       throw new IllegalArgumentException();
     SameValuesLongList array = new SameValuesLongList(new IntLongMap(new IntArray(1), new LongArray(1)));
@@ -389,22 +392,25 @@ public class LongCollections {
   }
 
   /**
-   * Complexity: {@code O(N + T * log(N))}, where {@code N = destSize} and {@code T = srcSize}.
-   * @param  dest - sorted unique dest
-   * @param  destSize - size of dest
-   * @param  src - another array
-   * @param  srcSize - size of src
-   * @return union of dest and src. If there is enough memory, changing dest. Otherwise creating new array.
+   * Complexity: {@code O(N + T * log(N))}, where {@code N = destSize} and {@code T = srcSize}.<br>
+   * Prefer to use if the srcSize much smaller than destSize. If they are comparable
+   * it's better to use {@link LongCollections#unionWithSameLengthList(long[], int, LongList)}
+   *
+   * @param  dest sorted unique destination array
+   * @param  destSize size of dest. Elements {@code[destSize + 1; dest.length)} will be ignored.
+   * @param  src another read-only array
+   * @param  srcSize size of src. Also, elements {@code[srcSize + 1; src.length)} will be ignored.
+   * @return union of dest and src. If there is enough memory, change dest. Otherwise create new array.
    * */
   public static LongArray unionWithSmallArray(long[] dest, int destSize, long[] src, int srcSize) {
-    return unionWithSmallArray(dest, destSize, src, srcSize, null);
+    return unionWithSmallArray(dest, destSize, src, srcSize, new int[][]{null});
   }
 
   /**
-   * @param insertionPoints - temporary array, its length = srcSize
-   * @see #unionWithSmallArray(long[], int, long[], int, int[])
+   * @param insertionPoints0 temporary array, its length must be greater than or equal to the srcSize.
+   * @see #unionWithSmallArray(long[], int, long[], int)
    */
-  public static LongArray unionWithSmallArray(long[] dest, int destSize, long[] src, int srcSize, int[] insertionPoints) {
+  public static LongArray unionWithSmallArray(long[] dest, int destSize, long[] src, int srcSize, int[][] insertionPoints0) {
     if (srcSize == 0)
       return new LongArray(dest, destSize);
     Arrays.sort(src, 0, srcSize);
@@ -447,36 +453,37 @@ public class LongCollections {
     } else {
       // merge in place
       // a) find insertion points and count how many to be inserted
-      if (insertionPoints == null)
-        insertionPoints = new int[src.length];
+      if (insertionPoints0[0] == null)
+        insertionPoints0[0] = new int[src.length];
+      int[] insertionPoints = insertionPoints0[0];
       Arrays.fill(insertionPoints, 0, srcSize, -1);
       int insertCount = 0;
-      int sourceP = 0;
+      int destIndex = 0;
       long last = 0;
       for (int i = 0; i < srcSize; i++) {
         long v = src[i];
         if (i > 0 && v == last)
           continue;
         last = v;
-        if (sourceP < destSize) {
-          int k = LongCollections.binarySearch(v, dest, sourceP, destSize);
+        if (destIndex < destSize) {
+          int k = LongCollections.binarySearch(v, dest, destIndex, destSize);
           if (k >= 0) {
             // found
             continue;
           }
           int insertion = -k - 1;
-          if (insertion < sourceP) {
-            assert false : insertion + " " + sourceP;
+          if (insertion < destIndex) {
+            assert false : insertion + " " + destIndex;
             continue;
           }
-          sourceP = insertion;
+          destIndex = insertion;
         }
-        insertionPoints[i] = sourceP;
+        insertionPoints[i] = destIndex;
         insertCount++;
       }
-      // b) insertionPoints contains places in the old dest for insertion
+      // b) insertionPoints contains places in the dest for insertion
       // insertCount contains number of insertions
-      sourceP = destSize;
+      destIndex = destSize;
       destSize += insertCount;
       int i = srcSize - 1;
       while (insertCount > 0) {
@@ -485,9 +492,9 @@ public class LongCollections {
           i--;
         assert i >= 0 : i;
         int insertion = insertionPoints[i];
-        if (sourceP > insertion) {
-          System.arraycopy(dest, insertion, dest, insertion + insertCount, sourceP - insertion);
-          sourceP = insertion;
+        if (destIndex > insertion) {
+          System.arraycopy(dest, insertion, dest, insertion + insertCount, destIndex - insertion);
+          destIndex = insertion;
         }
         dest[insertion + insertCount - 1] = src[i];
         insertCount--;
@@ -498,10 +505,13 @@ public class LongCollections {
   }
 
   /**
-   * Complexity: {@code O(N + T)}, where {@code N = destSize} and T - size of src.
-   * @param  dest - sorted array
-   * @param  destSize - size of dest
-   * @param  src - sorted list of numbers (set)
+   * Complexity: {@code O(N + T)}, where N - size of dest(destSize) and T - size of src.<br>
+   * Prefer to use if the sizes of dest and src are comparable. If the size of src is much smaller than destSize,
+   * it's better to use {@link LongCollections#unionWithSmallArray(long[], int, long[], int)}
+   *
+   * @param  dest sorted unique destination array
+   * @param  destSize size of dest. Elements {@code[destSize + 1; dest.length)} will be ignored.
+   * @param  src sorted list of numbers (set)
    *
    * @return union of dest and src. If there is enough memory, changing dest. Otherwise creating new array.
    * */
@@ -622,4 +632,22 @@ public class LongCollections {
     }
     return new LongArray(newArray, i);
   }
+
+  public static DynamicLongSet union(DynamicLongSet first, DynamicLongSet second) {
+    LongArray a = first.toSortedLongArray();
+    int aSize = a.size();
+    LongArray b = second.toSortedLongArray();
+
+    LongArray res = LongCollections.unionWithSameLengthList(a.extractHostArray(), aSize, b);
+
+    return DynamicLongSet.fromSortedList(res);
+  }
+
+  public static DynamicLongSet intersection(DynamicLongSet first, DynamicLongSet second) {
+    LongArray a = first.toSortedLongArray();
+    a.retainSorted(second.toSortedLongArray());
+
+    return DynamicLongSet.fromSortedList(a);
+  }
+
 }

@@ -36,7 +36,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   /**
    * Used when merge() is called
    */
-  private int[] myTempInsertionPoints;
+  private int[][] myTempInsertionPoints = {null};
 
   /**
    * mySorted contains valid ids on [0, mySortedSize)
@@ -107,8 +107,8 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   }
 
   private void mergeTemp() {
-    if (myTempInsertionPoints == null)
-      myTempInsertionPoints = new int[myTempLength];
+    if (myTempSize == 0)
+      return;
     LongArray res = LongCollections.unionWithSmallArray(mySorted, mySortedSize, myTemp, myTempSize, myTempInsertionPoints);
     mySortedSize = res.size();
     mySorted = res.extractHostArray();

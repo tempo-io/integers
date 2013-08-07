@@ -429,16 +429,15 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testRepeatValues() {
-    LongList array = LongCollections.repeatValues(-5, 3);
+    LongList array = LongCollections.repeat(-5, 3);
     CHECK.order(array, -5, -5, -5);
-    array = LongCollections.repeatValues(0, 4);
+    array = LongCollections.repeat(0, 4);
     CHECK.order(array, 0, 0, 0, 0);
 
-    assertEquals(0, LongCollections.repeatValues(3, 0).size());
-
+    assertEquals(0, LongCollections.repeat(3, 0).size());
     try {
-      LongCollections.repeatValues(3, -1);
-      fail("must be IAE");
+      LongCollections.repeat(3, -1);
+      fail("must throw IAE");
     } catch(IllegalArgumentException ex) {}
   }
 
