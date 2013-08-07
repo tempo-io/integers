@@ -331,8 +331,4 @@ public final class LongArray extends AbstractWritableLongList {
     updateSize(0);
     return array;
   }
-
-  public void testSvn() {
-
-  }
 }

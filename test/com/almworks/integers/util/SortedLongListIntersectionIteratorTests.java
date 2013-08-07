@@ -38,7 +38,7 @@ public class SortedLongListIntersectionIteratorTests extends NativeIntFixture {
       iterators.add(arrays[i].iterator());
       IntegersDebug.println("iterator ", i, " : ", arrays[i]);
     }
-    SortedLongListIntersectionIterator res = new SortedLongListIntersectionIterator(iterators);
+    SortedLongListIntersectionIterator res = new SortedLongListIntersectionIterator(iterators.get(0), iterators.get(1));
     CHECK.order(res, expected);
   }
 

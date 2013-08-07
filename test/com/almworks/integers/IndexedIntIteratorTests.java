@@ -60,15 +60,9 @@ public class IndexedIntIteratorTests extends NativeIntFixture{
     boolean caught = false;
     try {
       res.value();
-    } catch(NoSuchElementException ex) {
+    } catch(IllegalStateException ex) {
       caught = true;
     }
     assertTrue("caught IOOBE", caught);
-  }
-  public void testRandomCase() {
-
-  }
-  public void testSpecificationCase() {
-
   }
 }
