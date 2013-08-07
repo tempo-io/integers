@@ -28,6 +28,7 @@ final String libDir =           rel2(rootDir, antProp("lib.dir"))
 final String generatorSrcDir =  rel2(rootDir, antProp("generator.java.dir"))
 final String testDir =          rel2(rootDir, antProp("test.dir"))
 final String utilDir =          rel2(rootDir, antProp("util.dir"))
+final String devDir =           rel2(rootDir, antProp("dev.dir"))
 
 final String generatorClassesDir =    rel2(buildDir, antProp("generator.classes.dir"))
 final String generatedJavaDir =       rel2(buildDir, antProp("generated.java.dir"))
@@ -207,6 +208,31 @@ target(name: 'fetchVersion') {
     }
   }
   almMessage "version=" + version
+}
+
+emptySvnSt = {String message ->
+    svnSt = "svn st $rootDir".execute().text
+    changes = svnSt.split('\n')
+    firstChars = changes.collect { i -> i[0]}
+    if (('M' in firstChars) || ('!' in firstChars)) {
+        println svnSt
+        ant.fail(message: message);
+    }
+}
+
+target(name: 'checkCommits') {
+    depends(['init'])
+    almMessage "checkCommits"
+
+    emptySvnSt("changes should be commited")
+
+    ant.copy(todir: deliverSources) {
+        fileset(dir: generatedJavaDir, excludes: "**/.svn")
+        fileset(dir: devDir, excludes: "**/.svn")
+    }
+
+    emptySvnSt("templates are deprecated")
+    almMessage "checkCommits done"
 }
 
 target(name: 'javadoc') {
