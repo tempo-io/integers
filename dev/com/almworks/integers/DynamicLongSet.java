@@ -20,6 +20,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.util.IntegersDebug;
 
 import java.io.*;
 import java.lang.ref.SoftReference;
@@ -121,7 +122,7 @@ public class DynamicLongSet implements LongIterable {
     myBlack.clear();
     init();
     modified();
-    assert checkRedBlackTreeInvariants("clear");
+    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("clear");
   }
 
   private void modified() {
@@ -215,7 +216,7 @@ public class DynamicLongSet implements LongIterable {
     if (psi == 0) myRoot = x;
     else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
     balanceAfterAdd(x, ps, psi, key);
-    assert checkRedBlackTreeInvariants("add key:" + key);
+    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("add key:" + key);
     return true;
   }
 
@@ -303,7 +304,6 @@ public class DynamicLongSet implements LongIterable {
   }
 
   /**
-   *
    * @param n difference between future size and actual size
    * @return
    */
@@ -379,7 +379,7 @@ public class DynamicLongSet implements LongIterable {
       }
     }
     fromPreparedArray(newKeys, srcSize, coloringType);
-    assert checkRedBlackTreeInvariants("fromSortedLongIterable");
+    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("fromSortedLongIterable");
   }
 
   /**
@@ -545,7 +545,7 @@ public class DynamicLongSet implements LongIterable {
       myBlack.clear(y);
     }
 
-    assert checkRedBlackTreeInvariants("remove key:" + key);
+    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("remove key:" + key);
     return true;
   }
 
