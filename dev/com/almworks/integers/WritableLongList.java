@@ -85,13 +85,14 @@ public interface WritableLongList extends LongList, LongCollector {
   void removeDuplicates();
 
   /**
-   * Increasing list's size and shifts all values to the right of index. The resulting "hole"
-   * in the range [index; index + count) contains undefined values.
+   * Increases the list size and shifts all values to the right of {@code index}. The resulting "hole"
+   * in the range {@code [index; index + count)} contains undefined values.
    *
-   * @param index where to insert "hole"
+   * @param index where to insert the "hole"
    * @param count how much size increase is needed, must be >= 0
    *
    * @throws IndexOutOfBoundsException when index < 0 or index > size
+   * @throws IllegalArgumentException when count < 0
    */
   void expand(int index, int count);
 

@@ -119,7 +119,9 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   public void expand(int index, int count) {
     assert !IntegersDebug.DEBUG || checkInvariants();
-    if (count <= 0)
+    if (count < 0)
+      throw new IllegalArgumentException();
+    if (count == 0)
       return;
     int size = size();
     if (index < 0 || index > size)

@@ -169,7 +169,9 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     if (index < 0 || index > size())
       throw new IndexOutOfBoundsException(index + " " + this);
     assert !IntegersDebug.DEBUG || checkInvariants();
-    if (count <= 0)
+    if (count < 0)
+      throw new IllegalArgumentException();
+    if (count == 0)
       return;
     doExpand(index, count);
     assert !IntegersDebug.DEBUG || checkInvariants();

@@ -157,6 +157,8 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   public void expand(int index, int count) {
+    if (count < 0)
+      new IllegalArgumentException();
     makeSpaceForInsertion(index, index + count);
   }
 
