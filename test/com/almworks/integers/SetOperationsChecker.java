@@ -17,9 +17,6 @@
 package com.almworks.integers;
 
 import com.almworks.integers.util.IntegersDebug;
-import com.almworks.util.RandomHolder;
-
-import java.util.Random;
 
 import static com.almworks.integers.LongArray.create;
 
@@ -33,6 +30,17 @@ public class SetOperationsChecker {
     return new LongArray(values);
   }
 
+  /**
+   * @param intersectionLength the number of common values for all arrays
+   * @param arraysNumber number of arrays
+   * @param maxArrayLength max random length for every array
+   * @param minMaxValues the min and max values for arrays. There is 4 possible values for minMaxValues.length
+   *                     <br>0 - for all arrays values {@code min = 0, max = MAX}
+   *                     <br>1 - for all arrays values {@code min = 0, max = minMaxValues[0]}
+   *                     <br>2 - for all arrays values {@code min = minMaxValues[0], max = minMaxValues[1]}
+   *                     <br>arraysNumber * 2 - min and max are contains in minMaxValues and different for all arrays
+   * @return LongArray[arraysNumber]
+   * */
   public static LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, int... minMaxValues) {
     final int mLen = minMaxValues.length;
     assert mLen == 0 || mLen == 1 || mLen == 2 || mLen == arraysNumber * 2;
@@ -52,23 +60,22 @@ public class SetOperationsChecker {
         mValues[i + 1] = max;
       }
     }
-    Random r = new RandomHolder().getRandom();
     LongArray[] arrays = new LongArray[arraysNumber];
 
     LongArray intersection = create();
     for ( int i = 0; i < intersectionLength; i++) {
-      intersection.add(r.nextInt());
+      intersection.add(IntegersFixture.rand.nextInt());
     }
 
     for (int i = 0; i < arraysNumber; i++) {
-      int arrayLength = r.nextInt(maxArrayLength);
+      int arrayLength = IntegersFixture.rand.nextInt(maxArrayLength);
       arrays[i] = LongArray.copy(intersection);
 
       for (int j = 0; j < arrayLength; j++) {
         int minValue = mValues[i * 2];
         int maxValue = mValues[i * 2 + 1];
         int diff = maxValue - minValue;
-        arrays[i].add(minValue + r.nextInt(diff));
+        arrays[i].add(minValue + IntegersFixture.rand.nextInt(diff));
       }
       arrays[i].sortUnique();
       IntegersDebug.println(arrays[i]);

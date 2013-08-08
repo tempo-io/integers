@@ -16,11 +16,8 @@
 
 package com.almworks.integers;
 
-import com.almworks.util.RandomHolder;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class LongArrayTests extends IntegersFixture {
   private static final CollectionsCompare CHECK = new CollectionsCompare();
@@ -90,13 +87,12 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testSort() {
-    Random r = new RandomHolder().getRandom();
     int arrayLength = 200;
     int maxValue = Integer.MAX_VALUE;
     LongArray res = new LongArray();
 
     for (int j = 0; j < arrayLength; j++) {
-      res.add((long)r.nextInt(maxValue));
+      res.add((long)rand.nextInt(maxValue));
     }
 
     array = LongArray.copy(res);
@@ -398,9 +394,8 @@ public class LongArrayTests extends IntegersFixture {
     testReverse(new long[]{0,1,3,6,10,15,21,28,36}, new long[]{36,28,21,15,10,6,3,1,0});
 
     LongArray lst = new LongArray();
-    Random r = new RandomHolder().getRandom();
     for (int i = 0; i < 20; i++) {
-      lst.add(r.nextInt(200));
+      lst.add(rand.nextInt(200));
     }
     lst.sortUnique();
     lst.reverse();

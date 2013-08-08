@@ -16,7 +16,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.func.LongFunction;
 
 import java.util.NoSuchElementException;

@@ -56,11 +56,10 @@ public class BinarySearchChecker {
 
     int arrLength = 100;
     long[] arr = new long[arrLength];
-    Random r = new RandomHolder().getRandom();
 
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < arrLength; j++) {
-        arr[j] = r.nextInt();
+        arr[j] = IntegersFixture.rand.nextInt();
       }
       Arrays.sort(arr);
       check(bs, arr);

@@ -20,27 +20,17 @@ import com.almworks.integers.*;
 import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.optimized.SegmentedLongArray;
 import com.almworks.util.Pair;
-import com.almworks.util.RandomHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import static com.almworks.integers.SetOperationsChecker.*;
 import static com.almworks.integers.LongCollections.*;
 
 public class LongCollectionsTests extends IntegersFixture {
   public static final CollectionsCompare COMPARE = new CollectionsCompare();
-  private Random myRandom;
-  public static final String SEED = "com.almworks.integers.seed";
   private final LongArray myArray = new LongArray();
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    setupRandom();
-  }
 
   public void testArray_RemoveSubsequentDuplicates() {
     myArray.addAll(1, 1, 2);
@@ -185,23 +175,6 @@ public class LongCollectionsTests extends IntegersFixture {
     assertEquals(3, rem.getRemoveCount());
   }
 
-  private void setupRandom() {
-    String seedStr = System.getProperty(SEED, "");
-    long seed;
-    try {
-      seed = Long.parseLong(seedStr);
-      System.out.println("Using seed from settings: " + seed);
-    } catch (NumberFormatException _) {
-      seed = System.currentTimeMillis();
-      System.out.println("Using seed " + seed);
-    }
-    myRandom = new Random(seed);
-  }
-
-  public Random getRandom() {
-    return myRandom;
-  }
-
   public void testUniteTwoLengthySortedSetsAndIntersectWithThirdShort() {
     doTestSimple();
     doTestMany();
@@ -223,16 +196,16 @@ public class LongCollectionsTests extends IntegersFixture {
     int intersLen = 100;
     int maxElem = len * 10;
     for (int nTest = 0; nTest < 10; ++nTest) {
-      LongList a = createRand(myRandom, len, maxElem, 2);
-      LongList b = createRand(myRandom, len, maxElem, 3);
-      Pair<LongArray, LongArray> exp_int = createInters(myRandom, a, b, intersRate, intersLen, maxElem);
+      LongList a = createRand(len, maxElem, 2);
+      LongList b = createRand(len, maxElem, 3);
+      Pair<LongArray, LongArray> exp_int = createInters(a, b, intersRate, intersLen, maxElem);
       LongArray inters = exp_int.getSecond();
       System.out.println("\n/////////\na: " + a + "\nb: " + b + "\ninters:" + inters);
       COMPARE.order(exp_int.getFirst(), uniteTwoLengthySortedSetsAndIntersectWithThirdShort(a, b, inters));
     }
   }
 
-  private LongList createRand(Random rand, int len, int maxElem, int factor) {
+  private LongList createRand(int len, int maxElem, int factor) {
     maxElem = maxElem / factor;
     LongArray larr = new LongArray(len);
     for (int i = 0; i < len; ++i) {
@@ -243,7 +216,7 @@ public class LongCollectionsTests extends IntegersFixture {
     return larr;
   }
 
-  private Pair<LongArray, LongArray> createInters(Random rand, LongList a, LongList b, float intersRate, int intersLen, int maxElem) {
+  private Pair<LongArray, LongArray> createInters(LongList a, LongList b, float intersRate, int intersLen, int maxElem) {
     LongArray trueIntersection = new LongArray(intersLen);
     LongArray withExtra = new LongArray(intersLen);
     int sza = a.size();
@@ -289,8 +262,8 @@ public class LongCollectionsTests extends IntegersFixture {
     b.clear();
     diff.clear();
     for (int i = 0; i < 100; ++i) {
-      a.add(getRandom().nextInt(1000));
-      b.add(getRandom().nextInt(1000));
+      a.add(rand.nextInt(1000));
+      b.add(rand.nextInt(1000));
     }
     a.sortUnique();
     b.sortUnique();
@@ -346,7 +319,6 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testFindDuplicate() {
-    myRandom = new RandomHolder().getRandom();
     checkFindDuplicate(5, 10, 20, 5);
     checkFindDuplicate(2, 4, 6, 8);
     checkFindDuplicate(2, 4, 6, 8, 2);
@@ -356,7 +328,7 @@ public class LongCollectionsTests extends IntegersFixture {
     long[] arr = new long[arrLength];
     for (int test = 0; test < 20; test++) {
       for (int i = 0; i < arrLength; i++) {
-        arr[i] = myRandom.nextInt(maxInt);
+        arr[i] = rand.nextInt(maxInt);
       }
       checkFindDuplicate(arr);
     }
@@ -379,11 +351,10 @@ public class LongCollectionsTests extends IntegersFixture {
     int maxVal = 10000;
     LongArray expected;
     LongArray arr = new LongArray(LongProgression.arithmetic(0, arrLength, 0));
-    Random r = new RandomHolder().getRandom();
 
     for (int test = 0; test < 10; test++) {
       for (int i = 0; i < arrLength; i++) {
-        arr.set(i, r.nextInt(maxVal));
+        arr.set(i, rand.nextInt(maxVal));
       }
       expected = LongArray.copy(arr);
       expected.sort();

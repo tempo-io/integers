@@ -32,21 +32,20 @@ public class ModifyingLongListRemovingDecoratorTests extends IntegersFixture {
   }
 
   public void _testRandomCreateFromSorted() {
-    Random r = new RandomHolder().getRandom();
     int arrLength = 100;
     int indexesLength = 50;
     int maxValue = 1000;
 
     long[] values = new long[arrLength];
     for (int i = 0; i < arrLength; i++) {
-      values[i] = r.nextInt(maxValue);
+      values[i] = rand.nextInt(maxValue);
     }
     LongList base = LongArray.create(values);
 
     int[] nativeIndexes = new int[arrLength];
     for (int test = 0; test < 20; test++) {
       for (int i = 0; i < indexesLength; i++) {
-        nativeIndexes[i] = r.nextInt(arrLength);
+        nativeIndexes[i] = rand.nextInt(arrLength);
       }
       IntArray indexes = IntArray.create(nativeIndexes);
       indexes.sortUnique();

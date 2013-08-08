@@ -79,14 +79,13 @@ public class IntegersUtilsTests extends IntegersFixture {
   }
 
   public void testArrayCopy() {
-    Random r = new RandomHolder().getRandom();
     int arrayLength = 1000;
     int maxValue = Integer.MAX_VALUE;
 
     int[] res = new int[arrayLength];
     int[] expected = new int[arrayLength];
     for (int i = 0; i < arrayLength; i++) {
-      res[i] = r.nextInt(maxValue);
+      res[i] = rand.nextInt(maxValue);
       expected[i] = res[i];
     }
     int[] copy = IntegersUtils.arrayCopy(res);
@@ -94,7 +93,6 @@ public class IntegersUtilsTests extends IntegersFixture {
   }
 
   public void testIndexOf() {
-    Random r = new RandomHolder().getRandom();
     int arrayLength = 1000;
     int maxValue = Integer.MAX_VALUE;
 
@@ -102,7 +100,7 @@ public class IntegersUtilsTests extends IntegersFixture {
     int[] intArr = new int[arrayLength];
 
     for (int i = 0; i < arrayLength; i++) {
-      int val = r.nextInt(maxValue);
+      int val = rand.nextInt(maxValue);
       res.add(val);
       intArr[i] = val;
     }

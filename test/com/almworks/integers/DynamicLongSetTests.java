@@ -114,14 +114,13 @@ public class DynamicLongSetTests extends IntegersFixture {
   }
 
   public void testRandom() {
-    Random r = new RandomHolder().getRandom();
     int[] ns = new int[]{510,513,1025,2049,4097}; // testing sizes near 2^n
     int nAttempts = 5;
     LongSetBuilder anotherSet = new LongSetBuilder();
     DynamicLongSet dynamicSet = new DynamicLongSet(510);
     WritableLongList toAdd = new LongArray();
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      for (int i = 0; i < ns[attempt]; ++i) toAdd.add(r.nextLong());
+      for (int i = 0; i < ns[attempt]; ++i) toAdd.add(rand.nextLong());
       dynamicSet.addAll(toAdd);
       dynamicSet.compactify();
       anotherSet.addAll(toAdd);
@@ -151,10 +150,10 @@ public class DynamicLongSetTests extends IntegersFixture {
 
     testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
     testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
-//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
-//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
-//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
-//    testColoringTypes(r, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
+//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
+//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
+//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
+//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
   }
 
   private void testColoringTypes(Random r, int waitTime, int attempts, int sz, DynamicLongSet.ColoringType cT, DlsOperation oper) {

@@ -4,13 +4,26 @@ import com.almworks.integers.util.*;
 import com.almworks.util.RandomHolder;
 import junit.framework.TestCase;
 
-import java.util.Arrays;
 import java.util.Random;
-
-import static com.almworks.integers.LongArray.create;
 
 public abstract class IntegersFixture extends TestCase {
   protected static final CollectionsCompare CHECK = new CollectionsCompare();
+
+  public static final String SEED = "com.almworks.integers.seed";
+  public static final Random rand = createRandom();
+
+  private static Random createRandom() {
+    String seedStr = System.getProperty(SEED, "");
+    long seed;
+    try {
+      seed = Long.parseLong(seedStr);
+      System.out.println("Using seed from settings: " + seed);
+    } catch (NumberFormatException _) {
+      seed = System.currentTimeMillis();
+      System.out.println("Using seed " + seed);
+    }
+    return new Random(seed);
+  }
 
   protected static LongArray a(long... values) {
     return new LongArray(values);
@@ -68,7 +81,6 @@ public abstract class IntegersFixture extends TestCase {
   }
 
   protected void checkCollection(LongList collection, long... ints) {
-    LongList list = collection instanceof LongList ? (LongList) collection : new LongArray(collection);
     if (ints == null)
       ints = IntegersUtils.EMPTY_LONGS;
     CHECK.order(collection.toNativeArray(), ints);
@@ -76,13 +88,9 @@ public abstract class IntegersFixture extends TestCase {
     CHECK.order(collection.iterator(), ints);
     LongIterator it;
     for (int i = 0; i < ints.length; i++) {
-      it = list.iterator();
+      it = collection.iterator();
       if (i > 0) {
-        if (it instanceof LongListIterator)
           ((LongListIterator) it).move(i);
-        else
-          for (int j = 0; j < i; j++)
-            it.nextValue();
       }
       CHECK.order(it, IntegersUtils.arrayCopy(ints, i, ints.length - i));
     }
@@ -91,20 +99,20 @@ public abstract class IntegersFixture extends TestCase {
       long anInt = ints[i];
       assertTrue(it.hasNext());
       assertEquals(anInt, it.nextValue());
-      assertEquals(anInt, list.get(i));
+      assertEquals(anInt, collection.get(i));
     }
     assertFalse(it.hasNext());
     for (int i = 0; i < ints.length; i++) {
-      CheckLongCollection checker = new CheckLongCollection(list, i);
-      AbstractLongListDecorator.iterate(list, i, ints.length, checker);
+      CheckLongCollection checker = new CheckLongCollection(collection, i);
+      AbstractLongListDecorator.iterate(collection, i, ints.length, checker);
       assertEquals(ints.length, checker.index);
       long[] array = new long[ints.length - i + 1];
-      list.toArray(i, array, 1, list.size() - i);
+      collection.toArray(i, array, 1, collection.size() - i);
       CHECK.order(IntegersUtils.arrayCopy(array, 1, array.length - 1), IntegersUtils.arrayCopy(ints, i, ints.length - i));
     }
     for (int i = ints.length; i >= 0; i--) {
-      CheckLongCollection checker = new CheckLongCollection(list, 0);
-      AbstractLongListDecorator.iterate(list, 0, i, checker);
+      CheckLongCollection checker = new CheckLongCollection(collection, 0);
+      AbstractLongListDecorator.iterate(collection, 0, i, checker);
       assertEquals(i, checker.index);
     }
   }

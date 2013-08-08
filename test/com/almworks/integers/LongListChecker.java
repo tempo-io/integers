@@ -16,14 +16,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.util.RandomHolder;
-
 import java.util.List;
-import java.util.Random;
 
 public abstract class LongListChecker extends IntegersFixture {
-  Random r = new RandomHolder().getRandom();
-
   protected abstract List<LongList> createLongList(long ... values);
 
   public void _testStatusMethods(long ... values) {
@@ -91,7 +86,7 @@ public abstract class LongListChecker extends IntegersFixture {
     long[] arr = new long[arrLength];
     for (int test = 0; test < 20; test++) {
       for (int i = 0; i < arrLength; i++) {
-        arr[i] = r.nextInt();
+        arr[i] = rand.nextInt();
       }
       _testGetMethods(arr);
       _testStatusMethods(arr);

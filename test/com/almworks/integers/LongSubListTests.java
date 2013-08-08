@@ -16,16 +16,12 @@
 
 package com.almworks.integers;
 
-import com.almworks.util.RandomHolder;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class LongSubListTests extends LongListChecker{
+public class LongSubListTests extends LongListChecker {
   @Override
   protected List<LongList> createLongList(long... values) {
-    Random r = new RandomHolder().getRandom();
     final int length = values.length;
 
     // [...]
@@ -36,7 +32,7 @@ public class LongSubListTests extends LongListChecker{
     long[] newValues = new long[length + 3];
     System.arraycopy(values, 0, newValues, 3, length);
     for (int i = 0; i < 3; i++) {
-      newValues[i] = r.nextInt();
+      newValues[i] = rand.nextInt();
     }
     result.add(new AbstractLongList.SubList(LongArray.create(newValues), 3, length + 3));
 
@@ -44,7 +40,7 @@ public class LongSubListTests extends LongListChecker{
     newValues = new long[length + 3];
     System.arraycopy(values, 0, newValues, 0, length);
     for (int i = 0; i < 3; i++) {
-      newValues[i + length] = r.nextInt();
+      newValues[i + length] = rand.nextInt();
     }
     result.add(new AbstractLongList.SubList(LongArray.create(newValues), 0, length));
 
@@ -52,8 +48,8 @@ public class LongSubListTests extends LongListChecker{
     newValues = new long[length + 6];
     System.arraycopy(values, 0, newValues, 3, length);
     for (int i = 0; i < 3; i++) {
-      newValues[i] = r.nextInt();
-      newValues[i + 3 + length] = r.nextInt();
+      newValues[i] = rand.nextInt();
+      newValues[i + 3 + length] = rand.nextInt();
     }
     result.add(new AbstractLongList.SubList(LongArray.create(newValues), 3, length + 3));
     return result;

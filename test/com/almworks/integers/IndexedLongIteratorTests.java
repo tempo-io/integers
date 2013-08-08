@@ -62,18 +62,17 @@ public class IndexedLongIteratorTests extends IntegersFixture {
   }
 
   public void testRandomCase() {
-    Random r = new RandomHolder().getRandom();
     int arrayLength = 1000;
     int indexesLength = 100;
     int maxValue = Integer.MAX_VALUE;
 
     LongArray list = LongArray.create();
     for ( int i = 0; i < arrayLength; i++) {
-      list.add((long) r.nextInt(maxValue));
+      list.add((long) rand.nextInt(maxValue));
     }
     IntArray arrayIndexes = IntArray.create();
     for ( int i = 0; i < indexesLength; i++) {
-      arrayIndexes.add(r.nextInt(arrayLength));
+      arrayIndexes.add(rand.nextInt(arrayLength));
     }
 
     LongArray expected = LongArray.create();

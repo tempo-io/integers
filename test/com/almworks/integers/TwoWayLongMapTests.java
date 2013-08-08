@@ -18,17 +18,14 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.LongFunction;
 import com.almworks.integers.func.LongFunction2;
-import com.almworks.util.RandomHolder;
 import junit.framework.ComparisonFailure;
-import junit.framework.TestCase;
 
 import java.util.List;
-import java.util.Random;
 
 import static com.almworks.integers.LongProgression.arithmetic;
 import static com.almworks.integers.func.LongFunctions.*;
 
-public class TwoWayLongMapTests extends TestCase {
+public class TwoWayLongMapTests extends IntegersFixture {
   private final CollectionsCompare compare = new CollectionsCompare();
   private final TwoWayLongMap map = new TwoWayLongMap();
 
@@ -81,12 +78,11 @@ public class TwoWayLongMapTests extends TestCase {
   }
 
   public void testPutRandom() {
-    Random random = new RandomHolder().getRandom();
     final int N_KEYS = 1000;
     LongArray keySet = new LongArray(N_KEYS);
     int prime0 = 47;
     for (int n = 0; n < N_KEYS; ++n) {
-      int key = random.nextInt(N_KEYS);
+      int key = rand.nextInt(N_KEYS);
       boolean hasAdded = keySet.contains(key);
       assertEquals(hasAdded, map.containsKey(key));
       if (!hasAdded) {
@@ -180,7 +176,6 @@ public class TwoWayLongMapTests extends TestCase {
 
   public void testInsertAllRandom() {
     final int N_KEYS = 1000;
-    Random rand = new RandomHolder().getRandom();
     int prime = 239;
     for (int n = 0; n < 10; ++n) {
       int attempt;
@@ -277,7 +272,6 @@ public class TwoWayLongMapTests extends TestCase {
     final int N_KEYS = 1000;
     int prime = 41;
     map.insertAllRo(arithmetic(0, N_KEYS, 3), apply(swap(MOD), prime));
-    Random rand = new RandomHolder().getRandom();
     LongArray removed = new LongArray();
     for (int i = 0; i < N_KEYS / 10; ++i) {
       int k;
@@ -322,7 +316,6 @@ public class TwoWayLongMapTests extends TestCase {
     final int N_TRIALS = 100;
     final int PRIME = 41;
     LongArray alreadyRemoved = new LongArray();
-    Random rand = new RandomHolder().getRandom();
     map.insertAllRo(LongProgression.arithmetic(0, N_KEYS), apply(swap(MOD), PRIME));
     for (int i = 0; i < N_TRIALS; ++i) {
       LongArray toRemove = new LongArray(N_REMOVED_STEP);
@@ -412,7 +405,6 @@ public class TwoWayLongMapTests extends TestCase {
     final int N_ATTEMPTS = 10;
     final int VALS_IN_ATTEMPT = 3;
     map.insertAllRo(LongProgression.arithmetic(0, N_KEYS), apply(swap(MOD), PRIME));
-    Random rand = new RandomHolder().getRandom();
     LongArray removed = new LongArray();
     for (int i = 0; i < N_ATTEMPTS; ++i) {
       LongArray toRemove = new LongArray();
