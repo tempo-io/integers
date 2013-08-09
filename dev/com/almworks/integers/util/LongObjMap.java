@@ -151,6 +151,9 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
     return new LongMapIterator();
   }
 
+  /**
+   * @return LongList with map keys.
+   * */
   public LongList keySet() {
     return myKeys;
   }

@@ -16,17 +16,17 @@
 
 package com.almworks.integers.util;
 
-import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
 import com.almworks.integers.IntCollections;
 import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
-public abstract class SortedLongListOperationsIterator extends FindingLongIterator {
+public abstract class LongOperationsIterator extends FindingLongIterator {
   protected final List<LongIterator> myIts;
   /**
    * myHeap elements start from index 1, index 0 is unused
@@ -36,16 +36,14 @@ public abstract class SortedLongListOperationsIterator extends FindingLongIterat
   protected long myNext = Long.MIN_VALUE;
   protected static final int TOP = 1;
 
-  public SortedLongListOperationsIterator(@NotNull List<LongIterator> iterators) {
+  public LongOperationsIterator(@NotNull List<LongIterator> iterators) {
     myIts = iterators;
     heapLength = myIts.size();
     myHeap = new int[heapLength + 1];
   }
 
-  public SortedLongListOperationsIterator(@NotNull LongIterator ... iterators) {
-    myIts = Arrays.asList(iterators);
-    heapLength = myIts.size();
-    myHeap = new int[heapLength + 1];
+  public LongOperationsIterator(@NotNull LongIterator... iterators) {
+    this(Arrays.asList(iterators));
   }
 
   protected static List<LongIterator> longIterablesToIterators(List<? extends LongIterable> includes) {

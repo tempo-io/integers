@@ -35,11 +35,13 @@ public class IndexedLongIterator extends AbstractLongIteratorWithFlag {
     return myIndexIterator.hasNext();
   }
 
-  public void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
+  @Override
+  protected void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
     myIndexIterator.next();
   }
 
-  public long valueImpl() {
+  @Override
+  protected long valueImpl() {
     return myList.get(myIndexIterator.value());
   }
 }

@@ -20,15 +20,15 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.AbstractLongIterator;
+import com.almworks.integers.AbstractLongIteratorWithFlag;
 import com.almworks.integers.LongIterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class FindingLongIterator extends AbstractLongIterator {
+public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
   private boolean myFound;
   private boolean mySought;
-  private boolean myIterated;
 
   public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
     if (myFound)
@@ -40,7 +40,7 @@ public abstract class FindingLongIterator extends AbstractLongIterator {
     return myFound;
   }
 
-  public final LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
+  protected final void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
     if (!mySought) {
       myFound = findNext();
       mySought = true;
@@ -49,17 +49,9 @@ public abstract class FindingLongIterator extends AbstractLongIterator {
       throw new NoSuchElementException();
     mySought = false;
     myFound = false;
-    myIterated = true;
-    return this;
   }
 
-  public boolean hasValue() {
-    return myIterated;
-  }
-
-  public long value() throws NoSuchElementException {
-    if (!hasValue())
-      throw new NoSuchElementException();
+  public long valueImpl() throws NoSuchElementException {
     return getNext();
   }
 

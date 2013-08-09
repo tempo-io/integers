@@ -449,10 +449,6 @@ public class SameValuesLongList extends AbstractWritableLongList {
       return this;
     }
 
-    public boolean hasValue() {
-      return !(getNextIndex() <= getFrom());
-    }
-
     public long value() throws NoSuchElementException {
       if (isJustRemoved())
         throw new IllegalStateException();

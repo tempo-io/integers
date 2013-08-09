@@ -33,20 +33,16 @@ public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator 
   }
 
   public long value() throws NoSuchElementException {
-    if (!hasValue())
+    if (!myIterated)
       throw new NoSuchElementException();
     return valueImpl();
   }
-
-  abstract public long valueImpl();
 
   public LongIterator next() {
     nextImpl();
     myIterated = true;
     return this;
   }
-
-  protected abstract void nextImpl();
 
   public long nextValue() {
     next();
@@ -56,4 +52,8 @@ public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator 
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
+
+  abstract protected long valueImpl();
+
+  protected abstract void nextImpl();
 }

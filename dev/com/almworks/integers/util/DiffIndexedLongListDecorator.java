@@ -88,12 +88,14 @@ public class DiffIndexedLongListDecorator extends AbstractLongList {
       return myIndexIterator.hasNext();
     }
 
-    public void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
+    @Override
+    protected void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
       myIndexIterator.next();
       myNext++;
     }
 
-    public long valueImpl() throws IllegalStateException {
+    @Override
+    protected long valueImpl() throws NoSuchElementException {
       int index = myIndexIterator.value() + myNext - 1;
       return mySource.get(index);
     }

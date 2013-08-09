@@ -23,27 +23,26 @@ import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size
+ * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size,<br>
  * providing unique sorted values that exist in every list
  */
-public class SortedLongListIntersectionIterator extends SortedLongListOperationsIterator {
+public class LongIntersectionIterator extends LongOperationsIterator {
 
-  public SortedLongListIntersectionIterator(List<LongIterator> iterators) {
+  public LongIntersectionIterator(List<LongIterator> iterators) {
     super(iterators);
   }
 
-  public SortedLongListIntersectionIterator(LongIterable ... includes) {
-    super(longIterablesToIterators(Arrays.asList(includes)));
+  public LongIntersectionIterator(LongIterable... iterables) {
+    super(longIterablesToIterators(Arrays.asList(iterables)));
   }
 
   @NotNull
-  public static SortedLongListIntersectionIterator create(List<? extends LongIterable> includes) {
-    return new SortedLongListIntersectionIterator(longIterablesToIterators(includes));
+  public static LongIntersectionIterator create(List<? extends LongIterable> iterables) {
+    return new LongIntersectionIterator(longIterablesToIterators(iterables));
   }
 
   private boolean equalValues() {

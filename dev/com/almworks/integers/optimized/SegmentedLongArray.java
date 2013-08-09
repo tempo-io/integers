@@ -799,11 +799,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       int left = from + myLeftOffset;
       mySegmentIndex = left >> mySegmentBits;
       myOffset = (left & mySegmentMask);
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
     }
 
     public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -817,11 +817,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       myNext = p + 1;
       myOffset++;
       adjustOffset();
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
     }
 
     public WritableLongListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
       checkMod();
       if (myNext < 0)
         myNext = -myNext-1;
@@ -833,12 +833,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       myNext++;
       myOffset++;
       adjustOffset();
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
       return this;
     }
 
     public boolean hasValue() {
-      return !(myNext <= myFrom);
+      return myFrom < myNext;
     }
 
     public long value() throws NoSuchElementException {
@@ -864,7 +864,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
 
     public long get(int relativeOffset) throws IndexOutOfBoundsException, NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -897,7 +897,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
 
     public void set(int offset, long value) throws NoSuchElementException, IndexOutOfBoundsException {
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -919,11 +919,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         seg = mySegment == null ? mySegments.segments[si] : mySegment;
       }
       seg.data[off] = value;
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
     }
 
     public void removeRange(int offsetFrom, int offsetTo) throws NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
       if (myNext < 0)
         throw new IllegalStateException();
       if (offsetFrom >= offsetTo) {
@@ -944,12 +944,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       myOffset = p & mySegmentMask;
       myIterationModCount = modCount();
       myNext = -myNext-1;
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
     }
 
     @Override
     public void remove() throws NoSuchElementException, ConcurrentModificationException {
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -982,7 +982,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       }
       myIterationModCount = modCount();
       myNext = -myNext-1;
-      assert checkIterator();
+      assert !IntegersDebug.DEBUG || checkIterator();
     }
 
     public String toString() {

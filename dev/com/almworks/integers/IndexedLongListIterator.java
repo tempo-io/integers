@@ -35,13 +35,6 @@ public class IndexedLongListIterator extends AbstractLongIteratorWithFlag implem
     return myIndexes.hasNext();
   }
 
-  public void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
-    myIndexes.next();
-  }
-
-  public long valueImpl() throws NoSuchElementException {
-    return mySource.get(myIndexes.value());
-  }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
     myIndexes.move(offset);
@@ -54,5 +47,15 @@ public class IndexedLongListIterator extends AbstractLongIteratorWithFlag implem
   public int index() throws NoSuchElementException {
     if (!myIterated) throw new NoSuchElementException();
     return myIndexes.index();
+  }
+
+  @Override
+  protected void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
+    myIndexes.next();
+  }
+
+  @Override
+  protected long valueImpl() throws NoSuchElementException {
+    return mySource.get(myIndexes.value());
   }
 }

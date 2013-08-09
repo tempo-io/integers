@@ -28,7 +28,7 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
     List<LongArray> list = new ArrayList<LongArray>();
     list.add(LongArray.create(1, 2, 5, 10, 20));
     list.add(LongArray.create(1, 5, 21, 30, 40));
-    LongArray intersection = new LongArray(SortedLongListIntersectionIterator.create(list));
+    LongArray intersection = new LongArray(LongIntersectionIterator.create(list));
     CHECK.order(intersection, 1, 5);
   }
 
@@ -36,7 +36,7 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
     SetOperationsChecker.testSetOperations(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        LongArray res = new LongArray(new SortedLongListIntersectionIterator(arrays));
+        LongArray res = new LongArray(new LongIntersectionIterator(arrays));
         return res.iterator();
       }
     }, new SetOperationsChecker.IntersectionGetter(), false);

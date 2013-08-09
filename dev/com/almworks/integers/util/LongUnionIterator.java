@@ -22,28 +22,27 @@ import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size
+ * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size,<br>
  * providing unique sorted values that exist in at least one of lists
  */
-public class SortedLongListUnionIterator extends SortedLongListOperationsIterator {
+public class LongUnionIterator extends LongOperationsIterator {
   private boolean myIsHeapBuilt = false;
 
-  public SortedLongListUnionIterator(List<LongIterator> iterators) {
+  public LongUnionIterator(List<LongIterator> iterators) {
     super(iterators);
   }
 
-  public SortedLongListUnionIterator(LongIterable... includes) {
-    super(longIterablesToIterators(Arrays.asList(includes)));
+  public LongUnionIterator(LongIterable... iterables) {
+    super(longIterablesToIterators(Arrays.asList(iterables)));
   }
 
   @NotNull
-  public static SortedLongListUnionIterator create(List<? extends LongIterable> includes) {
-    return new SortedLongListUnionIterator(longIterablesToIterators(includes));
+  public static LongUnionIterator create(List<? extends LongIterable> iterables) {
+    return new LongUnionIterator(longIterablesToIterators(iterables));
   }
 
   protected boolean findNext() {

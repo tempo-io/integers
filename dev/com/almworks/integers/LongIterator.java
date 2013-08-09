@@ -39,7 +39,7 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
 
 
   /**
-   * @return false iterator has never been advanced otherwise true
+   * @return false if iterator has never been advanced otherwise true
    */
   boolean hasValue();
 
@@ -67,10 +67,12 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
       return !myIterated;
     }
 
-    public void nextImpl() throws NoSuchElementException {
+    @Override
+    protected void nextImpl() throws NoSuchElementException {
     }
 
-    public long valueImpl() throws NoSuchElementException {
+    @Override
+    protected long valueImpl() throws NoSuchElementException {
       return myValue;
     }
   }
