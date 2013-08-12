@@ -23,7 +23,7 @@ import java.util.List;
 
 import static com.almworks.integers.LongArray.create;
 
-public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
+public class LongIntersectionIteratorTests extends IntegersFixture {
   public void testCreate() {
     List<LongArray> list = new ArrayList<LongArray>();
     list.add(LongArray.create(1, 2, 5, 10, 20));
@@ -33,13 +33,13 @@ public class SortedLongListIntersectionIteratorTests extends IntegersFixture {
   }
 
   public void testAllCases() {
-    SetOperationsChecker.testSetOperations(new SetOperationsChecker.newSetCreator() {
+    new SetOperationsChecker().check(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray res = new LongArray(new LongIntersectionIterator(arrays));
         return res.iterator();
       }
-    }, new SetOperationsChecker.IntersectionGetter(), false);
+    }, new SetOperationsChecker.IntersectionGetter(false), true, false);
   }
 
 }

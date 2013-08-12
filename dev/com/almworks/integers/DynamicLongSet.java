@@ -111,11 +111,13 @@ public class DynamicLongSet implements LongIterable {
     myLeft[x] = 0;
     myRight[x] = 0;
     myBlack.clear(x);
-    if (myRemoved != null)
-      if (myRemoved.cardinality() == 1)
+    if (myRemoved != null) {
+      if (myRemoved.cardinality() == 1) {
         myRemoved = null;
-      else
+      } else {
         myRemoved.clear(x);
+      }
+    }
   }
 
   public void clear() {
@@ -494,6 +496,13 @@ public class DynamicLongSet implements LongIterable {
     boolean ret = remove0(key, fetchStackCache(0));
     maybeShrink();
     return ret;
+  }
+
+  public void retain(DynamicLongSet set) {
+    LongArray array = toSortedLongArray();
+    array.retainSorted(set.toSortedLongArray());
+    clear();
+    addAll(array);
   }
 
   private void maybeShrink() {

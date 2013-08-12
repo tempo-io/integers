@@ -26,7 +26,7 @@ import com.almworks.integers.LongIterable;
  * Iterates through two sorted long lists in O(N+M), providing values that exist in the
  * first list and do not exist in the second
  */
-public class SortedLongListMinusIterator extends FindingLongIterator {
+public class LongMinusIterator extends FindingLongIterator {
   private final LongIterator myInclude;
   private final LongIterator myExclude;
 
@@ -34,13 +34,13 @@ public class SortedLongListMinusIterator extends FindingLongIterator {
   private long myLastExclude = Long.MIN_VALUE;
   private boolean myExcludeIterated;
 
-  public SortedLongListMinusIterator(LongIterator include, LongIterator exclude) {
+  public LongMinusIterator(LongIterator include, LongIterator exclude) {
     myInclude = include;
     myExclude = exclude;
   }
 
-  public static SortedLongListMinusIterator create(LongIterable include, LongIterable exclude) {
-    return new SortedLongListMinusIterator(include.iterator(), exclude.iterator());
+  public static LongMinusIterator create(LongIterable include, LongIterable exclude) {
+    return new LongMinusIterator(include.iterator(), exclude.iterator());
   }
 
   protected boolean findNext() {

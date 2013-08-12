@@ -158,7 +158,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   public void expand(int index, int count) {
     if (count < 0)
-      new IllegalArgumentException();
+      throw new IllegalArgumentException();
     makeSpaceForInsertion(index, index + count);
   }
 
@@ -229,7 +229,7 @@ public final class LongArray extends AbstractWritableLongList {
       super.sort(sortAlso);
   }
 
-  public void addAll(LongList collection) {
+  public void addAll(LongIterable collection) {
     if (collection instanceof LongList) {
       LongList list = (LongList) collection;
       int added = list.size();
@@ -281,11 +281,11 @@ public final class LongArray extends AbstractWritableLongList {
     int i = 0, i2;
     int insertionPoint = 0;
     int mSize = size();
-    while ( i < mSize) {
-      while(i < mSize && sortedValues.binarySearch(myArray[i]) < 0) i++;
+    while (i < mSize) {
+      while (i < mSize && sortedValues.binarySearch(myArray[i]) < 0) i++;
       i2 = i;
-      while(i2 < mSize && sortedValues.binarySearch(myArray[i2]) >= 0) i2++;
       if (i == mSize) break;
+      while (i2 < mSize && sortedValues.binarySearch(myArray[i2]) >= 0) i2++;
 
       int diff = i2 - i;
       System.arraycopy(myArray, i, myArray, insertionPoint, diff);
@@ -355,5 +355,245 @@ public final class LongArray extends AbstractWritableLongList {
     myArray = EMPTY_LONGS;
     updateSize(0);
     return array;
+  }
+
+  /**
+   * Complexity: {@code O(N + T * log(N))}, where {@code N = destSize} and {@code T = srcSize}.<br>
+   * Prefer to use if the srcSize much smaller than destSize. If they are comparable
+   * it's better to use {@link com.almworks.integers.LongArray#(long[], int, com.almworks.integers.LongList)} // fix
+   *
+   * @param  src another read-only array
+   * @return union of dest and src. If there is enough memory, change dest. Otherwise create new array.
+   * */
+  public LongArray unionWithSmallArray(LongArray src) {
+    unionWithSmallArray(src, new int[][]{null});
+    return this;
+  }
+
+  /**
+   * @param insertionPoints0 temporary array, its length must be greater than or equal to the srcSize.
+   * @see #unionWithSmallArray(LongArray)
+   */
+  public LongArray unionWithSmallArray(LongArray src, int[][] insertionPoints0) {
+    if (src.size() == 0)
+      return this;
+    src.sort();
+    if (size() + src.size() > myArray.length) { //fix it
+      // merge with reallocation
+      int oldLength = myArray.length;
+      long[] newDest = new long[Math.max(size() + src.size(), oldLength * 2)];
+      long last = 0;
+      int newDestSize = 0;
+      int destIndex = 0;
+      for (int i = 0; i < src.size(); i++) {
+        long v = src.myArray[i];
+        if (i > 0 && v == last)
+          continue;
+        last = v;
+        if (destIndex < size()) {
+          int k = LongCollections.binarySearch(v, myArray, destIndex, size());
+          if (k >= 0) {
+            // found
+            continue;
+          }
+          int insertion = -k - 1;
+          if (insertion < destIndex) {
+            assert false : insertion + " " + destIndex;
+            continue;
+          }
+          int chunkSize = insertion - destIndex;
+          System.arraycopy(myArray, destIndex, newDest, newDestSize, chunkSize);
+          destIndex = insertion;
+          newDestSize += chunkSize;
+        }
+        newDest[newDestSize++] = v;
+      }
+      if (destIndex < size()) {
+        int chunkSize = size() - destIndex;
+        System.arraycopy(myArray, destIndex, newDest, newDestSize, chunkSize);
+        newDestSize += chunkSize;
+      }
+      myArray = newDest;
+      updateSize(newDestSize);
+    } else {
+      // merge in place
+      // a) find insertion points and count how many to be inserted
+      if (insertionPoints0[0] == null)
+        insertionPoints0[0] = new int[src.size()];
+      int[] insertionPoints = insertionPoints0[0];
+      Arrays.fill(insertionPoints, 0, src.size(), -1);
+      int insertCount = 0;
+      int destIndex = 0;
+      long last = 0;
+      for (int i = 0; i < src.size(); i++) {
+        long v = src.myArray[i];
+        if (i > 0 && v == last)
+          continue;
+        last = v;
+        if (destIndex < size()) {
+          int k = LongCollections.binarySearch(v, myArray, destIndex, size());
+          if (k >= 0) {
+            // found
+            continue;
+          }
+          int insertion = -k - 1;
+          if (insertion < destIndex) {
+            assert false : insertion + " " + destIndex;
+            continue;
+          }
+          destIndex = insertion;
+        }
+        insertionPoints[i] = destIndex;
+        insertCount++;
+      }
+      // b) insertionPoints contains places in the dest for insertion
+      // insertCount contains number of insertions
+      destIndex = size();
+      updateSize(size() + insertCount);
+      int i = src.size() - 1;
+      while (insertCount > 0) {
+        // get next to insert
+        while (i >= 0 && insertionPoints[i] == -1)
+          i--;
+        assert i >= 0 : i;
+        int insertion = insertionPoints[i];
+        if (destIndex > insertion) {
+          System.arraycopy(myArray, insertion, myArray, insertion + insertCount, destIndex - insertion);
+          destIndex = insertion;
+        }
+        myArray[insertion + insertCount - 1] = src.myArray[i];
+        insertCount--;
+        i--;
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Complexity: {@code O(N + T)}, where N - size of dest(destSize) and T - size of src.<br>
+   * Prefer to use if the sizes of dest and src are comparable. If the size of src is much smaller than destSize,
+   * it's better to use {@link com.almworks.integers.LongCollections#(long[], int, long[], int)} //fix
+   *
+   * @param  src sorted list of numbers (set)
+   *
+   * @return union of dest and src. If there is enough memory, changing dest. Otherwise creating new array.
+   * */
+  public LongArray unionWithSameLengthList(LongList src) {
+    int srcSize = src.size();
+    int totalLength = size() + srcSize;
+    if (totalLength > myArray.length) {
+      // merge with reallocation
+//      if (size() > 0)
+//        throw new IllegalArgumentException(String.valueOf(size()));
+      merge0withReallocation(src, srcSize, totalLength);
+    } else {
+      merge0inPlace(src, srcSize, totalLength);
+    }
+    return this;
+  }
+
+  private void merge0inPlace(LongList src, int srcSize, int totalLength) {
+    // in place
+    // 1. find offset (scan for duplicates)
+    // 2. merge starting from the end
+    if (size() > 0 && srcSize > 0 && myArray[0] > src.get(srcSize - 1)) {
+      System.arraycopy(myArray, 0, myArray, srcSize, size());
+      src.toArray(0, myArray, 0, srcSize);
+      updateSize(totalLength);
+    } else if (size() > 0 && srcSize > 0 && myArray[size() - 1] < src.get(0)) {
+      src.toArray(0, myArray, size(), srcSize);
+      updateSize(totalLength);
+    } else {
+      int insertCount = 0;
+      int pi = 0, pj = 0;
+      while (pi < size() && pj < srcSize) {
+        long vi = myArray[pi];
+        long vj = src.get(pj);
+        if (vi < vj) {
+          pi++;
+        } else if (vi > vj) {
+          pj++;
+          insertCount++;
+        } else {
+          assert vi == vj;
+          pi++;
+          pj++;
+        }
+      }
+      insertCount += (srcSize - pj);
+      pi = size() - 1;
+      pj = srcSize - 1;
+      int i = size() + insertCount;
+      while (pi >= 0 && pj >= 0) {
+        assert i > pi : i + " " + pi;
+        long vi = myArray[pi];
+        long vj = src.get(pj);
+        if (vi < vj) {
+          myArray[--i] = vj;
+          pj--;
+        } else if (vi > vj) {
+          myArray[--i] = vi;
+          pi--;
+        } else {
+          assert vi == vj;
+          myArray[--i] = vi;
+          pi--;
+          pj--;
+        }
+      }
+      if (pj >= 0) {
+        int size = pj + 1;
+        src.toArray(0, myArray, 0, size);
+        i -= size;
+      } else if (pi >= 0) {
+        i -= pi + 1;
+      }
+      assert i == 0 : i;
+      updateSize(size() + insertCount);
+    }
+  }
+
+  private void merge0withReallocation(LongList src, int srcSize, int totalLength) {
+    int newSize = Math.max(totalLength, myArray.length * 2);
+    long[] newArray = new long[newSize];
+    int pi = 0, pj = 0;
+    int i = 0;
+    if (size() > 0 && srcSize > 0) {
+      // boundary conditions: quickly merge disjoint sets
+      if (myArray[0] > src.get(srcSize - 1)) {
+        src.toArray(0, newArray, 0, srcSize);
+        i = pj = srcSize;
+      } else if (myArray[size() - 1] < src.get(0)) {
+        System.arraycopy(myArray, 0, newArray, 0, size());
+        i = pi = size();
+      }
+    }
+    while (pi < size() && pj < srcSize) {
+      long vi = myArray[pi];
+      long vj = src.get(pj);
+      if (vi < vj) {
+        newArray[i++] = vi;
+        pi++;
+      } else if (vi > vj) {
+        newArray[i++] = vj;
+        pj++;
+      } else {
+        assert vi == vj;
+        newArray[i++] = vi;
+        pi++;
+        pj++;
+      }
+    }
+    if (pi < size()) {
+      int size = size() - pi;
+      System.arraycopy(myArray, pi, newArray, i, size);
+      i += size;
+    } else if (pj < srcSize) {
+      int size = srcSize - pj;
+      src.toArray(pj, newArray, i, size);
+      i += size;
+    }
+    myArray = newArray;
+    updateSize(i);
   }
 }

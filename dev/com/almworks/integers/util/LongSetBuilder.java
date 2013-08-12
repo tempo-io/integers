@@ -23,25 +23,19 @@ import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
 import static com.almworks.integers.IntegersUtils.*;
-import java.util.NoSuchElementException;
 
 public final class LongSetBuilder implements Cloneable, LongCollector, LongIterable {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;
 
   private final int myTempLength;
 
-  private long[] mySorted;
+  private LongArray mySorted = new LongArray();
   private long[] myTemp;
 
   /**
    * Used when merge() is called
    */
   private int[][] myTempInsertionPoints = {null};
-
-  /**
-   * mySorted contains valid ids on [0, mySortedSize)
-   */
-  private int mySortedSize;
 
   /**
    * myTemp contains valid ids on [0, myTempSize)
@@ -90,9 +84,9 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
 
   public void mergeFrom(LongSetBuilder other) {
     other.mergeTemp();
-    if (other.mySortedSize == 0)
+    if (other.mySorted.size() == 0)
       return;
-    mergeFromSortedCollection(new LongArray(other.mySorted, other.mySortedSize));
+    mergeFromSortedCollection(other.mySorted);
   }
 
   public void mergeFromSortedCollection(LongList other) {
@@ -101,32 +95,28 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     if (other.isEmpty())
       return;
     mergeTemp();
-    LongArray res = LongCollections.unionWithSameLengthList(mySorted, mySortedSize, other);
-    mySortedSize = res.size();
-    mySorted = res.extractHostArray();
+    mySorted.unionWithSameLengthList(other);
   }
 
   private void mergeTemp() {
     if (myTempSize == 0)
       return;
-    LongArray res = LongCollections.unionWithSmallArray(mySorted, mySortedSize, myTemp, myTempSize, myTempInsertionPoints);
-    mySortedSize = res.size();
-    mySorted = res.extractHostArray();
+    mySorted.unionWithSmallArray(new LongArray(myTemp, myTempSize), myTempInsertionPoints);
     myTempSize = 0;
   }
 
   public LongList toSortedCollection() {
     myFinished = true;
     mergeTemp();
-    if (mySortedSize == 0)
+    if (mySorted == null || mySorted.size() == 0)
       return LongList.EMPTY;
-    return new LongArray(mySorted, mySortedSize);
+    return mySorted;
   }
 
   public LongArray toLongArray() {
     myFinished=true;
     mergeTemp();
-    return new LongArray(mySorted, mySortedSize);
+    return mySorted;
   }
 
   /**
@@ -136,28 +126,17 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
    */
   public LongList toTemporaryReadOnlySortedCollection() {
     mergeTemp();
-    if (mySortedSize == 0)
+    if (mySorted.size() == 0)
       return LongList.EMPTY;
-    return new AbstractLongList() {
-      @Override
-      public int size() {
-        return mySortedSize;
-      }
-
-      @Override
-      public long get(int index) throws NoSuchElementException {
-        if (index < 0 || index >= mySortedSize) throw new NoSuchElementException("" + index);
-        return mySorted[index];
-      }
-    };
+    return mySorted;
   }
 
   public long[] toNativeArray() {
     myFinished = true;
     mergeTemp();
-    if (mySortedSize == 0)
+    if (mySorted.size() == 0)
       return EMPTY_LONGS;
-    return LongCollections.arrayCopy(mySorted, 0, mySortedSize);
+    return mySorted.toNativeArray();//LongCollections.arrayCopy(mySorted, 0, mySorted.size());
   }
 
   public LongSetBuilder clone() {
@@ -170,19 +149,19 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     }
     r.myFinished = false;
     r.myTemp = null;
-    r.myTempInsertionPoints = null;
-    if (r.mySorted != null) {
-      r.mySorted = r.mySorted.clone();
+    r.myTempInsertionPoints = new int[][]{null};
+    if (mySorted != null) { // fix it
+      r.mySorted = LongArray.copy(mySorted);
     }
     return r;
   }
 
   public boolean isEmpty() {
-    return mySortedSize + myTempSize == 0;
+    return mySorted.size() + myTempSize == 0;
   }
 
   public void clear(boolean reuseArrays) {
-    mySortedSize = 0;
+    mySorted.clear();
     myTempSize = 0;
     if (myFinished && !reuseArrays) {
       mySorted = null;
@@ -192,17 +171,17 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
 
   public int size() {
     mergeTemp();
-    return mySortedSize;
+    return mySorted.size();
   }
 
   public boolean contains(long value) {
-    return LongCollections.binarySearch(value, mySorted, 0, mySortedSize) >= 0 ||
+    return mySorted.binarySearch(value) >= 0 ||
        LongCollections.indexOf(myTemp, 0, myTempSize, value) != -1;
   }
 
   @NotNull
   public LongIterator iterator() {
     mergeTemp();
-    return new LongArrayIterator(mySorted, 0, mySortedSize);
+    return mySorted.iterator();
   }
 }

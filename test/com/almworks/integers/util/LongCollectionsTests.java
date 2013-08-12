@@ -399,7 +399,7 @@ public class LongCollectionsTests extends IntegersFixture {
     CHECK.order(a.iterator(), 1, 9, 14, 15, 16, 18);
   }
 
-  public void testRepeatValues() {
+  public void testRepeat() {
     LongList array = LongCollections.repeat(-5, 3);
     CHECK.order(array, -5, -5, -5);
     array = LongCollections.repeat(0, 4);
@@ -438,48 +438,4 @@ public class LongCollectionsTests extends IntegersFixture {
     return resultingIndices.iterator();
   }
 
-  public void testUnion() {
-    newSetCreator unionGetter = new UnionGetter();
-    // is likely to be launched branch with realloc
-    testSetOperations(new newSetCreator() {
-      @Override
-      public LongIterator get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        return LongCollections.unionWithSameLengthList(copy.extractHostArray(), arrays[0].size(),
-            arrays[1]).iterator();
-      }
-    }, unionGetter, true);
-
-    // guaranteed launch branch with replace
-    testSetOperations(new newSetCreator() {
-      @Override
-      public LongIterator get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return LongCollections.unionWithSameLengthList(copy.extractHostArray(), arrays[0].size(),
-            arrays[1]).iterator();
-      }
-    }, unionGetter, true);
-
-    // is likely to be launched branch with realloc
-    testSetOperations(new newSetCreator() {
-      @Override
-      public LongIterator get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        return LongCollections.unionWithSmallArray(copy.extractHostArray(), arrays[0].size(),
-            arrays[1].toNativeArray(), arrays[1].size()).iterator();
-      }
-    }, unionGetter, true);
-
-    // guaranteed launch branch with replace
-    testSetOperations(new newSetCreator() {
-      @Override
-      public LongIterator get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return LongCollections.unionWithSmallArray(copy.extractHostArray(), arrays[0].size(),
-            arrays[1].toNativeArray(), arrays[1].size()).iterator();
-      }
-    }, unionGetter, true);
-  }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 import static com.almworks.integers.LongArray.create;
 
-public class SortedLongListUnionIteratorTests extends IntegersFixture {
+public class LongUnionIteratorTests extends IntegersFixture {
   public void testCreate() {
     List<LongArray> list = new ArrayList<LongArray>();
     list.add(LongArray.create(1, 2, 5, 10));
@@ -17,13 +17,13 @@ public class SortedLongListUnionIteratorTests extends IntegersFixture {
   }
 
   public void testAllCases() {
-    SetOperationsChecker.testSetOperations(new SetOperationsChecker.newSetCreator() {
+    new SetOperationsChecker().check(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray res = new LongArray(new LongUnionIterator(arrays));
         return res.iterator();
       }
-    }, new SetOperationsChecker.UnionGetter(), false);
+    }, new SetOperationsChecker.UnionGetter(), true, false);
   }
 
 }

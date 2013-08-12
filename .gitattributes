@@ -115,6 +115,7 @@ dev/com/almworks/integers/util/LongIntersectionIterator.java -text
 dev/com/almworks/integers/util/LongListConcatenation.java -text
 dev/com/almworks/integers/util/LongListInsertingDecorator.java -text
 dev/com/almworks/integers/util/LongListRemovingDecorator.java -text
+dev/com/almworks/integers/util/LongMinusIterator.java -text
 dev/com/almworks/integers/util/LongObjMap.java -text
 dev/com/almworks/integers/util/LongOperationsIterator.java -text
 dev/com/almworks/integers/util/LongSetBuilder.java -text
@@ -125,7 +126,6 @@ dev/com/almworks/integers/util/ReadonlyIntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/ReadonlyLongListRemovingDecorator.java -text
 dev/com/almworks/integers/util/SortedIntListIntersectionIterator.java -text
 dev/com/almworks/integers/util/SortedIntListMinusIterator.java -text
-dev/com/almworks/integers/util/SortedLongListMinusIterator.java -text
 gen/IntegerCollectionsCodegen.java -text
 gen/SkipImportsRegex.groovy -text
 gen/TypeDescriptor.java -text
@@ -212,15 +212,15 @@ test/com/almworks/integers/optimized/SegmentedLongArrayTests.java -text
 test/com/almworks/integers/optimized/TestEnvForSegmentedLongArray.java -text
 test/com/almworks/integers/util/DiffIndexedLongListDecoratorTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
+test/com/almworks/integers/util/LongIntersectionIteratorTests.java -text
 test/com/almworks/integers/util/LongListConcatenationTests.java -text
 test/com/almworks/integers/util/LongListInsertingDecoratorTests.java -text
+test/com/almworks/integers/util/LongMinusIteratorTests.java -text
 test/com/almworks/integers/util/LongObjMapTests.java -text
 test/com/almworks/integers/util/LongSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/LongSetBuilderTests.java -text
+test/com/almworks/integers/util/LongUnionIteratorTests.java -text
 test/com/almworks/integers/util/ModifyingLongListRemovingDecoratorTests.java -text
-test/com/almworks/integers/util/SortedLongListIntersectionIteratorTests.java -text
-test/com/almworks/integers/util/SortedLongListMinusIteratorTests.java -text
-test/com/almworks/integers/util/SortedLongListUnionIteratorTests.java -text
 test/com/almworks/util/RandomHolder.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text

@@ -17,11 +17,13 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class LongArrayTests extends IntegersFixture {
   private static final CollectionsCompare CHECK = new CollectionsCompare();
   private LongArray array = new LongArray();
+  private SetOperationsChecker setOperations = new SetOperationsChecker();
 
   public void testAdd() {
     array.addAll(0, 1, 2);
@@ -155,16 +157,21 @@ public class LongArrayTests extends IntegersFixture {
     arr.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
     CHECK.order(LongProgression.arithmetic(1, 10, 2), arr);
 
-    SetOperationsChecker.testSetOperations(new SetOperationsChecker.newSetCreator() {
+    setOperations.check(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        LongArray res = LongArray.copy(arrays[0]);
-        for (int i = 0; i < arrays.length; i++) {
-          res.retainSorted(arrays[i]);
-        }
-        return res.iterator();
+        arrays[0].retain(arrays[1]);
+        return arrays[0].iterator();
       }
-    }, new SetOperationsChecker.IntersectionGetter(), false);
+    }, new SetOperationsChecker.IntersectionGetter(false), false, true);
+
+    setOperations.check(new SetOperationsChecker.newSetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        arrays[0].retainSorted(arrays[1]);
+        return arrays[0].iterator();
+      }
+    }, new SetOperationsChecker.IntersectionGetter(true), true, true);
   }
 
   protected void tearDown() throws Exception {
@@ -402,5 +409,44 @@ public class LongArrayTests extends IntegersFixture {
     for (int i = 1; i < lst.size(); i++) {
       assertFalse(lst.get(i - 1) <= lst.get(i));
     }
+  }
+
+  public void testUnion() {
+    SetOperationsChecker.newSetCreator unionGetter = new SetOperationsChecker.UnionGetter();
+    // is likely to be launched branch with realloc
+    setOperations.check(new SetOperationsChecker.newSetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        return arrays[0].unionWithSameLengthList(arrays[1]).iterator();
+      }
+    }, unionGetter, true, true);
+
+    // guaranteed launch branch with replace
+    setOperations.check(new SetOperationsChecker.newSetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
+        return copy.unionWithSameLengthList(arrays[1]).iterator();
+      }
+    }, unionGetter, true, true);
+
+    // is likely to be launched branch with realloc
+    setOperations.check(new SetOperationsChecker.newSetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        return arrays[0].unionWithSmallArray(arrays[1]).iterator();
+      }
+    }, unionGetter, true, true);
+
+    // guaranteed launch branch with replace
+    setOperations.check(new SetOperationsChecker.newSetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
+        return copy.unionWithSmallArray(arrays[1]).iterator();
+      }
+    }, unionGetter, true, true);
   }
 }

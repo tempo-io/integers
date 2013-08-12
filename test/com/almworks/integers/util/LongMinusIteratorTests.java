@@ -4,7 +4,7 @@ import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
 import junit.framework.TestCase;
 
-public class SortedLongListMinusIteratorTests extends TestCase{
+public class LongMinusIteratorTests extends TestCase{
   protected final long MIN = Long.MIN_VALUE;
   protected final long MAX = Long.MAX_VALUE;
 
@@ -46,6 +46,6 @@ public class SortedLongListMinusIteratorTests extends TestCase{
   }
 
   private void testMinus(LongArray include, LongArray exclude, LongArray difference) {
-    IntegersFixture.assertContents(new SortedLongListMinusIterator(include.iterator(), exclude.iterator()), difference);
+    IntegersFixture.assertContents(new LongMinusIterator(include.iterator(), exclude.iterator()), difference);
   }
 }
