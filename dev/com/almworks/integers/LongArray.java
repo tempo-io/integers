@@ -331,4 +331,8 @@ public final class LongArray extends AbstractWritableLongList {
     updateSize(0);
     return array;
   }
+
+  public void echo(long i) {
+    System.out.println(i);
+  }
 }

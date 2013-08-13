@@ -61,7 +61,7 @@ target(name: 'init') {
     copy(overwrite: "true", failonerror: "true", preservelastmodified: "true")
   }
 
-  almMessage "initDone"
+  almMessage "init done"
 }
 
 target(name: 'clean') {
@@ -89,7 +89,7 @@ target(name: 'makeGen') {
     javac([debug: "true", source: "1.6", target: "1.6", nowarn: "on"])
   }
 
-  almMessage "make gen done"
+  almMessage "makeGen done"
 }
 
 runGenerator = {boolean checkOnly ->
