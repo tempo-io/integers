@@ -21,6 +21,18 @@ package com.almworks.integers;
 
 import java.util.NoSuchElementException;
 
+
+/**
+ * There is iterators, that status hasValue() can't be calculate from
+ * some class fields, and it's necessary also store separately flag
+ * boolean.<br>
+ * For such purposes approach class
+ * AbstractLongIteratorWithFlag, which store and work with flag take over.
+ *
+ * For iterator implementation it's necessary to define 2 methods: nextImpl(), valueImpl()
+ * nextImpl()  switch iterator position to next state
+ * valueImpl() return the current value, if it's possible
+ * */
 public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator {
   protected boolean myIterated = false;
 
