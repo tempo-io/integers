@@ -331,4 +331,8 @@ public final class IntArray extends AbstractWritableIntList {
     updateSize(0);
     return array;
   }
+
+  public void echo(int i) {
+    System.out.println(i);
+  }
 }

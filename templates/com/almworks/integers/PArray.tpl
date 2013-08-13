@@ -328,4 +328,8 @@ public final class #E#Array extends AbstractWritable#E#List {
     updateSize(0);
     return array;
   }
+
+  public void echo(#e# i) {
+    System.out.println(i);
+  }
 }
