@@ -17,9 +17,6 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
-import com.almworks.util.RandomHolder;
-
-import java.util.Random;
 
 
 public class ModifyingLongListRemovingDecoratorTests extends IntegersFixture {

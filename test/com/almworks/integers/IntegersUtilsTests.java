@@ -17,10 +17,8 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
-import com.almworks.util.RandomHolder;
 
 import java.util.HashSet;
-import java.util.Random;
 
 public class IntegersUtilsTests extends IntegersFixture {
   public void testPermutationsSimple() {

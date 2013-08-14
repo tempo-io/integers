@@ -1,7 +1,9 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.*;
-import com.almworks.util.RandomHolder;
+import com.almworks.integers.util.AbstractLongListDecorator;
+import com.almworks.integers.util.LongListInsertingDecorator;
+import com.almworks.integers.util.LongListRemovingDecorator;
+import com.almworks.integers.util.LongSetBuilder;
 import junit.framework.TestCase;
 
 import java.util.Random;

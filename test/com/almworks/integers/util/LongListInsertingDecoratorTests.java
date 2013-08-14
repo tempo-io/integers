@@ -16,7 +16,9 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.LongArray;
+import com.almworks.integers.LongIterator;
 
 public class LongListInsertingDecoratorTests extends IntegersFixture {
   private final LongArray myArray = new LongArray();

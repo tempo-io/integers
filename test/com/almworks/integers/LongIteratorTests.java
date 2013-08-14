@@ -1,9 +1,9 @@
 package com.almworks.integers;
 
-import com.almworks.integers.optimized.SameValuesIntList;
 import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.optimized.SegmentedLongArray;
-import com.almworks.integers.util.*;
+import com.almworks.integers.util.LongListInsertingDecorator;
+import com.almworks.integers.util.ReadonlyLongListRemovingDecorator;
 import junit.framework.TestCase;
 
 public class LongIteratorTests extends TestCase {

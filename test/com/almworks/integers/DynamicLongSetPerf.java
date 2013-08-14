@@ -17,10 +17,8 @@
 package com.almworks.integers;
 
 import com.almworks.integers.util.LongSetBuilder;
-import com.almworks.util.RandomHolder;
 
 import java.io.IOException;
-import java.util.Random;
 
 /** This class is abstract to prevent it from running in the build. */
 public abstract class DynamicLongSetPerf extends DynamicLongSetTests {

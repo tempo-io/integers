@@ -19,7 +19,6 @@ package com.almworks.integers;
 import com.almworks.integers.func.IntProcedure;
 import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.util.LongSetBuilder;
-import com.almworks.util.RandomHolder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

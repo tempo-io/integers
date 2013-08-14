@@ -16,10 +16,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.util.RandomHolder;
-
 import java.util.Arrays;
-import java.util.Random;
 
 import static com.almworks.util.TestUtil.assertEquals;
 import static junit.framework.Assert.assertTrue;

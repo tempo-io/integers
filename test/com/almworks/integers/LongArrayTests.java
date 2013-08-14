@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LongArrayTests extends IntegersFixture {

@@ -1,11 +1,12 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.LongArray;
+import com.almworks.integers.LongIterator;
+import com.almworks.integers.SetOperationsChecker;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.almworks.integers.LongArray.create;
 
 public class LongUnionIteratorTests extends IntegersFixture {
   public void testCreate() {

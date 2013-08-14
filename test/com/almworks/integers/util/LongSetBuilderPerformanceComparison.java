@@ -2,7 +2,6 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.LongList;
 import junit.framework.TestCase;
-import com.almworks.integers.IntList;
 
 /**
  * This class is made abstract to avoid running very long tests

@@ -1,6 +1,9 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.IntegersUtils;
+import com.almworks.integers.LongArray;
+import com.almworks.integers.LongList;
 
 public class LongSetBuilderTests extends IntegersFixture {
   public void test() {

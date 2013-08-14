@@ -1,6 +1,9 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.*;
+import com.almworks.integers.IntegersFixture;
+import com.almworks.integers.LongArray;
+import com.almworks.integers.LongCollections;
+import com.almworks.integers.WritableLongListIterator;
 
 public class SameValuesLongListTests extends IntegersFixture {
   private SameValuesLongList list;

@@ -16,10 +16,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.util.RandomHolder;
-
 import java.util.NoSuchElementException;
-import java.util.Random;
 
 
 public class IndexedLongIteratorTests extends IntegersFixture {
