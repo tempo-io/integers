@@ -152,7 +152,12 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   }
 
   /**
-   * @return LongList with map keys.
+   * Returns a {@link LongList} view of the values contained in this map.
+   * The collection is backed by the map, so changes to the map are
+   * reflected in the keySet. It's recommended not to change keySet,
+   * because of changes in keySet are reflected in the map too.
+   *
+   * @return LongList of the values contained in this map
    * */
   public LongList keySet() {
     return myKeys;
