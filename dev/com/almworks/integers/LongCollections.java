@@ -379,14 +379,12 @@ public class LongCollections {
   }
 
   /**
-   * @return SameValuesLongList with element value, repeating count times.
+   * @return SameValuesLongList with element {@code value}, repeated {@code count} times.
    * */
   public static SameValuesLongList repeat(long value, int count) {
     if (count < 0)
       throw new IllegalArgumentException();
     SameValuesLongList array = new SameValuesLongList(new IntLongMap(new IntArray(1), new LongArray(1)));
-    if (count == 0)
-      return array;
     array.insertMultiple(0, value, count);
     return array;
   }
