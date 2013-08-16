@@ -76,6 +76,33 @@ public class IntegersUtilsTests extends IntegersFixture {
     }
   }
 
+  public void testReversePerm() {
+    final IntArray perms = IntArray.copy(new IntProgression.ArithmeticIterator(0, 1, 9));
+    IntegersUtils.allPermutations(perms.size(), new IntProcedure() {
+      {
+        testRevPerm(perms);
+      }
+
+      @Override
+      public void invoke(int i) {
+        perms.swap(i, i + 1);
+        testRevPerm(perms);
+      }
+    });
+  }
+
+  private static void testRevPerm(IntArray perms) {
+    IntArray rev = new IntArray(perms);
+    IntegersUtils.reversePerm(rev);
+    int n = perms.size();
+    IntArray e = new IntArray(n);
+    for (int i = 0; i < n; ++i) {
+      e.add(perms.get(rev.get(i)));
+    }
+    CHECK.order(IntProgression.arithmetic(0, n).iterator(), e.iterator());
+  }
+
+
   public void testArrayCopy() {
     int arrayLength = 1000;
     int maxValue = Integer.MAX_VALUE;

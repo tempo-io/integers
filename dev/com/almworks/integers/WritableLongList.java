@@ -69,6 +69,8 @@ public interface WritableLongList extends LongList, LongCollector {
 
   void sort(WritableLongList... sortAlso);
 
+  void sortByFirstThenBySecond(WritableLongList sortAlso);
+
   void swap(int index1, int index2);
 
   /**

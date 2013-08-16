@@ -20,10 +20,13 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import static com.almworks.integers.IntegersUtils.*;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public abstract class AbstractLongList implements LongList {
   public boolean isEmpty() {
@@ -46,6 +49,49 @@ public abstract class AbstractLongList implements LongList {
   }
 
   @NotNull
+  public static StringBuilder append(@Nullable StringBuilder sb, @Nullable LongIterable i) {
+    if (sb == null) sb = new StringBuilder();
+    if (i == null) {
+      sb.append("null");
+    } else {
+      LongIterator it = i.iterator();
+      sb.append("(").append(it.nextValue());
+      while (it.hasNext()) {
+        sb.append(", ").append(it.nextValue());
+      }
+      sb.append(")");
+    }
+    return sb;
+  }
+
+  /** https://code.google.com/p/integers/issues/detail?id=27 */
+  public String toBoundedString() {
+    int lim = 10;
+    if (size() > 2 * lim) {
+      return toShortString(lim);
+    } else {
+      return append(null, this).toString();
+    }
+  }
+
+  private String toShortString(int lim) {
+    assert size() > 2 * lim : size() + " " + this;
+    StringBuilder sb = new StringBuilder("[").append(size()).append("] (");
+
+    LongListIterator it = this.iterator();
+    sb.append(it.nextValue());
+    for (int i = 1; i < lim; i++) {
+      sb.append(", ").append(it.nextValue());
+    }
+    sb.append(", ...");
+    it.move(size() - 2 * lim);
+    for (int i = 0; i < lim; i++) {
+      sb.append(", ").append(it.nextValue());
+    }
+    return sb.append(")").toString();
+  }
+
+  @NotNull
   public LongListIterator iterator() {
     return iterator(0, size());
   }
@@ -63,6 +109,24 @@ public abstract class AbstractLongList implements LongList {
     }
     return new IndexIterator(from, to);
   }
+
+  /** Use for MATLAB-like indexing, i.e. vector indexed by vector. */
+  public static LongList get(final LongList that, final IntList indices) {
+    if (that == null) throw new NullPointerException("that");
+    if (indices == null) throw new NullPointerException("indices");
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return indices.size();
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        return that.get(indices.get(index));
+      }
+    };
+  }
+
 
   public int indexOf(long value) {
     int i = 0;

@@ -19,6 +19,7 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.func.LongFunction;
 // function on indices, hence int
 import com.almworks.integers.func.IntFunction2;
@@ -257,6 +258,30 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     });
   }
 
+  /**
+   * @param sortAlso ties in this array are broken via elements of this array. Must not be shorter than {@code a1}
+   * @throws IllegalArgumentException in case the second array is shorter than the first
+   * */
+  public void sortByFirstThenBySecond(final WritableLongList sortAlso) {
+    if (size() > sortAlso.size()) throw new IllegalArgumentException("This array is longer than sortAlso: " +
+        size() + " > " + sortAlso.size());
+    IntegersUtils.quicksort(size(), new IntFunction2() {
+          @Override
+          public int invoke(int a, int b) {
+            int comp = LongCollections.compare(get(a), get(b));
+            if (comp == 0) comp = LongCollections.compare(sortAlso.get(a), sortAlso.get(b));
+            return comp;
+          }
+        },
+        new IntProcedure2() {
+          @Override
+          public void invoke(int a, int b) {
+            swap(a, b);
+            sortAlso.swap(a, b);
+          }
+        });
+  }
+
   public void swap(int index1, int index2) {
     if (index1 != index2) {
       long t = get(index1);
@@ -300,6 +325,19 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     int j = size() - 1;
     for (int i = 0; i < j; i++, j--) swap(i,j);
   }
+
+  /** Updates the value in the specified list at the specified index; if the list is currently shorter, it is first appended
+   * with {@code defaultValue} up to the {@code idx}.
+   * @param update the update function to apply. See {@link com.almworks.integers.func.IntFunctions}
+   * @return the updated value
+   * */
+  public long update(int idx, long defaultValue, LongFunction update) {
+    if (size() <= idx) insertMultiple(size(), defaultValue, idx - size() + 1);
+    long updated = update.invoke(get(idx));
+    set(idx, updated);
+    return updated;
+  }
+
 
   protected class WritableIndexIterator extends IndexIterator implements WritableLongListIterator {
     private int myIterationModCount = myModCount;

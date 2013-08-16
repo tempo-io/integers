@@ -448,4 +448,15 @@ public class LongArrayTests extends IntegersFixture {
       }
     }, unionGetter, true, true);
   }
+
+  public void testToBoundedString() {
+    array.addAll(LongProgression.arithmetic(0, 20));
+    System.out.println(array.toBoundedString());
+    array.add(20);
+    System.out.println(array.toBoundedString());
+    array.addAll(LongProgression.arithmetic(21, 10));
+    System.out.println(array.toBoundedString());
+
+  }
+
 }

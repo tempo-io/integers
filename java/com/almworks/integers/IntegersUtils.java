@@ -234,6 +234,25 @@ public final class IntegersUtils {
     }
   }
 
+  public static void reversePerm(IntArray p) {
+    int n = p.size();
+    boolean[] visited = new boolean[n];
+    for (int i = 0; i < n; ++i) {
+      if (visited[i]) continue;
+      // Reverse the cycle starting at i
+      int last = i;
+      int j = p.get(i);
+      while (true) {
+        int next = p.get(j);
+        p.set(j, last);
+        visited[j] = true;
+        if (j == i) break;
+        last = j;
+        j = next;
+      }
+    }
+  }
+
   /**
    * Increments a number in the factorial-base.<Br/>
    * Number in the factorial base is represented as
