@@ -93,7 +93,7 @@ public class LongArrayTests extends IntegersFixture {
     LongArray res = new LongArray();
 
     for (int j = 0; j < arrayLength; j++) {
-      res.add((long)rand.nextInt(maxValue));
+      res.add((long) RAND.nextInt(maxValue));
     }
 
     array = LongArray.copy(res);
@@ -401,7 +401,7 @@ public class LongArrayTests extends IntegersFixture {
 
     LongArray lst = new LongArray();
     for (int i = 0; i < 20; i++) {
-      lst.add(rand.nextInt(200));
+      lst.add(RAND.nextInt(200));
     }
     lst.sortUnique();
     lst.reverse();

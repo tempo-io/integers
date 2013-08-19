@@ -56,7 +56,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     DynamicLongSet dynamicSet = new DynamicLongSet(n*nAttempts);
     long[] toAdd = new long[n];
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      for (int i = 0; i < n; ++i) toAdd[i] = rand.nextLong();
+      for (int i = 0; i < n; ++i) toAdd[i] = RAND.nextLong();
       dynamicSet.addAll(toAdd);
       anotherSet.addAll(toAdd);
       LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
@@ -72,12 +72,12 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
 //    DynamicLongSet dls = new DynamicLongSet(n*nAttempts);
     long[] toAdd = new long[n];
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      for (int i = 0; i < n; ++i) toAdd[i] = rand.nextLong();
+      for (int i = 0; i < n; ++i) toAdd[i] = RAND.nextLong();
       lsb.addAll(toAdd);
       dls.addAll(toAdd);
       LongList lsbList = lsb.toTemporaryReadOnlySortedCollection();
       for (int i = 0; i < n; ++i) {
-        long l = rand.nextLong();
+        long l = RAND.nextLong();
         boolean expected = lsbList.binarySearch(l) >= 0;
         boolean actual = dls.contains(l);
         assertEquals(attempt + " " + i, expected, actual);
@@ -94,7 +94,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
         assertEquals(lsb.size(), dls.size());
         System.out.println(i + " set size: " + lsb.size() + " ratio: " + lsb.size()*1./i);
       }
-      long key = rand.nextInt(n);
+      long key = RAND.nextInt(n);
       boolean lsbContains = lsb.toTemporaryReadOnlySortedCollection().binarySearch(key) >= 0;
       boolean dlsContains = dls.contains(key);
       assertEquals(lsbContains, dlsContains);
@@ -117,7 +117,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
         assertEquals(hash.size(), tree.size());
         System.out.println(i + " set size: " + hash.size());
       }
-      long key = rand.nextInt(n);
+      long key = RAND.nextInt(n);
       boolean hashContains = hash.containsKey(key);
       boolean treeContains = tree.contains(key);
       assertEquals(hashContains, treeContains);
@@ -134,7 +134,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     LongSetBuilder setBuilder = new LongSetBuilder();
     int domain = (int)(1.2*n);
     for (int i = 0; i < n; ++i) {
-      long key = rand.nextInt(domain);
+      long key = RAND.nextInt(domain);
       hash.put(key, key);
       setBuilder.add(key);
     }
@@ -142,7 +142,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     System.in.read();
     LongList sorted = setBuilder.toTemporaryReadOnlySortedCollection();
     for (int i = 0; i < n; ++i) {
-      long key = rand.nextInt(domain);
+      long key = RAND.nextInt(domain);
       boolean hashContains = hash.containsKey(key);
       boolean sortedContains = sorted.binarySearch(key) >= 0;
       assertEquals(hashContains, sortedContains);

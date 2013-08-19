@@ -12,7 +12,7 @@ public abstract class IntegersFixture extends TestCase {
   protected static final CollectionsCompare CHECK = new CollectionsCompare();
 
   public static final String SEED = "com.almworks.integers.seed";
-  public static final Random rand = createRandom();
+  public static final Random RAND = createRandom();
 
   private static Random createRandom() {
     String seedStr = System.getProperty(SEED, "");

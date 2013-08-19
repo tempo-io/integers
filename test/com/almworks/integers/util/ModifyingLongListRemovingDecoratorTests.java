@@ -35,14 +35,14 @@ public class ModifyingLongListRemovingDecoratorTests extends IntegersFixture {
 
     long[] values = new long[arrLength];
     for (int i = 0; i < arrLength; i++) {
-      values[i] = rand.nextInt(maxValue);
+      values[i] = RAND.nextInt(maxValue);
     }
     LongList base = LongArray.create(values);
 
     int[] nativeIndexes = new int[arrLength];
     for (int test = 0; test < 20; test++) {
       for (int i = 0; i < indexesLength; i++) {
-        nativeIndexes[i] = rand.nextInt(arrLength);
+        nativeIndexes[i] = RAND.nextInt(arrLength);
       }
       IntArray indexes = IntArray.create(nativeIndexes);
       indexes.sortUnique();

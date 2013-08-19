@@ -1,9 +1,6 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
-import junit.framework.TestCase;
-
-import java.util.Arrays;
 
 public class LongSetBuilderTests extends IntegersFixture {
   public void test() {
@@ -29,13 +26,13 @@ public class LongSetBuilderTests extends IntegersFixture {
 
   public void testRandom() {
     for (int i = 0; i < 20; i++) { // replace 100 with 20 to make test run faster on build agent
-      int size = rand.nextInt(16000) + 10;
-      int factor = rand.nextInt(10) + 1;
+      int size = RAND.nextInt(16000) + 10;
+      int factor = RAND.nextInt(10) + 1;
       int count = size * factor / 2;
       LongArray set = new LongArray();
       LongSetBuilder builder = new LongSetBuilder(5);
       for (int j = 0; j < count; j++) {
-        int v = rand.nextInt(size);
+        int v = RAND.nextInt(size);
         set.add(v);
         builder.add(v);
       }

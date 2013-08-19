@@ -147,7 +147,7 @@ public class LongObjMapTests extends IntegersFixture {
     LongArray expected = new LongArray(10000);
     expected.addAll(0, 100, 228);
     for (int i = 0; i < 10000; i++) {
-      long value = rand.nextInt();
+      long value = RAND.nextInt();
       expected.add(value);
       myMap.put(value, Long.toString(value));
     }

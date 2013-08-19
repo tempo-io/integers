@@ -2,8 +2,6 @@ package com.almworks.integers.optimized;
 
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongProgression;
-import org.junit.Before;
-import org.junit.Test;
 
 public class SlidingLongArrayTests extends IntegersFixture {
   private final CyclicLongQueue myArray = new CyclicLongQueue(5);
@@ -69,7 +67,7 @@ public class SlidingLongArrayTests extends IntegersFixture {
       int next = 0;
       int min = 0;
       for (int i = 0; i < 100; ++i) {
-        boolean add = IntegersFixture.rand.nextBoolean();
+        boolean add = IntegersFixture.RAND.nextBoolean();
         if (add) {
           myArray.add(next);
           next += 1;

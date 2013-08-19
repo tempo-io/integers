@@ -86,7 +86,7 @@ public abstract class LongListChecker extends IntegersFixture {
     long[] arr = new long[arrLength];
     for (int test = 0; test < 20; test++) {
       for (int i = 0; i < arrLength; i++) {
-        arr[i] = rand.nextInt();
+        arr[i] = RAND.nextInt();
       }
       _testGetMethods(arr);
       _testStatusMethods(arr);

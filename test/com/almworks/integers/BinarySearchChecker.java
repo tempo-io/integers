@@ -56,7 +56,7 @@ public class BinarySearchChecker {
 
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < arrLength; j++) {
-        arr[j] = IntegersFixture.rand.nextInt();
+        arr[j] = IntegersFixture.RAND.nextInt();
       }
       Arrays.sort(arr);
       check(bs, arr);

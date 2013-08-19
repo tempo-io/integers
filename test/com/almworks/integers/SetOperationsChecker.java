@@ -68,18 +68,18 @@ public class SetOperationsChecker {
 
     LongArray intersection = create();
     for ( int i = 0; i < intersectionLength; i++) {
-      intersection.add(IntegersFixture.rand.nextInt());
+      intersection.add(IntegersFixture.RAND.nextInt());
     }
 
     for (int i = 0; i < arraysNumber; i++) {
-      int arrayLength = IntegersFixture.rand.nextInt(maxArrayLength);
+      int arrayLength = IntegersFixture.RAND.nextInt(maxArrayLength);
       arrays[i] = LongArray.copy(intersection);
 
       for (int j = 0; j < arrayLength; j++) {
         int minValue = mValues[i * 2];
         int maxValue = mValues[i * 2 + 1];
         int diff = maxValue - minValue;
-        arrays[i].add(minValue + IntegersFixture.rand.nextInt(diff));
+        arrays[i].add(minValue + IntegersFixture.RAND.nextInt(diff));
       }
       if (isSortUnique) {
         arrays[i].sortUnique();

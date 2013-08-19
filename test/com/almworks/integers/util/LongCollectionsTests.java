@@ -208,7 +208,7 @@ public class LongCollectionsTests extends IntegersFixture {
     maxElem = maxElem / factor;
     LongArray larr = new LongArray(len);
     for (int i = 0; i < len; ++i) {
-      int elem = rand.nextInt(maxElem) * factor;
+      int elem = RAND.nextInt(maxElem) * factor;
       larr.add(elem);
     }
     larr.sortUnique();
@@ -222,7 +222,7 @@ public class LongCollectionsTests extends IntegersFixture {
     int szb = b.size();
     int max = (int)((sza + szb) / intersRate);
     for (int i = 0; i < intersLen; ++i) {
-      int idx = rand.nextInt(max);
+      int idx = RAND.nextInt(max);
       if (idx < sza) {
         long value = a.get(idx);
         trueIntersection.add(value);
@@ -233,7 +233,7 @@ public class LongCollectionsTests extends IntegersFixture {
         withExtra.add(value);
       } else {
         long value;
-        do value = rand.nextInt(maxElem);
+        do value = RAND.nextInt(maxElem);
         while (value % 2 == 0 || value % 3 == 0);
         withExtra.add(value);
       }
@@ -261,8 +261,8 @@ public class LongCollectionsTests extends IntegersFixture {
     b.clear();
     diff.clear();
     for (int i = 0; i < 100; ++i) {
-      a.add(rand.nextInt(1000));
-      b.add(rand.nextInt(1000));
+      a.add(RAND.nextInt(1000));
+      b.add(RAND.nextInt(1000));
     }
     a.sortUnique();
     b.sortUnique();
@@ -327,7 +327,7 @@ public class LongCollectionsTests extends IntegersFixture {
     long[] arr = new long[arrLength];
     for (int test = 0; test < 20; test++) {
       for (int i = 0; i < arrLength; i++) {
-        arr[i] = rand.nextInt(maxInt);
+        arr[i] = RAND.nextInt(maxInt);
       }
       checkFindDuplicate(arr);
     }
@@ -353,7 +353,7 @@ public class LongCollectionsTests extends IntegersFixture {
 
     for (int test = 0; test < 10; test++) {
       for (int i = 0; i < arrLength; i++) {
-        arr.set(i, rand.nextInt(maxVal));
+        arr.set(i, RAND.nextInt(maxVal));
       }
       expected = LongArray.copy(arr);
       expected.sort();

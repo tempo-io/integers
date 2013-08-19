@@ -2,9 +2,6 @@ package com.almworks.integers;
 
 import junit.framework.TestCase;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -40,7 +37,7 @@ public class LongArrayMergePerformanceComparison extends TestCase{
       LongArray[] arrays = {null, null};
       for (int j = 0; j < 2; j++) {
         arrays[j] = new LongArray(sizes[j]);
-        for (int k = 0; k < sizes[j]; k++) arrays[j].add(IntegersFixture.rand.nextInt());
+        for (int k = 0; k < sizes[j]; k++) arrays[j].add(IntegersFixture.RAND.nextInt());
         arrays[j].sortUnique();
       }
 
@@ -66,16 +63,25 @@ public class LongArrayMergePerformanceComparison extends TestCase{
     String[] mergeTypesNames = {"realloc", "replace", "replace & count eCap"};
 
 
-    int[] coefs = new IntArray(IntProgression.arithmetic(9, 9)).toNativeArray();
-    int[] firstSizes = new IntArray(IntProgression.arithmetic(1000000, 1, 1000000 + 10)).toNativeArray();
+    int[] coefs = new IntArray(IntProgression.arithmetic(9, 15)).toNativeArray();
+    int[] firstSizes = new IntArray(IntProgression.arithmetic(1000000, 10, 1)).toNativeArray();
     int testCount = 100;
-    IntegersFixture.rand.nextInt();
+    IntegersFixture.RAND.nextInt();
+    System.out.print("|firstSize|coef");
+    for (int j = 0; j < mergeTypesNames.length; j++) {
+      for (int i = 0; i < mergersNames.length - 1; i++) {
+        System.out.print("|" + mergeTypesNames[j] + ", " + mergersNames[i]);
+      }
+    }
+    System.out.println();
+
     for (int firstSize : firstSizes) {
       for(int coef: coefs) {
         int[] sizes = {firstSize, firstSize / coef};
         System.out.print("|" + firstSize + "|" + coef);
-        for (int i = 0; i < mergers.length - 1; i++) {
-          for (int j = 0; j < mergeTypes.length; j++) {
+
+        for (int j = 0; j < mergeTypes.length; j++) {
+          for (int i = 0; i < mergers.length - 1; i++) {
             System.out.print("|" + testBenchMerge(mergers[i], mergeTypes[j], sizes, testCount));
 //            System.out.println(mergersNames[i] + ", " +  mergeTypesNames[j] + ": " +
 //                testBenchMerge(mergers[i], mergeTypes[j], sizes, testCount) + "\n ");
@@ -131,7 +137,7 @@ public class LongArrayMergePerformanceComparison extends TestCase{
       indexes[i] = i;
     }
     for (int curSize = size; 0 < curSize; curSize--) {
-      int ind = IntegersFixture.rand.nextInt(curSize);
+      int ind = IntegersFixture.RAND.nextInt(curSize);
       IntCollections.swap(indexes, ind, curSize);
     }
     return indexes;
@@ -145,7 +151,7 @@ public class LongArrayMergePerformanceComparison extends TestCase{
 //    if (true) return;
 
     int[] src = new int[size], dest = new int[size];
-    for (int i = 0; i < size; i++) src[i] = IntegersFixture.rand.nextInt();
+    for (int i = 0; i < size; i++) src[i] = IntegersFixture.RAND.nextInt();
 
     // stupid copy
     for (int j = 0; j < 100; j++) {

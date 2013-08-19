@@ -119,7 +119,7 @@ public class DynamicLongSetTests extends IntegersFixture {
     DynamicLongSet dynamicSet = new DynamicLongSet(510);
     WritableLongList toAdd = new LongArray();
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      for (int i = 0; i < ns[attempt]; ++i) toAdd.add(rand.nextLong());
+      for (int i = 0; i < ns[attempt]; ++i) toAdd.add(RAND.nextLong());
       dynamicSet.addAll(toAdd);
       dynamicSet.compactify();
       anotherSet.addAll(toAdd);
@@ -146,12 +146,12 @@ public class DynamicLongSetTests extends IntegersFixture {
     int sz = 8; //8200;
     int waitTime = 0;
 
-    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
-    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
-//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
-//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
-//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
-//    testColoringTypes(rand, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
+    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
+    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
+//    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
+//    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
+//    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
+//    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
   }
 
   private void testColoringTypes(Random r, int waitTime, int attempts, int sz, DynamicLongSet.ColoringType cT, DlsOperation oper) {
@@ -220,9 +220,9 @@ public class DynamicLongSetTests extends IntegersFixture {
 
   public void testAdd() {
     int n = 1023;
-    for (int i = 0; i < n; ++i) set.add(rand.nextLong());
+    for (int i = 0; i < n; ++i) set.add(RAND.nextLong());
     long[] toAdd = new long[n];
-    for (int i = 0; i < n; ++i) toAdd[i] = rand.nextLong();
+    for (int i = 0; i < n; ++i) toAdd[i] = RAND.nextLong();
     long start = System.currentTimeMillis();
     set.addAll(toAdd);
     float tm = (System.currentTimeMillis() - start)/1000F;

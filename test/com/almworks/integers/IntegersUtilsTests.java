@@ -110,7 +110,7 @@ public class IntegersUtilsTests extends IntegersFixture {
     int[] res = new int[arrayLength];
     int[] expected = new int[arrayLength];
     for (int i = 0; i < arrayLength; i++) {
-      res[i] = rand.nextInt(maxValue);
+      res[i] = RAND.nextInt(maxValue);
       expected[i] = res[i];
     }
     int[] copy = IntegersUtils.arrayCopy(res);
@@ -125,7 +125,7 @@ public class IntegersUtilsTests extends IntegersFixture {
     int[] intArr = new int[arrayLength];
 
     for (int i = 0; i < arrayLength; i++) {
-      int val = rand.nextInt(maxValue);
+      int val = RAND.nextInt(maxValue);
       res.add(val);
       intArr[i] = val;
     }
