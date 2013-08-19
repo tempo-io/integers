@@ -49,49 +49,6 @@ public abstract class AbstractLongList implements LongList {
   }
 
   @NotNull
-  public static StringBuilder append(@Nullable StringBuilder sb, @Nullable LongIterable i) {
-    if (sb == null) sb = new StringBuilder();
-    if (i == null) {
-      sb.append("null");
-    } else {
-      LongIterator it = i.iterator();
-      sb.append("(").append(it.nextValue());
-      while (it.hasNext()) {
-        sb.append(", ").append(it.nextValue());
-      }
-      sb.append(")");
-    }
-    return sb;
-  }
-
-  /** https://code.google.com/p/integers/issues/detail?id=27 */
-  public String toBoundedString() {
-    int lim = 10;
-    if (size() > 2 * lim) {
-      return toShortString(lim);
-    } else {
-      return append(null, this).toString();
-    }
-  }
-
-  private String toShortString(int lim) {
-    assert size() > 2 * lim : size() + " " + this;
-    StringBuilder sb = new StringBuilder("[").append(size()).append("] (");
-
-    LongListIterator it = this.iterator();
-    sb.append(it.nextValue());
-    for (int i = 1; i < lim; i++) {
-      sb.append(", ").append(it.nextValue());
-    }
-    sb.append(", ...");
-    it.move(size() - 2 * lim);
-    for (int i = 0; i < lim; i++) {
-      sb.append(", ").append(it.nextValue());
-    }
-    return sb.append(")").toString();
-  }
-
-  @NotNull
   public LongListIterator iterator() {
     return iterator(0, size());
   }

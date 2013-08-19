@@ -21,7 +21,9 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.optimized.CyclicLongQueue;
 import com.almworks.integers.optimized.SameValuesLongList;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -202,19 +204,19 @@ public class LongCollections {
     final LongArray sorted = new LongArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-      new IntFunction2() {
-        @Override
-        public int invoke(int a, int b) {
-          return LongCollections.compare(sorted.get(a), sorted.get(b));
-        }
-      },
-      new IntProcedure2() {
-        @Override
-        public void invoke(int a, int b) {
-          sorted.swap(a, b);
-          perms.swap(a, b);
-        }
-      });
+        new IntFunction2() {
+          @Override
+          public int invoke(int a, int b) {
+            return LongCollections.compare(sorted.get(a), sorted.get(b));
+          }
+        },
+        new IntProcedure2() {
+          @Override
+          public void invoke(int a, int b) {
+            sorted.swap(a, b);
+            perms.swap(a, b);
+          }
+        });
     int result = findDuplicateSorted(sorted);
     return result == -1 ? -1 : perms.get(result);
   }
@@ -400,6 +402,86 @@ public class LongCollections {
   public static DynamicLongSet intersection(DynamicLongSet dest, DynamicLongSet src) {
     dest.retain(src);
     return dest;
+  }
+
+  @NotNull
+  public static StringBuilder append(@Nullable StringBuilder sb, @Nullable LongIterable i) {
+    if (sb == null) sb = new StringBuilder();
+    if (i == null) {
+      sb.append("null");
+    } else {
+      LongIterator it = i.iterator();
+      if (!it.hasNext()) {
+        sb.append("()");
+      } else {
+        sb.append("(").append(it.nextValue());
+        while (it.hasNext()) {
+          sb.append(", ").append(it.nextValue());
+        }
+        sb.append(")");
+      }
+    }
+    return sb;
+  }
+
+  public static String toBoundedString(LongIterable iterable) {
+    return toBoundedString(iterable, 10);
+  }
+
+  public static String toBoundedString(LongIterable iterable, int lim) {
+    if (iterable instanceof LongList) {
+      LongList list = (LongList)iterable;
+      if (list.size() > lim * 2) {
+        LongListIterator lastElemsIt = list.iterator();
+        int size = list.size();
+        lastElemsIt.move(list.size() - lim);
+        return toShortString(size, lim, list.iterator(), lastElemsIt);
+      } else {
+        return append(null, list).toString();
+      }
+    } else {
+      return outputIterator(iterable.iterator(), lim);
+    }
+  }
+
+  private static String outputIterator(LongIterator it, int lim) {
+//    System.out.println(new LongArray(it));
+    int itSize = 0;
+    LongArray headValues = new LongArray(lim);
+    for ( ;it.hasNext() && itSize < lim; itSize++) {
+      headValues.add(it.nextValue());
+    }
+
+    CyclicLongQueue tailValues = new CyclicLongQueue(lim);
+    for ( ;it.hasNext() && itSize < lim * 2; itSize++) {
+      tailValues.add(it.nextValue());
+    }
+
+    if (!it.hasNext()) {
+      headValues.addAll(tailValues);
+      return toBoundedString(headValues);
+    } else {
+      // in iterator more than 20 elements
+      for ( ; it.hasNext(); itSize++) {
+        tailValues.removeFirst();
+        tailValues.add(it.nextValue());
+      }
+      return toShortString(itSize, lim, headValues.iterator(), tailValues.iterator());
+    }
+  }
+
+  private static String toShortString(int size, int lim, LongIterator headIt, LongIterator tailIt) {
+    assert size > 2 * lim : size + " " + lim;
+    StringBuilder sb = new StringBuilder("[").append(size).append("] (");
+    sb.append(headIt.nextValue());
+    for (int i = 1; i < lim; i++) {
+      sb.append(", ").append(headIt.nextValue());
+    }
+    sb.append(", ...");
+    for (int i = 0; i < lim; i++) {
+      sb.append(", ").append(tailIt.nextValue());
+    }
+    return sb.append(")").toString();
   }
 
 }

@@ -87,4 +87,21 @@ public class LongArrayIteratorTests extends IntegersFixture {
     iter.removeRange(0, 4);
     CHECK.order(arr, LongArray.create(0, 6, 7, 8, 9));
   }
+
+  public void checkToBoundedString(LongArray array) {
+    String expected = LongCollections.toBoundedString(array, 5);
+    String actual = LongCollections.toBoundedString(array.iterator(), 5);
+    assertEquals(actual, expected, actual);
+  }
+
+  public void testToBoundedString() {
+    LongArray array = new LongArray();
+    checkToBoundedString(array);
+    array.addAll(LongProgression.arithmetic(0, 10));
+    checkToBoundedString(array);
+    array.add(10);
+    checkToBoundedString(array);
+    array.addAll(LongProgression.arithmetic(11, 10));
+    checkToBoundedString(array);
+  }
 }
