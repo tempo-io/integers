@@ -358,15 +358,29 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Merge src and current array. Is there {@code getCapacity() < src.size() + size()}, will go reallocation.<br>
+   * Merge sorted src and this sorted array. Depending on {@code size()} and {@code src.size()} use {@link LongArray#unionWithSmallArray(LongList)} or
+   * {@link LongArray#unionWithSameLengthList(LongList)}.
+   * */
+  public LongArray unionWithArray(LongList src) {
+    int k = size() / src.size();
+    if (k < 10) {
+      unionWithSameLengthList(src);
+    } else {
+      unionWithSmallArray(src);
+    }
+    return this;
+  }
+
+  /**
+   * Merge sorted src and this sorted array. If there {@code getCapacity() < src.size() + size()}, will go reallocation.<br>
    * Complexity: {@code O(eps * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.<br>
    * Prefer to use if {@code src.size()} is much smaller than {@code size()}. If they are comparable
    * it's better use {@link com.almworks.integers.LongArray#unionWithSameLengthList(LongList)}
    *
-   * @param  src another read-only array
+   * @param  src another sorted read-only array
    * @return this.
    * */
-  public LongArray unionWithSmallArray(LongArray src) {
+  public LongArray unionWithSmallArray(LongList src) {
     unionWithSmallArray(src, new int[][]{null});
     return this;
   }
@@ -374,12 +388,11 @@ public final class LongArray extends AbstractWritableLongList {
   /**
    * @param insertionPoints temporary array, insertionPoints[0] must be null or
    *                        it's length greater than or equal to the src.size()
-   * @see #unionWithSmallArray(LongArray)
+   * @see #unionWithSmallArray(LongList)
    */
-  public LongArray unionWithSmallArray(LongArray src, int[][] insertionPoints) {
+  public LongArray unionWithSmallArray(LongList src, int[][] insertionPoints) {
     if (src.size() == 0)
       return this;
-    src.sort();
     if (size() + src.size() > myArray.length) {
       // merge with reallocation
       int oldLength = myArray.length;
@@ -388,7 +401,7 @@ public final class LongArray extends AbstractWritableLongList {
       int newDestSize = 0;
       int destIndex = 0;
       for (int i = 0; i < src.size(); i++) {
-        long v = src.myArray[i];
+        long v = src.get(i);
         if (i > 0 && v == last)
           continue;
         last = v;
@@ -428,7 +441,7 @@ public final class LongArray extends AbstractWritableLongList {
       int destIndex = 0;
       long last = 0;
       for (int i = 0; i < src.size(); i++) {
-        long v = src.myArray[i];
+        long v = src.get(i);
         if (i > 0 && v == last)
           continue;
         last = v;
@@ -463,7 +476,7 @@ public final class LongArray extends AbstractWritableLongList {
           System.arraycopy(myArray, insertion, myArray, insertion + insertCount, destIndex - insertion);
           destIndex = insertion;
         }
-        myArray[insertion + insertCount - 1] = src.myArray[i];
+        myArray[insertion + insertCount - 1] = src.get(i);
         insertCount--;
         i--;
       }
@@ -472,11 +485,11 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Merge src and current array. Is there {@code getCapacity() < src.size() + size()}, will go reallocation.<br>
+   * Merge src and sorted this array. Is there {@code getCapacity() < src.size() + size()}, will go reallocation.<br>
    * Complexity: {@code O(N + T)}, where N - size() and T - {@code src.size()}.<br>
    * Prefer to use if the {@code size()} and {@code src.size()} are comparable.
    * If the {@code src.size()} is much smaller than {@code size()},
-   * it's better to use {@link com.almworks.integers.LongArray#unionWithSmallArray(LongArray)}
+   * it's better to use {@link com.almworks.integers.LongArray#unionWithSmallArray(LongList)}
    *
    * @param  src sorted list of numbers (set)
    *

@@ -34,22 +34,18 @@ public class SetOperationsChecker {
   private boolean sortUniqueStatus = true;
   private boolean onlyTwo = true;
 
-  void foo(LongList a) {
-    LongArray b = (LongArray)a;
-  }
-
   /**
    *
    * @param intersectionLength the number of common values for all arrays
    * @param arraysNumber number of arrays
    * @param maxArrayLength max random length for every array
+   * @param isSortUnique
    * @param minMaxValues the min and max values for arrays. There is 4 possible values for minMaxValues.length
 *                 <ul><li>0 - for all arrays values {@code min = 0, max = MAX}
 *                     <li>1 - for all arrays values {@code min = 0, max = minMaxValues[0]}
 *                     <li>2 - for all arrays values {@code min = minMaxValues[0], max = minMaxValues[1]}
-*                     <li>arraysNumber * 2 - min and max are contains in minMaxValues and different for all arrays   @return LongArray[arraysNumber]
-*                   </ul>   */
-  private LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, int... minMaxValues) {
+*                     <li>arraysNumber * 2 - min and max are contains in minMaxValues and different for all arrays   @return LongArray[arraysNumber]   */
+  public static LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, boolean isSortUnique, int... minMaxValues) {
     final int mLen = minMaxValues.length;
     assert mLen == 0 || mLen == 1 || mLen == 2 || mLen == arraysNumber * 2;
     int[] mValues = new int[arraysNumber * 2];
@@ -85,7 +81,7 @@ public class SetOperationsChecker {
         int diff = maxValue - minValue;
         arrays[i].add(minValue + IntegersFixture.rand.nextInt(diff));
       }
-      if (sortUniqueStatus) {
+      if (isSortUnique) {
         arrays[i].sortUnique();
       }
       IntegersDebug.println(arrays[i]);
@@ -171,7 +167,7 @@ public class SetOperationsChecker {
   }
 
   private void testUnionRandom(int intersectionLength, int arraysNumber, int maxArrayLength, int... minMaxValues) {
-    LongArray[] arrays = generateRandomArrays(intersectionLength, arraysNumber, maxArrayLength, minMaxValues);
+    LongArray[] arrays = generateRandomArrays(intersectionLength, arraysNumber, maxArrayLength, sortUniqueStatus, minMaxValues);
     checkNewSetCreator(arrays);
   }
 
@@ -179,7 +175,7 @@ public class SetOperationsChecker {
     LongIterator get(LongArray... arrays);
   }
 
-  public static class UnionGetter implements newSetCreator{
+  public static class UnionGetter implements newSetCreator {
     public LongIterator get(LongArray ... arrays) {
       LongArray expected = new LongArray();
       for (LongArray array : arrays) {

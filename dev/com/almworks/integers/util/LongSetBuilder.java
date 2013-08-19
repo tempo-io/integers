@@ -22,6 +22,8 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 import static com.almworks.integers.IntegersUtils.*;
 
 public final class LongSetBuilder implements Cloneable, LongCollector, LongIterable {
@@ -101,6 +103,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   private void mergeTemp() {
     if (myTempSize == 0)
       return;
+    Arrays.sort(myTemp, 0, myTempSize);
     mySorted.unionWithSmallArray(new LongArray(myTemp, myTempSize), myTempInsertionPoints);
     myTempSize = 0;
   }
