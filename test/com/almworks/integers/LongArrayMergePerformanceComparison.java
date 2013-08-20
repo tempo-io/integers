@@ -1,209 +1,206 @@
 package com.almworks.integers;
 
-import junit.framework.TestCase;
-
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 
-public class LongArrayMergePerformanceComparison extends TestCase{
-  public enum MergeType { REPLACE, REALLOC, REPLACE_COUNT_ENSURE_CAPACITY }
+public class LongArrayMergePerformanceComparison extends IntegersFixture {
+  public enum MergeModification {
+    REALLOC, REPLACE, REPLACE_COUNT_ENSURE_CAPACITY
+  }
 
-  public static interface Merger {
+  MergeType[] mergers = {new MergeUsingSame(), new MergeUsingSmall(), new MergeUsingHeuristic()};
+  MergeModification[] mergeModifications = {MergeModification.REALLOC, MergeModification.REPLACE, MergeModification.REPLACE_COUNT_ENSURE_CAPACITY};
+
+  public static interface MergeType {
     void invoke(LongArray first, LongArray second);
+    String toString();
   }
 
-
-  public static class MergeUsingSame implements Merger {
+  public static class MergeUsingSame implements MergeType {
     public void invoke(LongArray first, LongArray second) {
-      first.unionWithSameLengthList(second);
+      first.mergeWithSameLength(second);
     }
+    public String toString() { return "Same";}
   }
 
-  public static class MergeUsingSmall implements Merger {
+  public static class MergeUsingSmall implements MergeType {
     public void invoke(LongArray first, LongArray second) {
-      first.unionWithSmallArray(second);
+      first.mergeWithSmall(second);
     }
+    public String toString() { return "Small";}
   }
 
-  public static class MergeUsingHeuristic implements Merger {
+  public static class MergeUsingHeuristic implements MergeType {
     public void invoke(LongArray first, LongArray second) {
-      first.unionWithArray(second);
+      first.merge(second);
+    }
+    public String toString() { return "Heuristic";}
+  }
+
+  public static class TestConfiguration {
+    public MergeType[] mergers;
+    public MergeModification[] modifications;
+    public int[] firstSizes, coefs;
+    public int testNumber, warmUp;
+    // if outputFolder == "", than result will put to System.output
+    public String outputFolder;
+
+    public TestConfiguration(MergeType[] mergers, MergeModification[] modifications, int[] firstSizes, int[] coefs, int testNumber, int warmUp, String outputFolder) {
+      this.mergers = mergers;
+      this.modifications = modifications;
+      this.firstSizes = firstSizes;
+      this.coefs = coefs;
+      this.testNumber = testNumber;
+      this.warmUp = warmUp;
+      this.outputFolder = outputFolder;
+    }
+
+    public String toString() {
+      StringBuilder res = new StringBuilder("TestConfiguration:\n");
+      res.append("  mergers: [").append(Arrays.toString(mergers)).append("]\n");
+      res.append("  modifications: [").append(Arrays.toString(modifications)).append("]\n");
+      res.append("  firstSizes: [").append(Arrays.toString(firstSizes)).append("]\n");
+      res.append("  coefs: [").append(Arrays.toString(coefs)).append("]\n");
+      res.append("  testNumber: ").append(testNumber).append("; ").append(warmUp);
+      return res.toString();
     }
   }
 
-  public long testBenchMerge(Merger merger, MergeType mType, int[] sizes, int testCount) {
-    long allTime = 0, start = 0;
-    for (int i = 0; i < testCount + 20; i++) {
-      LongArray[] arrays = {null, null};
-      for (int j = 0; j < 2; j++) {
-        arrays[j] = new LongArray(sizes[j]);
-        for (int k = 0; k < sizes[j]; k++) arrays[j].add(IntegersFixture.RAND.nextInt());
-        arrays[j].sortUnique();
+  public long runMerge(MergeType merger, MergeModification mergeModification, LongArray[] arrays) {
+    long start = 0;
+    if (mergeModification == MergeModification.REPLACE_COUNT_ENSURE_CAPACITY) {
+      start = System.currentTimeMillis();
+    }
+    if (mergeModification != MergeModification.REALLOC) {
+      arrays[0].ensureCapacity(arrays[0].size() + arrays[1].size() + 10);
+    }
+    if (mergeModification != MergeModification.REPLACE_COUNT_ENSURE_CAPACITY) {
+      start = System.currentTimeMillis();
+    }
+    merger.invoke(arrays[0], arrays[1]);
+    return System.currentTimeMillis() - start;
+  }
+
+  protected int[] intAp(int start, int step, int count) {
+    int[] r = new int[count];
+    for (int i = 0; i < r.length; i++) {
+      r[i] = start + step * i;
+    }
+    return r;
+  }
+
+  public LongArray[] getArrays(int ... sizes) {
+    LongArray[] res = new LongArray[sizes.length];
+    for (int i = 0; i < sizes.length; i++) {
+      res[i] = new LongArray(sizes[i]);
+      for (int j = 0; j < sizes[i]; j++) {
+        res[i].add(RAND.nextInt());
+      }
+      res[i].sortUnique();
+    }
+    return res;
+  }
+
+  public void testBenchMerge(TestConfiguration configuration) throws IOException{
+    PrintStream out = System.out;
+    boolean writeToFile = !configuration.outputFolder.equals("");
+    if (writeToFile) {
+      new File(configuration.outputFolder).mkdir();
+      out = new PrintStream(new File (configuration.outputFolder + "/TestConfiguration.txt"));
+      out.println(configuration);
+    }
+    System.out.println(configuration);
+
+    int mergersLen = configuration.mergers.length;
+    int modificationsLen = configuration.modifications.length;
+
+    for (int firstSize: configuration.firstSizes) {
+      if (writeToFile) {
+        out = new PrintStream(new File (configuration.outputFolder + "/" + firstSize + ".txt"));
       }
 
-      if (mType == MergeType.REPLACE_COUNT_ENSURE_CAPACITY) {
-        start = System.currentTimeMillis();
+      out.print("| firstSize | coef ");
+      for (int type = 0; type < mergersLen; type++) {
+        for (int mod = 0; mod < modificationsLen; mod++) {
+          out.printf("| %s, %s ", configuration.mergers[type].toString(), configuration.modifications[mod]);
+        }
       }
-      if (mType != MergeType.REALLOC) {
-        arrays[0].ensureCapacity(arrays[0].size() + arrays[1].size() + 10);
+      out.println();
+
+      for (int coef: configuration.coefs) {
+
+        long[] allTimes = new long[mergersLen * modificationsLen];
+        for (int i = 0; i < configuration.testNumber + configuration.warmUp; i++) {
+          LongArray[] arrays = getArrays(firstSize, firstSize / coef);
+          for (int type = 0; type < mergersLen; type++) {
+            for (int mod = 0; mod < modificationsLen; mod++) {
+              LongArray[] copy = {LongArray.copy(arrays[0]), LongArray.copy(arrays[1])};
+              long time = runMerge(configuration.mergers[type], configuration.modifications[mod], copy);
+              if (i > configuration.warmUp) {
+                allTimes[type * modificationsLen + mod] += time;
+              }
+            }
+          }
+        }
+        out.printf("| %d | %d", firstSize, coef);
+        for (long time: allTimes) {
+          out.print("|" + time);
+        }
+        out.println();
       }
-      if (mType != MergeType.REPLACE_COUNT_ENSURE_CAPACITY) {
-        start = System.currentTimeMillis();
-      }
-      merger.invoke(arrays[0], arrays[1]);
-      if (i > 20) allTime += System.currentTimeMillis() - start;
+      if (writeToFile) out.close();
     }
-    return allTime;
   }
 
   public void testBenchMerge() throws IOException {
-    Merger[] mergers = {new MergeUsingSame(), new MergeUsingSmall(), new MergeUsingHeuristic()};
-    String[] mergersNames = {"Same", "Small", "Heuristic"};
-    MergeType[] mergeTypes = {MergeType.REALLOC, MergeType.REPLACE, MergeType.REPLACE_COUNT_ENSURE_CAPACITY};
-    String[] mergeTypesNames = {"realloc", "replace", "replace & count eCap"};
+    final MergeType[] SameAndSmall = {mergers[0], mergers[1]};
+    final MergeModification[] reallocModification = {MergeModification.REALLOC};
+    final MergeModification[] replaceModification = {MergeModification.REPLACE};
 
+    TestConfiguration config = new TestConfiguration(
+        SameAndSmall,
+        reallocModification,
+        intAp(10000, 5000, 18), intAp(10, 1, 15), 5000, 100, "benchmark realloc, firstSize max 100000");
+    testBenchMerge(config);
 
-    int[] coefs = new IntArray(IntProgression.arithmetic(9, 15)).toNativeArray();
-    int[] firstSizes = new IntArray(IntProgression.arithmetic(1000000, 10, 1)).toNativeArray();
-    int testCount = 100;
-    IntegersFixture.RAND.nextInt();
-    System.out.print("|firstSize|coef");
-    for (int j = 0; j < mergeTypesNames.length; j++) {
-      for (int i = 0; i < mergersNames.length - 1; i++) {
-        System.out.print("|" + mergeTypesNames[j] + ", " + mergersNames[i]);
-      }
-    }
-    System.out.println();
+    config = new TestConfiguration(
+        SameAndSmall,
+        reallocModification,
+        intAp(100000, 100000, 3), intAp(12, 1, 13), 100, 5, "benchmark realloc, firstSize max 400000");
+    testBenchMerge(config);
 
-    for (int firstSize : firstSizes) {
-      for(int coef: coefs) {
-        int[] sizes = {firstSize, firstSize / coef};
-        System.out.print("|" + firstSize + "|" + coef);
+    config = new TestConfiguration(
+        SameAndSmall,
+        reallocModification,
+        intAp(500000, 100000, 6), intAp(12, 1, 13), 50, 5, "benchmark realloc, firstSize max 1000000");
+    testBenchMerge(config);
+    config = new TestConfiguration(
+        SameAndSmall,
+        replaceModification,
+        intAp(10000, 5000, 18), intAp(3, 1, 7), 500, 20, "benchmark replace, firstSize max 100000");
+    testBenchMerge(config);
 
-        for (int j = 0; j < mergeTypes.length; j++) {
-          for (int i = 0; i < mergers.length - 1; i++) {
-            System.out.print("|" + testBenchMerge(mergers[i], mergeTypes[j], sizes, testCount));
-//            System.out.println(mergersNames[i] + ", " +  mergeTypesNames[j] + ": " +
-//                testBenchMerge(mergers[i], mergeTypes[j], sizes, testCount) + "\n ");
-          }
-        }
-        System.out.println();
-      }
-    }
+    config = new TestConfiguration(
+        SameAndSmall,
+        replaceModification,
+        intAp(100000, 100000, 3), intAp(3, 1, 7), 100, 5, "benchmark replace, firstSize max 400000");
+    testBenchMerge(config);
+
+    config = new TestConfiguration(
+        SameAndSmall,
+        replaceModification,
+        intAp(500000, 100000, 6), intAp(3, 1, 7), 50, 5, "benchmark replace, firstSize max 1000000");
+    testBenchMerge(config);
   }
 
-  long stupidCopyTest(int[] src, int[] dest, int size) {
-    long start = System.currentTimeMillis();
-    for (int i = 0; i < size; i++) {
-      dest[i] = src[i];
-    }
-    return System.currentTimeMillis() - start;
-  }
+  public void test() throws IOException {
+    new File("op").mkdirs();
 
-  long stupidCopyTestWithIndexes(int[] src, int[] dest, int[] indexes, int size) {
-    long start = System.currentTimeMillis();
-    for (int i = 0; i < size; i++) {
-      dest[i] = src[indexes[i]];
-    }
-    return System.currentTimeMillis() - start;
-  }
+    PrintStream out = new PrintStream(new File ("Engineer.txt"));
+    out.println("hw!");
+    out.close();
 
-  long stupidCopyTestWithIndexes0(int[] src, int[] dest, int[] indexes, int size) {
-    long start = System.currentTimeMillis();
-    for (int i = 0; i < size; i++) {
-      System.arraycopy(src, indexes[i], dest, i, 1);
-    }
-    return System.currentTimeMillis() - start;
-  }
-
-  long arraycopyTest(int[] src, int[] dest, int size, int elementsCount, int[] indexes) {
-    if (elementsCount == -1) {
-      long start = System.currentTimeMillis();
-      System.arraycopy(src, 0, dest, 0, size);
-      return System.currentTimeMillis() - start;
-    } else {
-      int times = indexes.length;
-      long start = System.currentTimeMillis();
-      for (int i = 0; i < times; i++) {
-        System.arraycopy(src, indexes[i], dest, i, elementsCount);
-      }
-      return System.currentTimeMillis() - start;
-    }
-  }
-
-  public int[] getShuffledArray(int size) {
-    int[] indexes = new int[size];
-    for (int i = 0; i < size; i++) {
-      indexes[i] = i;
-    }
-    for (int curSize = size; 0 < curSize; curSize--) {
-      int ind = IntegersFixture.RAND.nextInt(curSize);
-      IntCollections.swap(indexes, ind, curSize);
-    }
-    return indexes;
-  }
-
-  public void _testArrayCopy() {
-    int size = 10000000;
-    int[] indexes = getShuffledArray(size);
-    System.out.println("e!");
-//    System.out.println(Arrays.toString(indexes));
-//    if (true) return;
-
-    int[] src = new int[size], dest = new int[size];
-    for (int i = 0; i < size; i++) src[i] = IntegersFixture.RAND.nextInt();
-
-    // stupid copy
-    for (int j = 0; j < 100; j++) {
-      Arrays.fill(dest, -1);
-      stupidCopyTest(src, dest, size);
-    }
-    long allTime = 0;
-    for (int j = 0; j < 1000; j++) {
-      Arrays.fill(dest, -1);
-      allTime += stupidCopyTest(src, dest, size);
-    }
-    System.out.println("Stupid copy: " + allTime);
-
-    // stupid copy with indexes
-    for (int j = 0; j < 100; j++) {
-      Arrays.fill(dest, -1);
-      stupidCopyTestWithIndexes(src, dest, indexes, size);
-    }
-    allTime = 0;
-    for (int j = 0; j < 1000; j++) {
-      Arrays.fill(dest, -1);
-      allTime += stupidCopyTestWithIndexes(src, dest, indexes, size);
-    }
-    System.out.println("Stupid copy with indexes: " + allTime);
-
-    // stupid Systems.arraycopy with indexes
-    for (int j = 0; j < 100; j++) {
-      Arrays.fill(dest, -1);
-      stupidCopyTestWithIndexes0(src, dest, indexes, size);
-    }
-    allTime = 0;
-    for (int j = 0; j < 1000; j++) {
-      Arrays.fill(dest, -1);
-      allTime += stupidCopyTestWithIndexes0(src, dest, indexes, size);
-    }
-    System.out.println("Systems.arraycopy 1 elem, with indexes: " + allTime);
-
-    // Systems.arraycopy
-    int[] counties = {1, 2, 4, 5, 8, 10, 20, 50, 100, 200, 500, 1000, 10000, 100000, 200000, 500000, 1000000, -1};
-    for (int count: counties) {
-      indexes = count == -1 ? null : getShuffledArray(size/count);
-
-      for (int j = 0; j < 100; j++) {
-        Arrays.fill(dest, -1);
-        arraycopyTest(src, dest, size, count, indexes);
-      }
-      allTime = 0;
-      for (int j = 0; j < 1000; j++) {
-        Arrays.fill(dest, -1);
-        allTime += arraycopyTest(src, dest, size, count, indexes);
-      }
-      System.out.println("arraycopy full: [count=" + (count == -1 ? "all" : count) + "]: " + allTime);
-    }
+    PrintStream sout = System.out;
+    sout.print("hello!");
   }
 }

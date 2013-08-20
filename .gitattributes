@@ -226,6 +226,7 @@ test/com/almworks/integers/util/LongSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/LongSetBuilderTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTests.java -text
 test/com/almworks/integers/util/ModifyingLongListRemovingDecoratorTests.java -text
+test/com/almworks/util/ArrayCopyTests.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text
 util/com/almworks/util/BadFormatException.java -text
