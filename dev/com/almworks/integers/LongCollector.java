@@ -23,7 +23,17 @@ package com.almworks.integers;
 * Interface for write-only collection
 */
 public interface LongCollector {
-  LongCollector DUMMY = new LongCollector() {
+  LongCollector DUMMY = new Dummy();
+
+  void add(long value);
+
+  void addAll(LongList values);
+
+  void addAll(LongIterator iterator);
+
+  void addAll(long ... values);
+
+  class Dummy implements LongCollector {
     @Override
     public void add(long value) {
     }
@@ -39,13 +49,5 @@ public interface LongCollector {
     @Override
     public void addAll(long... values) {
     }
-  };
-
-  void add(long value);
-
-  void addAll(LongList values);
-
-  void addAll(LongIterator iterator);
-
-  void addAll(long ... values);
+  }
 }
