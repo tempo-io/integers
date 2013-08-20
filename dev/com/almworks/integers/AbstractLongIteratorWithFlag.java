@@ -23,15 +23,21 @@ import java.util.NoSuchElementException;
 
 
 /**
- * There is iterators, that status hasValue() can't be calculate from
- * some class fields, and it's necessary also store separately flag
- * boolean.<br>
- * For such purposes approach class
- * AbstractLongIteratorWithFlag, which store and work with flag take over.
- *
- * For iterator implementation it's necessary to define 2 methods: nextImpl(), valueImpl()
- * nextImpl()  switch iterator position to next state
- * valueImpl() return the current value, if it's possible
+ * This is a convenient base class for iterators that store
+ * {@link com.almworks.integers.AbstractLongIterator#hasValue()}
+ * state in a separate boolean flag.
+ * These are the iterators that cannot calculate {@link AbstractLongIterator#hasValue()}
+ * based only on the state necessary to implement {@link AbstractLongIterator#value()} and
+ * {@link AbstractLongIterator#hasNext()}. Example: IndexedLongIterator.
+ * To implement this class, one needs to implement 3 methods,
+ * {@link AbstractLongIteratorWithFlag#nextImpl()}, {@link AbstractLongIteratorWithFlag#valueImpl()} and
+ * {@link AbstractLongIteratorWithFlag#hasNext()}
+ * <ul>
+ * <li>{@link AbstractLongIteratorWithFlag#nextImpl()} is called before any call to
+ * {@link AbstractLongIteratorWithFlag#valueImpl()} and should be used to either initialize the
+ * state or advance the iterator.
+ * <li>{@link AbstractLongIteratorWithFlag#valueImpl()} can safely assume that the iterator is initialized.
+ * </ul>
  * */
 public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator {
   protected boolean myIterated = false;
@@ -65,7 +71,7 @@ public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator 
     throw new UnsupportedOperationException();
   }
 
-  abstract protected long valueImpl();
+  protected abstract long valueImpl();
 
-  protected abstract void nextImpl();
+  protected abstract void nextImpl() throws NoSuchElementException;
 }
