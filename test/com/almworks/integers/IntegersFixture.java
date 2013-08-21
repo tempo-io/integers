@@ -14,6 +14,10 @@ public abstract class IntegersFixture extends TestCase {
   public static final String SEED = "com.almworks.integers.seed";
   public static final Random RAND = createRandom();
 
+  /**
+   * Add {@code -Dcom.almworks.integers.seed=12312423455}
+   * to system properties to reproduce the test
+   * */
   private static Random createRandom() {
     String seedStr = System.getProperty(SEED, "");
     long seed;
@@ -22,7 +26,7 @@ public abstract class IntegersFixture extends TestCase {
       System.out.println("Using seed from settings: " + seed);
     } catch (NumberFormatException _) {
       seed = System.currentTimeMillis();
-      System.out.println("Using seed " + seed);
+      System.out.println("-Dcom.almworks.integers.seed=" + seed);
     }
     return new Random(seed);
   }
@@ -39,7 +43,7 @@ public abstract class IntegersFixture extends TestCase {
   }
 
   protected void checkSet(LongSetBuilder builder, long[]... v) {
-    LongList collection = builder.clone().toSortedCollection();
+    LongList collection = builder.clone().toSortedList();
     checkSet(collection, v);
   }
 
