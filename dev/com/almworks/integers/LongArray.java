@@ -358,39 +358,44 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Merge sorted src and this sorted array. Depending on {@code size()} and {@code src.size()} use {@link LongArray#unionWithSmallArray(LongList)} or
-   * {@link LongArray#unionWithSameLengthList(LongList)}.
+   * Merge the specified sorted list and this sorted unique array. Depending on {@code size()} and {@code src.size()} uses {@link LongArray#mergeWithSmall(LongList)} or
+   * {@link LongArray#mergeWithSameLength(LongList)}.
    * */
-  public LongArray unionWithArray(LongList src) {
+  public LongArray merge(LongList src) {
+    if (src.size() == 0) return this;
     int k = size() / src.size();
     if (k < 10) {
-      unionWithSameLengthList(src);
+      mergeWithSameLength(src);
     } else {
-      unionWithSmallArray(src);
+      mergeWithSmall(src);
     }
     return this;
   }
 
   /**
-   * Merge sorted src and this sorted array. If there {@code getCapacity() < src.size() + size()}, will go reallocation.<br>
-   * Complexity: {@code O(eps * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.<br>
-   * Prefer to use if {@code src.size()} is much smaller than {@code size()}. If they are comparable
-   * it's better use {@link com.almworks.integers.LongArray#unionWithSameLengthList(LongList)}
+   * <p>Merge the specified sorted list and this sorted array. If src or this array are not sorted, result is undefined.
+   * If there {@code getCapacity() < src.size() + size()}, will go reallocation.
+   * <p>Complexity: {@code O(eps * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
+   * {@code eps} depend on ratio of {@code N/T} and mixing of {@code src} and this array.
+   * In the general case, if N/T > 4, then eps < 0.5.
+   * <p>Prefer to use this method over {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
+   * if {@code src.size()} is much smaller than {@code size()}. If they are close
+   * use {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
    *
-   * @param  src another sorted read-only array
+   * @param  src sorted list.
    * @return this.
    * */
-  public LongArray unionWithSmallArray(LongList src) {
-    unionWithSmallArray(src, new int[][]{null});
+  public LongArray mergeWithSmall(LongList src) {
+    mergeWithSmall(src, new int[][]{null});
     return this;
   }
 
   /**
-   * @param insertionPoints temporary array, insertionPoints[0] must be null or
-   *                        it's length greater than or equal to the src.size()
-   * @see #unionWithSmallArray(LongList)
+   * @param insertionPoints contains temporary array in the first element. If it isn't there,
+   *                        it will be written there
+   * @see #mergeWithSmall(LongList)
    */
-  public LongArray unionWithSmallArray(LongList src, int[][] insertionPoints) {
+  public LongArray mergeWithSmall(LongList src, int[][] insertionPoints) {
     if (src.size() == 0)
       return this;
     if (size() + src.size() > myArray.length) {
@@ -433,7 +438,8 @@ public final class LongArray extends AbstractWritableLongList {
     } else {
       // merge in place
       // a) find insertion points and count how many to be inserted
-      if (insertionPoints[0] == null)
+      if (insertionPoints == null) insertionPoints = new int[][]{null};
+      if (insertionPoints[0] == null || insertionPoints[0].length < src.size())
         insertionPoints[0] = new int[src.size()];
       int[] insertionPoints0 = insertionPoints[0];
       Arrays.fill(insertionPoints0, 0, src.size(), -1);
@@ -485,17 +491,17 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Merge src and sorted this array. Is there {@code getCapacity() < src.size() + size()}, will go reallocation.<br>
+   * Merge the specified sorted list and sorted this array. If there {@code getCapacity() < src.size() + size()}, will go reallocation.<br>
    * Complexity: {@code O(N + T)}, where N - size() and T - {@code src.size()}.<br>
    * Prefer to use if the {@code size()} and {@code src.size()} are comparable.
    * If the {@code src.size()} is much smaller than {@code size()},
-   * it's better to use {@link com.almworks.integers.LongArray#unionWithSmallArray(LongList)}
+   * it's better to use {@link com.almworks.integers.LongArray#mergeWithSmall(LongList)}
    *
    * @param  src sorted list of numbers (set)
    *
    * @return this
    * */
-  public LongArray unionWithSameLengthList(LongList src) {
+  public LongArray mergeWithSameLength(LongList src) {
     int srcSize = src.size();
     int totalLength = size() + srcSize;
     if (totalLength > myArray.length) {
@@ -538,6 +544,8 @@ public final class LongArray extends AbstractWritableLongList {
       insertCount += (srcSize - pj);
       pi = size() - 1;
       pj = srcSize - 1;
+      boolean curThis = false;
+      int lastInserted = -1;
       int i = size() + insertCount;
       while (pi >= 0 && pj >= 0) {
         assert i > pi : i + " " + pi;
@@ -546,14 +554,16 @@ public final class LongArray extends AbstractWritableLongList {
         if (vi < vj) {
           myArray[--i] = vj;
           pj--;
-        } else if (vi > vj) {
-          myArray[--i] = vi;
-          pi--;
         } else {
-          assert vi == vj;
-          myArray[--i] = vi;
-          pi--;
-          pj--;
+          if (vi > vj) {
+            myArray[--i] = vi;
+            pi--;
+          } else {
+            assert vi == vj;
+            myArray[--i] = vi;
+            pi--;
+            pj--;
+          }
         }
       }
       if (pj >= 0) {

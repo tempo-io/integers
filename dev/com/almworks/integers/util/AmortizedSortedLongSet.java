@@ -2,8 +2,6 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.LongIterator;
 import com.almworks.integers.LongList;
-import com.almworks.integers.util.FindingLongIterator;
-import com.almworks.integers.util.LongSetBuilder;
 
 import java.util.*;
 
@@ -68,7 +66,7 @@ public class AmortizedSortedLongSet {
       }
       myAdded.clear();
     }
-    myBaseList = builder.toSortedCollection();
+    myBaseList = builder.toSortedList();
   }
 
   public LongIterator tailIterator(long value) {
@@ -83,7 +81,7 @@ public class AmortizedSortedLongSet {
   public void replaceFrom(LongSetBuilder builder) {
     myAdded.clear();
     myRemoved.clear();
-    myBaseList = builder.toSortedCollection();
+    myBaseList = builder.toSortedList();
   }
 
   public boolean isEmpty() {

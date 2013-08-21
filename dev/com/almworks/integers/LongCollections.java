@@ -381,7 +381,7 @@ public class LongCollections {
   }
 
   /**
-   * @return SameValuesLongList with element {@code value}, repeated {@code count} times.
+   * @return SameValuesLongList with element {@code value} repeated {@code count} times.
    * */
   public static SameValuesLongList repeat(long value, int count) {
     if (count < 0)
@@ -395,7 +395,7 @@ public class LongCollections {
     LongArray a = first.toSortedLongArray();
     LongArray b = second.toSortedLongArray();
 
-    a.unionWithSameLengthList(b);
+    a.mergeWithSameLength(b);
     return DynamicLongSet.fromSortedList(a);
   }
 
@@ -453,7 +453,7 @@ public class LongCollections {
     }
 
     CyclicLongQueue tailValues = new CyclicLongQueue(lim);
-    for ( ;it.hasNext() && itSize < lim * 2; itSize++) {
+    for ( int lim2 = lim * 2; it.hasNext() && itSize < lim2; itSize++) {
       tailValues.add(it.nextValue());
     }
 

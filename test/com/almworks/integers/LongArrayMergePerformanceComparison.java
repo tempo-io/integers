@@ -161,46 +161,50 @@ public class LongArrayMergePerformanceComparison extends IntegersFixture {
         SameAndSmall,
         reallocModification,
         intAp(10000, 5000, 18), intAp(10, 1, 15), 5000, 100, "benchmark realloc, firstSize max 100000");
-    testBenchMerge(config);
+//    testBenchMerge(config);
 
     config = new TestConfiguration(
         SameAndSmall,
         reallocModification,
         intAp(100000, 100000, 3), intAp(12, 1, 13), 100, 5, "benchmark realloc, firstSize max 400000");
-    testBenchMerge(config);
+//    testBenchMerge(config);
 
     config = new TestConfiguration(
         SameAndSmall,
         reallocModification,
         intAp(500000, 100000, 6), intAp(12, 1, 13), 50, 5, "benchmark realloc, firstSize max 1000000");
-    testBenchMerge(config);
+//    testBenchMerge(config);
+
+
+    // replace
     config = new TestConfiguration(
         SameAndSmall,
         replaceModification,
-        intAp(10000, 5000, 18), intAp(3, 1, 7), 500, 20, "benchmark replace, firstSize max 100000");
-    testBenchMerge(config);
+        intAp(10000, 5000, 18), intAp(3, 1, 12), 500, 20, "benchmark replace, firstSize max 100000");
+//    testBenchMerge(config);
 
     config = new TestConfiguration(
         SameAndSmall,
         replaceModification,
-        intAp(100000, 100000, 3), intAp(3, 1, 7), 100, 5, "benchmark replace, firstSize max 400000");
-    testBenchMerge(config);
+        intAp(100000, 100000, 3), intAp(3, 1, 12), 100, 5, "benchmark replace, firstSize max 400000");
+//    testBenchMerge(config);
 
     config = new TestConfiguration(
         SameAndSmall,
         replaceModification,
-        intAp(500000, 100000, 6), intAp(3, 1, 7), 50, 5, "benchmark replace, firstSize max 1000000");
+        intAp(500000, 100000, 6), intAp(3, 1, 12), 50, 5, "benchmark replace, firstSize max 1000000");
+//    testBenchMerge(config);
+
+    config = new TestConfiguration(
+        SameAndSmall,
+        replaceModification,
+        intAp(500, 500, 20), intAp(3, 1, 11), 15000, 100, "benchmark replace, firstSize small 500..10000");
+//    testBenchMerge(config);
+
+    config = new TestConfiguration(
+        SameAndSmall,
+        reallocModification,
+        intAp(500, 500, 20), intAp(8, 1, 12), 15000, 100, "benchmark realloc, firstSize small 500..10000");
     testBenchMerge(config);
-  }
-
-  public void test() throws IOException {
-    new File("op").mkdirs();
-
-    PrintStream out = new PrintStream(new File ("Engineer.txt"));
-    out.println("hw!");
-    out.close();
-
-    PrintStream sout = System.out;
-    sout.print("hello!");
   }
 }

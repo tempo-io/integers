@@ -17,6 +17,7 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class LongArrayTests extends IntegersFixture {
@@ -416,7 +417,7 @@ public class LongArrayTests extends IntegersFixture {
     setOperations.check(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        return arrays[0].unionWithSameLengthList(arrays[1]).iterator();
+        return arrays[0].mergeWithSameLength(arrays[1]).iterator();
       }
     }, unionGetter, true, true);
 
@@ -426,7 +427,7 @@ public class LongArrayTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return copy.unionWithSameLengthList(arrays[1]).iterator();
+        return copy.mergeWithSameLength(arrays[1]).iterator();
       }
     }, unionGetter, true, true);
 
@@ -434,7 +435,7 @@ public class LongArrayTests extends IntegersFixture {
     setOperations.check(new SetOperationsChecker.newSetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        return arrays[0].unionWithSmallArray(arrays[1]).iterator();
+        return arrays[0].mergeWithSmall(arrays[1]).iterator();
       }
     }, unionGetter, true, true);
 
@@ -444,7 +445,7 @@ public class LongArrayTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return copy.unionWithSmallArray(arrays[1]).iterator();
+        return copy.mergeWithSmall(arrays[1]).iterator();
       }
     }, unionGetter, true, true);
   }
@@ -457,10 +458,4 @@ public class LongArrayTests extends IntegersFixture {
     array.addAll(LongProgression.arithmetic(11, 10));
     assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array, 5));
   }
-
-  public void testTest() {
-    LongListIterator it = LongArray.create(1,2,3,4,5).iterator();
-    System.out.println(it);
-  }
-
 }

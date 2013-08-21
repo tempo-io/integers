@@ -160,8 +160,9 @@ public class SegmentedLongArrayTests extends IntegersFixture {
   }
 
   public void testIterator() {
-    for (int i = 0; i < 10000; i++)
+    for (int i = 0; i < 10000; i++) {
       array.add(i);
+    }
     WritableLongListIterator ii = array.iterator(100, 600);
     assertFalse(ii.hasValue());
     for (int i = 0; i < 10; i++) {

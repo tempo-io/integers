@@ -38,7 +38,7 @@ public class LongSetBuilderTests extends IntegersFixture {
       }
       assertEquals(count, set.size());
       set.sortUnique();
-      CHECK.order(builder.toSortedCollection().iterator(), set.toNativeArray());
+      CHECK.order(builder.toSortedList().iterator(), set.toNativeArray());
     }
   }
 

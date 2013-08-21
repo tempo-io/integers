@@ -31,7 +31,9 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
 
   private final int myTempLength;
 
+  @NotNull
   private LongArray mySorted = new LongArray();
+
   private long[] myTemp;
 
   /**
@@ -97,27 +99,27 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     if (other.isEmpty())
       return;
     mergeTemp();
-    mySorted.unionWithSameLengthList(other);
+    mySorted.mergeWithSameLength(other);
   }
 
   private void mergeTemp() {
     if (myTempSize == 0)
       return;
     Arrays.sort(myTemp, 0, myTempSize);
-    mySorted.unionWithSmallArray(new LongArray(myTemp, myTempSize), myTempInsertionPoints);
+    mySorted.mergeWithSmall(new LongArray(myTemp, myTempSize), myTempInsertionPoints);
     myTempSize = 0;
   }
 
-  public LongList toSortedCollection() {
+  public LongList toSortedList() {
     myFinished = true;
     mergeTemp();
-    if (mySorted == null || mySorted.size() == 0)
+    if (mySorted.size() == 0)
       return LongList.EMPTY;
     return mySorted;
   }
 
   public LongArray toLongArray() {
-    myFinished=true;
+    myFinished = true;
     mergeTemp();
     return mySorted;
   }
@@ -139,7 +141,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     mergeTemp();
     if (mySorted.size() == 0)
       return EMPTY_LONGS;
-    return mySorted.toNativeArray();//LongCollections.arrayCopy(mySorted, 0, mySorted.size());
+    return mySorted.toNativeArray();
   }
 
   public LongSetBuilder clone() {
@@ -153,9 +155,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     r.myFinished = false;
     r.myTemp = null;
     r.myTempInsertionPoints = new int[][]{null};
-    if (mySorted != null) { // fix it
-      r.mySorted = LongArray.copy(mySorted);
-    }
+    r.mySorted = LongArray.copy(mySorted);
     return r;
   }
 
@@ -167,7 +167,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     mySorted.clear();
     myTempSize = 0;
     if (myFinished && !reuseArrays) {
-      mySorted = null;
+      mySorted = new LongArray();
     }
     myFinished = false;
   }
