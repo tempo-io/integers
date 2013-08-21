@@ -152,10 +152,10 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   }
 
   /**
-   * Returns a {@link LongList} view of the values contained in this map.
+   * Returns a unique sorted {@link LongList} view of the keys contained in this map.
    * The collection is backed by the map, so changes to the map are
-   * reflected in the keySet. It's recommended not to change keySet,
-   * because of changes in keySet are reflected in the map too.
+   * reflected in the keySet. Unlike of {@link java.util.Map#keySet()},
+   * {@link com.almworks.integers.util.LongObjMap#keySet()} return read-only list.
    *
    * @return LongList of the values contained in this map
    * */
