@@ -502,7 +502,7 @@ public class DynamicLongSet implements LongIterable {
     LongArray array = toSortedLongArray();
     array.retainSorted(set.toSortedLongArray());
     clear();
-    addAll(array);
+    fromSortedLongIterable(array, array.size(), ColoringType.BALANCED);
   }
 
   private void maybeShrink() {
