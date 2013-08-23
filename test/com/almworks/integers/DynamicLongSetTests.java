@@ -146,15 +146,15 @@ public class DynamicLongSetTests extends IntegersFixture {
     int sz = 8; //8200;
     int waitTime = 0;
 
-    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
-    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
+    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
+    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
 //    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
 //    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
 //    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
 //    testColoringTypes(RAND, waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
   }
 
-  private void testColoringTypes(Random r, int waitTime, int attempts, int sz, DynamicLongSet.ColoringType cT, DlsOperation oper) {
+  private void testColoringTypes(int waitTime, int attempts, int sz, DynamicLongSet.ColoringType cT, DlsOperation oper) {
     String opName;
     if (oper == DlsOperation.REMOVE) {
       switch (cT) {
@@ -175,8 +175,8 @@ public class DynamicLongSetTests extends IntegersFixture {
       WritableLongList srcList = new LongArray();
       WritableLongList addList = new LongArray();
       for (int i = 0; i < sz; i++) {
-        srcList.add(r.nextLong());
-        addList.add(r.nextLong());
+        srcList.add(RAND.nextLong());
+        addList.add(RAND.nextLong());
       }
       srcList.sort();
       if (oper == DlsOperation.REMOVE) {
@@ -227,6 +227,16 @@ public class DynamicLongSetTests extends IntegersFixture {
     set.addAll(toAdd);
     float tm = (System.currentTimeMillis() - start)/1000F;
     System.out.println("Size = " + set.size() + ", time = " + tm + " seconds.");
+  }
+
+  public void testAddReturn() {
+    for (long i: ap(0, 2, 100)) {
+      assertTrue(set.add(i));
+    }
+    for (long i: ap(0, 1, 200)) {
+      assertEquals(i % 2 == 1, set.add(i));
+    }
+
   }
 
   private void testRemove(LongList srcAdd, LongList srcRemove) {
@@ -300,5 +310,44 @@ public class DynamicLongSetTests extends IntegersFixture {
       if (stateCount == 3) stateCount = -2;
     }
     assertEquals(expected, set.toSortedLongArray());
+  }
+
+  public void testTailIteratorSimple() {
+    LongArray expected = LongArray.create(ap(1, 2, 10));
+    set.addAll(expected);
+    assertEquals(expected, set.toSortedLongArray());
+    int ind = 0;
+
+    for (int i = 0; i < 21; i++) {
+      CHECK.order(expected.iterator(ind), set.tailIterator(i));
+      if (i % 2 == 1) ind++;
+    }
+  }
+
+  public void testTailIteratorRandom() {
+    final int size = 1000,
+              testCount = 20;
+    LongArray expected = new LongArray(size);
+    LongArray testValues = new LongArray(size * 3);
+    for (int i = 0; i < testCount; i++) {
+      expected.clear();
+      testValues.clear();
+      set.clear();
+      for (int j = 0; j < size; j++) {
+        long val = RAND.nextLong();
+        expected.add(val);
+        testValues.addAll(val - 1, val, val + 1);
+      }
+      set.addAll(expected);
+      expected.sortUnique();
+      testValues.sortUnique();
+
+      for (int j = 0; j < testValues.size(); j++) {
+        final long key = testValues.get(j);
+        int ind = expected.binarySearch(key);
+        if (ind < 0) ind = -ind - 1;
+        CHECK.order(expected.iterator(ind), set.tailIterator(key));
+      }
+    }
   }
 }

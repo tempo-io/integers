@@ -473,6 +473,10 @@ public class DynamicLongSet implements LongIterable {
     return new KeysIterator();
   }
 
+  public LongIterator tailIterator(long key) {
+    return new KeysIterator(key);
+  }
+
   public void removeAll(LongIterable keys) {
     modified();
     int[] parentsStack = fetchStackCache(0);
@@ -851,8 +855,16 @@ public class DynamicLongSet implements LongIterable {
   }
 
   private class KeysIterator extends AbstractLongIterator {
-    private LURIterator myIterator = new LURIterator();
+    private LURIterator myIterator;
     private final int myModCountAtCreation = myModCount;
+
+    public KeysIterator() {
+      myIterator = new LURIterator();
+    }
+
+    public KeysIterator(long key) {
+      myIterator = new LURIterator(key);
+    }
 
     @Override
     public boolean hasNext() throws ConcurrentModificationException {
@@ -867,6 +879,7 @@ public class DynamicLongSet implements LongIterable {
     }
 
     public boolean hasValue() {
+      checkMod();
       return myIterator.hasValue();
     }
 
@@ -884,24 +897,49 @@ public class DynamicLongSet implements LongIterable {
   private class LURIterator extends AbstractIntIterator {
     private int myValue;
     private int x = myRoot;
-    private final int[] xs;
-    private int xsi;
+    private final int[] ps;
+    private int psi;
 
     public LURIterator() {
-      xs = new int[height(size())];
+      ps = new int[height(size())];
+    }
+
+    public LURIterator(long key) {
+      this();
+      x = myRoot;
+      // Parents stack top + 1
+      psi = 0;
+      // actually, curKey is always overwritten if it is used (psi > 0), but compiler does not know that
+      long curKey = 0;
+      while (x != 0) {
+        curKey = myKeys[x];
+        if (key <= curKey) {
+          ps[psi++] = x;
+          x = myLeft[x];
+        } else {
+          x = myRight[x];
+        }
+      }
+      if (key <= curKey) {
+        while (psi >= 2 && myLeft[ps[psi - 2]] == ps[psi - 1]) {
+          psi--;
+        }
+        psi--;
+        x = ps[psi];
+      }
     }
 
     public boolean hasNext() throws ConcurrentModificationException {
-      return x != 0 || xsi > 0;
+      return x != 0 || psi > 0;
     }
 
     public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (!hasNext()) throw new NoSuchElementException();
-      if (x == 0) x = xs[--xsi];
+      if (x == 0) x = ps[--psi];
       else {
         int l = myLeft[x];
         while (l != 0) {
-          xs[xsi++] = x;
+          ps[psi++] = x;
           x = l;
           l = myLeft[x];
         }
