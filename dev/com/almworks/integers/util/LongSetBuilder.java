@@ -23,6 +23,8 @@ import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.*;
 
@@ -51,6 +53,8 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
    */
   private boolean myFinished;
 
+  private int myModCount = 0;
+
   public LongSetBuilder() {
     this(DEFAULT_TEMP_STORAGE_SIZE);
   }
@@ -60,8 +64,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   }
 
   public void add(long value) {
-    if (myFinished)
-      throw new IllegalStateException();
+    if (myFinished) throw new IllegalStateException();
     if (myTemp == null) {
       myTemp = new long[myTempLength];
     }
@@ -105,6 +108,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   private void mergeTemp() {
     if (myTempSize == 0)
       return;
+    modified();
     Arrays.sort(myTemp, 0, myTempSize);
     mySorted.mergeWithSmall(new LongArray(myTemp, myTempSize), myTempInsertionPoints);
     myTempSize = 0;
@@ -172,6 +176,10 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     myFinished = false;
   }
 
+  private void modified() {
+    myModCount++;
+  }
+
   public int size() {
     mergeTemp();
     return mySorted.size();
@@ -182,9 +190,57 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
        LongCollections.indexOf(myTemp, 0, myTempSize, value) != -1;
   }
 
-  @NotNull
   public LongIterator iterator() {
     mergeTemp();
-    return mySorted.iterator();
+    return new SortedIterator();
+  }
+
+  public LongIterator tailIterator(long value) {
+    mergeTemp();
+    return new SortedIterator(value);
+  }
+
+  private class SortedIterator extends AbstractLongIterator {
+    private LongIterator mySortedIterator;
+    private final int myModCountAtCreation = myModCount;
+
+    public SortedIterator(long value) {
+      int from = mySorted.binarySearch(value);
+      if (from < 0) {
+        from = -from - 1;
+      }
+      mySortedIterator = mySorted.iterator(from);
+    }
+
+    public SortedIterator() {
+      mySortedIterator = mySorted.iterator();
+    }
+
+    @Override
+    public boolean hasNext() throws ConcurrentModificationException {
+      checkMod();
+      return mySortedIterator.hasNext();
+    }
+
+    public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
+      checkMod();
+      mySortedIterator.next();
+      return this;
+    }
+
+    public boolean hasValue() {
+      checkMod();
+      return mySortedIterator.hasValue();
+    }
+
+    public long value() throws IllegalStateException {
+      checkMod();
+      return mySortedIterator.value();
+    }
+
+    private void checkMod() {
+      if (myModCountAtCreation != myModCount || myTempSize != 0)
+        throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
+    }
   }
 }

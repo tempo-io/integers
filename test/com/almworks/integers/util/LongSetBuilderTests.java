@@ -120,5 +120,13 @@ public class LongSetBuilderTests extends IntegersFixture {
 
     CHECK.order(collection.iterator(), expected.iterator());
   }
+  
+  public void testTailIterator() {
+    LongSetBuilder b = new LongSetBuilder(100);
+    b.addAll(ap(1, 2, 50));
+    for (int i = 0; i < 99; i++) {
+      assertEquals(i + 1 - (i % 2), b.tailIterator(i).nextValue());
+    }
+  }
 
 }
