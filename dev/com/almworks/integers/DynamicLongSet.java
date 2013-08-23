@@ -59,6 +59,10 @@ public class DynamicLongSet implements LongIterable {
   // the size of the given LongIterable multiplied by this constant (additional space for new elements to be added later).
   private static final int EXPAND_FACTOR = 2;
 
+  int minSize = -1;
+  int maxSize = -1;
+  int countedHeight = -1;
+
   /**
    * This enum is used in {@link DynamicLongSet#compactify(com.almworks.integers.DynamicLongSet.ColoringType)} and
    * {@link DynamicLongSet#fromSortedList(LongList, com.almworks.integers.DynamicLongSet.ColoringType)}
@@ -325,12 +329,17 @@ public class DynamicLongSet implements LongIterable {
 
   /** Estimate tree height: it can be shown that it's <= 2*log_2(N + 1) (not counting the root) */
   private int height(int n) {
+    if (minSize <= n && n < maxSize) return countedHeight;
+    maxSize = 1;
+
     int lg2 = 0;
-    while (n > 1) {
+    while (maxSize <= n) {
       lg2++;
-      n >>= 1;
+      maxSize <<= 1;
     }
-    return lg2 << 1;
+    minSize = maxSize >> 1;
+    countedHeight = lg2 << 1;
+    return countedHeight;
   }
 
   /**
@@ -901,7 +910,13 @@ public class DynamicLongSet implements LongIterable {
     private int psi;
 
     public LURIterator() {
-      ps = new int[height(size())];
+      int[] cache = myStackCache.get();
+      if (cache == null || cache.length < height(size())) {
+        ps = new int[height(size())];
+      } else {
+        ps = cache;
+        myStackCache.clear();
+      }
     }
 
     public LURIterator(long key) {
