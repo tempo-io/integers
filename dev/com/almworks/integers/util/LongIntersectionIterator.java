@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/SortedPListIntersectionIterator.tpl
-
 
 package com.almworks.integers.util;
 
@@ -27,10 +25,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size,<br>
+ * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size,
  * providing unique sorted values that exist in every list
+ *
+ * @author Eugene Vagin
  */
-public class LongIntersectionIterator extends LongOperationsIterator {
+public class LongIntersectionIterator extends LongSetOperationsIterator {
 
   public LongIntersectionIterator(List<LongIterator> iterators) {
     super(iterators);

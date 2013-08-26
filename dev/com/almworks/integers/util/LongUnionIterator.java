@@ -26,10 +26,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size,<br>
+ * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size,
  * providing unique sorted values that exist in at least one of lists
+ *
+ * @author Eugene Vagin
  */
-public class LongUnionIterator extends LongOperationsIterator {
+public class LongUnionIterator extends LongSetOperationsIterator {
   private boolean myIsHeapBuilt = false;
 
   public LongUnionIterator(List<LongIterator> iterators) {

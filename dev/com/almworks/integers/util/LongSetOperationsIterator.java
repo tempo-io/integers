@@ -26,7 +26,10 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public abstract class LongOperationsIterator extends FindingLongIterator {
+/**
+ * @author Eugene Vagin
+ * */
+abstract class LongSetOperationsIterator extends FindingLongIterator {
   protected final List<LongIterator> myIts;
   /**
    * myHeap elements start from index 1, index 0 is unused
@@ -36,13 +39,13 @@ public abstract class LongOperationsIterator extends FindingLongIterator {
   protected long myNext = Long.MIN_VALUE;
   protected static final int TOP = 1;
 
-  public LongOperationsIterator(@NotNull List<LongIterator> iterators) {
+  public LongSetOperationsIterator(@NotNull List<LongIterator> iterators) {
     myIts = iterators;
     heapLength = myIts.size();
     myHeap = new int[heapLength + 1];
   }
 
-  public LongOperationsIterator(@NotNull LongIterator... iterators) {
+  public LongSetOperationsIterator(@NotNull LongIterator... iterators) {
     this(Arrays.asList(iterators));
   }
 
