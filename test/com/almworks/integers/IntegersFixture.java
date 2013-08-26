@@ -1,9 +1,6 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.AbstractLongListDecorator;
-import com.almworks.integers.util.LongListInsertingDecorator;
-import com.almworks.integers.util.LongListRemovingDecorator;
-import com.almworks.integers.util.LongSetBuilder;
+import com.almworks.integers.util.*;
 import junit.framework.TestCase;
 
 import java.util.Random;
@@ -219,5 +216,40 @@ public abstract class IntegersFixture extends TestCase {
     b.insert(0, '[');
     b.append(']');
     return b.toString();
+  }
+
+  /**
+   * @param minMaxValues the min and max values for arrays. There is 3 possible values for minMaxValues.length
+   *                 <ul><li>0 - {@code min = 0, max = Integer.MAX_VALUE}
+   *                     <li>1 - {@code min = 0, max = minMaxValues[0]}
+   *                     <li>2 - {@code min = minMaxValues[0], max = minMaxValues[1]}
+   * @return {@link LongArray} with values uniformly distributed on the interval [minValue..maxValue)
+   * */
+  public static LongArray generateRandomArray(int maxArrayLength, boolean isSortUnique, int ... minMaxValues) {
+    int mLen = minMaxValues.length;
+    int minValue = 0, maxValue = Integer.MAX_VALUE;
+    switch (mLen) {
+      case 0: break;
+      case 1: {
+        maxValue = minMaxValues[0];
+        if (maxValue < 0) throw new IllegalArgumentException();
+      }
+      case 2: {
+        minValue = minMaxValues[0];
+        maxValue = minMaxValues[1];
+      }
+    }
+    int diff = maxValue - minValue;
+    if (diff <= 0) throw new IllegalArgumentException();
+
+    LongArray res = new LongArray(maxArrayLength);
+    for (int i = 0; i < maxArrayLength; i++) {
+      res.add(minValue + RAND.nextInt(diff));
+    }
+    if (isSortUnique) {
+      res.sortUnique();
+    }
+    IntegersDebug.println(res);
+    return res;
   }
 }

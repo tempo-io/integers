@@ -331,4 +331,11 @@ public final class IntArray extends AbstractWritableIntList {
     updateSize(0);
     return array;
   }
+
+  public void shuffle(Random random) {
+    for (int curSize = size() - 1; 0 < curSize; curSize--) {
+      int ind = random.nextInt(curSize);
+      IntCollections.swap(myArray, ind, curSize);
+    }
+  }
 }

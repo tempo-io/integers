@@ -35,16 +35,15 @@ public class SetOperationsChecker {
   private boolean onlyTwo = true;
 
   /**
-   *
    * @param intersectionLength the number of common values for all arrays
    * @param arraysNumber number of arrays
    * @param maxArrayLength max random length for every array
    * @param isSortUnique
    * @param minMaxValues the min and max values for arrays. There is 4 possible values for minMaxValues.length
-*                 <ul><li>0 - for all arrays values {@code min = 0, max = MAX}
-*                     <li>1 - for all arrays values {@code min = 0, max = minMaxValues[0]}
-*                     <li>2 - for all arrays values {@code min = minMaxValues[0], max = minMaxValues[1]}
-*                     <li>arraysNumber * 2 - min and max are contains in minMaxValues and different for all arrays   @return LongArray[arraysNumber]   */
+   *                 <ul><li>0 - for all arrays values {@code min = 0, max = MAX}
+   *                     <li>1 - for all arrays values {@code min = 0, max = minMaxValues[0]}
+   *                     <li>2 - for all arrays values {@code min = minMaxValues[0], max = minMaxValues[1]}
+   *                     <li>arraysNumber * 2 - min and max are contains in minMaxValues and different for all arrays   @return LongArray[arraysNumber]   */
   public static LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, boolean isSortUnique, int... minMaxValues) {
     final int mLen = minMaxValues.length;
     assert mLen == 0 || mLen == 1 || mLen == 2 || mLen == arraysNumber * 2;
@@ -73,18 +72,11 @@ public class SetOperationsChecker {
 
     for (int i = 0; i < arraysNumber; i++) {
       int arrayLength = IntegersFixture.RAND.nextInt(maxArrayLength);
-      arrays[i] = LongArray.copy(intersection);
-
-      for (int j = 0; j < arrayLength; j++) {
-        int minValue = mValues[i * 2];
-        int maxValue = mValues[i * 2 + 1];
-        int diff = maxValue - minValue;
-        arrays[i].add(minValue + IntegersFixture.RAND.nextInt(diff));
-      }
+      arrays[i] = IntegersFixture.generateRandomArray(maxArrayLength, false, mValues[i * 2], mValues[i * 2 + 1]);
+      arrays[i].addAll(intersection);
       if (isSortUnique) {
         arrays[i].sortUnique();
       }
-      IntegersDebug.println(arrays[i]);
     }
     return arrays;
   }

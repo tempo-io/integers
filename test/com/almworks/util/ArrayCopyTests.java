@@ -1,12 +1,12 @@
 package com.almworks.util;
 
-import com.almworks.integers.IntCollections;
+import com.almworks.integers.IntArray;
 import com.almworks.integers.IntegersFixture;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
 
-public abstract class ArrayCopyTests extends TestCase {
+public class ArrayCopyTests extends TestCase {
   long stupidCopyTest(int[] src, int[] dest, int size) {
     long start = System.currentTimeMillis();
     for (int i = 0; i < size; i++) {
@@ -46,24 +46,19 @@ public abstract class ArrayCopyTests extends TestCase {
     }
   }
 
-  public int[] getShuffledArray(int size) {
-    int[] indexes = new int[size];
+  public IntArray getShuffledIndexesArray(int size) {
+    IntArray indexes = new IntArray(size);
     for (int i = 0; i < size; i++) {
-      indexes[i] = i;
+      indexes.add(i);
     }
-    for (int curSize = size; 0 < curSize; curSize--) {
-      int ind = IntegersFixture.RAND.nextInt(curSize);
-      IntCollections.swap(indexes, ind, curSize);
-    }
+    indexes.shuffle(IntegersFixture.RAND);
     return indexes;
   }
 
   public void testArrayCopy() {
     int size = 10000000;
-    int[] indexes = getShuffledArray(size);
-    System.out.println("e!");
-//    System.out.println(Arrays.toString(indexes));
-//    if (true) return;
+    int[] indexes = getShuffledIndexesArray(size).extractHostArray();
+    System.out.println("Indexes was obtained");
 
     int[] src = new int[size], dest = new int[size];
     for (int i = 0; i < size; i++) src[i] = IntegersFixture.RAND.nextInt();
@@ -107,7 +102,7 @@ public abstract class ArrayCopyTests extends TestCase {
     // Systems.arraycopy
     int[] counties = {1, 2, 4, 5, 8, 10, 20, 50, 100, 200, 500, 1000, 10000, 100000, 200000, 500000, 1000000, -1};
     for (int count: counties) {
-      indexes = count == -1 ? null : getShuffledArray(size/count);
+      indexes = count == -1 ? null : getShuffledIndexesArray(size / count).extractHostArray();
 
       for (int j = 0; j < 100; j++) {
         Arrays.fill(dest, -1);

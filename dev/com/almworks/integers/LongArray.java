@@ -36,7 +36,7 @@ public final class LongArray extends AbstractWritableLongList {
     myArray = EMPTY_LONGS;
   }
 
-  public LongArray(int capacity) {
+public LongArray(int capacity) {
     if (capacity < 0)
       throw new IllegalArgumentException();
     myArray = capacity == 0 ? EMPTY_LONGS : new long[capacity];
@@ -620,5 +620,12 @@ public final class LongArray extends AbstractWritableLongList {
     }
     myArray = newArray;
     updateSize(i);
+  }
+
+  public void shuffle(Random random) {
+    for (int curSize = size() - 1; 0 < curSize; curSize--) {
+      int ind = random.nextInt(curSize);
+      LongCollections.swap(myArray, ind, curSize);
+    }
   }
 }
