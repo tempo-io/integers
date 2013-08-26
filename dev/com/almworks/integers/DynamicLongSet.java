@@ -162,6 +162,13 @@ public class DynamicLongSet implements LongIterable {
     return x != 0;
   }
 
+  public boolean containsAll(LongIterable keys) {
+    for (LongIterator it : keys.iterator()) {
+      if (!contains(it.value())) return false;
+    }
+    return true;
+  }
+
   public int size() {
     return myRemoved == null ? myFront - 1 : myFront - 1 - myRemoved.cardinality();
   }
@@ -914,6 +921,7 @@ public class DynamicLongSet implements LongIterable {
     private int x = myRoot;
     private final int[] ps;
     private int psi;
+    private boolean myIterated = false;
 
     public LURIterator() {
       int[] cache = myStackCache.get();
@@ -956,6 +964,7 @@ public class DynamicLongSet implements LongIterable {
 
     public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (!hasNext()) throw new NoSuchElementException();
+      myIterated = true;
       if (x == 0) x = ps[--psi];
       else {
         int l = myLeft[x];
@@ -971,11 +980,11 @@ public class DynamicLongSet implements LongIterable {
     }
 
     public boolean hasValue() {
-      return x != myRoot;
+      return myIterated;
     }
 
     public int value() throws IllegalStateException {
-      if (x == myRoot) throw new IllegalStateException();
+      if (!hasValue()) throw new IllegalStateException();
       return myValue;
     }
   }

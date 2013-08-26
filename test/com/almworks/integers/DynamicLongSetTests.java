@@ -136,11 +136,11 @@ public class DynamicLongSetTests extends IntegersFixture {
       testRemove(anotherSetList, anotherSetList);
     }
   }
-  
+
   private enum DlsOperation {
     REMOVE, ADD
   }
-  
+
   public void testColoringTypes() {
     int attempts = 7; //2000;
     int sz = 8; //8200;
@@ -292,6 +292,19 @@ public class DynamicLongSetTests extends IntegersFixture {
     } catch (ConcurrentModificationException e) {}
     assertEquals(expected, res);
   }
+  public void testIteratorHasMethods() {
+    set.addAll(1, 2, 3, 4, 5, 6, 7);
+    LongIterator iterator = set.iterator();
+    assertFalse(iterator.hasValue());
+    assertTrue(iterator.hasNext());
+    iterator.next();
+    assertTrue(iterator.hasValue());
+    for (int i = 0; i < 6; i++) {
+      iterator.next();
+    }
+    assertTrue(iterator.hasValue());
+    assertFalse(iterator.hasNext());
+  }
 
   public void testAddRemove() {
     WritableLongList sourceAdd = LongArray.create(14,7,3,12,6,2,13,8,5,15,4,0,-1,10,-2,20,-6,32);
@@ -318,15 +331,35 @@ public class DynamicLongSetTests extends IntegersFixture {
     assertEquals(expected, set.toSortedLongArray());
     int ind = 0;
 
+    LongIterator iterator = set.tailIterator(5);
+    System.out.println(iterator.hasValue());
     for (int i = 0; i < 21; i++) {
       CHECK.order(expected.iterator(ind), set.tailIterator(i));
       if (i % 2 == 1) ind++;
     }
   }
 
+  public void testTailIteratorHasMethods() {
+    set.addAll(LongProgression.arithmetic(1, 10, 2));
+    int curSize = 10;
+    for (int i = 0; i < 20; i++) {
+      LongIterator iterator = set.tailIterator(i);
+      assertFalse(iterator.hasValue());
+      assertTrue(iterator.hasNext());
+      iterator.next();
+      assertTrue(iterator.hasValue());
+      for (int j = 0; j < curSize - 1; j++) {
+        iterator.next();
+      }
+      assertTrue(iterator.hasValue());
+      assertFalse(iterator.hasNext());
+      if (i % 2 == 1) curSize--;
+    }
+  }
+
   public void testTailIteratorRandom() {
     final int size = 1000,
-              testCount = 20;
+        testCount = 20;
     LongArray expected = new LongArray(size);
     LongArray testValues = new LongArray(size * 3);
     for (int i = 0; i < testCount; i++) {
