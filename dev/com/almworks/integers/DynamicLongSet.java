@@ -96,7 +96,6 @@ public class DynamicLongSet implements LongIterable {
     myLeft = new int[initialCapacity];
     myRight = new int[initialCapacity];
     myKeys[0] = NIL_DUMMY_KEY;
-    myBlack.set(0);
   }
 
   private void init() {
@@ -177,7 +176,7 @@ public class DynamicLongSet implements LongIterable {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (LongIterator i : keys) {
-      add0(i.value(), ps);
+      push0(i.value(), ps);
     }
   }
 
@@ -185,7 +184,7 @@ public class DynamicLongSet implements LongIterable {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (LongIterator ii : keys) {
-      add0(ii.value(), ps);
+      push0(ii.value(), ps);
     }
   }
 
@@ -193,16 +192,23 @@ public class DynamicLongSet implements LongIterable {
     modified();
     int[] ps = prepareAdd(keys.length);
     for (long key : keys) {
-      add0(key, ps);
+      push0(key, ps);
     }
   }
 
-  public boolean add(long key) {
-    modified();
-    return add0(key, prepareAdd(1));
+  public void add(long key) {
+    push(key);
   }
 
-  private boolean add0(long key, int[] ps) {
+  /**
+   * @return false if set already contains key
+   * */
+  public boolean push(long key) {
+    modified();
+    return push0(key, prepareAdd(1));
+  }
+
+  private boolean push0(long key, int[] ps) {
     int x = myRoot;
     // Parents stack top + 1
     int psi = 0;

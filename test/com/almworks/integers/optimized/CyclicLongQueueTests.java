@@ -3,7 +3,7 @@ package com.almworks.integers.optimized;
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongProgression;
 
-public class SlidingLongArrayTests extends IntegersFixture {
+public class CyclicLongQueueTests extends IntegersFixture {
   private final CyclicLongQueue myArray = new CyclicLongQueue(5);
 
   public void setUp() {

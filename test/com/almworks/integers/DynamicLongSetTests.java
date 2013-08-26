@@ -229,12 +229,12 @@ public class DynamicLongSetTests extends IntegersFixture {
     System.out.println("Size = " + set.size() + ", time = " + tm + " seconds.");
   }
 
-  public void testAddReturn() {
+  public void testPush() {
     for (long i: ap(0, 2, 100)) {
-      assertTrue(set.add(i));
+      assertTrue(set.push(i));
     }
     for (long i: ap(0, 1, 200)) {
-      assertEquals(i % 2 == 1, set.add(i));
+      assertEquals(i % 2 == 1, set.push(i));
     }
 
   }
