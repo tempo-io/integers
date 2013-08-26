@@ -104,6 +104,7 @@ dev/com/almworks/integers/optimized/SegmentedLongArrayHeapEnvironment.java -text
 dev/com/almworks/integers/util/AbstractIntListDecorator.java -text
 dev/com/almworks/integers/util/AbstractLongListDecorator.java -text
 dev/com/almworks/integers/util/AmortizedSortedLongSet.java -text
+dev/com/almworks/integers/util/AmortizedSortedLongSetTemp.java -text
 dev/com/almworks/integers/util/DiffIndexedIntListDecorator.java -text
 dev/com/almworks/integers/util/DiffIndexedLongListDecorator.java -text
 dev/com/almworks/integers/util/FindingIntIterator.java -text
