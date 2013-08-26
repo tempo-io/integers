@@ -29,6 +29,9 @@ import java.util.NoSuchElementException;
 public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
   private boolean myFound;
   private boolean mySought;
+  protected long myNext = Long.MIN_VALUE;
+
+  protected abstract boolean findNext();
 
   public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
     if (myFound)
@@ -55,7 +58,7 @@ public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
     return getNext();
   }
 
-  protected abstract long getNext();
-
-  protected abstract boolean findNext();
+  protected long getNext() {
+    return myNext;
+  }
 }

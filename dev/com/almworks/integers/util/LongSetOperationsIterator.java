@@ -36,7 +36,6 @@ abstract class LongSetOperationsIterator extends FindingLongIterator {
    **/
   protected final int[] myHeap;
   protected int heapLength;
-  protected long myNext = Long.MIN_VALUE;
   protected static final int TOP = 1;
 
   public LongSetOperationsIterator(@NotNull List<LongIterator> iterators) {
@@ -93,9 +92,5 @@ abstract class LongSetOperationsIterator extends FindingLongIterator {
       IntegersDebug.print("(", myHeap[i], myIts.get(myHeap[i]).value(), ")");
     }
     IntegersDebug.println();
-  }
-
-  protected long getNext() {
-    return myNext;
   }
 }

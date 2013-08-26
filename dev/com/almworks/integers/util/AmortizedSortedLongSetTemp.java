@@ -119,7 +119,6 @@ public class AmortizedSortedLongSetTemp {
   }
 
   private static class CoalescingIterator extends FindingLongIterator {
-    private long myNext = Long.MIN_VALUE;
     private final LongIterator myBaseIterator;
     private final LongIterator myAddedIterator;
     private final DynamicLongSet myRemoved;
@@ -137,10 +136,6 @@ public class AmortizedSortedLongSetTemp {
       myNextBase = myHasNextBase ? baseIterator.nextValue() : 0;
       myHasNextAdded = addedIterator.hasNext();
       myNextAdded = myHasNextAdded ? addedIterator.nextValue() : 0;
-    }
-
-    protected long getNext() {
-      return myNext;
     }
 
     protected boolean findNext() {

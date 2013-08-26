@@ -77,7 +77,4 @@ public class LongMinusIterator extends FindingLongIterator {
     return true;
   }
 
-  protected long getNext() {
-    return myNext;
-  }
 }
