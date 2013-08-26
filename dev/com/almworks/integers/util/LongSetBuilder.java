@@ -36,17 +36,12 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   @NotNull
   private LongArray mySorted = new LongArray();
 
-  private long[] myTemp;
+  private LongArray myTemp = new LongArray();
 
   /**
    * Used when merge() is called
    */
   private int[][] myTempInsertionPoints = {null};
-
-  /**
-   * myTemp contains valid ids on [0, myTempSize)
-   */
-  private int myTempSize;
 
   /**
    * When finished, no change possible: the array has passed outside.
@@ -66,12 +61,12 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   public void add(long value) {
     if (myFinished) throw new IllegalStateException();
     if (myTemp == null) {
-      myTemp = new long[myTempLength];
+      myTemp = new LongArray(myTempLength);
     }
-    if (myTempSize == myTempLength)
+    if (myTemp.size() == myTempLength)
       mergeTemp();
-    assert myTempSize < myTempLength;
-    myTemp[myTempSize++] = value;
+    assert myTemp.size() < myTempLength;
+    myTemp.add(value);
   }
 
   public void addAll(long... values) {
@@ -106,12 +101,12 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   }
 
   private void mergeTemp() {
-    if (myTempSize == 0)
+    if (myTemp.size() == 0)
       return;
     modified();
-    Arrays.sort(myTemp, 0, myTempSize);
-    mySorted.mergeWithSmall(new LongArray(myTemp, myTempSize), myTempInsertionPoints);
-    myTempSize = 0;
+    myTemp.sort();
+    mySorted.mergeWithSmall(myTemp, myTempInsertionPoints);
+    myTemp.clear();
   }
 
   public LongList toSortedList() {
@@ -157,19 +152,19 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
       throw new Error(e);
     }
     r.myFinished = false;
-    r.myTemp = null;
+    r.myTemp = new LongArray();
     r.myTempInsertionPoints = new int[][]{null};
     r.mySorted = LongArray.copy(mySorted);
     return r;
   }
 
   public boolean isEmpty() {
-    return mySorted.size() + myTempSize == 0;
+    return mySorted.size() + myTemp.size() == 0;
   }
 
   public void clear(boolean reuseArrays) {
     mySorted.clear();
-    myTempSize = 0;
+    myTemp.clear();
     if (myFinished && !reuseArrays) {
       mySorted = new LongArray();
     }
@@ -187,7 +182,16 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
 
   public boolean contains(long value) {
     return mySorted.binarySearch(value) >= 0 ||
-       LongCollections.indexOf(myTemp, 0, myTempSize, value) != -1;
+        myTemp.indexOf(value) != -1;
+  }
+
+  public String toString() {
+    System.out.println();
+    StringBuilder builder = new StringBuilder();
+    builder.append("LongSetBuilder\n");
+    builder.append("mySorted: ").append(LongCollections.toBoundedString(mySorted)).append('\n');
+    builder.append("myTemp: ").append(LongCollections.toBoundedString(myTemp)).append('\n');
+    return builder.toString();
   }
 
   public LongIterator iterator() {
@@ -239,7 +243,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     }
 
     private void checkMod() {
-      if (myModCountAtCreation != myModCount || myTempSize != 0)
+      if (myModCountAtCreation != myModCount || myTemp.size() != 0)
         throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
     }
   }
