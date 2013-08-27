@@ -68,6 +68,7 @@ dev/com/almworks/integers/LongIterator.java -text
 dev/com/almworks/integers/LongList.java -text
 dev/com/almworks/integers/LongListIterator.java -text
 dev/com/almworks/integers/LongProgression.java -text
+dev/com/almworks/integers/LongSet.java -text
 dev/com/almworks/integers/PairIntIntIterator.java -text
 dev/com/almworks/integers/PairIntLongIterator.java -text
 dev/com/almworks/integers/ParallelIntList.java -text
@@ -78,6 +79,7 @@ dev/com/almworks/integers/WritableIntList.java -text
 dev/com/almworks/integers/WritableIntListIterator.java -text
 dev/com/almworks/integers/WritableLongList.java -text
 dev/com/almworks/integers/WritableLongListIterator.java -text
+dev/com/almworks/integers/WritableLongSet.java -text
 dev/com/almworks/integers/func/IntFunction.java -text
 dev/com/almworks/integers/func/IntFunction2.java -text
 dev/com/almworks/integers/func/IntFunctions.java -text

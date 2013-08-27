@@ -38,7 +38,7 @@ public class DynamicLongSetTests extends IntegersFixture {
     set.debugPrintTreeStructure(System.out);
     System.err.println(set.dumpArrays(0));
     LongList expected = LongProgression.arithmetic(0, 6);
-    CHECK.order(expected, set.toSortedLongArray());
+    CHECK.order(expected, set.toLongArray());
     set.removeAll(expected);
     assertTrue(set.isEmpty());
 
@@ -79,7 +79,7 @@ public class DynamicLongSetTests extends IntegersFixture {
       }
 
       private void check(LongList expectedValues) {
-        LongArray sorted = set.toSortedLongArray();
+        LongArray sorted = set.toLongArray();
         String debugInfo = sorted.toString() + "\ntoAdd:\n" + toAdd + "\ntree:" + treeStructureToString();
         assertTrue(debugInfo, sorted.checkSorted(true));
         assertEquals(debugInfo, expectedValues.size(), set.size());
@@ -95,8 +95,8 @@ public class DynamicLongSetTests extends IntegersFixture {
   }
 
   public void testEdgeCases() {
-    assertFalse(set.remove(Long.MIN_VALUE));
-    assertFalse(set.remove(0));
+    assertFalse(set.exclude(Long.MIN_VALUE));
+    assertFalse(set.exclude(0));
     set.removeAll(12, 23, 12, 51);
     assertTrue(set.isEmpty());
     set.compactify();
@@ -105,7 +105,7 @@ public class DynamicLongSetTests extends IntegersFixture {
     DynamicLongSet set2 = DynamicLongSet.fromSortedList(ll);
     assertTrue(set2.isEmpty());
     set.addAll(1, 3, 2, Long.MIN_VALUE, Long.MAX_VALUE);
-    assertTrue(set.toSortedLongArray().checkSorted(true));
+    assertTrue(set.toLongArray().checkSorted(true));
     assertTrue(set.contains(1));
     assertTrue(set.contains(Long.MIN_VALUE));
     assertFalse(set.contains(0));
@@ -124,7 +124,7 @@ public class DynamicLongSetTests extends IntegersFixture {
       dynamicSet.compactify();
       anotherSet.addAll(toAdd);
       LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
-      LongList setList = dynamicSet.toSortedLongArray();
+      LongList setList = dynamicSet.toLongArray();
       System.err.println("attempt #" + attempt);
       CHECK.order(anotherSetList, setList);
 
@@ -231,10 +231,10 @@ public class DynamicLongSetTests extends IntegersFixture {
 
   public void testPush() {
     for (long i: ap(0, 2, 100)) {
-      assertTrue(set.push(i));
+      assertTrue(set.include(i));
     }
     for (long i: ap(0, 1, 200)) {
-      assertEquals(i % 2 == 1, set.push(i));
+      assertEquals(i % 2 == 1, set.include(i));
     }
 
   }
@@ -322,13 +322,13 @@ public class DynamicLongSetTests extends IntegersFixture {
       stateCount++;
       if (stateCount == 3) stateCount = -2;
     }
-    assertEquals(expected, set.toSortedLongArray());
+    assertEquals(expected, set.toLongArray());
   }
 
   public void testTailIteratorSimple() {
     LongArray expected = LongArray.create(ap(1, 2, 10));
     set.addAll(expected);
-    assertEquals(expected, set.toSortedLongArray());
+    assertEquals(expected, set.toLongArray());
     int ind = 0;
 
     LongIterator iterator = set.tailIterator(5);

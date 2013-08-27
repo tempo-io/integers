@@ -392,8 +392,8 @@ public class LongCollections {
   }
 
   public static DynamicLongSet union(DynamicLongSet first, DynamicLongSet second) {
-    LongArray a = first.toSortedLongArray();
-    LongArray b = second.toSortedLongArray();
+    LongArray a = first.toLongArray();
+    LongArray b = second.toLongArray();
 
     a.mergeWithSameLength(b);
     return DynamicLongSet.fromSortedList(a);

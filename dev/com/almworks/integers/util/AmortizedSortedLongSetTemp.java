@@ -1,19 +1,15 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.DynamicLongSet;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongIterator;
-import com.almworks.integers.LongList;
-
-import java.util.*;
+import com.almworks.integers.*;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Igor Sereda
  */
-public class AmortizedSortedLongSetTemp {
+public class AmortizedSortedLongSetTemp implements WritableLongSet {
   private static final int DEFAULT_CHUNKSIZE = 512;
 
-  private LongList myBaseList = LongList.EMPTY;
+  private LongArray myBaseList = new LongArray();
   private final DynamicLongSet myAdded = new DynamicLongSet();
   private final DynamicLongSet myRemoved = new DynamicLongSet();
 
@@ -23,6 +19,12 @@ public class AmortizedSortedLongSetTemp {
     myRemoved.remove(value);
     myAdded.add(value);
     maybeCoalesce();
+  }
+
+  public boolean include(long value) {
+    boolean contain = contains(value);
+    if (!contain) add(value);
+    return !contain;
   }
 
   public void addAll(LongList values) {
@@ -44,17 +46,41 @@ public class AmortizedSortedLongSetTemp {
     }
   }
 
-
   public void remove(long value) {
     myAdded.remove(value);
     myRemoved.add(value);
     maybeCoalesce();
   }
 
+  public boolean exclude(long value) {
+    boolean contain = contains(value);
+    if (contain) remove(value);
+    return contain;
+  }
+
+  public void removeAll(long ... values) {
+    for (long value : values) {
+      remove(value);
+    }
+  }
+
+  @Override
+  public void retain(LongList values) {
+    coalesce();
+    myBaseList.retain(values);
+  }
+
   public boolean contains(long value) {
     if (myRemoved.contains(value)) return false;
     if (myAdded.contains(value)) return true;
     return myBaseList.binarySearch(value) >= 0;
+  }
+
+  public boolean containsAll(LongIterable values) {
+    for (LongIterator iterator : values.iterator()) {
+      if (!contains(iterator.value())) return false;
+    }
+    return true;
   }
 
   private void maybeCoalesce() {
@@ -64,31 +90,10 @@ public class AmortizedSortedLongSetTemp {
   }
 
   private void coalesce() {
-    LongSetBuilder builder = new LongSetBuilder();
-    if (myRemoved.isEmpty()) {
-      builder.mergeFromSortedCollection(myBaseList);
-    } else {
-      int size = myBaseList.size();
-      int i;
-      for (i = 0; i < size; i++) {
-        long v = myBaseList.get(i);
-        if (!myRemoved.remove(v)) {
-          builder.add(v);
-          if (myRemoved.isEmpty()) break;
-        }
-      }
-      if (i < size) {
-        builder.mergeFromSortedCollection(myBaseList.subList(i, size));
-      }
-      myRemoved.clear();
-    }
-    if (!myAdded.isEmpty()) {
-      for (LongIterator iterator: myAdded.iterator()) {
-        builder.add(iterator.value());
-      }
-      myAdded.clear();
-    }
-    myBaseList = builder.toSortedList();
+    myBaseList.removeAll(myRemoved.toLongArray());
+    myBaseList.merge(myBaseList);
+    myRemoved.clear();
+    myBaseList.clear();
   }
 
   public LongIterator tailIterator(long value) {
@@ -99,23 +104,46 @@ public class AmortizedSortedLongSetTemp {
     return new CoalescingIterator(baseIterator, myAdded.tailIterator(value), myRemoved);
   }
 
+  @NotNull
+  public LongIterator iterator() {
+    return new CoalescingIterator(myBaseList.iterator(), myAdded.iterator(), myRemoved);
+  }
+
   public void replaceFrom(LongSetBuilder builder) {
     myAdded.clear();
     myRemoved.clear();
-    myBaseList = builder.toSortedList();
+    myBaseList = new LongArray(builder.toTemporaryReadOnlySortedCollection());
   }
 
   public boolean isEmpty() {
     if (!myAdded.isEmpty()) return false;
     if (myBaseList.isEmpty()) return true;
     if (myRemoved.isEmpty()) return false;
-    return !tailIterator(Long.MIN_VALUE).hasNext();
+    if (myRemoved.isEmpty()) return false;
+    return !iterator().hasNext();
   }
 
   public void clear() {
     myAdded.clear();
     myRemoved.clear();
-    myBaseList = LongList.EMPTY;
+    myBaseList = new LongArray();
+  }
+
+  public int size() {
+    int size = myBaseList.size();
+    // intersection of myRemoved and myAdded is empty
+    for (LongIterator iterator: myAdded.iterator()) {
+      if (myBaseList.binarySearch(iterator.value()) < 0) size++;
+    }
+    for (LongIterator iterator: myRemoved.iterator()) {
+      if (myBaseList.binarySearch(iterator.value()) >= 0) size--;
+    }
+    return size;
+}
+
+  public LongList toList() {
+    coalesce();
+    return myBaseList;
   }
 
   private static class CoalescingIterator extends FindingLongIterator {

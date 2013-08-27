@@ -60,7 +60,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
       dynamicSet.addAll(toAdd);
       anotherSet.addAll(toAdd);
       LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
-      LongList setList = dynamicSet.toSortedLongArray();
+      LongList setList = dynamicSet.toLongArray();
       System.err.println("attempt #" + attempt);
       CHECK.order(anotherSetList, setList);
     }

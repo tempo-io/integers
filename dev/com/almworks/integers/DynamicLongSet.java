@@ -31,12 +31,12 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class DynamicLongSet implements LongIterable {
+public class DynamicLongSet implements LongIterable, WritableLongSet {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { Long.MIN_VALUE };
   private static final int[] EMPTY_INDEXES = new int[] { 0 };
-  /** Index into the backing arrays of the last entry plus 1. It is the insertion point when {@code myRemoved == null}. */
+  /** Index into the backing arrays of the last entry + 1 (for the NIL). It is the insertion point when {@code myRemoved == null}. */
   private int myFront;
   /** Key values. */
   private long[] myKeys;
@@ -53,8 +53,8 @@ public class DynamicLongSet implements LongIterable {
 
   private int myModCount = 0;
 
-  private static final int SHRINK_FACTOR = 6; //testing. actual should be less, say, 3
-  private static final int SHRINK_MIN_LENGTH = 4; //8
+  private static final int SHRINK_FACTOR = 3; // for testing try 6
+  private static final int SHRINK_MIN_LENGTH = 8; // for testing try 4
   // used in fromSortedLongIterable(). A new myKeys array is created in this method, and its size is
   // the size of the given LongIterable multiplied by this constant (additional space for new elements to be added later).
   private static final int EXPAND_FACTOR = 2;
@@ -203,14 +203,22 @@ public class DynamicLongSet implements LongIterable {
     }
   }
 
+  public void addAll(LongIterator iterator) {
+    if (!iterator.hasNext()) return;
+    modified();
+    while (iterator.hasNext()) {
+      add(iterator.nextValue());
+    }
+  }
+
   public void add(long key) {
-    push(key);
+    include(key);
   }
 
   /**
    * @return false if set already contains key
    * */
-  public boolean push(long key) {
+  public boolean include(long key) {
     modified();
     return push0(key, prepareAdd(1));
   }
@@ -517,18 +525,29 @@ public class DynamicLongSet implements LongIterable {
     maybeShrink();
   }
 
-  public boolean remove(long key) {
+  public void remove(long key) {
+    exclude(key);
+  }
+
+  public boolean exclude(long key) {
     modified();
     boolean ret = remove0(key, fetchStackCache(0));
     maybeShrink();
     return ret;
   }
 
-  public void retain(DynamicLongSet set) {
-    LongArray array = toSortedLongArray();
-    array.retainSorted(set.toSortedLongArray());
+  public void retain(LongList values) {
+    LongArray array = toLongArray();
+    array.retain(values);
     clear();
-    fromSortedLongIterable(array, array.size(), ColoringType.BALANCED);
+    fromSortedList(array, ColoringType.BALANCED);
+  }
+
+  public void retain(DynamicLongSet set) {
+    LongArray array = toLongArray();
+    array.retainSorted(set.toLongArray());
+    clear();
+    fromSortedList(array, ColoringType.BALANCED);
   }
 
   private void maybeShrink() {
@@ -639,13 +658,20 @@ public class DynamicLongSet implements LongIterable {
     myBlack.set(x);
   }
 
-  public LongArray toSortedLongArray() {
+  /**
+   * @return sorted LongArray with values from this set
+   * */
+  public LongArray toLongArray() {
     long[] arr = new long[size()];
     int i = 0;
     for (IntIterator it : new LURIterator()) {
       arr[i++] = myKeys[it.value()];
     }
     return new LongArray(arr);
+  }
+
+  public LongList toList() {
+    return toLongArray();
   }
 
   @Override
