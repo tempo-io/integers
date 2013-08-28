@@ -45,6 +45,10 @@ public interface WritableLongList extends LongList, LongCollector {
 
   void removeAll(long value);
 
+  /**
+   * Insert {@code value} {@code count} between indexes {@code index, index + 1}
+   * @throws IllegalArgumentException if count < 0
+   * */
   void insertMultiple(int index, long value, int count);
 
   void insert(int index, long value);

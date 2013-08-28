@@ -36,7 +36,7 @@ public final class LongArray extends AbstractWritableLongList {
     myArray = EMPTY_LONGS;
   }
 
-public LongArray(int capacity) {
+  public LongArray(int capacity) {
     if (capacity < 0)
       throw new IllegalArgumentException();
     myArray = capacity == 0 ? EMPTY_LONGS : new long[capacity];
@@ -150,10 +150,10 @@ public LongArray(int capacity) {
   }
 
   public void insertMultiple(int index, long value, int count) {
-    if (count > 0) {
-      makeSpaceForInsertion(index, index + count);
-      Arrays.fill(myArray, index, index + count, value);
-    }
+    if (count < 0) throw new IllegalArgumentException();
+    if (count == 0) return;
+    makeSpaceForInsertion(index, index + count);
+    Arrays.fill(myArray, index, index + count, value);
   }
 
   public void expand(int index, int count) {
@@ -267,6 +267,10 @@ public LongArray(int capacity) {
     retain(values, false);
   }
 
+  /**
+   * retain this array with sorted list of values
+   * @param values sorted {@code LongList}
+   * */
   public void retainSorted(LongList values) {
     assert values.isSorted();
     retain(values, true);
@@ -283,8 +287,8 @@ public LongArray(int capacity) {
     int mSize = size();
     while (i < mSize) {
       while (i < mSize && sortedValues.binarySearch(myArray[i]) < 0) i++;
-      i2 = i;
       if (i == mSize) break;
+      i2 = i;
       while (i2 < mSize && sortedValues.binarySearch(myArray[i2]) >= 0) i2++;
 
       int diff = i2 - i;

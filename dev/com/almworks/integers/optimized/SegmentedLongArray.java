@@ -179,8 +179,9 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
 
   public void insertMultiple(int index, long value, int count) {
     assert !IntegersDebug.DEBUG || checkInvariants();
-    if (count <= 0)
-      return;
+    if (count < 0) throw new IllegalArgumentException();
+    if (count == 0) return;
+
     doExpand(index, count);
     for (WritableLongListIterator ii = iterator(index, index + count); ii.hasNext();) {
       ii.next();

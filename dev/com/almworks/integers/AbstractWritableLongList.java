@@ -308,8 +308,8 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
   }
 
   public void insertMultiple(int index, long value, int count) {
-    if (count <= 0)
-      return;
+    if (count < 0) throw new IllegalArgumentException();
+    if (count == 0) return;
     expand(index, count);
     setRange(index, index + count, value);
   }
