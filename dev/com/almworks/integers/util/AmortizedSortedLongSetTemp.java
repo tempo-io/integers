@@ -119,7 +119,6 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
     if (!myAdded.isEmpty()) return false;
     if (myBaseList.isEmpty()) return true;
     if (myRemoved.isEmpty()) return false;
-    if (myRemoved.isEmpty()) return false;
     return !iterator().hasNext();
   }
 

@@ -1,7 +1,6 @@
 package com.almworks.integers;
 
-public interface LongSet extends LongCollector, LongIterable {
-
+public interface LongSet extends LongIterable {
   LongList toList();
 
   boolean isEmpty();

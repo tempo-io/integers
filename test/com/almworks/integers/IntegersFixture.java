@@ -69,8 +69,10 @@ public abstract class IntegersFixture extends TestCase {
 
   protected long[] ap(long start, int step, int count) {
     long[] r = new long[count];
+    long cur = start;
     for (int i = 0; i < r.length; i++) {
-      r[i] = start + step * i;
+      r[i] = cur;
+      cur += step;
     }
     return r;
   }
