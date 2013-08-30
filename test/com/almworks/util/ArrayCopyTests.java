@@ -6,7 +6,7 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 
-public class ArrayCopyTests extends TestCase {
+public abstract class ArrayCopyTests extends TestCase {
   long stupidCopyTest(int[] src, int[] dest, int size) {
     long start = System.currentTimeMillis();
     for (int i = 0; i < size; i++) {

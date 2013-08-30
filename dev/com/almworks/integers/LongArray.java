@@ -229,18 +229,13 @@ public final class LongArray extends AbstractWritableLongList {
       super.sort(sortAlso);
   }
 
-  public void addAll(LongIterable collection) {
-    if (collection instanceof LongList) {
-      LongList list = (LongList) collection;
-      int added = list.size();
-      int sz = size();
-      int newSize = sz + added;
-      ensureCapacity(newSize);
-      list.toArray(0, myArray, sz, added);
-      updateSize(newSize);
-    } else {
-      addAll(collection.iterator());
-    }
+  public void addAll(LongList list) {
+    int added = list.size();
+    int sz = size();
+    int newSize = sz + added;
+    ensureCapacity(newSize);
+    list.toArray(0, myArray, sz, added);
+    updateSize(newSize);
   }
 
   @Override

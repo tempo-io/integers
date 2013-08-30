@@ -21,7 +21,7 @@ import java.util.List;
 public abstract class LongListChecker extends IntegersFixture {
   protected abstract List<LongList> createLongList(long ... values);
 
-  public void _testStatusMethods(long ... values) {
+  private void _testStatusMethods(long ... values) {
     LongList expected = LongArray.create(values);
     for (LongList arr : createLongList(values)) {
       assertEquals(expected.size(), arr.size());
@@ -39,7 +39,7 @@ public abstract class LongListChecker extends IntegersFixture {
     _testStatusMethods(Integer.MIN_VALUE, 10, 20, 40, Integer.MAX_VALUE);
   }
 
-  public void _testGetMethods(long ... values) {
+  private void _testGetMethods(long ... values) {
     LongList expected = LongArray.create(values);
     for (LongList arr : createLongList(values)) {
       for (int i = 0; i < arr.size(); i++) {
@@ -63,14 +63,14 @@ public abstract class LongListChecker extends IntegersFixture {
     _testGetMethods(0, 9, 9, 5, 4, -1);
   }
 
-  public void _testIterator(long ... values) {
+  private void _testIterator(long ... values) {
     LongList expected = LongArray.create(values);
     for (LongList arr : createLongList(values)) {
       CHECK.order(expected.iterator(), arr.iterator());
     }
   }
 
-  public void _testToMethods(long ... values) {
+  private void _testToMethods(long ... values) {
     LongList expected = LongArray.create(values);
     int length = values.length;
     long[] tmp = new long[length];

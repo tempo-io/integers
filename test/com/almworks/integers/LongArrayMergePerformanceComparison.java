@@ -1,5 +1,7 @@
 package com.almworks.integers;
 
+import org.junit.Test;
+
 import java.io.*;
 import java.util.Arrays;
 
@@ -171,8 +173,8 @@ public class LongArrayMergePerformanceComparison extends IntegersFixture {
     config = new TestConfiguration(
         SameAndSmall,
         reallocModification,
-        intAp(33000, 1000, 467), intAp(10, 1, 15), 2000, 100, "benchmark realloc, firstSize 33000..34000....500000");
-    config.run();
+        intAp(420000, 1000, 80), intAp(10, 1, 15), 800, 100, "benchmark realloc, firstSize 420000..421000....500000");
+//    config.run();
 
     config = new TestConfiguration(
         SameAndSmall,
