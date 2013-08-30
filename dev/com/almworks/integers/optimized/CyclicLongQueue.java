@@ -284,9 +284,6 @@ public class CyclicLongQueue extends AbstractLongList {
         mySb.append('(');
         indexes.addAll(IntProgression.arithmetic(0, size()));
       }
-      System.out.println(Arrays.toString(CyclicLongQueue.this.myHostArray));
-      System.out.println(indexes);
-      System.out.println(myPiPos);
       appendIndexes();
       mySb.append(')');
       return mySb;

@@ -6,7 +6,8 @@ import com.almworks.integers.LongProgression;
 public class CyclicLongQueueTests extends IntegersFixture {
   private final CyclicLongQueue myArray = new CyclicLongQueue(5);
 
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     myArray.clear();
   }
 
@@ -201,33 +202,33 @@ public class CyclicLongQueueTests extends IntegersFixture {
   }
 
   public void testCheckToStringWithPiterators() {
-    CyclicLongQueue sia = new CyclicLongQueue(5);
+    CyclicLongQueue clq = new CyclicLongQueue(5);
 
-    sia.addAll(10, 11, 12, 13, 14);
-    assertEquals("(10, 11, 12, 13, 14)", sia.toStringWithPiterators().toString());
+    clq.addAll(10, 11, 12, 13, 14);
+    assertEquals("(10, 11, 12, 13, 14)", clq.toStringWithPiterators().toString());
 
-    CyclicLongQueue.PinnedIterator i1 = sia.pinnedIterator().next();
-    CyclicLongQueue.PinnedIterator i2 = sia.pinnedIterator().next().next().next();
-    CyclicLongQueue.PinnedIterator i3 = sia.pinnedIterator().next().next().next().next().next();
-    assertEquals("(10*, 11, 12*, 13, 14*)", sia.toStringWithPiterators().toString());
+    CyclicLongQueue.PinnedIterator i1 = clq.pinnedIterator().next();
+    CyclicLongQueue.PinnedIterator i2 = clq.pinnedIterator().next().next().next();
+    CyclicLongQueue.PinnedIterator i3 = clq.pinnedIterator().next().next().next().next().next();
+    assertEquals("(10*, 11, 12*, 13, 14*)", clq.toStringWithPiterators().toString());
 
-    sia.detach(i1);
-    sia.removeFirst(2);
-    sia.addAll(15, 16);
-    assertEquals("(12*, 13, 14*, 15, 16)", sia.toStringWithPiterators().toString());
+    clq.detach(i1);
+    clq.removeFirst(2);
+    clq.addAll(15, 16);
+    assertEquals("(12*, 13, 14*, 15, 16)", clq.toStringWithPiterators().toString());
 
-    sia.addAll(LongProgression.arithmetic(17, 10, 1));
+    clq.addAll(LongProgression.arithmetic(17, 10, 1));
     i3.next().next().next().next().next();
-    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 19*, ..., 22, 23, 24, 25, 26)", sia.toStringWithPiterators().toString());
+    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators().toString());
 
-    CyclicLongQueue.PinnedIterator i4 = sia.pinnedIterator();
+    CyclicLongQueue.PinnedIterator i4 = clq.pinnedIterator();
     for (int i = 0; i < 7; ++i) i4.next();
-    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 18*, 19*, ..., 22, 23, 24, 25, 26)", sia.toStringWithPiterators().toString());
+    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 18*, 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators().toString());
 
-    CyclicLongQueue.PinnedIterator i5 = sia.pinnedIterator();
-    CyclicLongQueue.PinnedIterator i6 = sia.pinnedIterator();
+    CyclicLongQueue.PinnedIterator i5 = clq.pinnedIterator();
+    CyclicLongQueue.PinnedIterator i6 = clq.pinnedIterator();
     for (int i = 0; i < 6; ++i) i5.next();
     for (int i = 0; i < 10; ++i) i6.next();
-    assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 21*, 22, 23, 24, 25, 26)", sia.toStringWithPiterators().toString());
+    assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 21*, 22, 23, 24, 25, 26)", clq.toStringWithPiterators().toString());
   }
 }
