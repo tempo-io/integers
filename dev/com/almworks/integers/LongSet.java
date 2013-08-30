@@ -3,6 +3,8 @@ package com.almworks.integers;
 public interface LongSet extends LongIterable {
   LongList toList();
 
+  LongArray toLongArray();
+
   boolean isEmpty();
 
   int size();

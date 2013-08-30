@@ -20,6 +20,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.util.FailFastLongIterator;
 import com.almworks.integers.util.IntegersDebug;
 
 import java.io.*;
@@ -34,9 +35,9 @@ import static java.lang.Math.max;
 public class DynamicLongSet implements LongIterable, WritableLongSet {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
-  private static final long[] EMPTY_KEYS = new long[] { Long.MIN_VALUE };
+  private static final long[] EMPTY_KEYS = new long[] { NIL_DUMMY_KEY };
   private static final int[] EMPTY_INDEXES = new int[] { 0 };
-  /** Index into the backing arrays of the last entry + 1 (for the NIL). It is the insertion point when {@code myRemoved == null}. */
+  /** Index into the backing arrays of the last entry + 1 (for the NIL). */
   private int myFront;
   /** Key values. */
   private long[] myKeys;
@@ -63,6 +64,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   int maxSize = -1;
   int countedHeight = -1;
 
+  private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
+
   /**
    * This enum is used in {@link DynamicLongSet#compactify(com.almworks.integers.DynamicLongSet.ColoringType)} and
    * {@link DynamicLongSet#fromSortedList(LongList, com.almworks.integers.DynamicLongSet.ColoringType)}
@@ -81,16 +84,16 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     public abstract int redLevelsDensity();
   }
 
-  private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
-
   public DynamicLongSet() {
     myBlack = new BitSet();
+    myRemoved = new BitSet();
     init();
   }
 
   public DynamicLongSet(int initialCapacity) {
     initialCapacity += 1;
     myBlack = new BitSet(initialCapacity);
+    myRemoved = new BitSet(initialCapacity);
     init();
     myKeys = new long[initialCapacity];
     myLeft = new int[initialCapacity];
@@ -105,28 +108,14 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myBlack.set(0);
     myRoot = 0;
     myFront = 1;
-    myRemoved = null;
+    myRemoved.clear();
     myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
   }
 
-  private void initNode(int x, long key) {
-    myKeys[x] = key;
-    myLeft[x] = 0;
-    myRight[x] = 0;
-    myBlack.clear(x);
-    if (myRemoved != null) {
-      if (myRemoved.cardinality() == 1) {
-        myRemoved = null;
-      } else {
-        myRemoved.clear(x);
-      }
-    }
-  }
-
   public void clear() {
+    modified();
     myBlack.clear();
     init();
-    modified();
     assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("clear");
   }
 
@@ -135,12 +124,13 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   /** @return {@link Long#MIN_VALUE} in case the set is empty */
-  public long getMax() {
+  public long getUpperBound() {
     return myKeys[traverseToEnd(myRight)];
   }
 
-  /** @return {@link Long#MIN_VALUE} in case the set is empty */
-  public long getMin() {
+  /** @return {@link Long#MAX_VALUE} in case the set is empty */
+  public long getLowerBound() {
+    if (size() == 0) return Long.MAX_VALUE;
     return myKeys[traverseToEnd(myLeft)];
   }
 
@@ -170,7 +160,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   public int size() {
-    return myRemoved == null ? myFront - 1 : myFront - 1 - myRemoved.cardinality();
+    return myRemoved.isEmpty() ? myFront - 1 : myFront - 1 - myRemoved.cardinality();
   }
 
   public boolean isEmpty() {
@@ -235,9 +225,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       ps[psi++] = x;
       x = key < k ? myLeft[x] : myRight[x];
     }
-    // Initialize the node
-    x = myRemoved == null ? myFront++ : myRemoved.nextSetBit(0);
-    initNode(x, key);
+    x = createNode(key);
+
     // x is RED already (myBlack.get(x) == false), so no modifications to myBlack
     // Insert into the tree
     if (psi == 0) myRoot = x;
@@ -245,6 +234,18 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     balanceAfterAdd(x, ps, psi, key);
     assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("add key:" + key);
     return true;
+  }
+
+  private int createNode(long key) {
+    int x = myRemoved.isEmpty() ? myFront++ : myRemoved.nextSetBit(0);
+    myKeys[x] = key;
+    myLeft[x] = 0;
+    myRight[x] = 0;
+    myBlack.clear(x);
+    if (!myRemoved.isEmpty()) {
+      myRemoved.clear(x);
+    }
+    return x;
   }
 
   /**
@@ -364,33 +365,32 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   /**
-   * This method rebuilds this DynamicLongSet.
-   * After running this method, this object will use memory which is needed to hold size() elements.
-   * (Usually it uses more memory before this method is ran)
+   * This method rebuilds this DynamicLongSet, after that it will use just the amount of memory needed to hold size() elements.
+   * (Usually it uses more memory before this method is run)
    * This method builds a new tree based on the same keyset.
    * All levels of the new tree are filled, except, probably, the last one.
-   * Levels are filled firstly with all possible left children, and only then
-   * with right children, all starting from the left side.
-   * To follow rb-restrictions, if there's an unfilled level,
-   * it's made completely red and pre-last is made completely black.
+   * Tree is built by levels top-down, within one level first all left children are added, then all right children.
+   * To keep black-height on all paths the same, if there's an unfilled level,
+   * it's made completely red and the penultimate level is made completely black.
    * All the other levels are made black, except every 4-th level, starting from level 2,
    * which are made red. This type of coloring guarantees a balance between average times taken
    * by subsequent add and remove operations.
    */
-  public void compactify() {
+  void compactify() {
     compactify(ColoringType.BALANCED);
   }
 
   /**
    * This method is similar to {@link com.almworks.integers.DynamicLongSet#compactify()},
    * except the way the internal levels are colored.
-   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
-   *                     if the last one is unfilled.
-   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet#compactify()};
-   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+   * @param coloringType the way the internal levels are colored.
+   *                     Internal levels are all levels except the last one (two if the last one is not full.)
+   *   <ul><li>{@link ColoringType#TO_REMOVE} colors every 2nd non-last levels red, theoretically making subsequent removals faster.
+   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link com.almworks.integers.DynamicLongSet#compactify()}.
+   *       <li>{@link ColoringType#TO_ADD} colors all non-last levels black, theoretically making subsequent additions faster.
+   *   </ul>
    */
-  public void compactify(ColoringType coloringType) {
+  void compactify(ColoringType coloringType) {
     modified();
     fromSortedLongIterable(this, size(), coloringType);
     assert checkRedsAmount(coloringType);
@@ -404,7 +404,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
       newKeys = new long[Math.max(SHRINK_MIN_LENGTH, arraySize)];
       int i = 0;
-      newKeys[0] = Long.MIN_VALUE;
+      newKeys[0] = NIL_DUMMY_KEY;
       for (LongIterator ii : src) {
         newKeys[++i] = ii.value();
         assert (i==1 || newKeys[i] >= newKeys[i-1]) : newKeys;
@@ -429,7 +429,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myRight = new int[myKeys.length];
 
     int levels = log(2, usedSize);
-    int top = (int)Math.pow(2, levels);
+    int top = 1 << levels;
     int redLevelsDensity = coloringType.redLevelsDensity();
     // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
     // If the last level contains only left children, then, due to the way the last level is filled,
@@ -500,20 +500,21 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   public LongIterator iterator() {
-    return new KeysIterator();
+    return new FailFastLongIterator(new IndexedLongIterator(new LongArray(myKeys), new LURIterator())) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public LongIterator tailIterator(long key) {
-    return new KeysIterator(key);
-  }
-
-  public void removeAll(LongIterable keys) {
-    modified();
-    int[] parentsStack = fetchStackCache(0);
-    for (LongIterator i : keys) {
-      remove0(i.value(), parentsStack);
-    }
-    maybeShrink();
+    return new FailFastLongIterator(new IndexedLongIterator(new LongArray(myKeys), new LURIterator(key))) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public void removeAll(long... keys) {
@@ -521,6 +522,19 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     int[] parentsStack = fetchStackCache(0);
     for (long key : keys) {
       remove0(key, parentsStack);
+    }
+    maybeShrink();
+  }
+
+  public void removeAll(LongList keys) {
+    removeAll(keys.iterator());
+  }
+
+  public void removeAll(LongIterator keys) {
+    modified();
+    int[] parentStack = fetchStackCache(0);
+    for (LongIterator it: keys) {
+      remove0(it.value(), parentStack);
     }
     maybeShrink();
   }
@@ -563,7 +577,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
     //searching for an index Z which contains the key.
     int z = myRoot;
-    while (myKeys[z] != key) {
+    while (myKeys[z] != key || z == 0) {
       if (z == 0)
         return false;
       parentsStack[++xsi] = z;
@@ -610,7 +624,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     if (y == myFront-1)
       myFront--;
     else {
-      if (myRemoved == null) myRemoved = new BitSet(y+1);
+      if (myRemoved.isEmpty()) myRemoved = new BitSet(y+1);
       myRemoved.set(y);
     }
   }
@@ -739,7 +753,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     assert (size() == 0) == isEmpty() : whatWasDoing + " " + myFront + ' ' + myRoot;
 
     // unnecessary requirements, though following them makes the structure more clear.
-    assert myKeys[0] == Long.MIN_VALUE : whatWasDoing + "\n" + myKeys[0];
+    assert myKeys[0] == NIL_DUMMY_KEY : whatWasDoing + "\n" + myKeys[0];
     assert myLeft[0] == 0  : whatWasDoing + "\n" + myLeft[0];
     assert myRight[0] == 0 : whatWasDoing + "\n" + myRight[0];
     assert myBlack.get(0) : whatWasDoing;
@@ -808,7 +822,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         return _;
       }
     });
-    if (myRemoved == null)
+    if (myRemoved.isEmpty())
       assert unremoved.cardinality() == size() : whatWasDoing + "\n" + size() + ' ' + unremoved.cardinality() + '\n' + unremoved + '\n' + dumpArrays(0);
     else {
       assert myRemoved.length() <= myFront : myFront + "\n" + myRemoved + "\n" + debugMegaPrint(whatWasDoing, 0);
@@ -831,7 +845,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     StringBuilder sb = new StringBuilder();
     if (problematicNode > 0) sb = debugPrintNode(problematicNode, sb);
     int idWidth = max(log(10, myFront), 4);
-    long longestKey = max(abs(getMax()), abs(getMin()));
+    long longestKey = max(abs(getUpperBound()), abs(getLowerBound()));
     int keyWidth = max(log(10, longestKey), 3);
     sb.append(String.format("%" + idWidth + "s | %" + keyWidth + "s | %" + idWidth + "s | %" + idWidth + "s\n", "id", "key", "left", "right"));
     String idFormat = "%" + idWidth + "d";
@@ -898,48 +912,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     int expected = redsExpected(sz, coloringType);
     int actual = sz - myBlack.cardinality() + 1;
     assert expected == actual : sz + " " + actual + " " + expected;
-    System.out.println("size: " + sz + ", reds: " + actual);
     return true;
-  }
-
-  private class KeysIterator extends AbstractLongIterator {
-    private LURIterator myIterator;
-    private final int myModCountAtCreation = myModCount;
-
-    public KeysIterator() {
-      myIterator = new LURIterator();
-    }
-
-    public KeysIterator(long key) {
-      myIterator = new LURIterator(key);
-    }
-
-    @Override
-    public boolean hasNext() throws ConcurrentModificationException {
-      checkMod();
-      return myIterator.hasNext();
-    }
-
-    public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      checkMod();
-      myIterator.next();
-      return this;
-    }
-
-    public boolean hasValue() {
-      checkMod();
-      return myIterator.hasValue();
-    }
-
-    public long value() throws IllegalStateException {
-      checkMod();
-      return myKeys[myIterator.value()];
-    }
-
-    private void checkMod() {
-      if (myModCountAtCreation != myModCount)
-        throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
-    }
   }
 
   private class LURIterator extends AbstractIntIterator {
@@ -1009,8 +982,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       return myIterated;
     }
 
-    public int value() throws IllegalStateException {
-      if (!hasValue()) throw new IllegalStateException();
+    public int value() throws NoSuchElementException {
+      if (!hasValue()) throw new NoSuchElementException();
       return myValue;
     }
   }

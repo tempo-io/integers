@@ -8,6 +8,10 @@ public interface WritableLongSet extends LongCollector, LongSet {
 
   void removeAll(long ... values);
 
+  void removeAll(LongList values);
+
+  void removeAll(LongIterator values);
+
   void retain(LongList values);
 
   /**

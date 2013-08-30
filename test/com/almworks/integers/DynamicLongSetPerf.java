@@ -19,6 +19,9 @@ package com.almworks.integers;
 import com.almworks.integers.util.LongSetBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /** This class is abstract to prevent it from running in the build. */
 public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
@@ -104,6 +107,90 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
       }
     }
   }
+
+  private enum DlsOperation {
+    REMOVE, ADD
+  }
+
+
+  public void testColoringTypes() {
+    int attempts = 7; //2000;
+    int sz = 8; //8200;
+    int waitTime = 0;
+
+    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
+    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
+//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
+//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
+//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
+//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
+  }
+
+  private void testColoringTypes(int waitTime, int attempts, int sz, DynamicLongSet.ColoringType cT, DlsOperation oper) {
+    String opName;
+    if (oper == DlsOperation.REMOVE) {
+      switch (cT) {
+        case TO_ADD: opName = "type=toAdd, op=remove, time="; break;
+        case BALANCED: opName = "type=balanced, op=remove, time="; break;
+        default: opName = "type=toRemove, op=remove, time=";
+      }
+    } else {
+      switch (cT) {
+        case TO_ADD: opName = "type=toAdd, op=add, time="; break;
+        case BALANCED: opName = "type=balanced, op=add, time="; break;
+        default: opName = "type=toRemove, op=add, time=";
+      }
+    }
+    List<DynamicLongSet> list = new ArrayList<DynamicLongSet>(attempts);
+    List<WritableLongList> list2 = new ArrayList<WritableLongList>(attempts);
+    for (int att = 0; att < attempts; att++) {
+      WritableLongList srcList = new LongArray();
+      WritableLongList addList = new LongArray();
+      for (int i = 0; i < sz; i++) {
+        srcList.add(RAND.nextLong());
+        addList.add(RAND.nextLong());
+      }
+      srcList.sort();
+      if (oper == DlsOperation.REMOVE) {
+        list2.add(srcList);
+      } else {
+        list2.add(addList);
+      }
+      DynamicLongSet dls = DynamicLongSet.fromSortedList(srcList, cT);
+      list.add(dls);
+    }
+
+    int i = 0;
+    long res = 0, t;
+    Iterator<DynamicLongSet> it = list.iterator();
+    Iterator<WritableLongList> it2 = list2.iterator();
+    for (int att = 0; att < attempts; att++) {
+      DynamicLongSet dls = it.next();
+      WritableLongList nx = it2.next();
+      t = System.currentTimeMillis();
+      if (oper == DlsOperation.REMOVE)
+        dls.removeAll(nx);
+      else
+        dls.addAll(nx);
+      t = System.currentTimeMillis() - t;
+      res += t;
+      if (i == 5) {
+        res = 0;
+        System.out.println("waiting before start");
+        t = System.currentTimeMillis();
+        while (System.currentTimeMillis() - t < waitTime);
+        System.out.println("started");
+      }
+      i++;
+    }
+    System.out.println(opName + res);
+    System.out.println("waiting after finish");
+    t = System.currentTimeMillis();
+    while (System.currentTimeMillis() - t < waitTime);
+    System.out.println("resuming");
+  }
+
+
 
 // To use these tests, add trove to the test folder
 /*
