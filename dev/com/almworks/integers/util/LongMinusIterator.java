@@ -30,9 +30,7 @@ public class LongMinusIterator extends FindingLongIterator {
   private final LongIterator myInclude;
   private final LongIterator myExclude;
 
-  private long myNext = Long.MIN_VALUE;
   private long myLastExclude = Long.MIN_VALUE;
-  private boolean myExcludeIterated;
 
   public LongMinusIterator(LongIterator include, LongIterator exclude) {
     myInclude = include;
@@ -58,7 +56,7 @@ public class LongMinusIterator extends FindingLongIterator {
   }
 
   private boolean accept(long v) {
-    if (myExcludeIterated) {
+    if (myExclude.hasValue()) {
       if (v == myLastExclude)
         return false;
       if (v < myLastExclude)
@@ -68,7 +66,6 @@ public class LongMinusIterator extends FindingLongIterator {
       long n = myExclude.nextValue();
       assert n >= myLastExclude : myLastExclude + " " + n + " " + myExclude;
       myLastExclude = n;
-      myExcludeIterated = true;
       if (v == myLastExclude)
         return false;
       if (v < myLastExclude)

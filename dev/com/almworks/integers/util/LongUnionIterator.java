@@ -50,28 +50,35 @@ public class LongUnionIterator extends LongSetOperationsIterator {
   protected boolean findNext() {
     if (!myIsHeapBuilt) {
       myIsHeapBuilt = true;
-      if (IntegersDebug.DEBUG) IntegersDebug.println(myIts.size());
+      if (IntegersDebug.TEST) IntegersDebug.println(myIts.size());
       heapLength = 0;
-      for (int i = 0; i < myIts.size(); i++) {
+      for (int i = 0, n = myIts.size(); i < n; i++) {
         if (myIts.get(i).hasNext()) {
           myIts.get(i).next();
           heapLength++;
           myHeap[heapLength] = i;
         }
       }
-
       buildHeap();
     }
-    if (IntegersDebug.DEBUG) outputHeap();
+    if (IntegersDebug.TEST) outputHeap();
     assert heapLength >= 0 : "heapLength < 0: " + heapLength;
     if (heapLength == 0) return false;
     myNext = myIts.get(myHeap[TOP]).value();
     while (myIts.get(myHeap[TOP]).value() == myNext && heapLength > 0) {
       LongIterator topIterator = myIts.get(myHeap[TOP]);
       if (topIterator.hasNext()) {
-        long prev = topIterator.value();
         topIterator.next();
-        assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
+        assert myNext < topIterator.value() : myHeap[TOP] + " " + myNext + " " + topIterator.value();
+
+//        long prev = 0;
+////        Saving on call to value() in case assertions are off
+//        assert (prev = topIterator.value()) >= Long.MIN_VALUE;
+//        if (prev == 4) {
+//          prev += 0;
+//        }
+//        topIterator.next();
+//        assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
       } else {
         IntCollections.swap(myHeap, TOP, heapLength);
         heapLength--;
