@@ -17,6 +17,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
+import com.almworks.integers.util.IntegersDebug;
 
 import java.util.HashSet;
 
@@ -39,7 +40,7 @@ public class IntegersUtilsTests extends IntegersFixture {
       }
     });
     final IntArray is = IntArray.create(1, 2, 3, 4);
-    System.out.println("0 " + is);
+    IntegersDebug.println("0 " + is);
     IntegersUtils.allPermutations(4, new IntProcedure() {
       int count = 1;
 
@@ -48,7 +49,7 @@ public class IntegersUtilsTests extends IntegersFixture {
         assertTrue("" + i, i >= 0);
         assertTrue("" + i, i < 3);
         is.swap(i, i + 1);
-        System.out.println(count++ + " " + is);
+        IntegersDebug.println(count++ + " " + is);
       }
     });
   }

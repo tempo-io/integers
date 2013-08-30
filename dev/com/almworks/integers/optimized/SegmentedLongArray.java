@@ -121,11 +121,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
 
   public SegmentedLongArray(SegmentedLongArrayEnvironment env) {
     myEnv = env;
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public long get(int index) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     try {
       index += myLeftOffset;
       LongSegment s = mySegments.segments[index >> mySegmentBits];
@@ -139,21 +139,21 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   public void add(long value) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     int p = size();
     increaseSize(1, false);
     writeLong(myLeftOffset + p, value);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public void insert(int index, long value) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     int sz = size();
     if (index < 0 || index > sz)
       throw new IndexOutOfBoundsException(index + " " + this);
     increaseSize(1, index < (sz >> 1));
     writeLong(myLeftOffset + index, value);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   @NotNull
@@ -168,17 +168,17 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   public void expand(int index, int count) {
     if (index < 0 || index > size())
       throw new IndexOutOfBoundsException(index + " " + this);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     if (count < 0)
       throw new IllegalArgumentException();
     if (count == 0)
       return;
     doExpand(index, count);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public void insertMultiple(int index, long value, int count) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     if (count < 0) throw new IllegalArgumentException();
     if (count == 0) return;
 
@@ -187,11 +187,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       ii.next();
       ii.set(0, value);
     }
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public void removeRange(int from, int to) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     if (to <= from)
       return;
     checkRange(from, to);
@@ -208,11 +208,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       shiftLeft(myLeftOffset + to, myLeftOffset + sz, count);
     }
     decreaseSize(count, leftward);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public long removeAt(int index) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     long value = get(index);
     int sz = size();
     boolean leftward = index < (sz >> 1);
@@ -222,7 +222,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       shiftLeft(myLeftOffset + index + 1, myLeftOffset + sz, 1);
     }
     decreaseSize(1, leftward);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     return value;
   }
 
@@ -246,7 +246,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   public void setAll(int index, LongList values, int sourceIndex, int count) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     if (values == null || count <= 0)
       return;
     if (values instanceof SegmentedLongArray) {
@@ -259,13 +259,13 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     } else {
       copyList(index, values, sourceIndex, count);
     }
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public long[] toArray(int startIndex, long[] dest, int destOffset, int length) {
     if (length <= 0)
       return dest;
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     if (startIndex < 0 || startIndex + length > size())
       throw new IndexOutOfBoundsException(startIndex + " " + length + " " + this);
     int sp = myLeftOffset + startIndex;
@@ -292,7 +292,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   public SegmentedLongArray clone(int from, int to) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     checkRange(from, to);
     if (from >= to)
       return new SegmentedLongArray(myEnv);
@@ -320,8 +320,8 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         r.use(r.mySegments.segments[i]);
       }
       r.myRightOffset = r.myCapacity - r.size() - r.myLeftOffset;
-      assert !IntegersDebug.DEBUG || checkInvariants();
-      assert r.checkInvariants();
+      assert !IntegersDebug.TEST || checkInvariants();
+      assert !IntegersDebug.TEST || r.checkInvariants();
       return r;
     } catch (CloneNotSupportedException e) {
       throw new Error(e);
@@ -329,11 +329,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   private void insertList(int index, LongList list, int sourceIndex, int count) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     assert list != null && !list.isEmpty() && count > 0 && count <= list.size();
     doExpand(index, count);
     copyList(index, list, sourceIndex, count);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   private void copyList(int targetIndex, LongList list, int sourceIndex, int count) {
@@ -351,12 +351,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   private void insertSegmented(int index, SegmentedLongArray array, int sourceIndex, int count) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     assert array != null && !array.isEmpty() && count > 0 && count <= array.size() : count + " " + array;
     // todo if segments are copied as whole, we don't need expand to allocate new segments
     doExpand(index, count);
     copySegmented(index, array, sourceIndex, count);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   private void copySegmented(int targetIndex, SegmentedLongArray array, int sourceIndex, int length) {
@@ -532,7 +532,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   private void increaseSize(int added, boolean leftward) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     int relatedOffset = leftward ? myLeftOffset : myRightOffset;
     int sz = size();
     if (added > relatedOffset) {
@@ -559,7 +559,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     } else {
       myRightOffset = myCapacity - sz - myLeftOffset;
     }
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   private void ensureFreeSpaceSmall(int required, boolean leftward) {
@@ -664,7 +664,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   public void clear() {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     if (mySegments != null) {
       for (int i = 0; i < mySegments.segments.length; i++) {
         unuse(mySegments.segments[i]);
@@ -679,22 +679,22 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     myCapacity = 0;
     myLeftOffset = 0;
     myRightOffset = 0;
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public void set(int index, long value) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     writeLong(myLeftOffset + index, value);
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   public void setRange(int from, int to, long value) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     for (WritableLongListIterator ii = iterator(from, to); ii.hasNext();) {
       ii.next();
       ii.set(0, value);
     }
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   private void writeLong(int absIndex, long value) {
@@ -738,14 +738,14 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   public void apply(int from, int to, LongFunction function) {
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
     if (from >= to)
       return;
     checkRange(from, to);
     for (WritableLongListIterator ii = iterator(from, to); ii.hasNext();) {
       ii.set(0, function.invoke(ii.nextValue()));
     }
-    assert !IntegersDebug.DEBUG || checkInvariants();
+    assert !IntegersDebug.TEST || checkInvariants();
   }
 
   private void checkRange(int from, int to) {
@@ -800,11 +800,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       int left = from + myLeftOffset;
       mySegmentIndex = left >> mySegmentBits;
       myOffset = (left & mySegmentMask);
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
     }
 
     public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -818,11 +818,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       myNext = p + 1;
       myOffset++;
       adjustOffset();
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
     }
 
     public WritableLongListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
       checkMod();
       if (myNext < 0)
         myNext = -myNext-1;
@@ -834,7 +834,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       myNext++;
       myOffset++;
       adjustOffset();
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
       return this;
     }
 
@@ -865,7 +865,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
 
     public long get(int relativeOffset) throws IndexOutOfBoundsException, NoSuchElementException {
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -898,7 +898,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
 
     public void set(int offset, long value) throws NoSuchElementException, IndexOutOfBoundsException {
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -920,11 +920,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         seg = mySegment == null ? mySegments.segments[si] : mySegment;
       }
       seg.data[off] = value;
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
     }
 
     public void removeRange(int offsetFrom, int offsetTo) throws NoSuchElementException {
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
       if (myNext < 0)
         throw new IllegalStateException();
       if (offsetFrom >= offsetTo) {
@@ -945,12 +945,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       myOffset = p & mySegmentMask;
       myIterationModCount = modCount();
       myNext = -myNext-1;
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
     }
 
     @Override
     public void remove() throws NoSuchElementException, ConcurrentModificationException {
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -983,7 +983,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       }
       myIterationModCount = modCount();
       myNext = -myNext-1;
-      assert !IntegersDebug.DEBUG || checkIterator();
+      assert !IntegersDebug.TEST || checkIterator();
     }
 
     public String toString() {

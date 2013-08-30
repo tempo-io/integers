@@ -3,6 +3,8 @@ package com.almworks.integers;
 import com.almworks.integers.util.*;
 import junit.framework.TestCase;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Random;
 
 public abstract class IntegersFixture extends TestCase {
@@ -10,6 +12,10 @@ public abstract class IntegersFixture extends TestCase {
 
   public static final String SEED = "com.almworks.integers.seed";
   public static final Random RAND = createRandom();
+
+  public void setUp() throws Exception {
+    System.setProperty("integers.test", "true");
+  }
 
   /**
    * Add {@code -Dcom.almworks.integers.seed=12312423455}
@@ -253,5 +259,16 @@ public abstract class IntegersFixture extends TestCase {
     }
     IntegersDebug.println(res);
     return res;
+  }
+
+  static void setFinalStatic(Object obj, String name, int newValue) throws Exception {
+    Field field = obj.getClass().getDeclaredField(name);
+    field.setAccessible(true);
+
+    Field modifiersField = Field.class.getDeclaredField("modifiers");
+    modifiersField.setAccessible(true);
+    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+    field.set(null, newValue);
   }
 }

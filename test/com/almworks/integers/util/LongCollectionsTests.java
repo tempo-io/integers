@@ -199,7 +199,7 @@ public class LongCollectionsTests extends IntegersFixture {
       LongList b = createRand(len, maxElem, 3);
       Pair<LongArray, LongArray> exp_int = createInters(a, b, intersRate, intersLen, maxElem);
       LongArray inters = exp_int.getSecond();
-      System.out.println("\n/////////\na: " + a + "\nb: " + b + "\ninters:" + inters);
+      IntegersDebug.println("\n/////////\na: " + a + "\nb: " + b + "\ninters:" + inters);
       COMPARE.order(exp_int.getFirst(), uniteTwoLengthySortedSetsAndIntersectWithThirdShort(a, b, inters));
     }
   }

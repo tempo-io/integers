@@ -17,6 +17,7 @@
 package com.almworks.integers.util;
 
 public class IntegersDebug {
+  public static final boolean TEST = Boolean.parseBoolean(System.getProperty("integers.test"));
   public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("integers.debug"));
 
   public static void print(Object ... elements) {
@@ -35,7 +36,7 @@ public class IntegersDebug {
   }
 
   public static void println(Object ... elements) {
-    if (DEBUG) {
+    if (TEST) {
       print(elements);
       System.out.println();
     }
