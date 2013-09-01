@@ -1,4 +1,4 @@
-/*
+&/*
  * Copyright 2011 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,6 +59,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   // used in fromSortedLongIterable(). A new myKeys array is created in this method, and its size is
   // the size of the given LongIterable multiplied by this constant (additional space for new elements to be added later).
   private static final int EXPAND_FACTOR = 2;
+
+// naming conv
 
   int minSize = -1;
   int maxSize = -1;
@@ -285,7 +287,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         }
         myBlack.set(p);
         myBlack.clear(pp);
-        int ppp = getLastOrNil(ps, --psi);
+        int ppp = getLastOrNil(ps, --psi);                                
         // Takes pp (which is now red) and makes it a branch-2 children of p (which is now black); note that branch-1 children of p is x, which is red and both children are black
         rotate(pp, ppp, branch2, branch1);
       }
@@ -364,7 +366,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     return countedHeight;
   }
 
-  /**
+  /**                                                                                                         
    * This method rebuilds this DynamicLongSet, after that it will use just the amount of memory needed to hold size() elements.
    * (Usually it uses more memory before this method is run)
    * This method builds a new tree based on the same keyset.
@@ -377,6 +379,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    * by subsequent add and remove operations.
    */
   void compactify() {
+// Use TO_ADD. BALANCED doesn't actually guarantee anything, it's based on upre speculation.
+// Also update docs
     compactify(ColoringType.BALANCED);
   }
 
@@ -401,6 +405,15 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     if (srcSize == 0)
       newKeys = EMPTY_KEYS;
     else {
+/* Consider removing expansion:
+1) TO_ADD will be used in almwost all cases ; 
+2) if one compactifies for further addition, probably he wastes more time calling this method than otherwise.
+
+The "best" scenario: there are N = 2^K - 1 nodes, i.e. no red level. Then there might be up to N additions that don't do rotations. 
+As at most 2 rotations are done when adding, we save 2N rotations. 
+How much do we pay?
+But we spend O(lg N) time anyway while traversing to the insertion point. 
+*/
       int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
       newKeys = new long[Math.max(SHRINK_MIN_LENGTH, arraySize)];
       int i = 0;
@@ -423,6 +436,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     init();
     myKeys = newKeys;
     myFront = usedSize+1;
+// Should compare with 1
     if (usedSize == 0)
       return;
     myLeft = new int[myKeys.length];
@@ -431,12 +445,19 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     int levels = log(2, usedSize);
     int top = 1 << levels;
     int redLevelsDensity = coloringType.redLevelsDensity();
-    // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
+    // Definition: last pair is any pair of nodes which belong to one parent and don't have children.
     // If the last level contains only left children, then, due to the way the last level is filled,
+
+// I don't understand why "therefore" they are black. What's the reason? THe only real invariant is that on each path, the amount of blacks is the same; 
+// it can work even if the last level is red, i.e. we think of NIL as a black node (and in fact we do!)    
+
     // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
     // Otherwise they belong entirely to the last level and are red.
     boolean lastPairsAreBlack;
     if (top != usedSize + 1)
+
+// Please add a comment explaining this (why 3/4?)
+
       lastPairsAreBlack = (usedSize < 3*top/4);
     else
       lastPairsAreBlack = (coloringType == ColoringType.TO_ADD) || (levels + redLevelsDensity - 2) % redLevelsDensity != 0;
@@ -487,6 +508,16 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
    *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)};
    *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+
+
+Let me check these claims. Suppose we have a tree built the way compactify() works
+1. 
+
+
+
+
+
+
    */
   public static DynamicLongSet fromSortedList(LongList src, ColoringType coloringType) {
     return fromSortedList0(src, coloringType);
