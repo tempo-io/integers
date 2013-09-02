@@ -28,15 +28,15 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class WritableLongSetChecker extends IntegersFixture {
-  protected abstract WritableLongSet createSet() throws Exception;
+  protected abstract WritableLongSet createSet();
 
-  protected abstract WritableLongSet createSetWithCapacity(int capacity) throws Exception;
+  protected abstract WritableLongSet createSetWithCapacity(int capacity);
 
 //  protected abstract WritableLongSet createSetFromSortedList(LongList sortedList) throws Exception;
 
   protected WritableLongSet set;
 
-  public void setUp() throws Exception {
+  public void setUp() {
     super.setUp();
     set = createSet();
     System.setProperty("integers.test", "true");

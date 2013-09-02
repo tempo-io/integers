@@ -29,19 +29,25 @@ import java.util.*;
 public class DynamicLongSetTests extends WritableLongSetChecker {
 //  protected final DynamicLongSet set = new DynamicLongSet();
 
-  protected WritableLongSet createSet() throws Exception {
+  private static final long MIN = Long.MIN_VALUE;
+
+  protected WritableLongSet createSet() {
     return createSetWithCapacity(-1);
   }
 
-  protected WritableLongSet createSetWithCapacity(int capacity) throws Exception {
+  protected WritableLongSet createSetWithCapacity(int capacity) {
     DynamicLongSet newSet;
     newSet = capacity == -1 ? new DynamicLongSet() : new DynamicLongSet(capacity);
-    setFinalStatic(newSet, "SHRINK_FACTOR", 6);
-    setFinalStatic(newSet, "SHRINK_MIN_LENGTH", 4);
+    try {
+      setFinalStatic(newSet, "SHRINK_FACTOR", 6);
+      setFinalStatic(newSet, "SHRINK_MIN_LENGTH", 4);
 
-    Field field = newSet.getClass().getDeclaredField("SHRINK_FACTOR");
-    field.setAccessible(true);
-    return newSet;
+      Field field = newSet.getClass().getDeclaredField("SHRINK_FACTOR");
+      field.setAccessible(true);
+      return newSet;
+    } catch (Exception ex) {
+      return new DynamicLongSet();
+    }
   }
 
   public void testRandom() {
@@ -108,7 +114,7 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
 
   public void testEdgeCasesWithCompactify() {
     DynamicLongSet set = new DynamicLongSet();
-    assertFalse(set.exclude(Long.MIN_VALUE));
+    assertFalse(set.exclude(MIN));
     assertFalse(set.exclude(0));
     set.removeAll(12, 23, 12, 51);
     assertTrue(set.isEmpty());
@@ -117,10 +123,16 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     LongList ll = new LongArray();
     DynamicLongSet set2 = DynamicLongSet.fromSortedList(ll);
     assertTrue(set2.isEmpty());
-    set.addAll(1, 3, 2, Long.MIN_VALUE, Long.MAX_VALUE);
+    set.addAll(1, 3, 2, MIN, Long.MAX_VALUE);
     assertTrue(new LongArray(set.toList()).checkSorted(true));
     assertTrue(set.contains(1));
-    assertTrue(set.contains(Long.MIN_VALUE));
+    assertTrue(set.contains(MIN));
+    assertFalse(set.contains(0));
+
+    set.clear();
+    set.add(MIN);
+    assertTrue(set.contains(MIN));
+    assertFalse(set.contains(MIN + 1));
     assertFalse(set.contains(0));
   }
 }
