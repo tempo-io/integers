@@ -11,6 +11,10 @@ public class AmortizedSortedLongSetTempTests extends WritableLongSetChecker {
     return new AmortizedSortedLongSetTemp();
   }
 
+  protected  WritableLongSet createSetFromSortedList(LongList sortedList) {
+    return new AmortizedSortedLongSetTemp(sortedList);
+  }
+
   public void testIteratorCoalesce() {
     AmortizedSortedLongSetTemp set = new AmortizedSortedLongSetTemp();
     set.addAll(2, 4, 6, 8);
@@ -42,6 +46,16 @@ public class AmortizedSortedLongSetTempTests extends WritableLongSetChecker {
     set.toList();
     assertEquals(2, it.nextValue());
     assertFalse(it.hasNext());
+  }
+
+  public void _testToString() {
+    AmortizedSortedLongSetTemp set = new AmortizedSortedLongSetTemp();
+    set.addAll(0, 2, 4, 6, 8);
+    set.coalesce();
+    set.addAll(1, 3, 5, 7, 9);
+    set.removeAll(0, 3, 6, 9);
+    System.out.println(set.toString());
+    System.out.println(LongCollections.toBoundedString(set));
   }
 
 }

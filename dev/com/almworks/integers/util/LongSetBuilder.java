@@ -186,7 +186,6 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   }
 
   public String toString() {
-    System.out.println();
     StringBuilder builder = new StringBuilder();
     builder.append("LongSetBuilder\n");
     builder.append("mySorted: ").append(LongCollections.toBoundedString(mySorted)).append('\n');

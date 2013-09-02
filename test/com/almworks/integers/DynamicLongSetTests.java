@@ -50,6 +50,10 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     }
   }
 
+  protected WritableLongSet createSetFromSortedList(LongList sortedList) {
+    return DynamicLongSet.fromSortedList(sortedList);
+  }
+
   public void testRandom() {
     int[] ns = new int[]{510, 513, 1025, 2049, 4097}; // testing sizes near 2^n
     int nAttempts = 5;

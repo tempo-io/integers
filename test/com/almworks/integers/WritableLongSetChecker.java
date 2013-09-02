@@ -32,7 +32,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
 
   protected abstract WritableLongSet createSetWithCapacity(int capacity);
 
-//  protected abstract WritableLongSet createSetFromSortedList(LongList sortedList) throws Exception;
+  protected abstract WritableLongSet createSetFromSortedList(LongList sortedList) throws Exception;
 
   protected WritableLongSet set;
 
@@ -218,25 +218,6 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     assertFalse(set.contains(0));
   }
 
-  public void testFromSortedList() throws Exception {
-    int testNumber = 10;
-    int arraySize = 10000;
-    for (int i = 0; i < testNumber; i++) {
-      LongArray res = IntegersFixture.generateRandomArray(arraySize, true);
-      LongArray res2 = LongArray.copy(res);
-      for (int j = 0, n = res.size(); j < n; j++) {
-        res2.addAll(res.get(j) - 1, res.get(j) + 1);
-      }
-      res2.sortUnique();
-
-//      set = createSetFromSortedList(res);
-      for (int j = 0; j < res2.size(); j++) {
-        
-      }
-
-    }
-  }
-
   public void testEdgeCases2() {
     LongArray res = LongArray.create(12, 23, 12, 51);
     set.addAll(12, 23, 12, 51);
@@ -245,6 +226,26 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     res.sortUnique();
     CHECK.order(res, set.toList());
     CHECK.order(res.iterator(), set.iterator());
+  }
+
+  public void testFromSortedList() throws Exception {
+    int testNumber = 10;
+    int arraySize = 10000;
+    for (int i = 0; i < testNumber; i++) {
+      LongArray res = IntegersFixture.generateRandomArray(arraySize, true);
+      set = createSetFromSortedList(res);
+      LongArray res2 = new LongArray(res.size() * 3 + 1);
+      for (int j = 0, n = res.size(); j < n; j++) {
+        long val = res.get(j);
+        res2.addAll(val - 1, val, val + 1);
+      }
+      res2.sortUnique();
+
+      for (int j = 0; j < res2.size(); j++) {
+        long val = res2.get(j);
+        assertEquals(res.binarySearch(val) >= 0, set.contains(val));
+      }
+    }
   }
 
   public void testRandom() throws Exception {

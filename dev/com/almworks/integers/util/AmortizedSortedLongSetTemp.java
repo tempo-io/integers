@@ -214,6 +214,15 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
     return LongArray.copy(myBaseList);
   }
 
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("AmortizedSortedLongSet\n");
+    builder.append("myBaseList: ").append(LongCollections.toBoundedString(myBaseList)).append('\n');
+    builder.append("myAdded: ").append(LongCollections.toBoundedString(myAdded)).append('\n');
+    builder.append("myRemoved: ").append(LongCollections.toBoundedString(myRemoved));
+    return builder.toString();
+  }
+
   private class CoalescingIterator extends AbstractLongIteratorWithFlag {
     private LongIterator myIterator;
     private long myNext = Long.MIN_VALUE;
