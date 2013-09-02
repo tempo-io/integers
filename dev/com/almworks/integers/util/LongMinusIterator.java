@@ -42,12 +42,12 @@ public class LongMinusIterator extends FindingLongIterator {
   }
 
   protected boolean findNext() {
-    long last = myNext;
+    long last = myCurrent;
     while (myInclude.hasNext()) {
       long v = myInclude.nextValue();
       assert v >= last : last + " " + v + " " + myInclude;
       if (accept(v)) {
-        myNext = v;
+        myCurrent = v;
         return true;
       }
       last = v;

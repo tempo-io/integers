@@ -93,4 +93,8 @@ abstract class LongSetOperationsIterator extends FindingLongIterator {
     }
     IntegersDebug.println();
   }
+
+  protected LongIterator getTopIterator() {
+    return myIts.get(myHeap[TOP]);
+  }
 }

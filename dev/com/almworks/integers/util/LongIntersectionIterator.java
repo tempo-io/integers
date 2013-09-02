@@ -46,7 +46,7 @@ public class LongIntersectionIterator extends LongSetOperationsIterator {
   }
 
   private boolean equalValues() {
-    long topValue = myIts.get(myHeap[TOP]).value();
+    long topValue = getTopIterator().value();
     for (int i = parent(heapLength) + TOP; i <= heapLength; i++) {
       if (topValue != myIts.get(myHeap[i]).value()) {
         return false;
@@ -68,7 +68,7 @@ public class LongIntersectionIterator extends LongSetOperationsIterator {
     if (IntegersDebug.DEBUG) outputHeap();
 
     while (!equalValues()) {
-      LongIterator topIterator = myIts.get(myHeap[TOP]);
+      LongIterator topIterator = getTopIterator();
       if (!topIterator.hasNext()) return false;
 
       long prev = topIterator.value();
@@ -77,7 +77,7 @@ public class LongIntersectionIterator extends LongSetOperationsIterator {
       heapify(TOP);
     }
     // all values are the same as the TOP
-    myNext = myIts.get(myHeap[TOP]).value();
+    myCurrent = getTopIterator().value();
     return true;
   }
 }

@@ -64,21 +64,12 @@ public class LongUnionIterator extends LongSetOperationsIterator {
     if (IntegersDebug.TEST) outputHeap();
     assert heapLength >= 0 : "heapLength < 0: " + heapLength;
     if (heapLength == 0) return false;
-    myNext = myIts.get(myHeap[TOP]).value();
-    while (myIts.get(myHeap[TOP]).value() == myNext && heapLength > 0) {
-      LongIterator topIterator = myIts.get(myHeap[TOP]);
+    myCurrent = getTopIterator().value();
+    while (myIts.get(myHeap[TOP]).value() == myCurrent && heapLength > 0) {
+      LongIterator topIterator = getTopIterator();
       if (topIterator.hasNext()) {
         topIterator.next();
-        assert myNext < topIterator.value() : myHeap[TOP] + " " + myNext + " " + topIterator.value();
-
-//        long prev = 0;
-////        Saving on call to value() in case assertions are off
-//        assert (prev = topIterator.value()) >= Long.MIN_VALUE;
-//        if (prev == 4) {
-//          prev += 0;
-//        }
-//        topIterator.next();
-//        assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
+        assert myCurrent < topIterator.value() : myHeap[TOP] + " " + myCurrent + " " + topIterator.value();
       } else {
         IntCollections.swap(myHeap, TOP, heapLength);
         heapLength--;

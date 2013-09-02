@@ -222,6 +222,7 @@ test/com/almworks/integers/optimized/SegmentedLongArrayTests.java -text
 test/com/almworks/integers/optimized/TestEnvForSegmentedLongArray.java -text
 test/com/almworks/integers/util/AmortizedSortedLongSetTempTests.java -text
 test/com/almworks/integers/util/DiffIndexedLongListDecoratorTests.java -text
+test/com/almworks/integers/util/FindingLongIteratorTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
 test/com/almworks/integers/util/LongIntersectionIteratorTests.java -text
 test/com/almworks/integers/util/LongListConcatenationTests.java -text

@@ -1,9 +1,6 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongIterator;
-import com.almworks.integers.SetOperationsChecker;
+import com.almworks.integers.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,4 +24,19 @@ public class LongUnionIteratorTests extends IntegersFixture {
     }, new SetOperationsChecker.UnionGetter(), true, false);
   }
 
+  public void testSimple() {
+    LongIterator it1 = LongArray.create(0, 1, 2).iterator();
+    LongIterator empty = LongIterator.EMPTY;
+    LongIterator minus = new LongMinusIterator(it1, empty);
+    assertFalse(minus.hasValue());
+    assertTrue(minus.hasNext());
+    minus.next();
+    assertEquals(0, minus.value());
+    assertTrue(minus.hasNext());
+    assertEquals(0, minus.value());
+
+    assertEquals(1, minus.nextValue());
+    assertTrue(minus.hasNext());
+    assertEquals(1, minus.value());
+  }
 }
