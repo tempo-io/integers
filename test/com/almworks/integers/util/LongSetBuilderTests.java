@@ -3,7 +3,7 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 
 public class LongSetBuilderTests extends IntegersFixture {
-  public void test() {
+  public void testSimple() {
     check(IntegersUtils.EMPTY_LONGS);
     check(range(0, 0));
     check(range(0, 0), range(0, 0), range(0, 0));

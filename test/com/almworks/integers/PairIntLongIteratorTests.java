@@ -26,6 +26,7 @@ public class PairIntLongIteratorTests extends IntegersFixture {
   private PairIntLongIterator res;
 
   public void setUp() {
+    super.setUp();
     arr1 = IntArray.create(1, 2, 3, 4, 5).iterator();
     arr2 = LongArray.create(5, 10, 15, 20, 25).iterator();
     res = new PairIntLongIterator(arr1,arr2);

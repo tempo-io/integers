@@ -13,7 +13,7 @@ public abstract class IntegersFixture extends TestCase {
   public static final String SEED = "com.almworks.integers.seed";
   public static final Random RAND = createRandom();
 
-  public void setUp() throws Exception {
+  public void setUp() {
     System.setProperty("integers.test", "true");
   }
 

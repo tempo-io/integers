@@ -21,6 +21,7 @@ public class LongArrayIteratorTests extends IntegersFixture {
   private static WritableLongListIterator iter;
 
   public void setUp() {
+    super.setUp();
     arr = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     iter = arr.iterator();
   }
@@ -103,5 +104,19 @@ public class LongArrayIteratorTests extends IntegersFixture {
     checkToBoundedString(array);
     array.addAll(LongProgression.arithmetic(11, 10));
     checkToBoundedString(array);
+  }
+
+  public void testSimple() {
+    LongIterator it = LongArray.create(0, 1, 2).iterator();
+    assertFalse(it.hasValue());
+    assertTrue(it.hasNext());
+    it.next();
+    assertEquals(0, it.value());
+    assertTrue(it.hasNext());
+    assertEquals(0, it.value());
+
+    assertEquals(1, it.nextValue());
+    assertTrue(it.hasNext());
+    assertEquals(1, it.value());
   }
 }
