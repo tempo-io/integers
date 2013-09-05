@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LongArrayTests extends IntegersFixture {
@@ -157,7 +156,7 @@ public class LongArrayTests extends IntegersFixture {
     arr.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
     CHECK.order(LongProgression.arithmetic(1, 10, 2), arr);
 
-    setOperations.check(new SetOperationsChecker.newSetCreator() {
+    setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         arrays[0].retain(arrays[1]);
@@ -165,7 +164,7 @@ public class LongArrayTests extends IntegersFixture {
       }
     }, new SetOperationsChecker.IntersectionGetter(false), false, true);
 
-    setOperations.check(new SetOperationsChecker.newSetCreator() {
+    setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         arrays[0].retainSorted(arrays[1]);
@@ -412,9 +411,9 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testUnion() {
-    SetOperationsChecker.newSetCreator unionGetter = new SetOperationsChecker.UnionGetter();
+    SetOperationsChecker.SetCreator unionGetter = new SetOperationsChecker.UnionGetter();
     // is likely to be launched branch with realloc
-    setOperations.check(new SetOperationsChecker.newSetCreator() {
+    setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return arrays[0].mergeWithSameLength(arrays[1]).iterator();
@@ -422,7 +421,7 @@ public class LongArrayTests extends IntegersFixture {
     }, unionGetter, true, true);
 
     // guaranteed launch branch with replace
-    setOperations.check(new SetOperationsChecker.newSetCreator() {
+    setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -432,7 +431,7 @@ public class LongArrayTests extends IntegersFixture {
     }, unionGetter, true, true);
 
     // is likely to be launched branch with realloc
-    setOperations.check(new SetOperationsChecker.newSetCreator() {
+    setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return arrays[0].mergeWithSmall(arrays[1]).iterator();
@@ -440,7 +439,7 @@ public class LongArrayTests extends IntegersFixture {
     }, unionGetter, true, true);
 
     // guaranteed launch branch with replace
-    setOperations.check(new SetOperationsChecker.newSetCreator() {
+    setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);

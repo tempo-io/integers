@@ -15,7 +15,7 @@ public class LongUnionIteratorTests extends IntegersFixture {
   }
 
   public void testAllCases() {
-    new SetOperationsChecker().check(new SetOperationsChecker.newSetCreator() {
+    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         LongArray res = new LongArray(new LongUnionIterator(arrays));

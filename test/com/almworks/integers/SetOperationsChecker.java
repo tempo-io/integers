@@ -16,8 +16,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.util.IntegersDebug;
-
 import static com.almworks.integers.LongArray.create;
 
 public class SetOperationsChecker {
@@ -29,8 +27,8 @@ public class SetOperationsChecker {
     return new LongArray(values);
   }
 
-  private newSetCreator creator;
-  private newSetCreator expected;
+  private SetCreator creator;
+  private SetCreator expected;
   private boolean sortUniqueStatus = true;
   private boolean onlyTwo = true;
 
@@ -88,7 +86,7 @@ public class SetOperationsChecker {
     }
   }
 
-  public void check(newSetCreator creator, newSetCreator expected, boolean sortUniqueStatus, boolean onlyTwo) {
+  public void check(SetCreator creator, SetCreator expected, boolean sortUniqueStatus, boolean onlyTwo) {
     this.creator = creator;
     this.expected = expected;
     this.sortUniqueStatus = sortUniqueStatus;
@@ -163,11 +161,11 @@ public class SetOperationsChecker {
     checkNewSetCreator(arrays);
   }
 
-  public static interface newSetCreator {
+  public static interface SetCreator {
     LongIterator get(LongArray... arrays);
   }
 
-  public static class UnionGetter implements newSetCreator {
+  public static class UnionGetter implements SetCreator {
     public LongIterator get(LongArray ... arrays) {
       LongArray expected = new LongArray();
       for (LongArray array : arrays) {
@@ -178,7 +176,7 @@ public class SetOperationsChecker {
     }
   }
 
-  public static class IntersectionGetter implements newSetCreator {
+  public static class IntersectionGetter implements SetCreator {
     private boolean isSorted;
     public IntersectionGetter(boolean isSorted) {  this.isSorted = isSorted;   }
     public LongIterator get(LongArray ... arrays) {

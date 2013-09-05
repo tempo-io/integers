@@ -6,7 +6,7 @@ import com.almworks.integers.LongProgression;
 public class CyclicLongQueueTests extends IntegersFixture {
   private final CyclicLongQueue myArray = new CyclicLongQueue(5);
 
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     myArray.clear();
   }
