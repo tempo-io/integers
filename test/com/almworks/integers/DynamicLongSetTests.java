@@ -30,6 +30,7 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
 //  protected final DynamicLongSet set = new DynamicLongSet();
 
   private static final long MIN = Long.MIN_VALUE;
+  private static final long MAX = Long.MAX_VALUE;
 
   protected WritableLongSet createSet() {
     return createSetWithCapacity(-1);
@@ -50,8 +51,12 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     }
   }
 
-  protected WritableLongSet createSetFromSortedList(LongList sortedList) {
-    return DynamicLongSet.fromSortedList(sortedList);
+  protected WritableLongSet[] createSetFromSortedList(LongList sortedList) {
+    return new WritableLongSet[]{
+        DynamicLongSet.fromSortedList(sortedList),
+        DynamicLongSet.fromSortedList(sortedList, DynamicLongSet.ColoringType.TO_ADD),
+        DynamicLongSet.fromSortedList(sortedList, DynamicLongSet.ColoringType.TO_REMOVE)
+    };
   }
 
   public void testRandom() {
@@ -138,5 +143,20 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     assertTrue(set.contains(MIN));
     assertFalse(set.contains(MIN + 1));
     assertFalse(set.contains(0));
+  }
+
+  public void testGetBounds() {
+    DynamicLongSet set = new DynamicLongSet();
+    assertEquals(MAX, set.getLowerBound());
+    assertEquals(MIN, set.getUpperBound());
+    set.addAll(0, 2);
+    assertEquals(0, set.getLowerBound());
+    assertEquals(2, set.getUpperBound());
+    set.removeAll(0, 2);
+    assertEquals(MAX, set.getLowerBound());
+    assertEquals(MIN, set.getUpperBound());
+    set.add(MIN);
+    assertEquals(MIN, set.getLowerBound());
+    assertEquals(MIN, set.getUpperBound());
   }
 }

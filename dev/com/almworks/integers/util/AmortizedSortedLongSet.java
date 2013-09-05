@@ -1,14 +1,13 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.LongIterator;
-import com.almworks.integers.LongList;
+import com.almworks.integers.*;
 
 import java.util.*;
 
 /**
  * @author Igor Sereda
  */
-public class AmortizedSortedLongSet {
+public class AmortizedSortedLongSet implements WritableLongSet {
   private static final int DEFAULT_CHUNKSIZE = 512;
 
   private LongList myBaseList = LongList.EMPTY;
@@ -23,16 +22,70 @@ public class AmortizedSortedLongSet {
     maybeCoalesce();
   }
 
+  public void addAll(LongList values) {
+    addAll(values.iterator());
+  }
+
+  public void addAll(LongIterator iterator) {
+    while (iterator.hasNext())
+      add(iterator.nextValue());
+  }
+
+  public void addAll(long... values) {
+    if (values != null && values.length != 0) {
+      if (values.length == 1) {
+        add(values[0]);
+      } else {
+        addAll(new LongArray(values));
+      }
+    }
+  }
+
+  public boolean include(long value) {
+    boolean contain = contains(value);
+    if (!contain) add(value);
+    return !contain;
+  }
+
+  public boolean exclude(long value) {
+    boolean contain = contains(value);
+    if (contain) remove(value);
+    return contain;
+  }
+
   public void remove(long value) {
     myAdded.remove(value);
     myRemoved.add(value);
     maybeCoalesce();
   }
 
+  public void removeAll(long ... values) {
+    for (long value : values) {
+      remove(value);
+    }
+  }
+
+  public void removeAll(LongList values) {
+    removeAll(values.iterator());
+  }
+
+  public void removeAll(LongIterator values) {
+    for (LongIterator it: values) {
+      remove(it.value());
+    }
+  }
+
   public boolean contains(long value) {
     if (myRemoved.contains(value)) return false;
     if (myAdded.contains(value)) return true;
     return myBaseList.binarySearch(value) >= 0;
+  }
+
+  public boolean containsAll(LongIterable values) {
+    for (LongIterator iterator : values.iterator()) {
+      if (!contains(iterator.value())) return false;
+    }
+    return true;
   }
 
   private void maybeCoalesce() {
@@ -78,10 +131,34 @@ public class AmortizedSortedLongSet {
     return new CoalescingIterator(baseIterator, addedIterator, myRemoved);
   }
 
+  public LongIterator iterator() {
+    return tailIterator(Long.MIN_VALUE);
+  }
+
+  public void retain(LongList values) {
+    coalesce();
+    ((LongArray)myBaseList).retain(values);
+  }
+
   public void replaceFrom(LongSetBuilder builder) {
     myAdded.clear();
     myRemoved.clear();
     myBaseList = builder.toSortedList();
+  }
+
+  public LongArray toLongArray() {
+    coalesce();
+    return LongArray.copy(myBaseList);
+  }
+
+  public LongList toList() {
+    coalesce();
+    return myBaseList;
+  }
+
+  public int size() {
+    coalesce();
+    return myBaseList.size();
   }
 
   public boolean isEmpty() {
@@ -134,9 +211,9 @@ public class AmortizedSortedLongSet {
           myHasNextAdded = myAddedIterator.hasNext();
           myNextAdded = myHasNextAdded ? myAddedIterator.next() : 0;
         }
-        assert value >= myNext : myNext + " " + value;
-        if (value > myNext && !myRemoved.contains(value)) {
-          myNext = value;
+        assert value >= myCurrent : myCurrent + " " + value;
+        if (value > myCurrent && !myRemoved.contains(value)) {
+          myCurrent = value;
           return true;
         }
       }

@@ -11,8 +11,8 @@ public class AmortizedSortedLongSetTempTests extends WritableLongSetChecker {
     return new AmortizedSortedLongSetTemp();
   }
 
-  protected  WritableLongSet createSetFromSortedList(LongList sortedList) {
-    return new AmortizedSortedLongSetTemp(sortedList);
+  protected  WritableLongSet[] createSetFromSortedList(LongList sortedList) {
+    return new WritableLongSet[]{new AmortizedSortedLongSetTemp(sortedList)};
   }
 
   public void testIteratorCoalesce() {

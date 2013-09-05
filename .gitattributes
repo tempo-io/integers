@@ -216,11 +216,13 @@ test/com/almworks/integers/ParallelLongListTests.java -text
 test/com/almworks/integers/SetOperationsChecker.java -text
 test/com/almworks/integers/TwoWayLongMapTests.java -text
 test/com/almworks/integers/WritableLongSetChecker.java -text
+test/com/almworks/integers/WritableLongSetPerformanceComparison.java -text
 test/com/almworks/integers/optimized/CyclicLongQueueTests.java -text
 test/com/almworks/integers/optimized/SameValuesLongListTests.java -text
 test/com/almworks/integers/optimized/SegmentedLongArrayTests.java -text
 test/com/almworks/integers/optimized/TestEnvForSegmentedLongArray.java -text
 test/com/almworks/integers/util/AmortizedSortedLongSetTempTests.java -text
+test/com/almworks/integers/util/AmortizedSortedLongSetTests.java -text
 test/com/almworks/integers/util/DiffIndexedLongListDecoratorTests.java -text
 test/com/almworks/integers/util/FindingLongIteratorTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text

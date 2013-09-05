@@ -116,7 +116,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     modified();
     myBlack.clear();
     init();
-    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("clear");
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("clear");
   }
 
   private void modified() {
@@ -232,7 +232,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     if (psi == 0) myRoot = x;
     else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
     balanceAfterAdd(x, ps, psi, key);
-    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("add key:" + key);
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("add key:" + key);
     return true;
   }
 
@@ -411,7 +411,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       }
     }
     fromPreparedArray(newKeys, srcSize, coloringType);
-    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("fromSortedLongIterable");
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("fromSortedLongIterable");
   }
 
   /**
@@ -554,7 +554,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     LongArray array = toLongArray();
     array.retain(values);
     clear();
-    fromSortedList(array, ColoringType.BALANCED);
+    fromSortedLongIterable(array, array.size(), ColoringType.BALANCED);
   }
 
   public void retain(DynamicLongSet set) {
@@ -613,7 +613,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       myBlack.clear(y);
     }
 
-    assert !IntegersDebug.DEBUG || checkRedBlackTreeInvariants("remove key:" + key);
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("remove key:" + key);
     return true;
   }
 
@@ -688,8 +688,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     return toLongArray();
   }
 
-  @Override
-  public String toString() {
+  public String toDebugString() {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     debugPrintTreeStructure(new PrintStream(baos));
     try {
@@ -698,6 +697,11 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       assert false: e;
       return "DynamicLongSet";
     }
+  }
+
+  @Override
+  public String toString() {
+    return LongCollections.toBoundedString(this);
   }
 
   /**
@@ -801,13 +805,13 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     assert myBlack.get(myRoot) : debugMegaPrint(whatWasDoing, myRoot);
 
     // 5. Height estimate is not less than any actual path height
-    final int hEst = height(size());
+    final int heightEstimate = height(size());
     visitULR(0, new IntFunction2() {
       @Override
       public int invoke(int x, int h) {
         if (myLeft[x] == 0 && myRight[x] == 0) {
           // we're at the bottom
-          assert hEst >= h : whatWasDoing + "\n" + h + ' ' + hEst + ' ' + size() + ' ' + myFront;
+          assert heightEstimate >= h : whatWasDoing + "\n" + h + ' ' + heightEstimate + ' ' + size() + ' ' + myFront;
         }
         return h + 1;
       }
