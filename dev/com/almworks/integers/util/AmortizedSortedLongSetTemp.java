@@ -15,6 +15,8 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
   private final DynamicLongSet myAdded = new DynamicLongSet();
   private final DynamicLongSet myRemoved = new DynamicLongSet();
 
+  private int myModCount = 0;
+  private boolean myCoalescingStatus;
 
   public AmortizedSortedLongSetTemp() {
     myBaseList = new LongArray();
@@ -30,9 +32,6 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
       myBaseList.sortUnique();
     }
   }
-
-  private int myModCount = 0;
-  private boolean myCoalescingStatus;
 
   public void add(long value) {
     modified();

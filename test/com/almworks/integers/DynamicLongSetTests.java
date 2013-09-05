@@ -27,8 +27,6 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class DynamicLongSetTests extends WritableLongSetChecker {
-//  protected final DynamicLongSet set = new DynamicLongSet();
-
   private static final long MIN = Long.MIN_VALUE;
   private static final long MAX = Long.MAX_VALUE;
 

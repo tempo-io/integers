@@ -60,9 +60,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   // the size of the given LongIterable multiplied by this constant (additional space for new elements to be added later).
   private static final int EXPAND_FACTOR = 2;
 
-  int minSize = -1;
-  int maxSize = -1;
-  int countedHeight = -1;
+  int myMaxSize = -1;
+  int myCountedHeight = -1;
 
   private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
 
@@ -173,7 +172,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (LongIterator i : keys) {
-      push0(i.value(), ps);
+      include0(i.value(), ps);
     }
   }
 
@@ -181,7 +180,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (LongIterator ii : keys) {
-      push0(ii.value(), ps);
+      include0(ii.value(), ps);
     }
   }
 
@@ -189,7 +188,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     modified();
     int[] ps = prepareAdd(keys.length);
     for (long key : keys) {
-      push0(key, ps);
+      include0(key, ps);
     }
   }
 
@@ -210,10 +209,10 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    * */
   public boolean include(long key) {
     modified();
-    return push0(key, prepareAdd(1));
+    return include0(key, prepareAdd(1));
   }
 
-  private boolean push0(long key, int[] ps) {
+  private boolean include0(long key, int[] ps) {
     int x = myRoot;
     // Parents stack top + 1
     int psi = 0;
@@ -351,17 +350,16 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   /** Estimate tree height: it can be shown that it's <= 2*log_2(N + 1) (not counting the root) */
   private int height(int n) {
-    if (minSize <= n && n < maxSize) return countedHeight;
-    maxSize = 1;
+    if ((myMaxSize >> 1) <= n && n < myMaxSize) return myCountedHeight;
+    myMaxSize = 1;
 
     int lg2 = 0;
-    while (maxSize <= n) {
+    while (myMaxSize <= n) {
       lg2++;
-      maxSize <<= 1;
+      myMaxSize <<= 1;
     }
-    minSize = maxSize >> 1;
-    countedHeight = lg2 << 1;
-    return countedHeight;
+    myCountedHeight = lg2 << 1;
+    return myCountedHeight;
   }
 
   /**
@@ -521,7 +519,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     modified();
     int[] parentsStack = fetchStackCache(0);
     for (long key : keys) {
-      remove0(key, parentsStack);
+      exclude0(key, parentsStack);
     }
     maybeShrink();
   }
@@ -534,7 +532,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     modified();
     int[] parentStack = fetchStackCache(0);
     for (LongIterator it: keys) {
-      remove0(it.value(), parentStack);
+      exclude0(it.value(), parentStack);
     }
     maybeShrink();
   }
@@ -545,7 +543,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   public boolean exclude(long key) {
     modified();
-    boolean ret = remove0(key, fetchStackCache(0));
+    boolean ret = exclude0(key, fetchStackCache(0));
     maybeShrink();
     return ret;
   }
@@ -570,7 +568,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       compactify();
   }
 
-  private boolean remove0(long key, int[] parentsStack) {
+  private boolean exclude0(long key, int[] parentsStack) {
     if (isEmpty()) return false;
 
     int xsi = -1;
