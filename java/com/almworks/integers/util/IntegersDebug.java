@@ -36,7 +36,7 @@ public class IntegersDebug {
   }
 
   public static void println(Object ... elements) {
-    if (PRINT && elements.length != 0) {
+    if (PRINT) {
       print(elements);
       System.out.println();
     }

@@ -26,7 +26,7 @@ public class DiffIndexedLongListDecoratorTests extends IntegersFixture {
   private static IntArray indexes = IntArray.create(0, 0, 0, 2, 2, 2);
   private static DiffIndexedLongListDecorator array;
 
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     array = new DiffIndexedLongListDecorator(source, indexes);
   }
