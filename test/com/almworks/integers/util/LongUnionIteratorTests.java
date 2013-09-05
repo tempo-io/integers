@@ -18,8 +18,7 @@ public class LongUnionIteratorTests extends IntegersFixture {
     new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        LongArray res = new LongArray(new LongUnionIterator(arrays));
-        return res.iterator();
+        return new LongUnionIterator(arrays);
       }
     }, new SetOperationsChecker.UnionGetter(), true, false);
   }

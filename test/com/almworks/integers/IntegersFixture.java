@@ -227,9 +227,10 @@ public abstract class IntegersFixture extends TestCase {
    *                 <ul><li>0 - {@code min = 0, max = Integer.MAX_VALUE}
    *                     <li>1 - {@code min = 0, max = minMaxValues[0]}
    *                     <li>2 - {@code min = minMaxValues[0], max = minMaxValues[1]}
+   * @param arrayLength the length of returned array.
    * @return {@link LongArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static LongArray generateRandomArray(int maxArrayLength, boolean isSortUnique, int ... minMaxValues) {
+  public static LongArray generateRandomArray(int arrayLength, boolean isSortUnique, int ... minMaxValues) {
     int mLen = minMaxValues.length;
     int minValue = 0, maxValue = Integer.MAX_VALUE;
     switch (mLen) {
@@ -246,12 +247,14 @@ public abstract class IntegersFixture extends TestCase {
     int diff = maxValue - minValue;
     if (diff <= 0) throw new IllegalArgumentException();
 
-    LongArray res = new LongArray(maxArrayLength);
-    for (int i = 0; i < maxArrayLength; i++) {
+    LongArray res = new LongArray(arrayLength);
+    for (int i = 0; i < arrayLength; i++) {
       res.add(minValue + RAND.nextInt(diff));
     }
     if (isSortUnique) {
       res.sortUnique();
+    } else {
+      res.shuffle(RAND);
     }
     return res;
   }

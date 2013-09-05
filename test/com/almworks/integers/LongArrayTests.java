@@ -158,17 +158,19 @@ public class LongArrayTests extends IntegersFixture {
 
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
-      public LongIterator get(LongArray... arrays) {
-        arrays[0].retain(arrays[1]);
-        return arrays[0].iterator();
+      public LongIterable get(LongArray... arrays) {
+        LongArray res = LongArray.copy(arrays[0]);
+        res.retain(arrays[1]);
+        return res;
       }
     }, new SetOperationsChecker.IntersectionGetter(false), false, true);
 
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
-      public LongIterator get(LongArray... arrays) {
-        arrays[0].retainSorted(arrays[1]);
-        return arrays[0].iterator();
+      public LongIterable get(LongArray... arrays) {
+        LongArray res = LongArray.copy(arrays[0]);
+        res.retain(arrays[1]);
+        return res;
       }
     }, new SetOperationsChecker.IntersectionGetter(true), true, true);
   }
@@ -415,36 +417,36 @@ public class LongArrayTests extends IntegersFixture {
     // is likely to be launched branch with realloc
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
-      public LongIterator get(LongArray... arrays) {
-        return arrays[0].mergeWithSameLength(arrays[1]).iterator();
+      public LongIterable get(LongArray... arrays) {
+        return arrays[0].mergeWithSameLength(arrays[1]);
       }
     }, unionGetter, true, true);
 
     // guaranteed launch branch with replace
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
-      public LongIterator get(LongArray... arrays) {
+      public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return copy.mergeWithSameLength(arrays[1]).iterator();
+        return copy.mergeWithSameLength(arrays[1]);
       }
     }, unionGetter, true, true);
 
     // is likely to be launched branch with realloc
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
-      public LongIterator get(LongArray... arrays) {
-        return arrays[0].mergeWithSmall(arrays[1]).iterator();
+      public LongIterable get(LongArray... arrays) {
+        return arrays[0].mergeWithSmall(arrays[1]);
       }
     }, unionGetter, true, true);
 
     // guaranteed launch branch with replace
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
-      public LongIterator get(LongArray... arrays) {
+      public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return copy.mergeWithSmall(arrays[1]).iterator();
+        return copy.mergeWithSmall(arrays[1]);
       }
     }, unionGetter, true, true);
   }

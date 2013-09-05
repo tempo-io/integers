@@ -37,8 +37,7 @@ public class LongIntersectionIteratorTests extends IntegersFixture {
     new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        LongArray res = new LongArray(new LongIntersectionIterator(arrays));
-        return res.iterator();
+        return new LongIntersectionIterator(arrays);
       }
     }, new SetOperationsChecker.IntersectionGetter(false), true, false);
   }
