@@ -4,42 +4,41 @@ import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.optimized.SegmentedLongArray;
 import com.almworks.integers.util.LongListInsertingDecorator;
 import com.almworks.integers.util.ReadonlyLongListRemovingDecorator;
-import junit.framework.TestCase;
 
-public class LongIteratorTests extends TestCase {
+public class LongIteratorTests extends IntegersFixture {
   public void testSimple() {
-    IntegersFixture.assertContents(
+    assertContents(
         LongArray.create(1, 3, 5).iterator(),
         LongArray.create(1, 3, 5));
   }
 
   public void testCursor() {
     LongProgression.Arithmetic rO = new LongProgression.Arithmetic(1,5,1);
-    for (LongIterator ii : rO){
-      long b = ii.value();
+    for (LongIterator it : rO) {
+      long b = it.value();
     }
 
     WritableLongList result, expected, source;
 
     source = new SameValuesLongList();
-    source.addAll(1,1,1,2,2,3,3,3,3);
+    source.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
 
     expected = new SameValuesLongList();
     expected.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
     result = new SameValuesLongList();
-    for (WritableLongListIterator ii : source.write()) {
-      result.add(ii.value());
-      ii.set(0, 3);
+    for (WritableLongListIterator it : source.write()) {
+      result.add(it.value());
+      it.set(0, 3);
     }
     assertEquals(expected, result);
 
     expected = new SameValuesLongList();
-    expected.addAll(1,2,3,5);
+    expected.addAll(1, 2, 3, 5);
     result = new SegmentedLongArray();
-    result.addAll(1,2,3,4,5);
-    for (WritableLongListIterator ii : result.write()) {
-      if (ii.value() == 4) {
-        ii.remove();
+    result.addAll(1, 2, 3, 4, 5);
+    for (WritableLongListIterator it : result.write()) {
+      if (it.value() == 4) {
+        it.remove();
       }
     }
     assertEquals(expected, result);

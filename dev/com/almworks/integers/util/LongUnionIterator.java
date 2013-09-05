@@ -50,7 +50,6 @@ public class LongUnionIterator extends LongSetOperationsIterator {
   protected boolean findNext() {
     if (!myIsHeapBuilt) {
       myIsHeapBuilt = true;
-      if (IntegersDebug.TEST) IntegersDebug.println(myIts.size());
       heapLength = 0;
       for (int i = 0, n = myIts.size(); i < n; i++) {
         if (myIts.get(i).hasNext()) {
@@ -61,7 +60,7 @@ public class LongUnionIterator extends LongSetOperationsIterator {
       }
       buildHeap();
     }
-    if (IntegersDebug.TEST) outputHeap();
+    if (IntegersDebug.PRINT) outputHeap();
     assert heapLength >= 0 : "heapLength < 0: " + heapLength;
     if (heapLength == 0) return false;
     myCurrent = getTopIterator().value();

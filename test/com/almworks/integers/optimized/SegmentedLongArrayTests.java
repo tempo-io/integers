@@ -7,7 +7,7 @@ public class SegmentedLongArrayTests extends IntegersFixture {
   private TestEnvForSegmentedLongArray myEnv;
   private SegmentedLongArray array;
 
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     myEnv = new TestEnvForSegmentedLongArray();
     array = new SegmentedLongArray(myEnv);

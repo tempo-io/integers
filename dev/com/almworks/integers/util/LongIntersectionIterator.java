@@ -65,7 +65,7 @@ public class LongIntersectionIterator extends LongSetOperationsIterator {
       }
     }
     buildHeap();
-    if (IntegersDebug.DEBUG) outputHeap();
+    if (IntegersDebug.PRINT) outputHeap();
 
     while (!equalValues()) {
       LongIterator topIterator = getTopIterator();

@@ -8,7 +8,7 @@ import com.almworks.integers.WritableLongListIterator;
 public class SameValuesLongListTests extends IntegersFixture {
   private SameValuesLongList list;
 
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     list = create();
   }

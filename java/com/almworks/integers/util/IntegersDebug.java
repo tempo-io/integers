@@ -17,11 +17,11 @@
 package com.almworks.integers.util;
 
 public class IntegersDebug {
-  public static final boolean TEST = Boolean.parseBoolean(System.getProperty("integers.test"));
-  public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("integers.debug"));
+  public static final boolean CHECK = Boolean.parseBoolean(System.getProperty("integers.check"));
+  public static final boolean PRINT = Boolean.parseBoolean(System.getProperty("integers.print"));
 
   public static void print(Object ... elements) {
-    if (DEBUG) {
+    if (PRINT) {
       StringBuilder sb = new StringBuilder();
       if (elements == null) sb.append("null");
       else {
@@ -36,7 +36,7 @@ public class IntegersDebug {
   }
 
   public static void println(Object ... elements) {
-    if (TEST) {
+    if (PRINT && elements.length != 0) {
       print(elements);
       System.out.println();
     }

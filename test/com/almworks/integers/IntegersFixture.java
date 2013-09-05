@@ -13,10 +13,6 @@ public abstract class IntegersFixture extends TestCase {
   public static final String SEED = "com.almworks.integers.seed";
   public static final Random RAND = createRandom();
 
-  public void setUp() {
-    System.setProperty("integers.test", "true");
-  }
-
   /**
    * Add {@code -Dcom.almworks.integers.seed=12312423455}
    * to system properties to reproduce the test
@@ -257,7 +253,6 @@ public abstract class IntegersFixture extends TestCase {
     if (isSortUnique) {
       res.sortUnique();
     }
-    IntegersDebug.println(res);
     return res;
   }
 

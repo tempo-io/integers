@@ -20,7 +20,7 @@ public class LongArrayIteratorTests extends IntegersFixture {
   private static LongArray arr;
   private static WritableLongListIterator iter;
 
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     arr = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     iter = arr.iterator();

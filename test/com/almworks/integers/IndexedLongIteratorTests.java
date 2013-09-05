@@ -81,8 +81,4 @@ public class IndexedLongIteratorTests extends IntegersFixture {
     CHECK.order(res, expected.iterator());
 
   }
-
-  public void testSpecificationCase() {
-
-  }
 }

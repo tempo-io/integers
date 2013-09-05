@@ -1,7 +1,5 @@
 package com.almworks.integers;
 
-import org.junit.Test;
-
 import java.io.*;
 import java.util.Arrays;
 
@@ -39,7 +37,7 @@ public class LongArrayMergePerformanceComparison extends IntegersFixture {
     public String toString() { return "Heuristic";}
   }
 
-  public static class TestConfiguration {
+  private static class TestConfiguration {
     public MergeType[] mergers;
     public MergeModification[] modifications;
     public int[] firstSizes, coefs;
@@ -67,15 +65,15 @@ public class LongArrayMergePerformanceComparison extends IntegersFixture {
       return res.toString();
     }
 
-    public void run() throws IOException{
+    public void run() throws IOException {
       PrintStream out = System.out;
       boolean writeToFile = !outputFolder.equals("");
       if (writeToFile) {
         new File(outputFolder).mkdir();
         out = new PrintStream(new File (outputFolder + "/Testtxt"));
-        out.println(this);
+        out.println(toString());
       }
-      System.out.println(this);
+      System.out.println(toString());
 
       int mergersLen = mergers.length;
       int modificationsLen = modifications.length;
@@ -173,7 +171,7 @@ public class LongArrayMergePerformanceComparison extends IntegersFixture {
     config = new TestConfiguration(
         SameAndSmall,
         reallocModification,
-        intAp(420000, 1000, 80), intAp(10, 1, 15), 800, 100, "benchmark realloc, firstSize 420000..421000....500000");
+        intAp(470000, 1000, 531), intAp(10, 1, 15), 800, 100, "benchmark realloc, firstSize 470000..471000....1000000");
 //    config.run();
 
     config = new TestConfiguration(

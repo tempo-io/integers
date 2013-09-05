@@ -85,8 +85,7 @@ abstract class LongSetOperationsIterator extends FindingLongIterator {
   }
 
   protected void outputHeap() {
-    if (!IntegersDebug.DEBUG)
-      return;
+    if (!IntegersDebug.PRINT) return;
     IntegersDebug.print("output:", heapLength, ": ");
     for (int i = 1; i <= heapLength; i++) {
       IntegersDebug.print("(", myHeap[i], myIts.get(myHeap[i]).value(), ")");

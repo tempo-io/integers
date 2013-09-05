@@ -23,7 +23,7 @@ import com.almworks.integers.LongIterator;
 public class FindingLongIteratorTests extends IntegersFixture {
   LongArray values = LongArray.create(0, 2, 4, 6, 8);
   LongIterator it;
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     it = new FindingLongIterator() {
       LongIterator innerIt = values.iterator();
@@ -49,6 +49,14 @@ public class FindingLongIteratorTests extends IntegersFixture {
       assertEquals(values.get(i), it.value());
       System.out.println(it.value());
       assertTrue(it.hasValue());
+    }
+  }
+
+  public void testSimple2() {
+    long cur = 0;
+    while (it.hasNext()) {
+      assertEquals(cur, it.nextValue());
+      cur += 2;
     }
   }
 }

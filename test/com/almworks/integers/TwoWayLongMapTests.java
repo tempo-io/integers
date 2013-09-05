@@ -29,7 +29,7 @@ public class TwoWayLongMapTests extends IntegersFixture {
   private final CollectionsCompare compare = new CollectionsCompare();
   private final TwoWayLongMap map = new TwoWayLongMap();
 
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     map.clear();
   }
