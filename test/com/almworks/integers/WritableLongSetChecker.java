@@ -181,7 +181,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     set.addAll(3, 1, 5, 2, 0, 4);
     LongList expected = LongProgression.arithmetic(0, 6);
     CHECK.order(expected, set.toList());
-    set.removeAll(expected.toNativeArray());
+    set.removeAll(expected);
     assertTrue(set.isEmpty());
 
     set.clear();

@@ -8,10 +8,13 @@
       <sourceFolder url="file://$MODULE_DIR$/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/dev" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/caliper/caliper-f6ebf866113c/caliper/src/main/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/bench" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.clover" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/ant" />
       <excludeFolder url="file://$MODULE_DIR$/build/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/caliper" />
       <excludeFolder url="file://$MODULE_DIR$/gen" />
       <excludeFolder url="file://$MODULE_DIR$/lib" />
     </content>
@@ -20,6 +23,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="module" module-name="Util" scope="TEST" />
+    <orderEntry type="library" name="caliper-1.0-beta-SNAPSHOT-all" level="project" />
   </component>
 </module>
 

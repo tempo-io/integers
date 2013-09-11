@@ -42,4 +42,9 @@ public class IntegersDebug {
     }
   }
 
+  public static void format(String fmt, Object... elements) {
+    if (PRINT) {
+      println(String.format(fmt, elements));
+    }
+  }
 }

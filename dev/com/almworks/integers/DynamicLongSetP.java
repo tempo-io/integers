@@ -26,7 +26,6 @@ import com.almworks.integers.util.IntegersDebug;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.SoftReference;
 import java.util.*;
 
 import static java.lang.Math.abs;
@@ -34,7 +33,7 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class DynamicLongSet implements LongIterable, WritableLongSet {
+public class DynamicLongSetP implements LongIterable, WritableLongSet {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { NIL_DUMMY_KEY };
@@ -47,6 +46,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   private int[] myLeft;
   /** Tree structure: contains indexes into key, left, right, black. */
   private int[] myRight;
+  private int[] myParent;
   /** Node color : false for red, true for black. */
   private final BitSet myBlack;
   /** List of removed nodes. Null if no internal nodes are removed */
@@ -62,15 +62,9 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   // the size of the given LongIterable multiplied by this constant (additional space for new elements to be added later).
   private static final int EXPAND_FACTOR = 2;
 
-  int minSize = -1;
-  int maxSize = -1;
-  int countedHeight = -1;
-
-  private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
-
   /**
-   * This enum is used in {@link DynamicLongSet#compactify(com.almworks.integers.DynamicLongSet.ColoringType)} and
-   * {@link DynamicLongSet#fromSortedList(LongList, com.almworks.integers.DynamicLongSet.ColoringType)}
+   * This enum is used in {@link com.almworks.integers.DynamicLongSetP#compactify(com.almworks.integers.DynamicLongSetP.ColoringType)} and
+   * {@link com.almworks.integers.DynamicLongSetP#fromSortedList(com.almworks.integers.LongList, com.almworks.integers.DynamicLongSetP.ColoringType)}
    * methods to determine the way the new tree will be colored.
    */
   public enum ColoringType {
@@ -86,13 +80,13 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     public abstract int redLevelsDensity();
   }
 
-  public DynamicLongSet() {
+  public DynamicLongSetP() {
     myBlack = new BitSet();
     myRemoved = new BitSet();
     init();
   }
 
-  public DynamicLongSet(int initialCapacity) {
+  public DynamicLongSetP(int initialCapacity) {
     initialCapacity += 1;
     myBlack = new BitSet(initialCapacity);
     myRemoved = new BitSet(initialCapacity);
@@ -100,6 +94,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myKeys = new long[initialCapacity];
     myLeft = new int[initialCapacity];
     myRight = new int[initialCapacity];
+    myParent = new int[initialCapacity];
     myKeys[0] = NIL_DUMMY_KEY;
   }
 
@@ -107,11 +102,11 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myKeys = EMPTY_KEYS;
     myLeft = EMPTY_INDEXES;
     myRight = EMPTY_INDEXES;
+    myParent = EMPTY_INDEXES;
     myBlack.set(0);
     myRoot = 0;
     myFront = 1;
     myRemoved.clear();
-    myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
   }
 
   public void clear() {
@@ -173,25 +168,26 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   public void addAll(LongList keys) {
     modified();
-    int[] ps = prepareAdd(keys.size());
+    maybeGrow(keys.size());
     for (LongIterator i : keys) {
-      push0(i.value(), ps);
+      push0(i.value());
     }
   }
 
-  public void addAll(DynamicLongSet keys) {
+  public void addAll(DynamicLongSetP keys) {
     modified();
-    int[] ps = prepareAdd(keys.size());
+    maybeGrow(keys.size());
     for (LongIterator ii : keys) {
-      push0(ii.value(), ps);
+      push0(ii.value());
     }
   }
 
   public void addAll(long... keys) {
     modified();
-    int[] ps = prepareAdd(keys.length);
+    if (keys == null) return;
+    maybeGrow(keys.length);
     for (long key : keys) {
-      push0(key, ps);
+      push0(key);
     }
   }
 
@@ -212,37 +208,38 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    * */
   public boolean include(long key) {
     modified();
-    return push0(key, prepareAdd(1));
+    maybeGrow(1);
+    return push0(key);
   }
 
-  private boolean push0(long key, int[] ps) {
+  private boolean push0(long key) {
     int x = myRoot;
-    // Parents stack top + 1
-    int psi = 0;
+    int p = 0;
     // actually, k is always overwritten if it is used (psi > 0), but compiler does not know that
     long k = 0;
     while (x != 0) {
       k = myKeys[x];
       if (key == k) return false;
-      ps[psi++] = x;
+      p = x;
       x = key < k ? myLeft[x] : myRight[x];
     }
-    x = createNode(key);
+    x = createNode(key, p);
 
     // x is RED already (myBlack.get(x) == false), so no modifications to myBlack
     // Insert into the tree
-    if (psi == 0) myRoot = x;
-    else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
-    balanceAfterAdd(x, ps, psi, key);
+    if (p == 0) myRoot = x;
+    else (key < k ? myLeft : myRight)[p] = x;
+    balanceAfterAdd(x, p, key);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("add key:" + key);
     return true;
   }
 
-  private int createNode(long key) {
+  private int createNode(long key, int p) {
     int x = myRemoved.isEmpty() ? myFront++ : myRemoved.nextSetBit(0);
     myKeys[x] = key;
     myLeft[x] = 0;
     myRight[x] = 0;
+    myParent[x] = p;
     myBlack.clear(x);
     if (!myRemoved.isEmpty()) {
       myRemoved.clear(x);
@@ -252,21 +249,22 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   /**
    * @param x the node being inserted, RED
-   * @param ps ancestors of the node x; ps[0] is the root, ps[psi] is the parent of x
-   * @param psi currently used ancestor of x; if psi is < 0, we continue to think that the corresponding ancestor is NIL.
    * @param debugKey a string to assist understanding what were we adding if assertion fails
    * */
-  private void balanceAfterAdd(int x, int[] ps, int psi, long debugKey) {
-    // parent
-    int p = getLastOrNil(ps, --psi);
+  private void balanceAfterAdd(int x, int p, long debugKey) {
     // grandparent
-    int pp = getLastOrNil(ps, --psi);
+    int pp = myParent[p];
     while (!myBlack.get(p)) {
       assert checkChildParent(p, pp, debugKey);
       assert checkChildParent(x, p, debugKey);
-      boolean branch1IsLeft = p == myLeft[pp];
-      int[] branch1 = branch1IsLeft ? myLeft : myRight;
-      int[] branch2 = branch1IsLeft ? myRight : myLeft;
+      int[] branch1, branch2;
+      if (p == myLeft[pp]) {
+        branch1 = myLeft;
+        branch2 = myRight;
+      } else {
+        branch1 = myRight;
+        branch2 = myLeft;
+      }
       // Uncle (parent's sibling)
       int u = branch2[pp];
       if (!myBlack.get(u)) {
@@ -274,8 +272,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         myBlack.set(u);
         myBlack.clear(pp);
         x = pp;
-        p = getLastOrNil(ps, --psi);
-        pp = getLastOrNil(ps, --psi);
+        p = myParent[x];
+        pp = myParent[p];
       } else {
         if (x == branch2[p]) {
           // Rotate takes x and makes it a branch1-parent of p
@@ -287,7 +285,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         }
         myBlack.set(p);
         myBlack.clear(pp);
-        int ppp = getLastOrNil(ps, --psi);
+        int ppp = myParent[pp];
         // Takes pp (which is now red) and makes it a branch-2 children of p (which is now black); note that branch-1 children of p is x, which is red and both children are black
         rotate(pp, ppp, branch2, branch1);
       }
@@ -310,20 +308,22 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    * */
   private void rotate(int x, int p, int[] mainBranch, int[] otherBranch) {
     int y = otherBranch[x];
-    otherBranch[x] = mainBranch[y];
+
+    int ym = mainBranch[y];
+    otherBranch[x] = ym;
+    if (ym != 0) myParent[ym] = x;
+    mainBranch[y] = x;
+    myParent[x] = y;
+
+    myParent[y] = p;
     if (p == 0) myRoot = y;
     else {
       if (x == myLeft[p]) myLeft[p] = y;
-      else if (x == myRight[p]) myRight[p] = y;
-      else assert false : "tree structure broken " + x + '\n' + dumpArrays(p);
+      else {
+        assert x == myRight[p] : "tree structure broken " + x + '\n' + dumpArrays(p);
+        myRight[p] = y;
+      }
     }
-    mainBranch[y] = x;
-  }
-
-  /** @return array for holding the stack for tree traversal */
-  private int[] prepareAdd(int n) {
-    maybeGrow(n);
-    return fetchStackCache(n);
   }
 
   private void maybeGrow(int n) {
@@ -332,6 +332,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myKeys = LongCollections.ensureCapacity(myKeys, futureSize);
     myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
     myRight = IntCollections.ensureCapacity(myRight, futureSize);
+    myParent = IntCollections.ensureCapacity(myParent, futureSize);
     if (IntegersDebug.PRINT) IntegersDebug.format("%20s %4d -> %4d  %H  %s", "grow", oldSz, myKeys.length, this, last4MethodNames());
   }
 
@@ -348,40 +349,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   /**
-   * @param n difference between future size and actual size
-   * @return
-   */
-  private int[] fetchStackCache(int n) {
-    int fh = estimateFutureHeight(n);
-    int[] cache = myStackCache.get();
-    if (cache != null && cache.length >= fh) return cache;
-    cache = new int[fh];
-    myStackCache = new SoftReference<int[]>(cache);
-    return cache;
-  }
-
-  /** Returns a number higher than the height after adding n elements.*/
-  private int estimateFutureHeight(int n) {
-    return height(size() + n) + 1;
-  }
-
-  /** Estimate tree height: it can be shown that it's <= 2*log_2(N + 1) (not counting the root) */
-  private int height(int n) {
-    if (minSize <= n && n < maxSize) return countedHeight;
-    maxSize = 1;
-
-    int lg2 = 0;
-    while (maxSize <= n) {
-      lg2++;
-      maxSize <<= 1;
-    }
-    minSize = maxSize >> 1;
-    countedHeight = lg2 << 1;
-    return countedHeight;
-  }
-
-  /**
-   * This method rebuilds this DynamicLongSet, after that it will use just the amount of memory needed to hold size() elements.
+   * This method rebuilds this DynamicLongSetP, after that it will use just the amount of memory needed to hold size() elements.
    * (Usually it uses more memory before this method is run)
    * This method builds a new tree based on the same keyset.
    * All levels of the new tree are filled, except, probably, the last one.
@@ -399,12 +367,12 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.DynamicLongSet#compactify()},
+   * This method is similar to {@link com.almworks.integers.DynamicLongSetP#compactify()},
    * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored.
    *                     Internal levels are all levels except the last one (two if the last one is not full.)
    *   <ul><li>{@link ColoringType#TO_REMOVE} colors every 2nd non-last levels red, theoretically making subsequent removals faster.
-   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link com.almworks.integers.DynamicLongSet#compactify()}.
+   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link com.almworks.integers.DynamicLongSetP#compactify()}.
    *       <li>{@link ColoringType#TO_ADD} colors all non-last levels black, theoretically making subsequent additions faster.
    *   </ul>
    */
@@ -445,6 +413,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       return;
     myLeft = new int[myKeys.length];
     myRight = new int[myKeys.length];
+    myParent = new int[myKeys.length];
 
     int levels = log(2, usedSize);
     int top = 1 << levels;
@@ -471,6 +440,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     else if (length == 2) {
       myBlack.set(index);
       myLeft[index] = offset;
+      myParent[offset] = index;
     } else {
       // calculating the node color
       boolean isBlack = true;
@@ -486,32 +456,34 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         myBlack.set(index, isBlack);
       myLeft[index] = rearrangeStep(offset, halfLength, colorCounter, maxCounter, lpab);
       myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, colorCounter, maxCounter, lpab);
+      myParent[myLeft[index]] = index;
+      myParent[myRight[index]] = index;
     }
     return index;
   }
 
   /**
-   * Builds a new DynamicLongSet based on values of src. src isn't used internally, its contents are copied.
+   * Builds a new DynamicLongSetP based on values of src. src isn't used internally, its contents are copied.
    */
-  public static DynamicLongSet fromSortedList(LongList src) {
+  public static DynamicLongSetP fromSortedList(LongList src) {
     return fromSortedList0(src, ColoringType.BALANCED);
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)},
+   * This method is similar to {@link com.almworks.integers.DynamicLongSetP#fromSortedList(com.almworks.integers.LongList)},
    * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
    *                     if the last one is unfilled.
    *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)};
+   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSetP#fromSortedList(com.almworks.integers.LongList)};
    *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
    */
-  public static DynamicLongSet fromSortedList(LongList src, ColoringType coloringType) {
+  public static DynamicLongSetP fromSortedList(LongList src, ColoringType coloringType) {
     return fromSortedList0(src, coloringType);
   }
 
-  private static DynamicLongSet fromSortedList0(LongList src, ColoringType coloringType) {
-    DynamicLongSet res = new DynamicLongSet();
+  private static DynamicLongSetP fromSortedList0(LongList src, ColoringType coloringType) {
+    DynamicLongSetP res = new DynamicLongSetP();
     res.fromSortedLongIterable(src, src.size(), coloringType);
     assert res.checkRedsAmount(coloringType);
     return res;
@@ -537,9 +509,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   public void removeAll(long... keys) {
     modified();
-    int[] parentsStack = fetchStackCache(0);
     for (long key : keys) {
-      remove0(key, parentsStack);
+      remove0(key);
     }
     maybeShrink();
   }
@@ -550,9 +521,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   public void removeAll(LongIterator keys) {
     modified();
-    int[] parentStack = fetchStackCache(0);
     for (LongIterator it: keys) {
-      remove0(it.value(), parentStack);
+      remove0(it.value());
     }
     maybeShrink();
   }
@@ -563,7 +533,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   public boolean exclude(long key) {
     modified();
-    boolean ret = remove0(key, fetchStackCache(0));
+    boolean ret = remove0(key);
     maybeShrink();
     return ret;
   }
@@ -575,7 +545,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     fromSortedLongIterable(array, array.size(), ColoringType.BALANCED);
   }
 
-  public void retain(DynamicLongSet set) {
+  public void retain(DynamicLongSetP set) {
     LongArray array = toLongArray();
     array.retainSorted(set.toLongArray());
     clear();
@@ -593,27 +563,23 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 */
   }
 
-  private boolean remove0(long key, int[] parentsStack) {
+  private boolean remove0(long key) {
     if (isEmpty()) return false;
 
-    int xsi = -1;
+    IntegersDebug.println("=== Remove", key, "===");
 
     //searching for an index Z which contains the key.
     int z = myRoot;
-    while (myKeys[z] != key || z == 0) {
-      if (z == 0)
-        return false;
-      parentsStack[++xsi] = z;
+    while (myKeys[z] != key && z != 0) {
       z = key < myKeys[z] ? myLeft[z] : myRight[z];
     }
+    if (z == 0) return false;
 
     // searching for an index Y which will be actually cleared.
     int y = z;
     if (myLeft[z] != 0 && myRight[z] != 0) {
-      parentsStack[++xsi] = y;
       y = myRight[y];
       while (myLeft[y] != 0) {
-        parentsStack[++xsi] = y;
         y = myLeft[y];
       }
     }
@@ -622,49 +588,62 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     // Child of Y. Y can't have 2 children.
     int x = (myLeft[y] != 0) ? myLeft[y] : myRight[y];
 
-    if (y == myRoot) myRoot = x;
-    else {
-      int parentOfY = parentsStack[xsi];
-      if (myLeft[parentOfY] == y)
-        myLeft[parentOfY] = x;
-      else myRight[parentOfY] = x;
+    int yp = myParent[y];
+    if (x != 0 || y == myRoot) {
+      if (yp == 0) myRoot = x;
+      else if (y == myLeft[yp]) myLeft[yp] = x;
+      else myRight[yp] = x;
+      myParent[x] = yp;
+      if (myBlack.get(y)) {
+        balanceAfterRemove(x);
+      }
+    } else {
+      balanceAfterRemove(y);
+      if (yp != 0) {
+        if (y == myLeft[yp]) myLeft[yp] = 0;
+        else if (y == myRight[yp]) myRight[yp] = 0;
+        else assert false;
+      }
     }
     free(y);
 
-    if (myBlack.get(y)) {
-      balanceAfterRemove(x, parentsStack, xsi);
-      myBlack.clear(y);
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("remove key:" + key);
+
+    if (IntegersDebug.PRINT) {
+      debugPrintTreeStructure(System.out);
     }
 
-    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("remove key:" + key);
     return true;
   }
 
-  private void free(int y) {
+  private boolean free(int y) {
     myKeys[y] = 0;
     myLeft[y] = 0;
     myRight[y] = 0;
-    if (y == myFront-1)
+    if (y == myFront-1) {
       myFront--;
-    else {
+    } else {
       if (myRemoved.isEmpty()) myRemoved = new BitSet(y+1);
       myRemoved.set(y);
     }
+    boolean black = myBlack.get(y);
+    myBlack.clear(y);
+    return black;
   }
 
-  private void balanceAfterRemove(int x, int[] parentsStack, int xsi) {
+  private void balanceAfterRemove(int x) {
     int[] mainBranch, otherBranch;
-    int parentOfX, w;
+    int xp, w;
     while (x != myRoot && myBlack.get(x)) {
-      parentOfX = parentsStack[xsi];
-      if (myLeft[parentOfX] == x) {
+      xp = myParent[x];
+      if (myLeft[xp] == x) {
         mainBranch = myLeft;
         otherBranch = myRight;
       } else {
         mainBranch = myRight;
         otherBranch = myLeft;
       }
-      w = otherBranch[parentOfX];
+      w = otherBranch[xp];
 
       if (IntegersDebug.PRINT) {
         IntegersDebug.println("balance", "x =", keyOrNil(x), "w =", keyOrNil(w));
@@ -673,27 +652,24 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       if (!myBlack.get(w)) {
         // then loop is also finished
         myBlack.set(w);
-        myBlack.clear(parentOfX);
-        rotate(parentOfX, getLastOrNil(parentsStack, xsi-1), mainBranch, otherBranch);
-        parentsStack[xsi] = w;
-        parentsStack[++xsi] = parentOfX;
-        w = otherBranch[parentOfX];
+        myBlack.clear(xp);
+        rotate(xp, myParent[xp], mainBranch, otherBranch);
+        w = otherBranch[xp];
       }
       if (myBlack.get(mainBranch[w]) && myBlack.get(otherBranch[w])) {
         myBlack.clear(w);
-        x = parentOfX;
-        xsi--;
+        x = xp;
       } else {
         if (myBlack.get(otherBranch[w])) {
           myBlack.set(mainBranch[w]);
           myBlack.clear(w);
-          rotate(w, parentOfX, otherBranch, mainBranch);
-          w = otherBranch[parentOfX];
+          rotate(w, xp, otherBranch, mainBranch);
+          w = otherBranch[xp];
         }
-        myBlack.set(w, myBlack.get(parentOfX));
-        myBlack.set(parentOfX);
+        myBlack.set(w, myBlack.get(xp));
+        myBlack.set(xp);
         myBlack.set(otherBranch[w]);
-        rotate(parentOfX, getLastOrNil(parentsStack, xsi - 1), mainBranch, otherBranch);
+        rotate(xp, myParent[xp], mainBranch, otherBranch);
         x = myRoot;
       }
     }
@@ -727,7 +703,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       return baos.toString("US-ASCII");
     } catch (UnsupportedEncodingException e) {
       assert false: e;
-      return "DynamicLongSet";
+      return "DynamicLongSetP";
     }
   }
 
@@ -751,9 +727,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     int x = myRoot;
     if (x == 0) return;
     int auxVal = auxInit;
-    int height = height(size());
-    IntArray xs = new IntArray(height);
-    IntArray auxVals = new IntArray(height);
+    IntArray xs = new IntArray();
+    IntArray auxVals = new IntArray();
     while (true) {
       auxVal = visitor.invoke(x, auxVal);
       int l = myLeft[x];
@@ -788,10 +763,10 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     assert myFront >= 1 : whatWasDoing + " " + myFront;
     assert (size() == 0) == isEmpty() : whatWasDoing + " " + myFront + ' ' + myRoot;
 
-    // unnecessary requirements, though following them makes the structure more clear.
     assert myKeys[0] == NIL_DUMMY_KEY : whatWasDoing + "\n" + myKeys[0];
     assert myLeft[0] == 0  : whatWasDoing + "\n" + myLeft[0];
     assert myRight[0] == 0 : whatWasDoing + "\n" + myRight[0];
+    assert myParent[0] == 0 : whatWasDoing + "\n" + myParent[0];
     assert myBlack.get(0) : whatWasDoing;
 
 
@@ -829,25 +804,16 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
             assert lastBlackHeight[0] == bh : debugMegaPrint(whatWasDoing + ' ' + lastBlackHeight[0] + ' ' + bh, x);
         }
 
+        // 4. Check parents
+        assert l == 0 || myParent[l] == x : debugMegaPrint(whatWasDoing + "\n" + l + " " + x, l);
+        assert r == 0 || myParent[r] == x : debugMegaPrint(whatWasDoing + "\n" + r + " " + x, r);
+
         return bh;
       }
     });
 
-    // 4. Red-black tree property-2: Root is black
+    // 5. Red-black tree property-2: Root is black
     assert myBlack.get(myRoot) : debugMegaPrint(whatWasDoing, myRoot);
-
-    // 5. Height estimate is not less than any actual path height
-    final int heightEstimate = height(size());
-    visitULR(0, new IntFunction2() {
-      @Override
-      public int invoke(int x, int h) {
-        if (myLeft[x] == 0 && myRight[x] == 0) {
-          // we're at the bottom
-          assert heightEstimate >= h : whatWasDoing + "\n" + h + ' ' + heightEstimate + ' ' + size() + ' ' + myFront;
-        }
-        return h + 1;
-      }
-    });
 
     // any unreachable node should be contained in myRemoved
     final BitSet unremoved = new BitSet(myFront);
@@ -883,14 +849,16 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     int idWidth = max(log(10, myFront), 4);
     long longestKey = max(abs(getUpperBound()), abs(getLowerBound()));
     int keyWidth = max(log(10, longestKey), 3);
-    sb.append(String.format("%" + idWidth + "s | %" + keyWidth + "s | %" + idWidth + "s | %" + idWidth + "s\n", "id", "key", "left", "right"));
+    sb.append(String.format("%" + idWidth + "s | %" + keyWidth + "s | %" + idWidth + "s | %" + idWidth + "s | %" + idWidth + "s\n",
+      "id", "key", "left", "right", "parent"));
     String idFormat = "%" + idWidth + "d";
     String keyFormat = "%" + keyWidth + "d";
     for (int i = 1; i < size(); ++i) {
       sb.append(String.format(idFormat, i)).append(" | ")
           .append(String.format(keyFormat, myKeys[i])).append(" | ")
           .append(String.format(idFormat, myLeft[i])).append(" | ")
-          .append(String.format(idFormat, myRight[i]))
+          .append(String.format(idFormat, myRight[i])).append(" | ")
+          .append(String.format(idFormat, myParent[i]))
           .append("\n");
     }
     return sb;
@@ -959,13 +927,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     private boolean myIterated = false;
 
     public LURIterator() {
-      int[] cache = myStackCache.get();
-      if (cache == null || cache.length < height(size())) {
-        ps = new int[height(size())];
-      } else {
-        ps = cache;
-        myStackCache.clear();
-      }
+      ps = new int[2*log(2, size())];
     }
 
     public LURIterator(long key) {

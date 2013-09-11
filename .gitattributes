@@ -36,6 +36,12 @@ dev/com/almworks/integers/AbstractWritableIntList.java -text
 dev/com/almworks/integers/AbstractWritableLongList.java -text
 dev/com/almworks/integers/DynamicIntSet.java -text
 dev/com/almworks/integers/DynamicLongSet.java -text
+dev/com/almworks/integers/DynamicLongSet2.java -text
+dev/com/almworks/integers/DynamicLongSetE.java -text
+dev/com/almworks/integers/DynamicLongSetEU.java -text
+dev/com/almworks/integers/DynamicLongSetEUP.java -text
+dev/com/almworks/integers/DynamicLongSetOpt.java -text
+dev/com/almworks/integers/DynamicLongSetP.java -text
 dev/com/almworks/integers/EmptyIntIterator.java -text
 dev/com/almworks/integers/EmptyLongIterator.java -text
 dev/com/almworks/integers/IndexedIntIterator.java -text

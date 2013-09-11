@@ -26,7 +26,6 @@ import com.almworks.integers.util.IntegersDebug;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.SoftReference;
 import java.util.*;
 
 import static java.lang.Math.abs;
@@ -34,7 +33,7 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class DynamicLongSet implements LongIterable, WritableLongSet {
+public class DynamicLongSet2 implements LongIterable, WritableLongSet {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { NIL_DUMMY_KEY };
@@ -66,11 +65,11 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   int maxSize = -1;
   int countedHeight = -1;
 
-  private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
+  private int[] myStackCache = IntegersUtils.EMPTY_INTS;
 
   /**
-   * This enum is used in {@link DynamicLongSet#compactify(com.almworks.integers.DynamicLongSet.ColoringType)} and
-   * {@link DynamicLongSet#fromSortedList(LongList, com.almworks.integers.DynamicLongSet.ColoringType)}
+   * This enum is used in {@link com.almworks.integers.DynamicLongSet2#compactify(com.almworks.integers.DynamicLongSet2.ColoringType)} and
+   * {@link com.almworks.integers.DynamicLongSet2#fromSortedList(com.almworks.integers.LongList, com.almworks.integers.DynamicLongSet2.ColoringType)}
    * methods to determine the way the new tree will be colored.
    */
   public enum ColoringType {
@@ -86,13 +85,13 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     public abstract int redLevelsDensity();
   }
 
-  public DynamicLongSet() {
+  public DynamicLongSet2() {
     myBlack = new BitSet();
     myRemoved = new BitSet();
     init();
   }
 
-  public DynamicLongSet(int initialCapacity) {
+  public DynamicLongSet2(int initialCapacity) {
     initialCapacity += 1;
     myBlack = new BitSet(initialCapacity);
     myRemoved = new BitSet(initialCapacity);
@@ -111,7 +110,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myRoot = 0;
     myFront = 1;
     myRemoved.clear();
-    myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
+    myStackCache = IntegersUtils.EMPTY_INTS;
   }
 
   public void clear() {
@@ -179,7 +178,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     }
   }
 
-  public void addAll(DynamicLongSet keys) {
+  public void addAll(DynamicLongSet2 keys) {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (LongIterator ii : keys) {
@@ -217,8 +216,10 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   private boolean push0(long key, int[] ps) {
     int x = myRoot;
+    ps[0] = 0;
+    ps[1] = 0;
     // Parents stack top + 1
-    int psi = 0;
+    int psi = 2;
     // actually, k is always overwritten if it is used (psi > 0), but compiler does not know that
     long k = 0;
     while (x != 0) {
@@ -231,7 +232,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
     // x is RED already (myBlack.get(x) == false), so no modifications to myBlack
     // Insert into the tree
-    if (psi == 0) myRoot = x;
+    if (ps[psi - 1] == 0) myRoot = x;
     else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
     balanceAfterAdd(x, ps, psi, key);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("add key:" + key);
@@ -258,9 +259,9 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    * */
   private void balanceAfterAdd(int x, int[] ps, int psi, long debugKey) {
     // parent
-    int p = getLastOrNil(ps, --psi);
+    int p = ps[--psi];
     // grandparent
-    int pp = getLastOrNil(ps, --psi);
+    int pp = ps[--psi];
     while (!myBlack.get(p)) {
       assert checkChildParent(p, pp, debugKey);
       assert checkChildParent(x, p, debugKey);
@@ -274,8 +275,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         myBlack.set(u);
         myBlack.clear(pp);
         x = pp;
-        p = getLastOrNil(ps, --psi);
-        pp = getLastOrNil(ps, --psi);
+        p = ps[--psi];
+        pp = ps[--psi];
       } else {
         if (x == branch2[p]) {
           // Rotate takes x and makes it a branch1-parent of p
@@ -287,7 +288,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         }
         myBlack.set(p);
         myBlack.clear(pp);
-        int ppp = getLastOrNil(ps, --psi);
+        // We're not outside the array, because for that we need pp == 0, what are we rotating then?
+        int ppp = ps[--psi];
         // Takes pp (which is now red) and makes it a branch-2 children of p (which is now black); note that branch-1 children of p is x, which is red and both children are black
         rotate(pp, ppp, branch2, branch1);
       }
@@ -298,10 +300,6 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   private boolean checkChildParent(int child, int parent, long debugKey) {
     assert myLeft[parent] == child || myRight[parent] == child : debugMegaPrint("add " + debugKey + "\nproblem with child " + child, parent);
     return true;
-  }
-
-  private static int getLastOrNil(int[] a, int i) {
-    return i < 0 ? 0 : a[i];
   }
 
   /**
@@ -352,17 +350,12 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    * @return
    */
   private int[] fetchStackCache(int n) {
-    int fh = estimateFutureHeight(n);
-    int[] cache = myStackCache.get();
-    if (cache != null && cache.length >= fh) return cache;
-    cache = new int[fh];
-    myStackCache = new SoftReference<int[]>(cache);
-    return cache;
-  }
-
-  /** Returns a number higher than the height after adding n elements.*/
-  private int estimateFutureHeight(int n) {
-    return height(size() + n) + 1;
+    // 2 is for the add(): sometimes we need to know the grand-grand-father
+    int fh = height(size() + n) + 2;
+    if (myStackCache.length < fh) {
+      myStackCache = new int[fh];
+    }
+    return myStackCache;
   }
 
   /** Estimate tree height: it can be shown that it's <= 2*log_2(N + 1) (not counting the root) */
@@ -381,7 +374,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   /**
-   * This method rebuilds this DynamicLongSet, after that it will use just the amount of memory needed to hold size() elements.
+   * This method rebuilds this DynamicLongSet2, after that it will use just the amount of memory needed to hold size() elements.
    * (Usually it uses more memory before this method is run)
    * This method builds a new tree based on the same keyset.
    * All levels of the new tree are filled, except, probably, the last one.
@@ -399,12 +392,12 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.DynamicLongSet#compactify()},
+   * This method is similar to {@link com.almworks.integers.DynamicLongSet2#compactify()},
    * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored.
    *                     Internal levels are all levels except the last one (two if the last one is not full.)
    *   <ul><li>{@link ColoringType#TO_REMOVE} colors every 2nd non-last levels red, theoretically making subsequent removals faster.
-   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link com.almworks.integers.DynamicLongSet#compactify()}.
+   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link com.almworks.integers.DynamicLongSet2#compactify()}.
    *       <li>{@link ColoringType#TO_ADD} colors all non-last levels black, theoretically making subsequent additions faster.
    *   </ul>
    */
@@ -491,27 +484,27 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   /**
-   * Builds a new DynamicLongSet based on values of src. src isn't used internally, its contents are copied.
+   * Builds a new DynamicLongSet2 based on values of src. src isn't used internally, its contents are copied.
    */
-  public static DynamicLongSet fromSortedList(LongList src) {
+  public static DynamicLongSet2 fromSortedList(LongList src) {
     return fromSortedList0(src, ColoringType.BALANCED);
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)},
+   * This method is similar to {@link com.almworks.integers.DynamicLongSet2#fromSortedList(com.almworks.integers.LongList)},
    * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
    *                     if the last one is unfilled.
    *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)};
+   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet2#fromSortedList(com.almworks.integers.LongList)};
    *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
    */
-  public static DynamicLongSet fromSortedList(LongList src, ColoringType coloringType) {
+  public static DynamicLongSet2 fromSortedList(LongList src, ColoringType coloringType) {
     return fromSortedList0(src, coloringType);
   }
 
-  private static DynamicLongSet fromSortedList0(LongList src, ColoringType coloringType) {
-    DynamicLongSet res = new DynamicLongSet();
+  private static DynamicLongSet2 fromSortedList0(LongList src, ColoringType coloringType) {
+    DynamicLongSet2 res = new DynamicLongSet2();
     res.fromSortedLongIterable(src, src.size(), coloringType);
     assert res.checkRedsAmount(coloringType);
     return res;
@@ -575,7 +568,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     fromSortedLongIterable(array, array.size(), ColoringType.BALANCED);
   }
 
-  public void retain(DynamicLongSet set) {
+  public void retain(DynamicLongSet2 set) {
     LongArray array = toLongArray();
     array.retainSorted(set.toLongArray());
     clear();
@@ -596,7 +589,8 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   private boolean remove0(long key, int[] parentsStack) {
     if (isEmpty()) return false;
 
-    int xsi = -1;
+    int xsi = 0;
+    parentsStack[0] = 0;
 
     //searching for an index Z which contains the key.
     int z = myRoot;
@@ -674,7 +668,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         // then loop is also finished
         myBlack.set(w);
         myBlack.clear(parentOfX);
-        rotate(parentOfX, getLastOrNil(parentsStack, xsi-1), mainBranch, otherBranch);
+        rotate(parentOfX, parentsStack[xsi-1], mainBranch, otherBranch);
         parentsStack[xsi] = w;
         parentsStack[++xsi] = parentOfX;
         w = otherBranch[parentOfX];
@@ -693,7 +687,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         myBlack.set(w, myBlack.get(parentOfX));
         myBlack.set(parentOfX);
         myBlack.set(otherBranch[w]);
-        rotate(parentOfX, getLastOrNil(parentsStack, xsi - 1), mainBranch, otherBranch);
+        rotate(parentOfX, parentsStack[xsi - 1], mainBranch, otherBranch);
         x = myRoot;
       }
     }
@@ -727,7 +721,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       return baos.toString("US-ASCII");
     } catch (UnsupportedEncodingException e) {
       assert false: e;
-      return "DynamicLongSet";
+      return "DynamicLongSet2";
     }
   }
 
@@ -959,12 +953,12 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     private boolean myIterated = false;
 
     public LURIterator() {
-      int[] cache = myStackCache.get();
+      int[] cache = myStackCache;
       if (cache == null || cache.length < height(size())) {
         ps = new int[height(size())];
       } else {
         ps = cache;
-        myStackCache.clear();
+        myStackCache = IntegersUtils.EMPTY_INTS;
       }
     }
 
