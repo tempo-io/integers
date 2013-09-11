@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
 
 public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
   protected long myCurrent = Long.MIN_VALUE;
-  protected long myNext = Long.MIN_VALUE;
+  private long myNext = Long.MIN_VALUE;
   private boolean storeValueState = false;
 
   /**

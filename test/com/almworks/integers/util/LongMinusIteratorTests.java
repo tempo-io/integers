@@ -41,7 +41,7 @@ public class LongMinusIteratorTests extends TestCase {
     new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        return new LongMinusIterator(arrays[0].iterator(), arrays[1].iterator());
+        return LongMinusIterator.create(arrays[0], arrays[1]);
       }
     }, new SetOperationsChecker.MinusGetter(), true, true);
   }
