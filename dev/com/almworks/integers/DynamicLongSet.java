@@ -390,23 +390,39 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    */
   void compactify(ColoringType coloringType) {
     modified();
-    fromSortedLongIterable(this, size(), coloringType);
+    fromSortedIterable0(this, size(), coloringType);
     assert checkRedsAmount(coloringType);
   }
 
-  private void fromSortedLongIterable(LongIterable src, int srcSize, ColoringType coloringType) {
+  public static DynamicLongSet fromSortedIterable(LongIterable src) {
+    return fromSortedIterable(src, -1);
+  }
+
+  public static DynamicLongSet fromSortedIterable(LongIterable src, int srcSize) {
+    return fromSortedIterable(src, srcSize, ColoringType.BALANCED);
+  }
+
+  public static DynamicLongSet fromSortedIterable(LongIterable src, int srcSize, ColoringType coloringType) {
+    DynamicLongSet res = new DynamicLongSet();
+    res.fromSortedIterable0(src, srcSize, coloringType);
+    return res;
+  }
+
+  private void fromSortedIterable0(LongIterable src, int srcSize, ColoringType coloringType) {
+    assert srcSize >= -1;
     long[] newKeys;
     if (srcSize == 0)
       newKeys = EMPTY_KEYS;
     else {
       int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
-      newKeys = new long[Math.max(SHRINK_MIN_LENGTH, arraySize)];
-      int i = 0;
-      newKeys[0] = NIL_DUMMY_KEY;
-      for (LongIterator ii : src) {
-        newKeys[++i] = ii.value();
-        assert (i==1 || newKeys[i] >= newKeys[i-1]) : newKeys;
+      LongArray buf = new LongArray(Math.max(SHRINK_MIN_LENGTH, arraySize));
+      buf.add(NIL_DUMMY_KEY);
+      buf.addAll(src.iterator());
+      assert buf.isUniqueSorted();
+      if (srcSize == -1) {
+        srcSize = buf.size() - 1;
       }
+      newKeys = buf.extractHostArray();
     }
     fromPreparedArray(newKeys, srcSize, coloringType);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("fromSortedLongIterable");
@@ -474,7 +490,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    * Builds a new DynamicLongSet based on values of src. src isn't used internally, its contents are copied.
    */
   public static DynamicLongSet fromSortedList(LongList src) {
-    return fromSortedList0(src, ColoringType.BALANCED);
+    return fromSortedList(src, ColoringType.BALANCED);
   }
 
   /**
@@ -487,14 +503,28 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
    *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
    */
   public static DynamicLongSet fromSortedList(LongList src, ColoringType coloringType) {
-    return fromSortedList0(src, coloringType);
+    DynamicLongSet res = new DynamicLongSet();
+    res.fromSortedList0(src, coloringType);
+    return res;
   }
 
-  private static DynamicLongSet fromSortedList0(LongList src, ColoringType coloringType) {
-    DynamicLongSet res = new DynamicLongSet();
-    res.fromSortedLongIterable(src, src.size(), coloringType);
-    assert res.checkRedsAmount(coloringType);
-    return res;
+  private void fromSortedList0(LongList src, ColoringType coloringType) {
+    fromSortedIterable(src, src.size(), coloringType);
+
+    long[] newKeys;
+    int srcSize = src.size();
+    if (srcSize == 0)
+      newKeys = EMPTY_KEYS;
+    else {
+      int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
+      LongArray buf = new LongArray(Math.max(SHRINK_MIN_LENGTH, arraySize));
+      buf.add(NIL_DUMMY_KEY);
+      buf.addAll(src);
+      assert buf.isUniqueSorted() : "wrong array";
+      newKeys = buf.extractHostArray();
+    }
+    fromPreparedArray(newKeys, srcSize, coloringType);
+    assert checkRedsAmount(coloringType);
   }
 
   public LongIterator iterator() {
@@ -550,16 +580,16 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
   public void retain(LongList values) {
     LongArray array = toLongArray();
-    array.retain(values);
+    array.retainSorted(values);
     clear();
-    fromSortedLongIterable(array, array.size(), ColoringType.BALANCED);
+    fromSortedList0(array, ColoringType.BALANCED);
   }
 
   public void retain(DynamicLongSet set) {
     LongArray array = toLongArray();
     array.retainSorted(set.toLongArray());
     clear();
-    fromSortedList(array, ColoringType.BALANCED);
+    fromSortedList0(array, ColoringType.BALANCED);
   }
 
   private void maybeShrink() {
@@ -619,10 +649,10 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myKeys[y] = 0;
     myLeft[y] = 0;
     myRight[y] = 0;
-    if (y == myFront-1)
+    if (y == myFront - 1)
       myFront--;
     else {
-      if (myRemoved.isEmpty()) myRemoved = new BitSet(y+1);
+//      if (myRemoved.isEmpty()) myRemoved = new BitSet(y+1);
       myRemoved.set(y);
     }
   }
@@ -936,6 +966,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
 
     public LURIterator(long key) {
       this();
+      if (DynamicLongSet.this.size() == 0) return;
       x = myRoot;
       // Parents stack top + 1
       psi = 0;
@@ -955,6 +986,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
           psi--;
         }
         psi--;
+        assert psi >= 0 : psi + Arrays.toString(ps) + DynamicLongSet.this.toString() + key;
         x = ps[psi];
       }
     }
