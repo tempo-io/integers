@@ -391,7 +391,7 @@ public class LongCollections {
     return array;
   }
 
-  public static DynamicLongSet union(DynamicLongSet first, DynamicLongSet second) {
+  public static DynamicLongSet union(WritableLongSet first, WritableLongSet second) {
     LongArray a = first.toLongArray();
     LongArray b = second.toLongArray();
 

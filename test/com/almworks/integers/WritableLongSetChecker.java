@@ -65,20 +65,8 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
       stateCount++;
       if (stateCount == 3) stateCount = -2;
     }
+    assertEquals(expected.size(), set.size());
     assertEquals(expected, set.toLongArray());
-  }
-
-  public void testTailIteratorSimple() {
-    LongArray expected = LongArray.create(ap(1, 2, 10));
-    set.addAll(expected);
-
-    int ind = 0;
-    LongIterator iterator = set.tailIterator(5);
-    System.out.println(iterator.hasValue());
-    for (int i = 0; i < 21; i++) {
-      CHECK.order(expected.iterator(ind), set.tailIterator(i));
-      if (i % 2 == 1) ind++;
-    }
   }
 
   public void testAddAll() {
@@ -94,52 +82,6 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     set.removeAll(expected);
     assertTrue(set.isEmpty());
   }
-
-  public void testTailIteratorHasMethods() {
-    set.addAll(LongProgression.arithmetic(1, 10, 2));
-    int curSize = 10;
-    for (int i = 0; i < 20; i++) {
-      LongIterator iterator = set.tailIterator(i);
-      assertFalse(iterator.hasValue());
-      assertTrue(iterator.hasNext());
-      iterator.next();
-      assertTrue(iterator.hasValue());
-      for (int j = 0; j < curSize - 1; j++) {
-        iterator.next();
-      }
-      assertTrue(iterator.hasValue());
-      assertFalse(iterator.hasNext());
-      if (i % 2 == 1) curSize--;
-    }
-  }
-
-  public void testTailIteratorRandom() {
-    final int size = 300,
-        testCount = 5;
-    LongArray expected = new LongArray(size);
-    LongArray testValues = new LongArray(size * 3);
-    for (int i = 0; i < testCount; i++) {
-      expected.clear();
-      testValues.clear();
-      set.clear();
-      for (int j = 0; j < size; j++) {
-        long val = RAND.nextLong();
-        expected.add(val);
-        testValues.addAll(val - 1, val, val + 1);
-      }
-      set.addAll(expected);
-      expected.sortUnique();
-      testValues.sortUnique();
-
-      for (int j = 0; j < testValues.size(); j++) {
-        final long key = testValues.get(j);
-        int ind = expected.binarySearch(key);
-        if (ind < 0) ind = -ind - 1;
-        CHECK.order(expected.iterator(ind), set.tailIterator(key));
-      }
-    }
-  }
-
 
   /** Prefixed with _ because it runs fairly long. */
   public void _testAllPermutations() {
@@ -275,11 +217,19 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     try {
       for (LongIterator i : set) {
         res.add(i.value());
-        if (i.value() == 16) set.add(99);
+        if (i.value() == 16) {
+          set.add(99);
+        }
       }
       fail();
     } catch (ConcurrentModificationException e) {}
     assertEquals(expected, res);
+
+    set.clear();
+    CHECK.order(LongIterator.EMPTY, set.iterator());
+    set.add(10);
+    CHECK.order(LongArray.create(10).iterator(), set.iterator());
+
   }
 
   public void testIteratorExceptions() {
@@ -353,6 +303,57 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     for (int i = 0; i < 99; i++) {
       assertEquals(i + 1 - (i % 2), set.tailIterator(i).nextValue());
     }
+
+    set.clear();
+    CHECK.order(LongIterator.EMPTY, set.tailIterator(0));
+    set.add(10);
+    CHECK.order(new LongIterator.Single(10), set.tailIterator(9));
+    CHECK.order(LongIterator.EMPTY, set.tailIterator(11));
+  }
+
+  public void testTailIteratorHasMethods() {
+    set.addAll(LongProgression.arithmetic(1, 10, 2));
+    int curSize = 10;
+    for (int i = 0; i < 20; i++) {
+      LongIterator iterator = set.tailIterator(i);
+      assertFalse(iterator.hasValue());
+      assertTrue(iterator.hasNext());
+      iterator.next();
+      assertTrue(iterator.hasValue());
+      for (int j = 0; j < curSize - 1; j++) {
+        iterator.next();
+      }
+      assertTrue(iterator.hasValue());
+      assertFalse(iterator.hasNext());
+      if (i % 2 == 1) curSize--;
+    }
+  }
+
+  public void testTailIteratorRandom() {
+    final int size = 300,
+        testCount = 5;
+    LongArray expected = new LongArray(size);
+    LongArray testValues = new LongArray(size * 3);
+    for (int i = 0; i < testCount; i++) {
+      expected.clear();
+      testValues.clear();
+      set.clear();
+      for (int j = 0; j < size; j++) {
+        long val = RAND.nextLong();
+        expected.add(val);
+        testValues.addAll(val - 1, val, val + 1);
+      }
+      set.addAll(expected);
+      expected.sortUnique();
+      testValues.sortUnique();
+
+      for (int j = 0; j < testValues.size(); j++) {
+        final long key = testValues.get(j);
+        int ind = expected.binarySearch(key);
+        if (ind < 0) ind = -ind - 1;
+        CHECK.order(expected.iterator(ind), set.tailIterator(key));
+      }
+    }
   }
 
   public void testIsEmpty() {
@@ -365,7 +366,9 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     set.addAll(ap(1, 1, 20));
     set.retain(new LongArray(ap(1, 2, 20)));
     CHECK.order(ap(1, 2, 10), set.toLongArray().toNativeArray());
+  }
 
+  public void testRetainComplex() {
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {

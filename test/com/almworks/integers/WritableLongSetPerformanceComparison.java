@@ -120,33 +120,36 @@ public class WritableLongSetPerformanceComparison extends IntegersFixture {
       if (testType == 3) {
         testParam = testParam & mask;
       }
-      start = System.currentTimeMillis();
       switch (testType) {
         // add
         case 0:
+          start = System.currentTimeMillis();
           set.add(testParam);
-          break;
+          return System.currentTimeMillis() - start;
         // remove
         case 1:
+          start = System.currentTimeMillis();
           set.remove(testParam);
-          break;
+          return System.currentTimeMillis() - start;
         // contains
         case 2:
+          start = System.currentTimeMillis();
           boolean res = set.contains(testParam);
-          break;
+          return System.currentTimeMillis() - start;
         // tailIterator
         case 3:
+          start = System.currentTimeMillis();
           long maxParam = testParam + (1 << maxStructureBits);
           testParam = 0;
           LongIterator it = set.tailIterator(testParam);
           for (long val = maxParam - 1; val < maxParam && it.hasNext(); ) {
             val = it.nextValue();
           }
-          break;
+          return System.currentTimeMillis() - start;
         default:
           assert false : "testType = " + testType;
       }
-      return System.currentTimeMillis() - start;
+      return -1;
     }
 
     public void inicRelationsOfQueries() {
@@ -203,18 +206,18 @@ public class WritableLongSetPerformanceComparison extends IntegersFixture {
   public void testSets() {
     SetCreator[] all = new SetCreator[]{
 //        new AmortizedSortedLongSetCreator(),
-//        new AmortizedSortedLongSetTempCreator(),
-        new DynamicLongSetCreator(),
+        new AmortizedSortedLongSetTempCreator(),
+//        new DynamicLongSetCreator(),
         new StandartTreeSetCreator(),
     };
 //    int[] standartRelationsOfQueries = {1, 1, 50, 25};
-    int[] standartRelationsOfQueries = {0, 1, 0, 0};
+    int[] standartRelationsOfQueries = {1, 0, 0, 0};
 
-    TestConfiguration config = new TestConfiguration(all, 10000, 50, 3000, 1000000, 14, 14);
+    TestConfiguration config = new TestConfiguration(all, 100, 5000, 3000, 100000, 14, 14);
     config.run(standartRelationsOfQueries);
 
-    config = new TestConfiguration(all, 10000, 50, 3000, 1500000, 14, 14);
-    config.run(standartRelationsOfQueries);
+//    config = new TestConfiguration(all, 10000, 50, 3000, 1500000, 14, 14);
+//    config.run(standartRelationsOfQueries);
 
 //    config = new TestConfiguration(all, 10000, 50, 3000, 2000000, 14, 14);
 //    config.run(standartRelationsOfQueries);
