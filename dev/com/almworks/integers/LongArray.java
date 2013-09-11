@@ -263,7 +263,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * retain this array with sorted list of values
+   * removes from this set all of its elements that are not contained in the {@code values}
    * @param values sorted {@code LongList}
    * */
   public void retainSorted(LongList values) {

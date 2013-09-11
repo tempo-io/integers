@@ -459,4 +459,24 @@ public class LongArrayTests extends IntegersFixture {
     array.addAll(LongProgression.arithmetic(11, 10));
     assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array, 5));
   }
+
+  public void testRemoveAllSorted() {
+    long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
+    long[][] tests = {{MIN, MIN, 0, 0, MAX, MAX},
+        {-10, -5, 0, 0, 5, 10},
+        {MIN, MIN, MIN},
+        {0, 0, 0},
+        {MAX, MAX, MAX}};
+    long[] values = {MIN, -10, -5, 0, 5, 10, 0, MAX};
+    LongArray actual, expected;
+    for (long[] test: tests) {
+      for (long value: values) {
+        actual = LongArray.copy(test);
+        actual.removeAllSorted(value);
+        expected = LongArray.create(test);
+        expected.removeAll(value);
+        CHECK.order(expected, actual);
+      }
+    }
+  }
 }
