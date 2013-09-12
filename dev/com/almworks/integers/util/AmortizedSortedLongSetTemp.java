@@ -22,17 +22,6 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
     myBaseList = new LongArray();
   }
 
-  public AmortizedSortedLongSetTemp(LongList values) {
-    this(values, false);
-  }
-
-  public AmortizedSortedLongSetTemp(LongList values, boolean sortedUniqueStatus) {
-    myBaseList = new LongArray(values);
-    if (!sortedUniqueStatus) {
-      myBaseList.sortUnique();
-    }
-  }
-
   public void add(long value) {
     modified();
     myRemoved.remove(value);
@@ -175,6 +164,22 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
     myAdded.clear();
     myRemoved.clear();
     myBaseList = new LongArray(builder.toTemporaryReadOnlySortedCollection());
+  }
+
+  public static AmortizedSortedLongSetTemp fromSortedIterable(LongIterable src) {
+    return fromSortedIterable(src, 0);
+  }
+
+  public static AmortizedSortedLongSetTemp fromSortedIterable(LongIterable src, int capacity) {
+    AmortizedSortedLongSetTemp res = new AmortizedSortedLongSetTemp();
+    res.myBaseList = LongCollections.collectSortedSet(src.iterator(), capacity);
+    return res;
+  }
+
+  public static AmortizedSortedLongSetTemp fromSortedList(LongList src) {
+    AmortizedSortedLongSetTemp res = new AmortizedSortedLongSetTemp();
+    res.myBaseList = new LongArray(src);
+    return res;
   }
 
   public boolean isEmpty() {

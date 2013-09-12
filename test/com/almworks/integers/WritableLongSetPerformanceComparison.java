@@ -52,7 +52,7 @@ public class WritableLongSetPerformanceComparison extends IntegersFixture {
 
   public class AmortizedSortedLongSetTempCreator implements SetCreator {
     public WritableLongSet get(LongList values) {
-      return new AmortizedSortedLongSetTemp(values);
+      return AmortizedSortedLongSetTemp.fromSortedList(values);
     }
     public String toString() { return "AmortizedSortedLongSetTemp";}
   }

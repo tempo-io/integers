@@ -17,8 +17,8 @@
 package com.almworks.integers.util;
 
 public class IntegersDebug {
-  public static final boolean CHECK = Boolean.parseBoolean(System.getProperty("integers.check"));
-  public static final boolean PRINT = Boolean.parseBoolean(System.getProperty("integers.print"));
+  public static final boolean CHECK = Boolean.parseBoolean(System.getProperty("com.almworks.integers.check"));
+  public static final boolean PRINT = Boolean.parseBoolean(System.getProperty("com.almworks.integers.print"));
 
   public static void print(Object ... elements) {
     if (PRINT) {

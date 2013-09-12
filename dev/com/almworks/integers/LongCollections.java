@@ -480,7 +480,7 @@ public class LongCollections {
     return r;
   }
 
-  private static LongArray collectSortedSet(LongIterator iterator, int capacity) {
+  public static LongArray collectSortedSet(LongIterator iterator, int capacity) {
     LongArray r = new LongArray(capacity);
     if (iterator.hasNext()) {
       long value = iterator.nextValue();

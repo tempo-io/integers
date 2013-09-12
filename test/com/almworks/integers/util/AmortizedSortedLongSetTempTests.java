@@ -12,7 +12,7 @@ public class AmortizedSortedLongSetTempTests extends WritableLongSetChecker {
   }
 
   protected  WritableLongSet[] createSetFromSortedList(LongList sortedList) {
-    return new WritableLongSet[]{new AmortizedSortedLongSetTemp(sortedList)};
+    return new WritableLongSet[]{AmortizedSortedLongSetTemp.fromSortedList(sortedList)};
   }
 
   public void testIteratorCoalesce() {

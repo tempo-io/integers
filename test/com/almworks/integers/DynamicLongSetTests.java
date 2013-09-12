@@ -26,7 +26,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+/**
+ * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
+ * */
 public class DynamicLongSetTests extends WritableLongSetChecker {
+
   private static final long MIN = Long.MIN_VALUE;
   private static final long MAX = Long.MAX_VALUE;
 
@@ -89,34 +93,6 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     for (long i: ap(0, 1, 200)) {
       assertEquals(i % 2 == 1, set.include(i));
     }
-  }
-
-  public void PrintPerm() {
-    final char[] s = "1234567".toCharArray();
-    final HashSet<String> ss = new HashSet<String>();
-    IntegersUtils.allPermutations(s.length, new IntProcedure() {
-      int count;
-
-      {
-        doPrint();
-      }
-
-      private void doPrint() {
-        String str = new String(s);
-        assertTrue(ss.add(str));
-        System.out.println(count + "\t" + str);
-      }
-
-      @Override
-      public void invoke(int i) {
-        count += 1;
-        char t = s[i];
-        s[i] = s[i + 1];
-        s[i + 1] = t;
-        doPrint();
-      }
-    });
-    System.out.println("Distinct: " + ss.size());
   }
 
   public void testEdgeCasesWithCompactify() {

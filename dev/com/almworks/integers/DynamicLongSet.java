@@ -176,7 +176,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     }
   }
 
-  public void addAll(DynamicLongSet keys) {
+  public void addAll(LongSet keys) {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (LongIterator ii : keys) {
@@ -212,7 +212,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     return include0(key, prepareAdd(1));
   }
 
-  private boolean include0(long key, int[] ps) {
+  private boolean   include0(long key, int[] ps) {
     int x = myRoot;
     // Parents stack top + 1
     int psi = 0;
@@ -261,9 +261,14 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     while (!myBlack.get(p)) {
       assert checkChildParent(p, pp, debugKey);
       assert checkChildParent(x, p, debugKey);
-      boolean branch1IsLeft = p == myLeft[pp];
-      int[] branch1 = branch1IsLeft ? myLeft : myRight;
-      int[] branch2 = branch1IsLeft ? myRight : myLeft;
+      int[] branch1, branch2;
+      if (p == myLeft[pp]) {
+        branch1 = myLeft;
+        branch2 = myRight;
+      } else {
+        branch1 = myRight;
+        branch2 = myLeft;
+      }
       // Uncle (parent's sibling)
       int u = branch2[pp];
       if (!myBlack.get(u)) {
@@ -324,7 +329,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   private void maybeGrow(int n) {
-    int futureSize = size() + n + 1;
+    int futureSize = 1 + size() + n;
     myKeys = LongCollections.ensureCapacity(myKeys, futureSize);
     myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
     myRight = IntCollections.ensureCapacity(myRight, futureSize);
@@ -398,33 +403,33 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     return fromSortedIterable(src, -1);
   }
 
-  public static DynamicLongSet fromSortedIterable(LongIterable src, int srcSize) {
-    return fromSortedIterable(src, srcSize, ColoringType.BALANCED);
+  public static DynamicLongSet fromSortedIterable(LongIterable src, int capacity) {
+    return fromSortedIterable(src, capacity, ColoringType.BALANCED);
   }
 
-  public static DynamicLongSet fromSortedIterable(LongIterable src, int srcSize, ColoringType coloringType) {
+  public static DynamicLongSet fromSortedIterable(LongIterable src, int capacity, ColoringType coloringType) {
     DynamicLongSet res = new DynamicLongSet();
-    res.fromSortedIterable0(src, srcSize, coloringType);
+    res.fromSortedIterable0(src, capacity, coloringType);
     return res;
   }
 
-  private void fromSortedIterable0(LongIterable src, int srcSize, ColoringType coloringType) {
-    assert srcSize >= -1;
+  private void fromSortedIterable0(LongIterable src, int capacity, ColoringType coloringType) {
+    assert capacity >= -1;
     long[] newKeys;
-    if (srcSize == 0)
+    if (capacity == 0)
       newKeys = EMPTY_KEYS;
     else {
-      int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
+      int arraySize = (coloringType == ColoringType.TO_ADD) ? capacity * EXPAND_FACTOR : capacity+1;
       LongArray buf = new LongArray(Math.max(SHRINK_MIN_LENGTH, arraySize));
       buf.add(NIL_DUMMY_KEY);
       buf.addAll(src.iterator());
       assert buf.isUniqueSorted();
-      if (srcSize == -1) {
-        srcSize = buf.size() - 1;
+      if (capacity == -1) {
+        capacity = buf.size() - 1;
       }
       newKeys = buf.extractHostArray();
     }
-    fromPreparedArray(newKeys, srcSize, coloringType);
+    fromPreparedArray(newKeys, capacity, coloringType);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("fromSortedLongIterable");
   }
 
@@ -473,8 +478,9 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       if (colorCounter == 1) {
         isBlack = false;
         colorCounter = maxCounter;
-      } else if (colorCounter > 1)
+      } else if (colorCounter > 1) {
         colorCounter--;
+      }
 
       if (length == 3 && !lpab)
         myBlack.set(index);
@@ -612,7 +618,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
       z = key < myKeys[z] ? myLeft[z] : myRight[z];
     }
 
-    // searching for an index Y which will be actually cleared.
+    // picking the node which will be actually cleared following z in the LUR order.
     int y = z;
     if (myLeft[z] != 0 && myRight[z] != 0) {
       parentsStack[++xsi] = y;
@@ -625,21 +631,23 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     if (z != y) myKeys[z] = myKeys[y];
 
     // Child of Y. Y can't have 2 children.
-    int x = (myLeft[y] != 0) ? myLeft[y] : myRight[y];
+    int x = myLeft[y];
+    if (x == 0) x = myRight[y];
 
-    if (y == myRoot) myRoot = x;
-    else {
+    // removing y from tree
+    if (y == myRoot) {
+      myRoot = x;
+    } else {
       int parentOfY = parentsStack[xsi];
       if (myLeft[parentOfY] == y)
         myLeft[parentOfY] = x;
       else myRight[parentOfY] = x;
     }
-    free(y);
 
     if (myBlack.get(y)) {
       balanceAfterRemove(x, parentsStack, xsi);
-      myBlack.clear(y);
     }
+    free(y);
 
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("remove key:" + key);
     return true;
@@ -649,10 +657,10 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     myKeys[y] = 0;
     myLeft[y] = 0;
     myRight[y] = 0;
-    if (y == myFront - 1)
+    myBlack.clear(y);
+    if (y == myFront - 1) {
       myFront--;
-    else {
-//      if (myRemoved.isEmpty()) myRemoved = new BitSet(y+1);
+    } else {
       myRemoved.set(y);
     }
   }
@@ -662,7 +670,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     int parentOfX, w;
     while (x != myRoot && myBlack.get(x)) {
       parentOfX = parentsStack[xsi];
-      if (myLeft[parentOfX] == x) {
+      if (x == myLeft[parentOfX]) {
         mainBranch = myLeft;
         otherBranch = myRight;
       } else {
@@ -679,6 +687,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
         parentsStack[++xsi] = parentOfX;
         w = otherBranch[parentOfX];
       }
+      // now w always black
       if (myBlack.get(mainBranch[w]) && myBlack.get(otherBranch[w])) {
         myBlack.clear(w);
         x = parentOfX;
@@ -691,6 +700,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
           w = otherBranch[parentOfX];
         }
         myBlack.set(w, myBlack.get(parentOfX));
+        // now otherBranch[w] always red
         myBlack.set(parentOfX);
         myBlack.set(otherBranch[w]);
         rotate(parentOfX, getLastOrNil(parentsStack, xsi-1), mainBranch, otherBranch);
