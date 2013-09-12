@@ -23,6 +23,10 @@ import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.optimized.CyclicLongQueue;
 import com.almworks.integers.optimized.SameValuesLongList;
+import com.almworks.integers.util.LongIntersectionIterator;
+import com.almworks.integers.util.LongMinusIterator;
+import com.almworks.integers.util.LongSetBuilder;
+import com.almworks.integers.util.LongUnionIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -399,9 +403,99 @@ public class LongCollections {
     return DynamicLongSet.fromSortedList(a);
   }
 
+  public static LongList union(LongList... lists) {
+    if (lists == null) return null;
+    LongList union = null;
+    LongSetBuilder builder = null;
+    for (LongList list : lists) {
+      if (list != null && !list.isEmpty()) {
+        if (union == null) {
+          union = list;
+        } else {
+          if (builder == null) {
+            builder = new LongSetBuilder();
+            builder.addAll(union);
+          }
+          builder.addAll(list);
+        }
+      }
+    }
+    if (builder != null) union = builder.toSortedList();
+    if (union == null) union = LongList.EMPTY;
+    return union;
+  }
+
+
   public static DynamicLongSet intersection(DynamicLongSet dest, DynamicLongSet src) {
     dest.retain(src);
     return dest;
+  }
+
+  @NotNull
+  public static LongList complementSorted(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
+    if (includeSorted == null || includeSorted.isEmpty()) return LongList.EMPTY;
+    if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted;
+    LongMinusIterator complement = new LongMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
+    return complement.hasNext() ? collectSortedSet(complement, includeSorted.size()) : LongList.EMPTY;
+  }
+
+  @NotNull
+  public static LongList unionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
+    if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? LongList.EMPTY : bSorted;
+    if (bSorted == null || bSorted.isEmpty()) return aSorted;
+    LongUnionIterator union = new LongUnionIterator(aSorted.iterator(), bSorted.iterator());
+    return union.hasNext() ? collectSortedSet(union, aSorted.size() + bSorted.size()) : LongList.EMPTY;
+  }
+
+  @NotNull
+  public static LongList intersectionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
+    if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return LongList.EMPTY;
+    LongIterator intersection = new LongIntersectionIterator(aSorted.iterator(), bSorted.iterator());
+    return intersection.hasNext() ? collectSortedSet(intersection, Math.max(aSorted.size(), bSorted.size())) : LongList.EMPTY;
+  }
+
+  public static boolean hasIntersection(@Nullable LongList aSorted, @Nullable LongList bSorted) {
+    if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return false;
+    LongIterator intersection = new LongIntersectionIterator(aSorted.iterator(), bSorted.iterator());
+    return intersection.hasNext();
+  }
+
+  public static boolean hasUnion(@Nullable LongList aSorted, @Nullable LongList bSorted) {
+    return aSorted != null && !aSorted.isEmpty() || bSorted != null && !bSorted.isEmpty();
+  }
+
+  public static boolean hasComplement(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
+    if (includeSorted == null || includeSorted.isEmpty()) return false;
+    if (excludeSorted == null || excludeSorted.isEmpty()) return !includeSorted.isEmpty();
+    LongMinusIterator complement = new LongMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
+    return complement.hasNext();
+  }
+
+  @NotNull
+  public static LongList toSortedUnique(@Nullable LongList list) {
+    if (list == null || list.isEmpty()) return LongList.EMPTY;
+    if (list.size() < 33 && list.isUniqueSorted()) return list; // check only small lists
+    LongArray r = new LongArray(list);
+    r.sortUnique();
+    return r;
+  }
+
+  private static LongArray collectSortedSet(LongIterator iterator, int capacity) {
+    LongArray r = new LongArray(capacity);
+    if (iterator.hasNext()) {
+      long value = iterator.nextValue();
+      r.add(value);
+      while (iterator.hasNext()) {
+        long nextValue = iterator.nextValue();
+        if (nextValue < value) {
+          throw new IllegalArgumentException("iterator sorting failure: " + value + " " + nextValue);
+        }
+        if (nextValue == value) continue; // skip duplicate
+        value = nextValue;
+        r.add(value);
+      }
+    }
+    return r;
   }
 
   @NotNull
