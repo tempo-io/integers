@@ -55,13 +55,14 @@ public class TreeSetWrapper implements WritableLongSet {
   }
 
   @Override
-  public void retain(LongList values) {
+  public TreeSetWrapper retain(LongList values) {
     modified();
     List aList = new ArrayList<Long>(values.size());
     for (int i = 0; i < values.size(); i++) {
       aList.add(values.get(i));
     }
     set.retainAll(aList);
+    return this;
   }
 
   @Override

@@ -584,11 +584,12 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
     return ret;
   }
 
-  public void retain(LongList values) {
+  public DynamicLongSet retain(LongList values) {
     LongArray array = toLongArray();
     array.retainSorted(values);
     clear();
     fromSortedList0(array, ColoringType.BALANCED);
+    return this;
   }
 
   public void retain(DynamicLongSet set) {

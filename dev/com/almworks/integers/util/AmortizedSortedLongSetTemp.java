@@ -89,10 +89,11 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
   }
 
   @Override
-  public void retain(LongList values) {
+  public AmortizedSortedLongSetTemp retain(LongList values) {
     modified();
     coalesce();
     myBaseList.retain(values);
+    return this;
   }
 
   public boolean contains(long value) {

@@ -10,7 +10,7 @@ import java.util.*;
 public class AmortizedSortedLongSet implements WritableLongSet {
   private static final int DEFAULT_CHUNKSIZE = 512;
 
-  private LongList myBaseList = LongList.EMPTY;
+  private LongArray myBaseList = new LongArray();
   private final SortedSet<Long> myAdded = new TreeSet<Long>();
   private final Set<Long> myRemoved = new HashSet<Long>();
 
@@ -119,7 +119,7 @@ public class AmortizedSortedLongSet implements WritableLongSet {
       }
       myAdded.clear();
     }
-    myBaseList = builder.toSortedList();
+    myBaseList = builder.toLongArray();
   }
 
   public LongIterator tailIterator(long value) {
@@ -135,15 +135,16 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     return tailIterator(Long.MIN_VALUE);
   }
 
-  public void retain(LongList values) {
+  public AmortizedSortedLongSet retain(LongList values) {
     coalesce();
     ((LongArray)myBaseList).retain(values);
+    return this;
   }
 
   public void replaceFrom(LongSetBuilder builder) {
     myAdded.clear();
     myRemoved.clear();
-    myBaseList = builder.toSortedList();
+    myBaseList = new LongArray(builder.toTemporaryReadOnlySortedCollection());
   }
 
   public LongArray toLongArray() {
@@ -171,7 +172,7 @@ public class AmortizedSortedLongSet implements WritableLongSet {
   public void clear() {
     myAdded.clear();
     myRemoved.clear();
-    myBaseList = LongList.EMPTY;
+    myBaseList = new LongArray();
   }
 
   private static class CoalescingIterator extends FindingLongIterator {
