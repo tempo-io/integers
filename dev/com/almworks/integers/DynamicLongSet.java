@@ -414,17 +414,16 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   private void fromSortedIterable0(LongIterable src, int capacity, ColoringType coloringType) {
-    assert capacity >= -1;
     long[] newKeys;
-    if (capacity == 0)
+    LongIterator iterator = src.iterator();
+    if (capacity == 0 && !iterator.hasNext())
       newKeys = EMPTY_KEYS;
     else {
       int arraySize = (coloringType == ColoringType.TO_ADD) ? capacity * EXPAND_FACTOR : capacity+1;
-      LongArray buf = new LongArray(Math.max(SHRINK_MIN_LENGTH, arraySize));
-      buf.add(NIL_DUMMY_KEY);
-      buf.addAll(src.iterator());
+      arraySize = Math.max(SHRINK_MIN_LENGTH, arraySize);
+      LongArray buf = LongCollections.collectIterables(arraySize, new LongIterator.Single(NIL_DUMMY_KEY), iterator);
       assert buf.isUniqueSorted();
-      if (capacity == -1) {
+      if (capacity < 0) {
         capacity = buf.size() - 1;
       }
       newKeys = buf.extractHostArray();
@@ -515,21 +514,7 @@ public class DynamicLongSet implements LongIterable, WritableLongSet {
   }
 
   private void fromSortedList0(LongList src, ColoringType coloringType) {
-    fromSortedIterable(src, src.size(), coloringType);
-
-    long[] newKeys;
-    int srcSize = src.size();
-    if (srcSize == 0)
-      newKeys = EMPTY_KEYS;
-    else {
-      int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
-      LongArray buf = new LongArray(Math.max(SHRINK_MIN_LENGTH, arraySize));
-      buf.add(NIL_DUMMY_KEY);
-      buf.addAll(src);
-      assert buf.isUniqueSorted() : "wrong array";
-      newKeys = buf.extractHostArray();
-    }
-    fromPreparedArray(newKeys, srcSize, coloringType);
+    fromSortedIterable0(src, src.size(), coloringType);
     assert checkRedsAmount(coloringType);
   }
 

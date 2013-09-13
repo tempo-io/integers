@@ -3,8 +3,6 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ConcurrentModificationException;
-
 /**
  * @author Igor Sereda
  */
@@ -173,7 +171,7 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
 
   public static AmortizedSortedLongSetTemp fromSortedIterable(LongIterable src, int capacity) {
     AmortizedSortedLongSetTemp res = new AmortizedSortedLongSetTemp();
-    res.myBaseList = LongCollections.collectSortedSet(src.iterator(), capacity);
+    res.myBaseList = LongCollections.collectIterables(capacity, src);
     return res;
   }
 

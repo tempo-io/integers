@@ -117,6 +117,7 @@ dev/com/almworks/integers/util/IntListInsertingDecorator.java -text
 dev/com/almworks/integers/util/IntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/IntObjMap.java -text
 dev/com/almworks/integers/util/IntSetBuilder.java -text
+dev/com/almworks/integers/util/LongConcatIterator.java -text
 dev/com/almworks/integers/util/LongIntersectionIterator.java -text
 dev/com/almworks/integers/util/LongIterableLexicographicComparator.java -text
 dev/com/almworks/integers/util/LongListConcatenation.java -text
@@ -227,6 +228,7 @@ test/com/almworks/integers/util/AmortizedSortedLongSetTests.java -text
 test/com/almworks/integers/util/DiffIndexedLongListDecoratorTests.java -text
 test/com/almworks/integers/util/FindingLongIteratorTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
+test/com/almworks/integers/util/LongConcatIteratorTests.java -text
 test/com/almworks/integers/util/LongIntersectionIteratorTests.java -text
 test/com/almworks/integers/util/LongListConcatenationTests.java -text
 test/com/almworks/integers/util/LongListInsertingDecoratorTests.java -text

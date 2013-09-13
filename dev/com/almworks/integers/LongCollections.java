@@ -436,7 +436,7 @@ public class LongCollections {
     if (includeSorted == null || includeSorted.isEmpty()) return LongList.EMPTY;
     if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted;
     LongMinusIterator complement = new LongMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
-    return complement.hasNext() ? collectSortedSet(complement, includeSorted.size()) : LongList.EMPTY;
+    return complement.hasNext() ? collectIterables(includeSorted.size(), complement) : LongList.EMPTY;
   }
 
   @NotNull
@@ -444,14 +444,14 @@ public class LongCollections {
     if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? LongList.EMPTY : bSorted;
     if (bSorted == null || bSorted.isEmpty()) return aSorted;
     LongUnionIterator union = new LongUnionIterator(aSorted.iterator(), bSorted.iterator());
-    return union.hasNext() ? collectSortedSet(union, aSorted.size() + bSorted.size()) : LongList.EMPTY;
+    return union.hasNext() ? collectIterables(aSorted.size() + bSorted.size(), union) : LongList.EMPTY;
   }
 
   @NotNull
   public static LongList intersectionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return LongList.EMPTY;
     LongIterator intersection = new LongIntersectionIterator(aSorted.iterator(), bSorted.iterator());
-    return intersection.hasNext() ? collectSortedSet(intersection, Math.max(aSorted.size(), bSorted.size())) : LongList.EMPTY;
+    return intersection.hasNext() ? collectIterables(Math.max(aSorted.size(), bSorted.size()), intersection) : LongList.EMPTY;
   }
 
   public static boolean hasIntersection(@Nullable LongList aSorted, @Nullable LongList bSorted) {
@@ -480,22 +480,17 @@ public class LongCollections {
     return r;
   }
 
-  public static LongArray collectSortedSet(LongIterator iterator, int capacity) {
-    LongArray r = new LongArray(capacity);
-    if (iterator.hasNext()) {
-      long value = iterator.nextValue();
-      r.add(value);
-      while (iterator.hasNext()) {
-        long nextValue = iterator.nextValue();
-        if (nextValue < value) {
-          throw new IllegalArgumentException("iterator sorting failure: " + value + " " + nextValue);
-        }
-        if (nextValue == value) continue; // skip duplicate
-        value = nextValue;
-        r.add(value);
+//  public static LongArray collectSet(int capacity, LongIterable ... iterables) {
+  public static LongArray collectIterables(int capacity, LongIterable ... iterables) {
+    LongArray res = new LongArray(capacity);
+    for (LongIterable iterable: iterables) {
+      if (iterable instanceof LongList) {
+        res.addAll((LongList) iterable);
+      } else {
+        res.addAll(iterable.iterator());
       }
     }
-    return r;
+    return res;
   }
 
   @NotNull
