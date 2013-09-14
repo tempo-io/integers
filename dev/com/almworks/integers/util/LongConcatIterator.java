@@ -20,41 +20,48 @@ import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 import org.jetbrains.annotations.NotNull;
 
-public class LongConcatIterator extends FindingLongIterator implements LongIterator {
-  private final LongIterable myIts[];
-  private final int myLength;
-  private LongIterator myCurIt = LongIterator.EMPTY;
-  private int curIndex;
-  private boolean myEnded = false;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
-  public LongConcatIterator(@NotNull LongIterable ... its) {
-    if (its.length == 0) {
-      myIts = null;
-      myLength = 0;
+public class LongConcatIterator extends FindingLongIterator implements LongIterator {
+  private LongIterator myCurIt = LongIterator.EMPTY;
+  private boolean myEnded = false;
+  private Iterator<LongIterable> itIt;
+
+  public LongConcatIterator(@NotNull List<LongIterable> iterables) {
+    if (iterables.size() == 0) {
       myEnded = true;
     } else {
-      myIts = its;
-      curIndex = 0;
-      myLength = myIts.length;
+      itIt = iterables.iterator();
     }
   }
 
-  protected boolean findNext() {
-//    if (myCurIt.hasNext()) {
-//      myCurrent = myCurIt.nextValue();
-//      return true;
-//    }
-    if (myEnded) return false;
-    if (!myCurIt.hasNext()) {
-      while (curIndex < myLength && !myCurIt.hasNext()) {
-        myCurIt = myIts[curIndex++].iterator();
-      }
-    }
+  public LongConcatIterator(@NotNull LongIterable ... iterables) {
+    this(Arrays.asList(iterables));
+  }
+
+  private boolean checkCurIterator() {
     if (myCurIt.hasNext()) {
       myCurrent = myCurIt.nextValue();
       return true;
     }
-    myEnded = true;
     return false;
+  }
+
+  protected boolean findNext() {
+    if (checkCurIterator()) return true;
+    if (myEnded) return false;
+    if (!myCurIt.hasNext()) {
+      while (itIt.hasNext() && !myCurIt.hasNext()) {
+        myCurIt = itIt.next().iterator();
+      }
+    }
+    if (checkCurIterator()) {
+      return true;
+    } else {
+      myEnded = true;
+      return false;
+    }
   }
 }

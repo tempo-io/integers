@@ -32,6 +32,7 @@ public class LongConcatIteratorTests extends IntegersFixture {
   }
 
   public void testSimple() {
+    inicIts();
     LongIterator res = new LongConcatIterator(its);
     CHECK.order(LongArray.create(0, 1, 2, 3, 4, 5).iterator(), res);
   }
