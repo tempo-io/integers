@@ -149,7 +149,7 @@ public class AmortizedSortedLongSetTemp implements WritableLongSet {
   @NotNull
   public LongIterator iterator() {
     myCoalescingStatus = false;
-    LongIterator baseIterator = myBaseList.iterator(0, myBaseList.size());
+    LongIterator baseIterator = myBaseList.iterator();
     if (myAdded.isEmpty() && myRemoved.isEmpty()) return baseIterator;
     return new FailFastLongIterator(new CoalescingIterator(baseIterator, myAdded.iterator(), myRemoved.iterator())) {
       @Override

@@ -18,12 +18,11 @@ public abstract class IntegersFixture extends TestCase {
    * to system properties to reproduce the test
    * */
   private static Random createRandom() {
-    String seedStr = System.getProperty(SEED, "");
     long seed;
     try {
-      seed = Long.parseLong(seedStr);
+      seed = Long.getLong(SEED);
       System.out.println("Using seed from settings: " + seed);
-    } catch (NumberFormatException _) {
+    } catch (NullPointerException _) {
       seed = System.currentTimeMillis();
       System.out.println("-Dcom.almworks.integers.seed=" + seed);
     }
