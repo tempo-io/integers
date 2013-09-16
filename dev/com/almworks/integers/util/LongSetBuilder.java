@@ -193,57 +193,27 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     return builder.toString();
   }
 
+  @NotNull
   public LongIterator iterator() {
     mergeTemp();
-    return new SortedIterator();
+    return new FailFastLongIterator(mySorted.iterator()) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public LongIterator tailIterator(long value) {
     mergeTemp();
-    return new SortedIterator(value);
-  }
-
-  private class SortedIterator extends AbstractLongIterator {
-    private LongIterator mySortedIterator;
-    private final int myModCountAtCreation = myModCount;
-
-    public SortedIterator(long value) {
-      int from = mySorted.binarySearch(value);
-      if (from < 0) {
-        from = -from - 1;
+    int baseIndex = mySorted.binarySearch(value);
+    if (baseIndex < 0) baseIndex = -baseIndex - 1;
+    LongIterator baseIterator = mySorted.iterator(baseIndex, mySorted.size());
+    return new FailFastLongIterator(baseIterator) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
       }
-      mySortedIterator = mySorted.iterator(from);
-    }
-
-    public SortedIterator() {
-      mySortedIterator = mySorted.iterator();
-    }
-
-    @Override
-    public boolean hasNext() throws ConcurrentModificationException {
-      checkMod();
-      return mySortedIterator.hasNext();
-    }
-
-    public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      checkMod();
-      mySortedIterator.next();
-      return this;
-    }
-
-    public boolean hasValue() {
-      checkMod();
-      return mySortedIterator.hasValue();
-    }
-
-    public long value() throws IllegalStateException {
-      checkMod();
-      return mySortedIterator.value();
-    }
-
-    private void checkMod() {
-      if (myModCountAtCreation != myModCount || myTemp.size() != 0)
-        throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
-    }
+    };
   }
 }
