@@ -451,15 +451,6 @@ public class LongArrayTests extends IntegersFixture {
     }, unionGetter, true, true);
   }
 
-  public void testToBoundedString() {
-    array.addAll(LongProgression.arithmetic(0, 10));
-    assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(array, 5));
-    array.add(10);
-    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(array, 5));
-    array.addAll(LongProgression.arithmetic(11, 10));
-    assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array, 5));
-  }
-
   public void testRemoveAllSorted() {
     long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
     long[][] tests = {{MIN, MIN, 0, 0, MAX, MAX},

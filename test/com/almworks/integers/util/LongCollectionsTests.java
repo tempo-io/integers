@@ -366,6 +366,22 @@ public class LongCollectionsTests extends IntegersFixture {
     }
   }
 
+  public void testToSortedSimple() {
+    int arrLength = 10;
+    LongArray arr = new LongArray(LongProgression.arithmetic(0, arrLength, 1));
+    arr.add(arrLength++);
+    for (int i = 0; i < arrLength; i++) {
+      LongList expected = arr.subList(i, arr.size());
+      for (boolean uniqueStatus: new boolean[]{false, true}) {
+        LongList actual = LongCollections.toSorted(uniqueStatus, arr.subList(i, arr.size()).iterator());
+        CHECK.order(actual, expected);
+
+        actual = LongCollections.toSorted(uniqueStatus, arr.subList(i, arr.size()));
+        CHECK.order(actual, expected);
+      }
+    }
+  }
+
   public void testBinarySearch() {
     BinarySearchChecker.test(new BinarySearchChecker.BinarySearcher() {
       private long[] arr;
@@ -435,6 +451,19 @@ public class LongCollectionsTests extends IntegersFixture {
       resultingIndices.add(i);
     }
     return resultingIndices.iterator();
+  }
+
+  public void testToBoundedString() {
+    LongArray array = new LongArray();
+    array.addAll(LongProgression.arithmetic(0, 10));
+    assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(array, 5));
+    assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(array.iterator(), 5));
+    array.add(10);
+    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(array, 5));
+    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(array.iterator(), 5));
+    array.addAll(LongProgression.arithmetic(11, 10));
+    assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array, 5));
+    assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array.iterator(), 5));
   }
 
 }

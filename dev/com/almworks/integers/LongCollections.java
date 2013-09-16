@@ -64,10 +64,12 @@ public class LongCollections {
       LongList list = (LongList) values;
       if ((unique && list.isUniqueSorted()) || (!unique && list.isSorted())) return list;
     }
-    long[] array = toNativeArray(values.iterator());
-    if (array.length == 0) return LongList.EMPTY;
-    Arrays.sort(array);
-    int length = unique ? removeSubsequentDuplicates(array, 0, array.length) : array.length;
+    LongArray buf = collectIterables(0, values);
+    int bufSize = buf.size();
+    if (bufSize == 0) return LongList.EMPTY;
+    long[] array = buf.extractHostArray();
+    Arrays.sort(array, 0, bufSize);
+    int length = unique ? removeSubsequentDuplicates(array, 0, bufSize) : bufSize;
     return new LongArray(array, length);
   }
 
@@ -480,7 +482,6 @@ public class LongCollections {
     return r;
   }
 
-//  public static LongArray collectSet(int capacity, LongIterable ... iterables) {
   public static LongArray collectIterables(int capacity, LongIterable ... iterables) {
     LongArray res = new LongArray(capacity);
     for (LongIterable iterable: iterables) {
@@ -491,6 +492,22 @@ public class LongCollections {
       }
     }
     return res;
+  }
+
+  /**
+   * @param iterables array of sorted {@code LongIterable}
+   * @return union of iterables.
+   * */
+  public static LongIterator unionIterator(LongIterable ... iterables) {
+    return new LongUnionIterator(iterables);
+  }
+
+  /**
+   * @param iterables array of sorted {@code LongIterable}
+   * @return intersection of iterables.
+   * */
+  public static LongIterator intersectionIterator(LongIterable ... iterables) {
+    return new LongIntersectionIterator(iterables);
   }
 
   @NotNull
