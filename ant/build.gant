@@ -1,3 +1,5 @@
+import com.sun.xml.internal.ws.transport.http.DeploymentDescriptorParser
+
 ant.taskdef (  name : 'groovyc' , classname : 'org.codehaus.groovy.ant.Groovyc' )
 
 final String antProp(String it) {
@@ -228,31 +230,31 @@ target(name: 'javadoc') {
 }
 
 target(name: 'dist') {
-  depends(['init', 'fetchVersion', 'make', 'test'])
-  almMessage "dist"
+    depends(['init', 'fetchVersion', 'make', 'test'])
+    almMessage "dist"
 
-  String deliverName = jarName
-  ant.mkdir(dir: deliverDir)
-  def jarFileName = deliverName + ".jar"
-  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn") {
-    manifest {
-      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
-      attribute(name: "Implementation-Vendor", value: "ALM Works")
-      attribute(name: "Implementation-Version", value: "${version}")
+    String deliverName = jarName
+    ant.mkdir(dir: deliverDir)
+    def jarFileName = deliverName + ".jar"
+    ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn") {
+        manifest {
+            attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+            attribute(name: "Implementation-Vendor", value: "ALM Works")
+            attribute(name: "Implementation-Version", value: "${version}")
+        }
     }
-  }
 
-  def deliverSources = rel2(buildDir, "deliver-sources")
-  ant.delete(dir: deliverSources)
-  ant.mkdir(dir: deliverSources)
-  ant.copy(todir: deliverSources) {
-    fileset(dir: javaDir, excludes: "**/.svn")
-    fileset(dir: generatedJavaDir, excludes: "**/.svn")
-  }
-  String srcFileName = deliverName + "-src.zip"
-  ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
-  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar")
-  almMessage "dist done"
+    def deliverSources = rel2(buildDir, "deliver-sources")
+    ant.delete(dir: deliverSources)
+    ant.mkdir(dir: deliverSources)
+    ant.copy(todir: deliverSources) {
+        fileset(dir: javaDir, excludes: "**/.svn")
+        fileset(dir: generatedJavaDir, excludes: "**/.svn")
+    }
+    String srcFileName = deliverName + "-src.zip"
+    ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
+    ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar")
+    almMessage "dist done"
 }
 
 target(name: 'build') {
@@ -261,3 +263,95 @@ target(name: 'build') {
 }
 
 setDefaultTarget('build')
+
+final String dirtyBuildDir = rel2(rootDir, "dirty");
+ant.mkdir(dir: dirtyBuildDir)
+final String dirtyGeneratorClassesDir =    rel2(dirtyBuildDir, antProp("generator.classes.dir"))
+final String dirtyGeneratedJavaDir =       rel2(rootDir, "dev")
+final String dirtyGeneratedClassesDir =    rel2(dirtyBuildDir, antProp("generated.classes.dir"))
+final String dirtyTestsClassesDir =        rel2(dirtyBuildDir, antProp("test.classes.dir"))
+final String dirtyTestResultsDir =         rel2(dirtyBuildDir, antProp("test.results.dir"))
+final String dirtyDeliverDir =             rel2(dirtyBuildDir, antProp("deliver.dir"))
+final String dirtyUtilClassesDir =       rel2(dirtyBuildDir, antProp("util.classes.dir"))
+
+
+target(name: 'dirtyMake') {
+    depends(['init'])
+    almMessage "dirty make"
+    ant.mkdir(dir: dirtyGeneratedClassesDir);
+    println "classpath: $libDir/"
+    ant.javac(defaultCompileParams + [destdir: dirtyGeneratedClassesDir, classpathref: "libs"]) {
+        src {
+            pathelement(path: dirtyGeneratedJavaDir)
+            pathelement(path: javaDir)
+        }
+    }
+    almMessage "dirty make done"
+}
+
+target(name: 'dirtyTest') {
+    depends(['init', 'dirtyMake'])
+    almMessage "compiling dirty tests"
+    ant.mkdir(dir: dirtyTestsClassesDir)
+    ant.javac(defaultCompileParams + [destdir: dirtyTestsClassesDir, classpathref: "libs"]) {
+        src {
+            pathelement(path: testDir)
+        }
+        classpath {
+            pathelement(path: dirtyGeneratedClassesDir)
+            pathelement(path: utilClassesDir)
+        }
+    }
+    almMessage "make dirty tests done"
+    ant.mkdir(dir: testResultsDir)
+    ant.junit(fork: "true", forkmode: "once", printsummary: "true", haltonfailure: "false") {
+        formatter(type: "xml", usefile: "true")
+        assertions {
+            enable()
+        }
+        classpath {
+            path(refid: "libs")
+            pathelement(path: dirtyGeneratedClassesDir)
+            pathelement(path: dirtyTestsClassesDir)
+            pathelement(path: utilClassesDir)
+        }
+        batchtest(todir: testResultsDir) {
+            fileset(dir: dirtyTestsClassesDir, includes: "**/*Test.class")
+            fileset(dir: dirtyTestsClassesDir, includes: "**/*Tests.class")
+        }
+    }
+    almMessage "dirty tests succeeded"
+}
+
+target(name: 'dirtyDist') {
+    depends(['dirtyMake', 'dirtyTest'])
+    almMessage "dirty dist"
+
+    String deliverName = jarName
+    ant.mkdir(dir: dirtyDeliverDir)
+    def jarFileName = deliverName + ".jar"
+    ant.jar(basedir: dirtyGeneratedClassesDir, destfile: rel2(dirtyDeliverDir, jarFileName), excludes: "**/.svn") {
+        manifest {
+            attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+            attribute(name: "Implementation-Vendor", value: "ALM Works")
+            attribute(name: "Implementation-Version", value: "dirty")
+        }
+    }
+
+    def dirtyDeliverSources = rel2(dirtyBuildDir, "deliver-sources")
+    ant.delete(dir: dirtyDeliverSources)
+    ant.mkdir(dir: dirtyDeliverSources)
+    ant.copy(todir: dirtyDeliverSources) {
+        fileset(dir: dirtyGeneratedJavaDir, excludes: "**/.svn")
+        fileset(dir: dirtyGeneratedJavaDir, excludes: "**/.svn")
+    }
+    String srcFileName = deliverName + "-src.zip"
+    ant.zip(basedir: javaDir, destfile: rel2(dirtyDeliverDir, srcFileName))
+    ant.jar(basedir: dirtyDeliverSources, destfile: "$dirtyDeliverDir/$deliverName-sources.jar")
+    almMessage "dirty dist done"
+}
+
+target(name: 'dirtyBuild') {
+    depends(['dirtyMake', 'dirtyTest', 'dirtyDist'])
+    almMessage "build finished"
+}
