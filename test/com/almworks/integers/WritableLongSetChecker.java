@@ -215,7 +215,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     WritableLongList res = new LongArray();
     set.addAll(14,12,15,11,13,16);
     try {
-      for (LongIterator i : set) {
+      for (LongIterator i: set.iterator()) {
         res.add(i.value());
         if (i.value() == 16) {
           set.add(99);
