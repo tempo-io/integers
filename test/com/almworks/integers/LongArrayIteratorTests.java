@@ -119,4 +119,13 @@ public class LongArrayIteratorTests extends IntegersFixture {
     assertTrue(it.hasNext());
     assertEquals(1, it.value());
   }
+
+  public void testIteratorSpecification() {
+    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+      @Override
+      public LongIterator get(long... values) {
+        return new LongArray(values).iterator();
+      }
+    });
+  }
 }

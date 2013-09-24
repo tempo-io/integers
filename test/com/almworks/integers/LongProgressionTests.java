@@ -39,4 +39,12 @@ public class LongProgressionTests extends IntegersFixture {
     assertEquals(-1, progression.indexOf(10));
   }
 
+  public void testSimple() {
+    LongProgression.Arithmetic rO = new LongProgression.Arithmetic(1,5,1);
+    int i = 1;
+    for (LongIterator it : rO) {
+      assertEquals(i++, it.value());
+    }
+  }
+
 }

@@ -1,9 +1,6 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongCollections;
-import com.almworks.integers.WritableLongListIterator;
+import com.almworks.integers.*;
 
 public class SameValuesLongListTests extends IntegersFixture {
   private SameValuesLongList list;
@@ -237,13 +234,41 @@ public class SameValuesLongListTests extends IntegersFixture {
     testReverse(new long[]{2, 2, 3, 3, 3}, new long[]{3, 3, 3, 2, 2});
   }
 
-  public void testIterator() {
+  public void testIteratorSpecification() {
+    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+      @Override
+      public LongIterator get(long... values) {
+        SameValuesLongList list = new SameValuesLongList();
+        list.addAll(values);
+        return list.iterator();
+      }
+    });
+  }
+
+  public void testIteratorRemove() {
     list.addAll(1, 1, 1, 2, 2, 3, 3, 3);
     WritableLongListIterator i = list.iterator();
     i.next().next().next().next();
     assertEquals(2, i.value());
     i.remove();
     assertEquals(2, i.nextValue());
+  }
+
+  public void testIteratorWrite() {
+    SameValuesLongList result, expected, source;
+
+    source = new SameValuesLongList();
+    source.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
+
+    expected = new SameValuesLongList();
+    expected.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
+
+    result = new SameValuesLongList();
+    for (WritableLongListIterator it : source.write()) {
+      result.add(it.value());
+      it.set(0, 3);
+    }
+    assertEquals(expected, result);
   }
 
   public void testExpandSimpleCase() {

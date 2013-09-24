@@ -61,4 +61,16 @@ public class ModifyingLongListRemovingDecoratorTests extends IntegersFixture {
     _testSimpleCreateFromSorted();
     _testRandomCreateFromSorted();
   }
+
+  public void testIterator() {
+    LongArray source = LongArray.create(10,13,15,14,11,12,16,17,18),
+        expected = LongArray.create(10, 15, 14, 12, 16, 18),
+        result = new LongArray();
+    ReadonlyLongListRemovingDecorator tst2 =
+        ReadonlyLongListRemovingDecorator.createFromPrepared(source, IntArray.create(1, 3, 5));
+    for (LongIterator i : tst2) {
+      result.add(i.value());
+    }
+    assertEquals(expected, result);
+  }
 }

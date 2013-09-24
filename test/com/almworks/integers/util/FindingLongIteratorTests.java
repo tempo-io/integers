@@ -19,44 +19,24 @@ package com.almworks.integers.util;
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
 import com.almworks.integers.LongIterator;
+import com.almworks.integers.LongIteratorSpecificationChecker;
 
 public class FindingLongIteratorTests extends IntegersFixture {
-  LongArray values = LongArray.create(0, 2, 4, 6, 8);
-  LongIterator it;
-  public void setUp() throws Exception {
-    super.setUp();
-    it = new FindingLongIterator() {
-      LongIterator innerIt = values.iterator();
+  public void testIteratorSpecification() {
+    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
-      protected boolean findNext() {
-        if (!innerIt.hasNext()) return false;
-        myCurrent = innerIt.nextValue();
-        return true;
+      public LongIterator get(final long... values) {
+        return new FindingLongIterator() {
+          LongIterator innerIt = LongArray.create(values).iterator();
+          @Override
+          protected boolean findNext() {
+            if (!innerIt.hasNext()) return false;
+            myCurrent = innerIt.nextValue();
+            return true;
+          }
+        };
       }
-    };
+    });
   }
 
-  public void testSimple() {
-    testSimple(it);
-  }
-
-  public void testSimple(LongIterator it) {
-    assertFalse(it.hasValue());
-    for (int i = 0, n = values.size(); i < n; i++) {
-      assertTrue(it.hasNext());
-      it.next();
-      assertTrue(it.hasNext() || (i == n - 1 && !it.hasNext()));
-      assertEquals(values.get(i), it.value());
-      System.out.println(it.value());
-      assertTrue(it.hasValue());
-    }
-  }
-
-  public void testSimple2() {
-    long cur = 0;
-    while (it.hasNext()) {
-      assertEquals(cur, it.nextValue());
-      cur += 2;
-    }
-  }
 }

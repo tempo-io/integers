@@ -159,15 +159,32 @@ public class SegmentedLongArrayTests extends IntegersFixture {
     checkList(array, ap(1034, 1, 5000), ap(6035, 1, 2941));
   }
 
-  public void testIterator() {
-    for (int i = 0; i < 10000; i++) {
-      array.add(i);
-    }
+  public void testIteratorSpectification() {
+    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+      @Override
+      public LongIterator get(long... values) {
+        SegmentedLongArray array = new SegmentedLongArray();
+        array.addAll(values);
+        return array.iterator();
+      }
+    });
+
+    array.addAll(LongProgression.arithmetic(0, 1000));
     WritableLongListIterator ii = array.iterator(100, 600);
     assertFalse(ii.hasValue());
     for (int i = 0; i < 10; i++) {
       assertEquals(100 + i, ii.nextValue());
     }
+  }
+  public void testIteratorRemove() {
+    LongArray expected = LongArray.create(1, 2, 3, 5);
+    array.addAll(1, 2, 3, 4, 5);
+    for (WritableLongListIterator it : array.write()) {
+      if (it.value() == 4) {
+        it.remove();
+      }
+    }
+    CHECK.order(expected, array);
   }
 
   public void testIteratorRemoveRange() {

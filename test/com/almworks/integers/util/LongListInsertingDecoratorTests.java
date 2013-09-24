@@ -16,6 +16,7 @@
 
 package com.almworks.integers.util;
 
+import com.almworks.integers.IntArray;
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
 import com.almworks.integers.LongIterator;
@@ -96,5 +97,23 @@ public class LongListInsertingDecoratorTests extends IntegersFixture {
 
     res = new LongListInsertingDecorator(expected);
     assertFalse(res.isEmpty());
+  }
+
+  public void testIterator() {
+    LongArray source = LongArray.create(8, 9),
+        expected = LongArray.create(8,9,10,13,15),
+        result = new LongArray();
+
+    LongListInsertingDecorator tst = new LongListInsertingDecorator(source);
+    tst.insert(2,10);
+    tst.insert(3,13);
+    tst.insert(4,15);
+    for (LongIterator i : tst) {
+      result.add(i.value());
+    }
+    assertEquals(expected, result);
+
+    source.clear();
+    expected.clear();
   }
 }
