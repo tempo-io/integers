@@ -239,9 +239,9 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   @Override
-  protected boolean checkSorted(boolean checkUnique) {
-    int r = LongCollections.isSortedUnique(!checkUnique, myArray, 0, size());
-    return r == 0 || (r < 0 && !checkUnique);
+  protected boolean isSorted(boolean isUnique) {
+    int r = LongCollections.isSortedUnique(!isUnique, myArray, 0, size());
+    return r == 0 || (r < 0 && !isUnique);
   }
 
   public boolean equalOrder(long[] array) {

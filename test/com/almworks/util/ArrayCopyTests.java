@@ -3,9 +3,11 @@ package com.almworks.util;
 import com.almworks.integers.IntArray;
 import com.almworks.integers.IntegersFixture;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.util.Arrays;
 
+@Ignore
 public abstract class ArrayCopyTests extends TestCase {
   long stupidCopyTest(int[] src, int[] dest, int size) {
     long start = System.currentTimeMillis();

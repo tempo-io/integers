@@ -20,11 +20,9 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static com.almworks.integers.IntegersUtils.*;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -158,13 +156,13 @@ public abstract class AbstractLongList implements LongList {
     return binarySearch(value, 0, size());
   }
 
-  protected boolean checkSorted(boolean checkUnique) {
+  protected boolean isSorted(boolean isUnique) {
     LongIterator it = iterator();
     if (!it.hasNext()) return true;
     long prev = it.nextValue();
     while (it.hasNext()) {
       long next = it.nextValue();
-      if (next < prev || (checkUnique && next == prev)) return false;
+      if (next < prev || (isUnique && next == prev)) return false;
       prev = next;
     }
     return true;
@@ -172,12 +170,12 @@ public abstract class AbstractLongList implements LongList {
 
   @Override
   public boolean isUniqueSorted() {
-    return checkSorted(true);
+    return isSorted(true);
   }
 
   @Override
   public boolean isSorted() {
-    return checkSorted(false);
+    return isSorted(false);
   }
 
   public int binarySearch(long value, int from, int to) {

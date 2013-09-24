@@ -112,7 +112,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
 
       private void check(LongList expectedValues) {
         LongArray sorted = new LongArray(set.toList());
-        assertTrue( sorted.checkSorted(true));
+        assertTrue( sorted.isSorted(true));
         assertEquals( expectedValues.size(), set.size());
         CHECK.unordered(sorted, expectedValues);
       }
@@ -141,7 +141,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
 
     set.addAll(1, 3, 2, Long.MIN_VALUE, Long.MAX_VALUE);
     assertEquals(set.size(), 5);
-    assertTrue(new LongArray(set.toList()).checkSorted(true));
+    assertTrue(new LongArray(set.toList()).isSorted(true));
     assertTrue(set.contains(1));
     assertTrue(set.contains(Long.MIN_VALUE));
     assertFalse(set.contains(0));
@@ -215,7 +215,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     WritableLongList res = new LongArray();
     set.addAll(14,12,15,11,13,16);
     try {
-      for (LongIterator i: set.iterator()) {
+      for (LongIterator i: set) {
         res.add(i.value());
         if (i.value() == 16) {
           set.add(99);

@@ -16,15 +16,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntProcedure;
-import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.util.LongSetBuilder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.*;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -107,7 +101,7 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     DynamicLongSet set2 = DynamicLongSet.fromSortedList(ll);
     assertTrue(set2.isEmpty());
     set.addAll(1, 3, 2, MIN, Long.MAX_VALUE);
-    assertTrue(new LongArray(set.toList()).checkSorted(true));
+    assertTrue(new LongArray(set.toList()).isSorted(true));
     assertTrue(set.contains(1));
     assertTrue(set.contains(MIN));
     assertFalse(set.contains(0));
