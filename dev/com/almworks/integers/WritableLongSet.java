@@ -1,6 +1,6 @@
 package com.almworks.integers;
 
-public interface WritableLongSet<T extends WritableLongSet> extends LongCollector, LongSet {
+public interface WritableLongSet extends LongCollector, LongSet {
 
   void clear();
 
@@ -16,7 +16,7 @@ public interface WritableLongSet<T extends WritableLongSet> extends LongCollecto
    * retain this set with values
    * @return this
    * */
-  T retain(LongList values);
+  WritableLongSet retain(LongList values);
 
   /**
    * Adds the specified element to this set if it is not already present.
