@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-public class WritableLongSetPerformanceComparison extends IntegersFixture {
+public abstract class WritableLongSetPerformanceComparison extends IntegersFixture {
 
   public static interface SetCreator {
     WritableLongSet get(LongList values);

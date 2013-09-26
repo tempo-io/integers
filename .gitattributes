@@ -134,7 +134,6 @@ dev/com/almworks/integers/util/ReadonlyIntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/ReadonlyLongListRemovingDecorator.java -text
 dev/com/almworks/integers/util/SortedIntListIntersectionIterator.java -text
 dev/com/almworks/integers/util/SortedIntListMinusIterator.java -text
-dev/com/almworks/integers/util/WithPrePostValueLongIterator.java -text
 gen/IntegerCollectionsCodegen.java -text
 gen/SkipImportsRegex.groovy -text
 gen/TypeDescriptor.java -text
@@ -240,7 +239,6 @@ test/com/almworks/integers/util/LongUnionIteratorTests.java -text
 test/com/almworks/integers/util/ModifyingLongListRemovingDecoratorTests.java -text
 test/com/almworks/integers/util/TreeSetWrapper.java -text
 test/com/almworks/integers/util/TreeSetWrapperTests.java -text
-test/com/almworks/integers/util/WithPrePostValueLongIteratorTests.java -text
 test/com/almworks/util/ArrayCopyTests.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text

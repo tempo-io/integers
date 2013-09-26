@@ -30,6 +30,9 @@ import java.util.List;
  * @author Eugene Vagin
  * */
 abstract class LongSetOperationsIterator extends FindingLongIterator {
+  /**
+   * ArrayList is preferable implementation. It's recommended not to use LinkedList
+   * */
   protected final List<LongIterator> myIts;
   /**
    * myHeap elements start from index 1, index 0 is unused
