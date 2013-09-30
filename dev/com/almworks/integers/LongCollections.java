@@ -398,11 +398,17 @@ public class LongCollections {
   }
 
   public static DynamicLongSet union(WritableLongSet first, WritableLongSet second) {
-    LongArray a = first.toLongArray();
-    LongArray b = second.toLongArray();
+    LongArray[] arrays = {first.toLongArray(), second.toLongArray()};
+    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
+    arrays[dest].merge(arrays[1 - dest]);
+    return DynamicLongSet.fromSortedList(arrays[dest]);
+  }
 
-    a.mergeWithSameLength(b);
-    return DynamicLongSet.fromSortedList(a);
+  public static DynamicLongSet intersection(WritableLongSet first, WritableLongSet second) {
+    LongArray[] arrays = {first.toLongArray(), second.toLongArray()};
+    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
+    arrays[dest].retainSorted(arrays[1 - dest]);
+    return DynamicLongSet.fromSortedList(arrays[dest]);
   }
 
   public static LongList union(LongList... lists) {
@@ -425,12 +431,6 @@ public class LongCollections {
     if (builder != null) union = builder.toSortedList();
     if (union == null) union = LongList.EMPTY;
     return union;
-  }
-
-
-  public static DynamicLongSet intersection(DynamicLongSet dest, DynamicLongSet src) {
-    dest.retain(src);
-    return dest;
   }
 
   @NotNull
@@ -498,7 +498,7 @@ public class LongCollections {
    * @param iterables array of sorted {@code LongIterable}
    * @return union of iterables.
    * */
-  public static LongIterator unionIterator(LongIterable ... iterables) {
+  public static LongIterator unionIterators(LongIterable ... iterables) {
     return new LongUnionIterator(iterables);
   }
 

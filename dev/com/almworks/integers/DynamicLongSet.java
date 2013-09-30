@@ -262,8 +262,8 @@ public class DynamicLongSet implements WritableLongSet {
     // grandparent
     int pp = ps[--psi];
     while (!myBlack.get(p)) {
-      assert checkChildParent(p, pp, debugKey);
-      assert checkChildParent(x, p, debugKey);
+      assert !IntegersDebug.CHECK && checkChildParent(p, pp, debugKey);
+      assert !IntegersDebug.CHECK && checkChildParent(x, p, debugKey);
       int[] branch1, branch2;
       if (p == myLeft[pp]) {
         branch1 = myLeft;
@@ -419,6 +419,15 @@ public class DynamicLongSet implements WritableLongSet {
     return fromSortedIterable(src, capacity, ColoringType.BALANCED);
   }
 
+  /**
+   * This method is similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)},
+   * except the way the internal levels are colored.
+   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
+   *                     if the last one is unfilled.
+   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
+   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)};
+   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+   */
   public static DynamicLongSet fromSortedIterable(LongIterable src, int capacity, ColoringType coloringType) {
     DynamicLongSet res = new DynamicLongSet();
     res.fromSortedIterable0(src, capacity, coloringType);
@@ -683,7 +692,7 @@ public class DynamicLongSet implements WritableLongSet {
       }
 
       if (!myBlack.get(w)) {
-        // then loop is also finished
+        // then loop is also finished after the current iteration
         myBlack.set(w);
         myBlack.clear(parentOfX);
         rotate(parentOfX, parentsStack[xsi-1], mainBranch, otherBranch);
@@ -960,7 +969,7 @@ public class DynamicLongSet implements WritableLongSet {
   private boolean checkRedsAmount(ColoringType coloringType) {
     int sz = size();
     int expected = redsExpected(sz, coloringType);
-    int actual = sz - myBlack.cardinality() + 1;
+    int actual = sz - myBlack.cardinality() - myRemoved.cardinality() + 1;
     assert expected == actual : sz + " " + actual + " " + expected;
     return true;
   }

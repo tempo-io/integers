@@ -55,20 +55,21 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     };
   }
 
-  public void testRandom() {
+  public void testRandom2() {
     int[] ns = new int[]{510, 513, 1025, 2049, 4097}; // testing sizes near 2^n
     int nAttempts = 5;
     LongSetBuilder anotherSet = new LongSetBuilder();
     DynamicLongSet dynamicSet = new DynamicLongSet(510);
     WritableLongList toAdd = new LongArray();
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      for (int i = 0; i < ns[attempt]; ++i) toAdd.add(RAND.nextLong());
+      toAdd.addAll(generateRandomArray(ns[attempt], false, 20));
       dynamicSet.addAll(toAdd);
       dynamicSet.compactify();
       anotherSet.addAll(toAdd);
       LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
       LongList setList = dynamicSet.toLongArray();
 //      System.err.println("attempt #" + attempt);
+      CHECK.order(dynamicSet.iterator(), anotherSet.iterator());
       CHECK.order(anotherSetList, setList);
 
       // testRemove runs long, so it's ran only twice
