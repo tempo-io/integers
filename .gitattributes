@@ -128,6 +128,7 @@ dev/com/almworks/integers/util/LongObjMap.java -text
 dev/com/almworks/integers/util/LongSetBuilder.java -text
 dev/com/almworks/integers/util/LongSetOperationsIterator.java -text
 dev/com/almworks/integers/util/LongUnionIterator.java -text
+dev/com/almworks/integers/util/LongUnionIteratorTwo.java -text
 dev/com/almworks/integers/util/ModifyingIntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/ModifyingLongListRemovingDecorator.java -text
 dev/com/almworks/integers/util/ReadonlyIntListRemovingDecorator.java -text
@@ -236,6 +237,7 @@ test/com/almworks/integers/util/LongObjMapTests.java -text
 test/com/almworks/integers/util/LongSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/LongSetBuilderTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTests.java -text
+test/com/almworks/integers/util/LongUnionIteratorTwoTests.java -text
 test/com/almworks/integers/util/ModifyingLongListRemovingDecoratorTests.java -text
 test/com/almworks/integers/util/TreeSetWrapper.java -text
 test/com/almworks/integers/util/TreeSetWrapperTests.java -text
