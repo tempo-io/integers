@@ -24,7 +24,7 @@ public class LongSetBuilderTests extends IntegersFixture {
   }
 
 
-  public void testRandom() {
+  public void testAddRandom() {
     for (int i = 0; i < 20; i++) { // replace 100 with 20 to make test run faster on build agent
       int size = RAND.nextInt(16000) + 10;
       int factor = RAND.nextInt(10) + 1;
@@ -37,6 +37,25 @@ public class LongSetBuilderTests extends IntegersFixture {
         builder.add(v);
       }
       assertEquals(count, set.size());
+      set.sortUnique();
+      CHECK.order(builder.toSortedList().iterator(), set.toNativeArray());
+    }
+  }
+
+  public void testAddAllRandom() {
+    int elementsCount = 10;
+    for (int i = 0; i < 6; i++) {
+      int size = RAND.nextInt(16000) + 10;
+      int factor = RAND.nextInt(10) + 1;
+      int count = size * factor / 2;
+      LongArray set = new LongArray();
+      LongSetBuilder builder = new LongSetBuilder(5);
+      for (int j = 0; j < count; j++) {
+        LongArray v = IntegersFixture.generateRandomArray(elementsCount, false, size);
+        set.addAll(v);
+        builder.addAll(v);
+      }
+      assertEquals(elementsCount * count, set.size());
       set.sortUnique();
       CHECK.order(builder.toSortedList().iterator(), set.toNativeArray());
     }

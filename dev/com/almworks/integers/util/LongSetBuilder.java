@@ -70,9 +70,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   }
 
   public void addAll(long... values) {
-    for (long value : values) {
-      add(value);
-    }
+    addAll(new LongArray(values));
   }
 
   public void addAll(LongIterator iterator) {
@@ -81,7 +79,16 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   }
 
   public void addAll(LongList values) {
-    addAll(values.iterator());
+    int vSize = values.size();
+    int startPos = 0;
+    int endPos = myTempLength - myTemp.size();
+    while (endPos < vSize) {
+      myTemp.addAll(values.subList(startPos, endPos));
+      mergeTemp();
+      startPos = endPos;
+      endPos += myTempLength;
+    }
+    myTemp.addAll(values.subList(startPos, vSize));
   }
 
   public void mergeFrom(LongSetBuilder other) {
@@ -97,7 +104,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     if (other.isEmpty())
       return;
     mergeTemp();
-    mySorted.mergeWithSameLength(other);
+    mySorted.merge(other);
   }
 
   private void mergeTemp() {
