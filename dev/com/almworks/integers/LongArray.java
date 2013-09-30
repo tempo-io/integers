@@ -74,12 +74,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   public static LongArray copy(@Nullable LongIterable iterable) {
     if (iterable == null) return new LongArray();
-    if (iterable instanceof LongArray) {
-      LongArray other = (LongArray) iterable;
-      return copy(other.myArray, other.size());
-    } else if (iterable instanceof LongList)
-      return new LongArray((LongList) iterable);
-    else return new LongArray(iterable.iterator());
+    return LongCollections.collectIterables(0, iterable);
   }
 
   public static LongArray create(long ... values) {
@@ -354,6 +349,40 @@ public final class LongArray extends AbstractWritableLongList {
     myArray = EMPTY_LONGS;
     updateSize(0);
     return array;
+  }
+
+  public int getInsertionPoints(LongList src, int[][] insertionPoints) {
+    if (insertionPoints[0] == null || insertionPoints[0].length < src.size())
+      insertionPoints[0] = new int[src.size()];
+    int[] insertionPoints0 = insertionPoints[0];
+    Arrays.fill(insertionPoints0, 0, src.size(), -1);
+    int insertCount = 0;
+    int destIndex = 0;
+    long last = 0;
+    for (int i = 0, n = src.size(); i < n; i++) {
+      long v = src.get(i);
+      if (i > 0 && v == last)
+        continue;
+      last = v;
+      if (destIndex < size()) {
+        int k = LongCollections.binarySearch(v, myArray, destIndex, size());
+        if (k >= 0) {
+          // found
+          continue;
+        }
+        int insertion = -k - 1;
+        if (insertion < destIndex) {
+          assert false : insertion + " " + destIndex;
+          continue;
+        }
+        destIndex = insertion;
+      }
+      insertionPoints0[i] = destIndex;
+      insertCount++;
+    }
+//    if (output) System.out.println(Arrays.toString(insertionPoints[0]));
+//    bh.consume(insertionPoints);
+    return insertCount;
   }
 
   /**

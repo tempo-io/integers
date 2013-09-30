@@ -3,6 +3,9 @@ package com.almworks.integers.util;
 import com.almworks.integers.LongList;
 import com.almworks.integers.WritableLongSet;
 
+/**
+ * it's normal ASLST fail iterator tests.
+ */
 public class AmortizedSortedLongSetTests extends AmortizedSortedLongSetTempTests {
   @Override
   protected WritableLongSet createSet() {

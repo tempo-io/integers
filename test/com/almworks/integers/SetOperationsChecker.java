@@ -116,10 +116,12 @@ public class SetOperationsChecker {
         create(3, 6, 9, 12, 15, 18, 21, 24));
     checkNewSetCreator(a(MIN), a(MIN + 1));
     checkNewSetCreator(a(MAX), a(MAX - 1));
+    checkNewSetCreator(a(0, 2, 4, 10), a(1, 3, 5, 10));
 
     if (!myTwoArrays) {
       checkNewSetCreator(a(), a(), a());
       checkNewSetCreator(a(), a(1, 3, 5), a());
+      checkNewSetCreator(a(0, 10, 20), a(1, 11, 20), a(2, 12, 20));
     }
     if (!sortUniqueStatus) {
       checkNewSetCreator(a(10, 5, 1), a(2, 4, 6, 4));

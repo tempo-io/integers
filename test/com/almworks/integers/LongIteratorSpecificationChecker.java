@@ -1,6 +1,8 @@
 package com.almworks.integers;
 
-public class LongIteratorSpecificationChecker extends IntegersFixture {
+import junit.framework.TestCase;
+
+public class LongIteratorSpecificationChecker {
   public static interface IteratorGetter {
     LongIterator get(long ... values);
   }
@@ -22,42 +24,42 @@ public class LongIteratorSpecificationChecker extends IntegersFixture {
     LongIterator it = getter.get(0, 1, 2);
     LongIterator empty = getter.get();
 
-    assertFalse(empty.hasValue());
-    assertFalse(empty.hasNext());
-    assertFalse(it.hasValue());
-    assertTrue(it.hasNext());
+    TestCase.assertFalse(empty.hasValue());
+    TestCase.assertFalse(empty.hasNext());
+    TestCase.assertFalse(it.hasValue());
+    TestCase.assertTrue(it.hasNext());
 
     it.next();
-    assertEquals(0, it.value());
-    assertTrue(it.hasNext());
-    assertEquals(0, it.value());
+    TestCase.assertEquals(0, it.value());
+    TestCase.assertTrue(it.hasNext());
+    TestCase.assertEquals(0, it.value());
 
-    assertEquals(1, it.nextValue());
-    assertTrue(it.hasNext());
-    assertEquals(1, it.value());
+    TestCase.assertEquals(1, it.nextValue());
+    TestCase.assertTrue(it.hasNext());
+    TestCase.assertEquals(1, it.value());
   }
 
   private static void testValues(IteratorGetter getter, long ... values) {
     LongIterator it = getter.get(values);
-    assertFalse(it.hasValue());
+    TestCase.assertFalse(it.hasValue());
     for (int i = 0, n = values.length; i < n; i++) {
-      assertTrue(it.hasNext());
+      TestCase.assertTrue(it.hasNext());
       it.next();
-      assertTrue(it.hasNext() || (i == n - 1 && !it.hasNext()));
-      assertEquals(values[i], it.value());
-      assertTrue(it.hasValue());
+      TestCase.assertTrue(it.hasNext() || (i == n - 1 && !it.hasNext()));
+      TestCase.assertEquals(values[i], it.value());
+      TestCase.assertTrue(it.hasValue());
     }
-    assertFalse(it.hasNext());
+    TestCase.assertFalse(it.hasNext());
 
     it = getter.get(values);
     int i = 0;
     for (LongIterator it2: it) {
-      assertEquals(values[i++], it2.value());
+      TestCase.assertEquals(values[i++], it2.value());
     }
     it = getter.get(values);
     i = 0;
     while(it.hasNext()) {
-      assertEquals(values[i++], it.nextValue());
+      TestCase.assertEquals(values[i++], it.nextValue());
     }
   }
 }

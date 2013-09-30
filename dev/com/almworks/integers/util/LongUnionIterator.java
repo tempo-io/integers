@@ -61,8 +61,8 @@ public class LongUnionIterator extends LongSetOperationsIterator {
       buildHeap();
     }
     if (IntegersDebug.PRINT) outputHeap();
-    assert heapLength >= 0 : "heapLength < 0: " + heapLength;
     if (heapLength == 0) return false;
+    assert heapLength > 0 : "heapLength < 0: " + heapLength;
     myCurrent = getTopIterator().value();
     while (myIts.get(myHeap[TOP]).value() == myCurrent && heapLength > 0) {
       LongIterator topIterator = getTopIterator();

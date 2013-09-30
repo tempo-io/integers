@@ -191,9 +191,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     set = createSetWithCapacity(510);
     WritableLongList toAdd = new LongArray();
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      for (int i = 0; i < setSizes[attempt]; ++i) {
-        toAdd.add(RAND.nextLong());
-      }
+      toAdd.addAll(generateRandomArray(setSizes[attempt], false));
       set.addAll(toAdd);
       anotherSet.addAll(toAdd);
       LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();

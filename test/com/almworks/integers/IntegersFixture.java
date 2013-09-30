@@ -237,10 +237,12 @@ public abstract class IntegersFixture extends TestCase {
       case 1: {
         maxValue = minMaxValues[0];
         if (maxValue < 0) throw new IllegalArgumentException();
+        break;
       }
       case 2: {
         minValue = minMaxValues[0];
         maxValue = minMaxValues[1];
+        break;
       }
     }
     int diff = maxValue - minValue;
