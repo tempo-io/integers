@@ -258,6 +258,12 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     });
   }
 
+  public void sortUnique() {
+    sort();
+    removeDuplicates();
+  }
+
+
   /**
    * @param sortAlso ties in this array are broken via elements of this array. Must not be shorter than {@code a1}
    * @throws IllegalArgumentException in case the second array is shorter than the first

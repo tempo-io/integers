@@ -334,4 +334,16 @@ public class SameValuesLongListTests extends IntegersFixture {
       CHECK.order(list.iterator(), expected.iterator());
     }
   }
+
+  public void testSortUnique() {
+    for (int size = 64; size < 1024; size *= 2) {
+      LongArray expected = IntegersFixture.generateRandomArray(1000, false, 1000);
+      list.clear();
+      expected.sort();
+      list.addAll(expected);
+      expected.sortUnique();
+      list.sortUnique();
+      CHECK.order(list.iterator(), expected.iterator());
+    }
+  }
 }

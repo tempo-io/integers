@@ -19,10 +19,7 @@
 
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.AbstractWritableLongList;
-import com.almworks.integers.IntLongMap;
-import com.almworks.integers.PairIntLongIterator;
-import com.almworks.integers.WritableLongListIterator;
+import com.almworks.integers.*;
 import com.almworks.integers.util.IntegersDebug;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +37,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
   /**
    * Maps index to the value that starts at that index
    */
-  private final IntLongMap myMap;
+  private IntLongMap myMap;
 
   public SameValuesLongList() {
     this(new IntLongMap());
@@ -139,7 +136,6 @@ public class SameValuesLongList extends AbstractWritableLongList {
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-
   public void setRange(int from, int to, long value) {
     assert !IntegersDebug.CHECK || checkInvariants();
 
@@ -196,6 +192,15 @@ public class SameValuesLongList extends AbstractWritableLongList {
       lastValue = value;
     }
     return true;
+  }
+
+  @Override
+  public void sortUnique() {
+    LongArray newValues = new LongArray(iterator());
+    newValues.sortUnique();
+    IntArray newIndexes = new IntArray(IntProgression.arithmetic(0, newValues.size()));
+    myMap = new IntLongMap(newIndexes, newValues);
+    updateSize(newValues.size());
   }
 
 

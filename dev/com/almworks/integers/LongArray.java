@@ -248,6 +248,7 @@ public final class LongArray extends AbstractWritableLongList {
     return true;
   }
 
+  @Override
   public void sortUnique() {
     Arrays.sort(myArray, 0, size());
     updateSize(LongCollections.removeSubsequentDuplicates(myArray, 0, size()));
@@ -351,7 +352,7 @@ public final class LongArray extends AbstractWritableLongList {
     return array;
   }
 
-  public int getInsertionPoints(LongList src, int[][] insertionPoints) {
+  private int getInsertionPoints(LongList src, int[][] insertionPoints) {
     if (insertionPoints[0] == null || insertionPoints[0].length < src.size())
       insertionPoints[0] = new int[src.size()];
     int[] insertionPoints0 = insertionPoints[0];
