@@ -238,7 +238,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     assertFalse(iterator.hasValue());
     try {
       iterator.value();
-    } catch (NoSuchElementException e) {};
+    } catch (NoSuchElementException e) {}
 
     for (int i = 0; i < res.size(); i++) {
       iterator.next();
@@ -248,7 +248,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     try {
       iterator.next();
       fail();
-    } catch (NoSuchElementException e) {};
+    } catch (NoSuchElementException e) {}
   }
 
   public void testIteratorConcurrentModificationException() {
@@ -266,19 +266,19 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     try {
       it.hasNext();
       fail();
-    } catch (ConcurrentModificationException e) {};
+    } catch (ConcurrentModificationException e) {}
     try {
       it.next();
       fail();
-    } catch (ConcurrentModificationException e) {};
+    } catch (ConcurrentModificationException e) {}
     try {
       it.hasValue();
       fail();
-    } catch (ConcurrentModificationException e) {};
+    } catch (ConcurrentModificationException e) {}
     try {
       it.value();
       fail();
-    } catch (ConcurrentModificationException e) {};
+    } catch (ConcurrentModificationException e) {}
   }
 
   public void testIteratorHasMethods() {

@@ -385,6 +385,11 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
       return super.value();
     }
 
+    public boolean hasValue() throws ConcurrentModificationException {
+      checkMod();
+      return super.hasValue();
+    }
+
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
       checkMod();
       if (isJustRemoved())

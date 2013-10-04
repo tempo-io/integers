@@ -87,9 +87,9 @@ public class SetOperationsChecker {
   }
 
   private void checkNewSetCreator(LongArray... arrays) {
-    CHECK.order(expected.get(arrays).iterator(), creator.get(arrays).iterator());
+    CHECK.order(creator.get(arrays).iterator(), expected.get(arrays).iterator());
     if (arrays.length == 2) {
-      CHECK.order(expected.get(arrays[1], arrays[0]).iterator(), creator.get(arrays[1], arrays[0]).iterator());
+      CHECK.order(creator.get(arrays[1], arrays[0]).iterator(), expected.get(arrays[1], arrays[0]).iterator());
     }
   }
 

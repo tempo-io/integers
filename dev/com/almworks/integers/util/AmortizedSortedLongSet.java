@@ -13,10 +13,12 @@ public class AmortizedSortedLongSet implements WritableLongSet {
   private LongArray myBaseList = new LongArray();
   private final SortedSet<Long> myAdded = new TreeSet<Long>();
   private final Set<Long> myRemoved = new HashSet<Long>();
+  private int myModCount = 0;
 
   private int myChunkSize = DEFAULT_CHUNKSIZE;
 
   public void add(long value) {
+    modified();
     myRemoved.remove(value);
     myAdded.add(value);
     maybeCoalesce();
@@ -42,18 +44,21 @@ public class AmortizedSortedLongSet implements WritableLongSet {
   }
 
   public boolean include(long value) {
+    modified();
     boolean contain = contains(value);
     if (!contain) add(value);
     return !contain;
   }
 
   public boolean exclude(long value) {
+    modified();
     boolean contain = contains(value);
     if (contain) remove(value);
     return contain;
   }
 
   public void remove(long value) {
+    modified();
     myAdded.remove(value);
     myRemoved.add(value);
     maybeCoalesce();
@@ -86,6 +91,10 @@ public class AmortizedSortedLongSet implements WritableLongSet {
       if (!contains(iterator.value())) return false;
     }
     return true;
+  }
+
+  private void modified() {
+    myModCount++;
   }
 
   private void maybeCoalesce() {
@@ -126,9 +135,14 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     int baseIndex = myBaseList.binarySearch(value);
     if (baseIndex < 0) baseIndex = -baseIndex - 1;
     LongIterator baseIterator = myBaseList.iterator(baseIndex, myBaseList.size());
-    if (myAdded.isEmpty() && myRemoved.isEmpty()) return baseIterator;
+//    if (myAdded.isEmpty() && myRemoved.isEmpty()) return baseIterator;
     Iterator<Long> addedIterator = myAdded.tailSet(value).iterator();
-    return new CoalescingIterator(baseIterator, addedIterator, myRemoved);
+    return new FailFastLongIterator(new CoalescingIterator(baseIterator, addedIterator, myRemoved)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public LongIterator iterator() {

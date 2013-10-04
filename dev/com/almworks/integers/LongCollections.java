@@ -23,10 +23,7 @@ import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.optimized.CyclicLongQueue;
 import com.almworks.integers.optimized.SameValuesLongList;
-import com.almworks.integers.util.LongIntersectionIterator;
-import com.almworks.integers.util.LongMinusIterator;
-import com.almworks.integers.util.LongSetBuilder;
-import com.almworks.integers.util.LongUnionIterator;
+import com.almworks.integers.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -445,7 +442,7 @@ public class LongCollections {
   public static LongList unionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? LongList.EMPTY : bSorted;
     if (bSorted == null || bSorted.isEmpty()) return aSorted;
-    LongUnionIterator union = new LongUnionIterator(aSorted.iterator(), bSorted.iterator());
+    LongUnionIteratorTwo union = new LongUnionIteratorTwo(aSorted.iterator(), bSorted.iterator());
     return union.hasNext() ? collectIterables(aSorted.size() + bSorted.size(), union) : LongList.EMPTY;
   }
 
