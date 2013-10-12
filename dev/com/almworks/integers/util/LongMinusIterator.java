@@ -45,7 +45,7 @@ public class LongMinusIterator extends FindingLongIterator {
     long last = myCurrent;
     while (myInclude.hasNext()) {
       long v = myInclude.nextValue();
-      assert v >= last : last + " " + v + " " + myInclude;
+      assert !hasValue() || v >= last : last + " " + v + " " + myInclude;
       if (accept(v)) {
         myCurrent = v;
         return true;

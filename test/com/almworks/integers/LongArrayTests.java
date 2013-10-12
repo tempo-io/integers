@@ -470,4 +470,18 @@ public class LongArrayTests extends IntegersFixture {
       }
     }
   }
+
+  public void testGet() {
+    for (int i = 0; i < 10; i++) {
+      array = generateRandomArray(1000, false);
+      IntArray indices = new IntArray(100);//generateRandomArray(100, false, 0, 1000);
+      for (int j = 0; j < 100; j++) {
+        indices.add(RAND.nextInt(1000));
+      }
+      LongList actual = AbstractLongList.get(array, indices);
+      for (int j = 0; j < actual.size(); j++) {
+        assertEquals(array.get(indices.get(i)), actual.get(i));
+      }
+    }
+  }
 }

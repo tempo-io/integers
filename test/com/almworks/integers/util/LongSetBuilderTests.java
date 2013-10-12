@@ -43,13 +43,13 @@ public class LongSetBuilderTests extends IntegersFixture {
   }
 
   public void testAddAllRandom() {
-    int elementsCount = 10;
-    for (int i = 0; i < 6; i++) {
-      int size = RAND.nextInt(16000) + 10;
+    int elementsCount = 300;
+    for (int i = 0; i < 3; i++) {
+      int size = RAND.nextInt(1600) + 10;
       int factor = RAND.nextInt(10) + 1;
       int count = size * factor / 2;
       LongArray set = new LongArray();
-      LongSetBuilder builder = new LongSetBuilder(5);
+      LongSetBuilder builder = new LongSetBuilder(100);
       for (int j = 0; j < count; j++) {
         LongArray v = IntegersFixture.generateRandomArray(elementsCount, false, size);
         set.addAll(v);

@@ -24,8 +24,8 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
-  protected long myCurrent = Long.MIN_VALUE;
-  private long myNext = Long.MIN_VALUE;
+  protected long myCurrent;
+  private long myNext;
   private boolean storeValueState = false;
 
   /**
