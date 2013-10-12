@@ -16,6 +16,8 @@
 
 package com.almworks.integers;
 
+import java.util.Arrays;
+
 import static com.almworks.integers.LongArray.create;
 
 public class SetOperationsChecker {
@@ -87,6 +89,10 @@ public class SetOperationsChecker {
   }
 
   private void checkNewSetCreator(LongArray... arrays) {
+    if (arrays[0].size() == 1 && arrays[0].get(0) == Integer.MIN_VALUE &&
+        arrays[1].size() == 1 && arrays[1].get(0) == Integer.MIN_VALUE) {
+      arrays[0].set(0, Integer.MIN_VALUE);
+    }
     CHECK.order(creator.get(arrays).iterator(), expected.get(arrays).iterator());
     if (arrays.length == 2) {
       CHECK.order(creator.get(arrays[1], arrays[0]).iterator(), expected.get(arrays[1], arrays[0]).iterator());

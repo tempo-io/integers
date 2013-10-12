@@ -18,11 +18,15 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
 import com.almworks.integers.util.LongSetBuilder;
+import com.cenqua.clover.tasks.CloverHtmlReportTask;
 
+import java.lang.reflect.Method;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class WritableLongSetChecker extends IntegersFixture {
+  protected abstract boolean isSupportTailIterator();
+
   protected abstract WritableLongSet createSet();
 
   protected abstract WritableLongSet createSetWithCapacity(int capacity);
@@ -32,6 +36,20 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
   protected WritableLongSet set;
 
   private SetOperationsChecker setOperations = new SetOperationsChecker();
+
+  private LongIterator getTailIterator(long from) {
+    if (isSupportTailIterator()) {
+      try {
+        Method method = set.getClass().getDeclaredMethod("tailIterator", long.class);
+        method.setAccessible(true);
+        Object res = method.invoke(set, from);
+        return (LongIterator)res;
+      } catch (Exception ex) {
+        // throw UOE below
+      }
+    }
+    throw new UnsupportedOperationException();
+  }
 
   public void setUp() throws Exception {
     super.setUp();
@@ -66,18 +84,18 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
       if (stateCount == 3) stateCount = -2;
     }
     assertEquals(expected.size(), set.size());
-    assertEquals(expected, set.toLongArray());
+    assertEquals(expected, set.toArray());
   }
 
   public void testAddAll() {
     LongArray expected = LongArray.create(ap(1, 2, 10));
     set.addAll(expected);
-    assertEquals(expected, set.toLongArray());
+    CHECK.order(expected, set.toArray());
 
     expected.addAll(ap(0, 2, 10));
     set.addAll(expected.toNativeArray());
     expected.sortUnique();
-    assertEquals(expected, set.toLongArray());
+    CHECK.order(expected, set.toArray());
 
     set.removeAll(expected);
     assertTrue(set.isEmpty());
@@ -208,28 +226,6 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     }
   }
 
-  public void testIterator() {
-    LongList expected = LongArray.create(11,12,13,14,15,16);
-    WritableLongList res = new LongArray();
-    set.addAll(14,12,15,11,13,16);
-    try {
-      for (LongIterator i: set) {
-        res.add(i.value());
-        if (i.value() == 16) {
-          set.add(99);
-        }
-      }
-      fail();
-    } catch (ConcurrentModificationException e) {}
-    assertEquals(expected, res);
-
-    set.clear();
-    CHECK.order(LongIterator.EMPTY, set.iterator());
-    set.add(10);
-    CHECK.order(LongArray.create(10).iterator(), set.iterator());
-
-  }
-
   public void testIteratorExceptions() {
     LongArray res = LongArray.create(2, 4, 6, 8);
     set.clear();
@@ -281,79 +277,6 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     } catch (ConcurrentModificationException e) {}
   }
 
-  public void testIteratorHasMethods() {
-    set.addAll(1, 2, 3, 4, 5, 6, 7);
-    LongIterator iterator = set.iterator();
-    assertFalse(iterator.hasValue());
-    assertTrue(iterator.hasNext());
-    iterator.next();
-    assertTrue(iterator.hasValue());
-    for (int i = 0; i < 6; i++) {
-      iterator.next();
-    }
-    assertTrue(iterator.hasValue());
-    assertFalse(iterator.hasNext());
-  }
-
-  public void testTailIterator() {
-    set.addAll(ap(1, 2, 50));
-    System.out.println(LongCollections.toBoundedString(set.tailIterator(-1)));
-    for (int i = 0; i < 99; i++) {
-      assertEquals(i + 1 - (i % 2), set.tailIterator(i).nextValue());
-    }
-
-    set.clear();
-    CHECK.order(LongIterator.EMPTY, set.tailIterator(0));
-    set.add(10);
-    CHECK.order(new LongIterator.Single(10), set.tailIterator(9));
-    CHECK.order(LongIterator.EMPTY, set.tailIterator(11));
-  }
-
-  public void testTailIteratorHasMethods() {
-    set.addAll(LongProgression.arithmetic(1, 10, 2));
-    int curSize = 10;
-    for (int i = 0; i < 20; i++) {
-      LongIterator iterator = set.tailIterator(i);
-      assertFalse(iterator.hasValue());
-      assertTrue(iterator.hasNext());
-      iterator.next();
-      assertTrue(iterator.hasValue());
-      for (int j = 0; j < curSize - 1; j++) {
-        iterator.next();
-      }
-      assertTrue(iterator.hasValue());
-      assertFalse(iterator.hasNext());
-      if (i % 2 == 1) curSize--;
-    }
-  }
-
-  public void testTailIteratorRandom() {
-    final int size = 300,
-        testCount = 5;
-    LongArray expected = new LongArray(size);
-    LongArray testValues = new LongArray(size * 3);
-    for (int i = 0; i < testCount; i++) {
-      expected.clear();
-      testValues.clear();
-      set.clear();
-      for (int j = 0; j < size; j++) {
-        long val = RAND.nextLong();
-        expected.add(val);
-        testValues.addAll(val - 1, val, val + 1);
-      }
-      set.addAll(expected);
-      expected.sortUnique();
-      testValues.sortUnique();
-
-      for (int j = 0; j < testValues.size(); j++) {
-        final long key = testValues.get(j);
-        int ind = expected.binarySearch(key);
-        if (ind < 0) ind = -ind - 1;
-        CHECK.order(expected.iterator(ind), set.tailIterator(key));
-      }
-    }
-  }
-
   public void testIsEmpty() {
     assertTrue(set.isEmpty());
     set.addAll(0, 7, 10);
@@ -363,7 +286,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
   public void testRetainSimple() {
     set.addAll(ap(1, 1, 20));
     set.retain(new LongArray(ap(1, 2, 20)));
-    CHECK.order(ap(1, 2, 10), set.toLongArray().toNativeArray());
+    CHECK.order(ap(1, 2, 10), set.toArray().toNativeArray());
   }
 
   public void testRetainComplex() {

@@ -1,46 +1,37 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Igor Sereda
  */
-public class AmortizedSortedLongSet implements WritableLongSet {
+public class AmortizedSortedLongSet implements WritableSortedLongSet {
   private static final int DEFAULT_CHUNKSIZE = 512;
 
-  private LongArray myBaseList = new LongArray();
-  private final SortedSet<Long> myAdded = new TreeSet<Long>();
-  private final Set<Long> myRemoved = new HashSet<Long>();
-  private int myModCount = 0;
+  private LongArray myBaseList;
+  private final DynamicLongSet myAdded = new DynamicLongSet();
+  //  private final ChainHashLongSet myRemoved = new ChainHashLongSet(509, 512);//HashSet<Long>(DEFAULT_CHUNKSIZE);
+  private final Set<Long> myRemoved = new HashSet<Long>(DEFAULT_CHUNKSIZE);
+//  private final DynamicLongSet myRemoved = new DynamicLongSet();
 
-  private int myChunkSize = DEFAULT_CHUNKSIZE;
+  private int myModCount = 0;
+  private boolean myCoalescingStatus;
+
+  private int[][] myTempInsertionPoints = {null};
+
+  public AmortizedSortedLongSet() {
+    myBaseList = new LongArray();
+  }
 
   public void add(long value) {
     modified();
     myRemoved.remove(value);
     myAdded.add(value);
     maybeCoalesce();
-  }
-
-  public void addAll(LongList values) {
-    addAll(values.iterator());
-  }
-
-  public void addAll(LongIterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
-  }
-
-  public void addAll(long... values) {
-    if (values != null && values.length != 0) {
-      if (values.length == 1) {
-        add(values[0]);
-      } else {
-        addAll(new LongArray(values));
-      }
-    }
   }
 
   public boolean include(long value) {
@@ -50,11 +41,26 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     return !contain;
   }
 
-  public boolean exclude(long value) {
+  public void addAll(LongList values) {
     modified();
-    boolean contain = contains(value);
-    if (contain) remove(value);
-    return contain;
+    addAll(values.iterator());
+  }
+
+  public void addAll(LongIterator iterator) {
+    modified();
+    while (iterator.hasNext())
+      add(iterator.nextValue());
+  }
+
+  public void addAll(long... values) {
+    modified();
+    if (values != null && values.length != 0) {
+      if (values.length == 1) {
+        add(values[0]);
+      } else {
+        addAll(new LongArray(values));
+      }
+    }
   }
 
   public void remove(long value) {
@@ -62,6 +68,13 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     myAdded.remove(value);
     myRemoved.add(value);
     maybeCoalesce();
+  }
+
+  public boolean exclude(long value) {
+    modified();
+    boolean contain = contains(value);
+    if (contain) remove(value);
+    return contain;
   }
 
   public void removeAll(long ... values) {
@@ -74,10 +87,25 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     removeAll(values.iterator());
   }
 
-  public void removeAll(LongIterator values) {
-    for (LongIterator it: values) {
+  public void removeAll(LongIterator iterator) {
+    for (LongIterator it: iterator) {
       remove(it.value());
     }
+  }
+
+  @Override
+  public AmortizedSortedLongSet retain(LongList values) {
+    modified();
+    coalesce();
+    myBaseList.retain(values);
+    return this;
+  }
+
+  private LongIterator sortedRemoveIterator() {
+    LongArray removeArray = LongArray.create(myRemoved);
+//    LongArray removedArray = myRemoved.toLongArray();
+    removeArray.sortUnique();
+    return removeArray.iterator();
   }
 
   public boolean contains(long value) {
@@ -86,8 +114,8 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     return myBaseList.binarySearch(value) >= 0;
   }
 
-  public boolean containsAll(LongIterable values) {
-    for (LongIterator iterator : values.iterator()) {
+  public boolean containsAll(LongIterable iterable) {
+    for (LongIterator iterator : iterable.iterator()) {
       if (!contains(iterator.value())) return false;
     }
     return true;
@@ -98,46 +126,35 @@ public class AmortizedSortedLongSet implements WritableLongSet {
   }
 
   private void maybeCoalesce() {
-    if (myAdded.size() + myRemoved.size() >= myChunkSize) {
+    if (myAdded.size() >= DEFAULT_CHUNKSIZE || myRemoved.size() >= DEFAULT_CHUNKSIZE) {
       coalesce();
     }
   }
 
-  private void coalesce() {
-    LongSetBuilder builder = new LongSetBuilder();
-    if (myRemoved.isEmpty()) {
-      builder.mergeFromSortedCollection(myBaseList);
-    } else {
-      int size = myBaseList.size();
-      int i;
-      for (i = 0; i < size; i++) {
-        long v = myBaseList.get(i);
-        if (!myRemoved.remove(v)) {
-          builder.add(v);
-          if (myRemoved.isEmpty()) break;
-        }
+  void coalesce() {
+    myCoalescingStatus = true;
+    // todo add method WLL.removeSortedFromSorted(LIterable)
+    int ind = 0;
+    LongIterator removeIt = sortedRemoveIterator();
+    while (removeIt.hasNext() && !myBaseList.isEmpty()) {
+      ind = myBaseList.binarySearch(removeIt.nextValue(), ind, myBaseList.size());
+      if (ind >= 0) {
+        myBaseList.removeAt(ind);
+      } else {
+        ind = -ind - 1;
       }
-      if (i < size) {
-        builder.mergeFromSortedCollection(myBaseList.subList(i, size));
-      }
-      myRemoved.clear();
     }
-    if (!myAdded.isEmpty()) {
-      for (Long value : myAdded) {
-        builder.add(value);
-      }
-      myAdded.clear();
-    }
-    myBaseList = builder.toLongArray();
+    myBaseList.mergeWithSmall(myAdded.toList(), myTempInsertionPoints);
+    myAdded.clear();
+    myRemoved.clear();
   }
 
-  public LongIterator tailIterator(long value) {
-    int baseIndex = myBaseList.binarySearch(value);
+  public LongIterator tailIterator(long fromElement) {
+    myCoalescingStatus = false;
+    int baseIndex = myBaseList.binarySearch(fromElement);
     if (baseIndex < 0) baseIndex = -baseIndex - 1;
     LongIterator baseIterator = myBaseList.iterator(baseIndex, myBaseList.size());
-//    if (myAdded.isEmpty() && myRemoved.isEmpty()) return baseIterator;
-    Iterator<Long> addedIterator = myAdded.tailSet(value).iterator();
-    return new FailFastLongIterator(new CoalescingIterator(baseIterator, addedIterator, myRemoved)) {
+    return new FailFastLongIterator(new CoalescingIterator(baseIterator, myAdded.tailIterator(fromElement), myRemoved)) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -145,14 +162,16 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     };
   }
 
+  @NotNull
   public LongIterator iterator() {
-    return tailIterator(Long.MIN_VALUE);
-  }
-
-  public AmortizedSortedLongSet retain(LongList values) {
-    coalesce();
-    ((LongArray)myBaseList).retain(values);
-    return this;
+    myCoalescingStatus = false;
+    LongIterator baseIterator = myBaseList.iterator();
+    return new FailFastLongIterator(new CoalescingIterator(baseIterator, myAdded.iterator(), myRemoved)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public void replaceFrom(LongSetBuilder builder) {
@@ -161,9 +180,50 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     myBaseList = new LongArray(builder.toTemporaryReadOnlySortedCollection());
   }
 
-  public LongArray toLongArray() {
-    coalesce();
-    return LongArray.copy(myBaseList);
+  public static AmortizedSortedLongSet fromSortedIterable(LongIterable src) {
+    return fromSortedIterable(src, 0);
+  }
+
+  public static AmortizedSortedLongSet fromSortedIterable(LongIterable src, int capacity) {
+    AmortizedSortedLongSet res = new AmortizedSortedLongSet();
+    res.myBaseList = LongCollections.collectIterables(capacity, src);
+    return res;
+  }
+
+  public static AmortizedSortedLongSet fromSortedList(LongList src) {
+    AmortizedSortedLongSet res = new AmortizedSortedLongSet();
+    res.myBaseList = new LongArray(src);
+    return res;
+  }
+
+  public boolean isEmpty() {
+    if (!myAdded.isEmpty()) return false;
+    if (myBaseList.isEmpty()) return true;
+    if (myRemoved.isEmpty()) return false;
+    return !iterator().hasNext();
+  }
+
+  public void clear() {
+    modified();
+    myAdded.clear();
+    myRemoved.clear();
+    myBaseList = new LongArray();
+  }
+
+  public int size() {
+    int size = myBaseList.size();
+    // intersection of myRemoved and myAdded is empty
+    for (LongIterator iterator: myAdded.iterator()) {
+      if (myBaseList.binarySearch(iterator.value()) < 0) size++;
+    }
+//    LongIterator removedIt = myRemoved.iterator();
+//    while (removedIt.hasNext()) {//removeIterator()) {
+//      if (myBaseList.binarySearch(removedIt.nextValue()) >= 0) size--;
+//    }
+    for(Long val: myRemoved) {
+      if (myBaseList.binarySearch(val) >= 0) size--;
+    }
+    return size;
   }
 
   public LongList toList() {
@@ -171,68 +231,53 @@ public class AmortizedSortedLongSet implements WritableLongSet {
     return myBaseList;
   }
 
-  public int size() {
+  public LongArray toArray() {
     coalesce();
-    return myBaseList.size();
+    return LongArray.copy(myBaseList);
   }
 
-  public boolean isEmpty() {
-    if (!myAdded.isEmpty()) return false;
-    if (myBaseList.isEmpty()) return true;
-    if (myRemoved.isEmpty()) return false;
-    return !tailIterator(Long.MIN_VALUE).hasNext();
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("AmortizedSortedLongSet\n");
+    builder.append("myBaseList: ").append(LongCollections.toBoundedString(myBaseList)).append('\n');
+    builder.append("myAdded: ").append(LongCollections.toBoundedString(myAdded)).append('\n');
+    builder.append("myRemoved: ").append(LongCollections.toBoundedString(sortedRemoveIterator()));
+    return builder.toString();
   }
 
-  public void clear() {
-    myAdded.clear();
-    myRemoved.clear();
-    myBaseList = new LongArray();
-  }
+  private class CoalescingIterator extends FindingLongIterator {
+    private LongIterator myIterator;
+    private Set<Long> removedSet;
+//    private ChainHashLongSet removedSet;
 
-  private static class CoalescingIterator extends FindingLongIterator {
-    private long myNext = Long.MIN_VALUE;
-    private final LongIterator myBaseIterator;
-    private final Iterator<Long> myAddedIterator;
-    private final Set<Long> myRemoved;
+    private boolean myCoalescingStatusAtCreation;
 
-    private boolean myHasNextBase;
-    private long myNextBase;
-    private boolean myHasNextAdded;
-    private long myNextAdded;
-
-    public CoalescingIterator(LongIterator baseIterator, Iterator<Long> addedIterator, Set<Long> removed) {
-      myBaseIterator = baseIterator;
-      myAddedIterator = addedIterator;
-      myRemoved = removed;
-      myHasNextBase = baseIterator.hasNext();
-      myNextBase = myHasNextBase ? baseIterator.nextValue() : 0;
-      myHasNextAdded = addedIterator.hasNext();
-      myNextAdded = myHasNextAdded ? addedIterator.next() : 0;
+    public CoalescingIterator(LongIterator baseIterator, LongIterator addedIterator, Set<Long> removedSet) {
+//    public CoalescingIterator(LongIterator baseIterator, LongIterator addedIterator, ChainHashLongSet removedSet) {
+      myIterator = new LongUnionIteratorTwo(baseIterator, addedIterator);
+      myCoalescingStatusAtCreation = myCoalescingStatus;
+      this.removedSet = removedSet;
     }
 
-    protected long getNext() {
-      return myNext;
-    }
-
+    @Override
     protected boolean findNext() {
-      while (myHasNextBase || myHasNextAdded) {
-        long value;
-        if (!myHasNextAdded || (myHasNextBase && myNextBase <= myNextAdded)) {
-          value = myNextBase;
-          myHasNextBase = myBaseIterator.hasNext();
-          myNextBase = myHasNextBase ? myBaseIterator.nextValue() : 0;
+      if (myCoalescingStatusAtCreation != myCoalescingStatus) {
+        myCoalescingStatusAtCreation = myCoalescingStatus;
+        // baseIndex always >= -1
+        if (!myIterated) {
+          myIterator = myBaseList.iterator();
         } else {
-          value = myNextAdded;
-          myHasNextAdded = myAddedIterator.hasNext();
-          myNextAdded = myHasNextAdded ? myAddedIterator.next() : 0;
+          // myIterated = true -> myNext always exist in myBaseList
+          int baseIndex = myBaseList.binarySearch(myCurrent);
+          myIterator = myBaseList.iterator(baseIndex + 1, myBaseList.size());
         }
-        assert value >= myCurrent : myCurrent + " " + value;
-        if (value > myCurrent && !myRemoved.contains(value)) {
-          myCurrent = value;
-          return true;
-        }
+      }
+      while (myIterator.hasNext()) {
+        myCurrent = myIterator.nextValue();
+        if (!removedSet.contains(myCurrent)) return true;
       }
       return false;
     }
+
   }
 }

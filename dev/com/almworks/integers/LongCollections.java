@@ -394,15 +394,17 @@ public class LongCollections {
     return array;
   }
 
-  public static DynamicLongSet union(WritableLongSet first, WritableLongSet second) {
-    LongArray[] arrays = {first.toLongArray(), second.toLongArray()};
+  public static DynamicLongSet union(LongSet first, LongSet second) {
+    LongArray[] arrays = {first.toArray(), second.toArray()};
+    if (!(first instanceof SortedLongSet)) arrays[0].sortUnique();
+    if (!(second instanceof SortedLongSet)) arrays[1].sortUnique();
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].merge(arrays[1 - dest]);
     return DynamicLongSet.fromSortedList(arrays[dest]);
   }
 
-  public static DynamicLongSet intersection(WritableLongSet first, WritableLongSet second) {
-    LongArray[] arrays = {first.toLongArray(), second.toLongArray()};
+  public static DynamicLongSet intersection(LongSet first, LongSet second) {
+    LongArray[] arrays = {first.toArray(), second.toArray()};
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].retainSorted(arrays[1 - dest]);
     return DynamicLongSet.fromSortedList(arrays[dest]);

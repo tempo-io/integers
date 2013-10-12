@@ -23,16 +23,20 @@ import java.lang.reflect.Field;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class DynamicLongSetTests extends WritableLongSetChecker {
+public class DynamicLongSetTests extends WritableSortedLongSetChecker {
 
   private static final long MIN = Long.MIN_VALUE;
   private static final long MAX = Long.MAX_VALUE;
 
-  protected WritableLongSet createSet() {
+  protected boolean isSupportTailIterator() {
+    return true;
+  }
+
+  protected WritableSortedLongSet createSet() {
     return createSetWithCapacity(-1);
   }
 
-  protected WritableLongSet createSetWithCapacity(int capacity) {
+  protected WritableSortedLongSet createSetWithCapacity(int capacity) {
     DynamicLongSet newSet;
     newSet = capacity == -1 ? new DynamicLongSet() : new DynamicLongSet(capacity);
     try {
@@ -47,8 +51,8 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     }
   }
 
-  protected WritableLongSet[] createSetFromSortedList(LongList sortedList) {
-    return new WritableLongSet[]{
+  protected WritableSortedLongSet[] createSetFromSortedList(LongList sortedList) {
+    return new WritableSortedLongSet[]{
         DynamicLongSet.fromSortedList(sortedList),
         DynamicLongSet.fromSortedList(sortedList, DynamicLongSet.ColoringType.TO_ADD),
         DynamicLongSet.fromSortedList(sortedList, DynamicLongSet.ColoringType.TO_REMOVE)
@@ -62,12 +66,12 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     DynamicLongSet dynamicSet = new DynamicLongSet(510);
     WritableLongList toAdd = new LongArray();
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      toAdd.addAll(generateRandomArray(ns[attempt], false, 20));
+      toAdd.addAll(generateRandomArray(ns[attempt], false));
       dynamicSet.addAll(toAdd);
       dynamicSet.compactify();
       anotherSet.addAll(toAdd);
       LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
-      LongList setList = dynamicSet.toLongArray();
+      LongList setList = dynamicSet.toArray();
 //      System.err.println("attempt #" + attempt);
       CHECK.order(dynamicSet.iterator(), anotherSet.iterator());
       CHECK.order(anotherSetList, setList);

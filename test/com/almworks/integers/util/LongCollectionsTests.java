@@ -466,4 +466,36 @@ public class LongCollectionsTests extends IntegersFixture {
     assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array.iterator(), 5));
   }
 
+  // TODO add test union for unsortable hash set
+  public void testUnionSets() {
+    WritableLongSet[] sets = new WritableLongSet[2];
+    LongArray[] arrays = new LongArray[2];
+    LongList expected, actual;
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 2; j++) {
+        arrays[j] = generateRandomArray(10000, true);
+        sets[j] = DynamicLongSet.fromSortedList(arrays[j]);
+      }
+      expected = union(arrays[0], arrays[1]);
+      actual = union(sets[0], sets[1]).toArray();
+      CHECK.order(expected, actual);
+    }
+  }
+
+  // TODO add test intersection for unsortable hash set
+  public void testIntersectionSets() {
+    WritableLongSet[] sets = new WritableLongSet[2];
+    LongArray[] arrays = new LongArray[2];
+    LongList expected, actual;
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 2; j++) {
+        arrays[j] = generateRandomArray(10000, true);
+        sets[j] = DynamicLongSet.fromSortedList(arrays[j]);
+      }
+      expected = intersectionSorted(arrays[0], arrays[1]);
+      actual = intersection(sets[0], sets[1]).toArray();
+      CHECK.order(expected, actual);
+    }
+  }
+
 }

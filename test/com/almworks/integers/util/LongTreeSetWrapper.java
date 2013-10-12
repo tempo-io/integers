@@ -4,15 +4,15 @@ import com.almworks.integers.*;
 
 import java.util.*;
 
-public class TreeSetWrapper implements WritableLongSet {
+public class LongTreeSetWrapper implements WritableLongSet {
   TreeSet<Long> set = new TreeSet<Long>();
   int myModCount = 0;
 
-  public TreeSetWrapper() {}
+  public LongTreeSetWrapper() {}
 
-  public TreeSetWrapper(int capacity) {}
+  public LongTreeSetWrapper(int capacity) {}
 
-  public TreeSetWrapper(LongList values) {
+  public LongTreeSetWrapper(LongList values) {
     for (int i = 0, n = values.size(); i < n; i++) {
       set.add(values.get(i));
     }
@@ -49,13 +49,13 @@ public class TreeSetWrapper implements WritableLongSet {
   }
 
   @Override
-  public void removeAll(LongIterator values) {
+  public void removeAll(LongIterator iterator) {
     modified();
-    removeAll(new LongArray(values));
+    removeAll(new LongArray(iterator));
   }
 
   @Override
-  public TreeSetWrapper retain(LongList values) {
+  public LongTreeSetWrapper retain(LongList values) {
     modified();
     List aList = new ArrayList<Long>(values.size());
     for (int i = 0; i < values.size(); i++) {
@@ -107,11 +107,11 @@ public class TreeSetWrapper implements WritableLongSet {
 
   @Override
   public LongList toList() {
-    return toLongArray();
+    return toArray();
   }
 
   @Override
-  public LongArray toLongArray() {
+  public LongArray toArray() {
     return new LongArray(iterator());
   }
 
@@ -148,7 +148,6 @@ public class TreeSetWrapper implements WritableLongSet {
     };
   }
 
-  @Override
   public LongIterator tailIterator(final long value) {
     return new FindingLongIterator() {
       Iterator<Long> it = set.tailSet(value).iterator();
@@ -162,7 +161,7 @@ public class TreeSetWrapper implements WritableLongSet {
   }
 
   @Override
-  public boolean containsAll(LongIterable values) {
-    return set.containsAll(Arrays.asList(values));
+  public boolean containsAll(LongIterable iterable) {
+    return set.containsAll(Arrays.asList(iterable));
   }
 }

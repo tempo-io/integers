@@ -24,7 +24,6 @@ import com.almworks.integers.util.FailFastLongIterator;
 import com.almworks.integers.util.IntegersDebug;
 
 import java.io.*;
-import java.lang.ref.SoftReference;
 import java.util.*;
 
 import static java.lang.Math.abs;
@@ -32,7 +31,7 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class DynamicLongSet implements WritableLongSet {
+public class DynamicLongSet implements WritableSortedLongSet {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { NIL_DUMMY_KEY };
@@ -152,8 +151,8 @@ public class DynamicLongSet implements WritableLongSet {
     return x != 0;
   }
 
-  public boolean containsAll(LongIterable keys) {
-    for (LongIterator it : keys.iterator()) {
+  public boolean containsAll(LongIterable iterable) {
+    for (LongIterator it : iterable.iterator()) {
       if (!contains(it.value())) return false;
     }
     return true;
@@ -185,23 +184,27 @@ public class DynamicLongSet implements WritableLongSet {
     }
   }
 
-  public void addAll(long... keys) {
+  public void addAll(long... values) {
     modified();
-    int[] ps = prepareAdd(keys.length);
-    for (long key : keys) {
-      include0(key, ps);
+    if (values != null && values.length != 0) {
+      if (values.length == 1) {
+        add(values[0]);
+      } else {
+        addAll(new LongArray(values));
+      }
     }
   }
 
   public void addAll(LongIterator iterator) {
-    if (!iterator.hasNext()) return;
     modified();
+    if (!iterator.hasNext()) return;
     while (iterator.hasNext()) {
       add(iterator.nextValue());
     }
   }
 
   public void add(long key) {
+    modified();
     include(key);
   }
 
@@ -213,7 +216,7 @@ public class DynamicLongSet implements WritableLongSet {
     return include0(key, prepareAdd(1));
   }
 
-  private boolean   include0(long key, int[] ps) {
+  private boolean include0(long key, int[] ps) {
     int x = myRoot;
     ps[0] = 0;
     ps[1] = 0;
@@ -547,8 +550,8 @@ public class DynamicLongSet implements WritableLongSet {
     };
   }
 
-  public LongIterator tailIterator(long key) {
-    return new FailFastLongIterator(new IndexedLongIterator(new LongArray(myKeys), new LURIterator(key))) {
+  public LongIterator tailIterator(long fromElement) {
+    return new FailFastLongIterator(new IndexedLongIterator(new LongArray(myKeys), new LURIterator(fromElement))) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -569,10 +572,10 @@ public class DynamicLongSet implements WritableLongSet {
     removeAll(keys.iterator());
   }
 
-  public void removeAll(LongIterator keys) {
+  public void removeAll(LongIterator iterator) {
     modified();
     int[] parentStack = fetchStackCache(0);
-    for (LongIterator it: keys) {
+    for (LongIterator it: iterator) {
       exclude0(it.value(), parentStack);
     }
     maybeShrink();
@@ -590,7 +593,7 @@ public class DynamicLongSet implements WritableLongSet {
   }
 
   public DynamicLongSet retain(LongList values) {
-    LongArray array = toLongArray();
+    LongArray array = toArray();
     array.retainSorted(values);
     clear();
     fromSortedList0(array, ColoringType.BALANCED);
@@ -598,8 +601,8 @@ public class DynamicLongSet implements WritableLongSet {
   }
 
   public void retain(DynamicLongSet set) {
-    LongArray array = toLongArray();
-    array.retainSorted(set.toLongArray());
+    LongArray array = toArray();
+    array.retainSorted(set.toArray());
     clear();
     fromSortedList0(array, ColoringType.BALANCED);
   }
@@ -730,7 +733,7 @@ public class DynamicLongSet implements WritableLongSet {
   /**
    * @return sorted LongArray with values from this set
    * */
-  public LongArray toLongArray() {
+  public LongArray toArray() {
     long[] arr = new long[size()];
     int i = 0;
     for (IntIterator it : new LURIterator()) {
@@ -740,7 +743,7 @@ public class DynamicLongSet implements WritableLongSet {
   }
 
   public LongList toList() {
-    return toLongArray();
+    return toArray();
   }
 
   public String toDebugString() {
