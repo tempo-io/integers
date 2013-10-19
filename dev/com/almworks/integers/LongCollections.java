@@ -235,6 +235,12 @@ public class LongCollections {
     return -1;
   }
 
+  /**
+   * @param array
+   * @param capacity
+   * @return {@code array} if {@code capacity <= array.length} otherwise copy {@code array} to new array
+   * with length equal to the max between {@code 16, capacity} and {@code (array.length * 2)}
+   */
   public static long[] ensureCapacity(@Nullable long[] array, int capacity) {
     int length = array == null ? -1 : array.length;
     if (capacity < 0)
@@ -246,6 +252,9 @@ public class LongCollections {
     return reallocArray(array, Math.max(16, Math.max(capacity, length * 2)));
   }
 
+  /**
+   * @return array with the specified length with copied elements from the specified array.
+   */
   public static long[] reallocArray(@Nullable long[] array, int length) {
     assert length >= 0 : length;
     int current = array == null ? -1 : array.length;
@@ -260,9 +269,15 @@ public class LongCollections {
     return newArray;
   }
 
-  public static int indexOf(long[] ints, int from, int to, long value) {
+  /**
+   * Returns the index of the first occurrence of the {@code value}
+   * in the specified array on the specified interval, or -1 if this array does not contain the element.
+   * @param from starting index, inclusive
+   * @param to ending index, exclusive
+   * */
+  public static int indexOf(long[] array, int from, int to, long value) {
     for (int i = from; i < to; i++) {
-      if (ints[i] == value)
+      if (array[i] == value)
         return i;
     }
     return -1;
@@ -282,7 +297,8 @@ public class LongCollections {
 
   /**
    * Returns LongList adapter of the specified collection. If collection changes, the returned LongList changes also. <br>
-   * Beware of unboxing: each call to the returned LongList leads to unboxing of the source collection element. If you will frequently access the returned LongList, it's a better idea to make a copy. See {@link LongArray#create(java.util.Collection)}
+   * Beware of unboxing: each call to the returned LongList leads to unboxing of the source collection element.
+   * If you will frequently access the returned LongList, it's a better idea to make a copy. See {@link LongArray#create(java.util.Collection)}
    */
   public static LongList asLongList(@Nullable final List<Long> coll) {
     if (coll == null || coll.isEmpty()) return LongList.EMPTY;
@@ -331,6 +347,11 @@ public class LongCollections {
     return result;
   }
 
+  /**
+   * @param a sorted {@code LongList}
+   * @param b sorted {@code LongList}
+   * @return union of {@code a} and {@code b} without elements are contained both in {@code a} and {@code b}
+   */
   public static LongList diffSortedLists(LongList a, LongList b) {
     int ia = 0;
     int sza = a.size();
@@ -362,6 +383,10 @@ public class LongCollections {
     return diff;
   }
 
+  /**
+   * Removes from the specified list all elements whose index is contained in the specified {@code IntList indexes}
+   * @param indexes sorted {@code IntList}
+   */
   public static void removeAllAtSorted(WritableLongList list, IntList indexes) {
     if (!indexes.isSorted()) throw new IllegalArgumentException("Indexes are not sorted: " + indexes);
     int rangeStart = -1;
@@ -394,6 +419,9 @@ public class LongCollections {
     return array;
   }
 
+  /**
+   * @return union of the two sets
+   */
   public static DynamicLongSet union(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     if (!(first instanceof SortedLongSet)) arrays[0].sortUnique();
@@ -403,6 +431,9 @@ public class LongCollections {
     return DynamicLongSet.fromSortedList(arrays[dest]);
   }
 
+  /**
+   * @return intersection of the two sets
+   */
   public static DynamicLongSet intersection(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
@@ -410,6 +441,9 @@ public class LongCollections {
     return DynamicLongSet.fromSortedList(arrays[dest]);
   }
 
+  /**
+   * @return union of the specified lists
+   */
   public static LongList union(LongList... lists) {
     if (lists == null) return null;
     LongList union = null;
@@ -432,6 +466,12 @@ public class LongCollections {
     return union;
   }
 
+  /**
+   * @param includeSorted sorted {@code LongList}
+   * @param excludeSorted sorted {@code LongList}
+   * @return {@code LongList} contains the elements from {@code includeSorted} and don't contains
+   * the elements from {@code excludeSorted}
+   */
   @NotNull
   public static LongList complementSorted(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
     if (includeSorted == null || includeSorted.isEmpty()) return LongList.EMPTY;
@@ -440,6 +480,12 @@ public class LongCollections {
     return complement.hasNext() ? collectIterables(includeSorted.size(), complement) : LongList.EMPTY;
   }
 
+
+  /**
+   * @return union of the specified lists
+   * @param aSorted sorted {@code LongList}
+   * @param bSorted sorted {@code LongList}
+   */
   @NotNull
   public static LongList unionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? LongList.EMPTY : bSorted;
@@ -448,6 +494,11 @@ public class LongCollections {
     return union.hasNext() ? collectIterables(aSorted.size() + bSorted.size(), union) : LongList.EMPTY;
   }
 
+  /**
+   * @return intersection of the specified lists
+   * @param aSorted sorted {@code LongList}
+   * @param bSorted sorted {@code LongList}
+   */
   @NotNull
   public static LongList intersectionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return LongList.EMPTY;
@@ -455,16 +506,31 @@ public class LongCollections {
     return intersection.hasNext() ? collectIterables(Math.max(aSorted.size(), bSorted.size()), intersection) : LongList.EMPTY;
   }
 
+  /**
+   * @return true if intersection of the specified lists is not empty otherwise false
+   * @param aSorted sorted {@code LongList}
+   * @param bSorted sorted {@code LongList}
+   */
   public static boolean hasIntersection(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return false;
     LongIterator intersection = new LongIntersectionIterator(aSorted.iterator(), bSorted.iterator());
     return intersection.hasNext();
   }
 
+  /**
+   * @return true if union of the specified lists is not empty otherwise false
+   * @param aSorted sorted {@code LongList}
+   * @param bSorted sorted {@code LongList}
+   */
   public static boolean hasUnion(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     return aSorted != null && !aSorted.isEmpty() || bSorted != null && !bSorted.isEmpty();
   }
 
+  /**
+   * @return true if complement of the specified lists is not empty otherwise false
+   * @param includeSorted sorted {@code LongList}
+   * @param excludeSorted sorted {@code LongList}
+   */
   public static boolean hasComplement(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
     if (includeSorted == null || includeSorted.isEmpty()) return false;
     if (excludeSorted == null || excludeSorted.isEmpty()) return !includeSorted.isEmpty();
@@ -472,6 +538,9 @@ public class LongCollections {
     return complement.hasNext();
   }
 
+  /**
+   * @return list with elements from the specified list in the sorted order without duplicates
+   */
   @NotNull
   public static LongList toSortedUnique(@Nullable LongList list) {
     if (list == null || list.isEmpty()) return LongList.EMPTY;
@@ -481,6 +550,10 @@ public class LongCollections {
     return r;
   }
 
+  /**
+   * @param capacity initial capacity for array
+   * @return array with elements from the {@code iterables}.
+   */
   public static LongArray collectIterables(int capacity, LongIterable ... iterables) {
     LongArray res = new LongArray(capacity);
     for (LongIterable iterable: iterables) {

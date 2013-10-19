@@ -101,6 +101,10 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     }
   }
 
+  /***
+   * Removes the first occurence of the specified element from this list if it exist.
+   * @return true if this list was modified otherwise false
+   */
   public boolean remove(long value) {
     int index = indexOf(value);
     if (index >= 0) {
@@ -332,9 +336,9 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     for (int i = 0; i < j; i++, j--) swap(i,j);
   }
 
-  /** Updates the value in the specified list at the specified index; if the list is currently shorter, it is first appended
+  /** Updates the value in this list at the specified index; if list is currently shorter, it is first appended
    * with {@code defaultValue} up to the {@code idx}.
-   * @param update the update function to apply. See {@link com.almworks.integers.func.IntFunctions}
+   * @param update the update function to apply. See {@link com.almworks.integers.func.LongFunctions}
    * @return the updated value
    * */
   public long update(int idx, long defaultValue, LongFunction update) {

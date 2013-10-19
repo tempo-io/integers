@@ -41,10 +41,6 @@ import java.util.NoSuchElementException;
 public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator {
   protected boolean myIterated = false;
 
-  public LongIterator iterator() {
-    return this;
-  }
-
   public boolean hasValue() {
     return myIterated;
   }
@@ -59,15 +55,6 @@ public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator 
     nextImpl();
     myIterated = true;
     return this;
-  }
-
-  public long nextValue() {
-    next();
-    return value();
-  }
-
-  public void remove() throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
   }
 
   /**

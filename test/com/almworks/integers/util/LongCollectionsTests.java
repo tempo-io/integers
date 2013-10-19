@@ -244,15 +244,15 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testDiffSortedLists() throws Exception {
-    COMPARE.order(diffSortedLists(LongList.EMPTY, LongList.EMPTY));
-    COMPARE.order(diffSortedLists(com.almworks.integers.LongArray.create(0, 3, 4, 7), com.almworks.integers.LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
+    CHECK.order(diffSortedLists(LongList.EMPTY, LongList.EMPTY));
+    CHECK.order(diffSortedLists(LongArray.create(0, 3, 4, 7), LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
 
-    com.almworks.integers.LongArray diff = new com.almworks.integers.LongArray();
-    com.almworks.integers.LongArray a = new com.almworks.integers.LongArray();
-    com.almworks.integers.LongArray b = new com.almworks.integers.LongArray();
+    LongArray diff = new LongArray();
+    LongArray a = new LongArray();
+    LongArray b = new LongArray();
     for (int i = 0; i < 10; ++i) {
       initLists(a, b, diff);
-      COMPARE.order(diffSortedLists(a, b), diff);
+      CHECK.order(diffSortedLists(a, b), diff);
     }
   }
 
@@ -496,6 +496,15 @@ public class LongCollectionsTests extends IntegersFixture {
       actual = intersection(sets[0], sets[1]).toArray();
       CHECK.order(expected, actual);
     }
+  }
+
+  public void testComplementSorted() {
+    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        return LongCollections.complementSorted(arrays[0], arrays[1]).iterator();
+      }
+    }, new SetOperationsChecker.MinusGetter(), true, true);
   }
 
 }

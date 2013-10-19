@@ -43,6 +43,9 @@ public interface WritableLongList extends LongList, LongCollector {
 
   long removeAt(int index);
 
+  /**
+   * This method remove from this list all values which are equals to {@code value}
+   */
   void removeAll(long value);
 
   /**
@@ -53,26 +56,61 @@ public interface WritableLongList extends LongList, LongCollector {
 
   void insert(int index, long value);
 
+  /**
+   * Insert values from {@code iterator} between indexes {@code index, index + 1}
+   */
   void insertAll(int index, LongIterator iterator);
 
+  /**
+   * Insert values from {@code list} between indexes {@code index, index + 1}
+   */
   void insertAll(int index, LongList list);
 
   void insertAll(int index, LongList values, int sourceIndex, int count);
 
+  /**
+   * Inserts {@code value} in this sorted list, if it isn't exist, keeping sorted order.
+   * @return true if this list was modified otherwise false
+   */
   boolean addSorted(long value);
 
   void set(int index, long value);
 
   void setRange(int from, int to, long value);
 
+  /**
+   * Replaces the elements in this list from the specified position
+   * {@code index} to {@code index + values.size()} with the elements from {@code values}
+   * @throws ArrayIndexOutOfBoundsException if {@code index + values.size > size()};
+   */
   void setAll(int index, LongList values);
 
+  /**
+   * Replaces the elements in this list from the specified position
+   * {@code index} to {@code index + count} with the elements from {@code values}
+   * beginning from index {@code sourceIndex} and ending {@code sourceIndex + count}
+   * @throws ArrayIndexOutOfBoundsException if
+   * {@code index + count > size()} or {@code sourceIndex + count > values.size()};
+   */
   void setAll(int index, LongList values, int sourceIndex, int count);
 
+  /**
+   * Updates the values in this list at the specified index with result of applying
+   * {@code function} to elements at this interval.
+   * @param from starting index, inclusive
+   * @param to ending index, exclusive
+   */
   void apply(int from, int to, LongFunction function);
 
+  /**
+   * Sorts this list using quicksort copied from {@link java.util.Arrays#sort(int[])} then corrected
+   * @param sortAlso lists in which the order is changed as well as this list
+   */
   void sort(WritableLongList... sortAlso);
 
+  /**
+   * Sorts this list and calls method {@link WritableLongList#removeDuplicates()}
+   */
   void sortUnique();
 
   void sortByFirstThenBySecond(WritableLongList sortAlso);

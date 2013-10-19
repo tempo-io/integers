@@ -65,24 +65,29 @@ public abstract class AbstractLongList implements LongList {
     return new IndexIterator(from, to);
   }
 
-  /** Use for MATLAB-like indexing, i.e. vector indexed by vector. */
-  public static LongList get(final LongList that, final IntList indices) {
-    if (that == null) throw new NullPointerException("that");
+  /**
+   * Use for MATLAB-like indexing, i.e. vector indexed by vector.
+   * */
+  public LongList get(final IntList indices) {
     if (indices == null) throw new NullPointerException("indices");
     return new AbstractLongList() {
+      final IntList ids = indices;
       @Override
       public int size() {
-        return indices.size();
+        return ids.size();
       }
 
       @Override
       public long get(int index) throws NoSuchElementException {
-        return that.get(indices.get(index));
+        return AbstractLongList.this.get(ids.get(index));
       }
     };
   }
 
-
+  /**
+   * Returns the index of the first occurrence of the specified element
+   * in this list, or -1 if this list does not contain the element.
+   * */
   public int indexOf(long value) {
     int i = 0;
     for (LongIterator ii : this) {
@@ -257,6 +262,9 @@ public abstract class AbstractLongList implements LongList {
     return size();
   }
 
+  /**
+   * @return {@code get(size() - backwardIndex - 1)}
+   */
   public long getLast(int backwardIndex) {
     return get(size() - backwardIndex - 1);
   }

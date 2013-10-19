@@ -478,7 +478,7 @@ public class LongArrayTests extends IntegersFixture {
       for (int j = 0; j < 100; j++) {
         indices.add(RAND.nextInt(1000));
       }
-      LongList actual = AbstractLongList.get(array, indices);
+      LongList actual = array.get(indices);
       for (int j = 0; j < actual.size(); j++) {
         assertEquals(array.get(indices.get(i)), actual.get(i));
       }

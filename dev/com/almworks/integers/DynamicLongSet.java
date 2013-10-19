@@ -89,7 +89,11 @@ public class DynamicLongSet implements WritableSortedLongSet {
     init();
   }
 
+  /**
+   * Constructs an empty <tt>DynamicLongSet</tt> with the specified initial capacity.
+   * */
   public DynamicLongSet(int initialCapacity) {
+    assert initialCapacity > 0;
     initialCapacity += 1;
     myBlack = new BitSet(initialCapacity);
     myRemoved = new BitSet(initialCapacity);
@@ -414,10 +418,16 @@ public class DynamicLongSet implements WritableSortedLongSet {
     assert checkRedsAmount(coloringType);
   }
 
+  /**
+   * Builds a new DynamicLongSet based on values of src.
+   */
   public static DynamicLongSet fromSortedIterable(LongIterable src) {
     return fromSortedIterable(src, -1);
   }
 
+  /**
+   * Builds a new DynamicLongSet with the specified initial capacity based on values of src.
+   */
   public static DynamicLongSet fromSortedIterable(LongIterable src, int capacity) {
     return fromSortedIterable(src, capacity, ColoringType.BALANCED);
   }
@@ -600,6 +610,9 @@ public class DynamicLongSet implements WritableSortedLongSet {
     return this;
   }
 
+  /**
+   * retain this set with the specified set
+   * */
   public void retain(DynamicLongSet set) {
     LongArray array = toArray();
     array.retainSorted(set.toArray());

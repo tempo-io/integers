@@ -36,12 +36,18 @@ public final class LongArray extends AbstractWritableLongList {
     myArray = EMPTY_LONGS;
   }
 
+  /**
+   * Constructs an empty array with the specified initial capacity.
+   * */
   public LongArray(int capacity) {
     if (capacity < 0)
       throw new IllegalArgumentException();
     myArray = capacity == 0 ? EMPTY_LONGS : new long[capacity];
   }
 
+  /**
+   * Constructs a LongArray and add all elements from {@code copyFrom}
+   */
   public LongArray(LongList copyFrom) {
     this(copyFrom == null ? 0 : copyFrom.size());
     if (copyFrom != null) {
@@ -49,40 +55,71 @@ public final class LongArray extends AbstractWritableLongList {
     }
   }
 
+  /**
+   * Constructs a LongArray and add all elements from {@code iterator}
+   */
   public LongArray(LongIterator iterator) {
     myArray = EMPTY_LONGS;
     if (iterator != null)
       addAll(iterator);
   }
 
+  /**
+   * Constructs a LongArray using {@code hostArray} for buffer {@code long[]} array where the elements
+   * of this array are stored. See {@link LongArray#copy(long[])} }, {@link LongArray#create(long...)}.
+   * */
   public LongArray(long[] hostArray) {
     this(hostArray, hostArray == null ? 0 : hostArray.length);
   }
 
+  /**
+   * Constructs a LongArray with specified size - {@code length}, using {@code hostArray}
+   * for inner buffer {@code long[]} array where the elements
+   * of this array are stored. See {@link LongArray#copy(long[])}, {@link LongArray#create(long...)}.
+   * */
   public LongArray(long[] hostArray, int length) {
     myArray = hostArray == null ? EMPTY_LONGS : hostArray;
     updateSize(length < 0 ? 0 : length >= myArray.length ? myArray.length : length);
   }
 
+  /**
+   * @return LongArray containing elements from the specified {@code long[]} array
+   */
   public static LongArray copy(long[] array) {
     return copy(array, array == null ? 0 : array.length);
   }
 
+  /**
+   * @return LongArray with the specified size
+   * containing elements from the specified {@code long[]} array
+   */
   public static LongArray copy(long[] array, int length) {
     return new LongArray(LongCollections.arrayCopy(array, 0, length));
   }
 
+  /**
+   * @return LongArray containing elements from the {@code iterable}
+   */
   public static LongArray copy(@Nullable LongIterable iterable) {
     if (iterable == null) return new LongArray();
     return LongCollections.collectIterables(0, iterable);
   }
 
+  /**
+   * @return LongArray containing the specified elements.
+   * See {@link LongArray#LongArray(long[])}, {@link LongArray#LongArray(long[], int)}.
+   * */
   public static LongArray create(long ... values) {
     if (values == null)
       values = EMPTY_LONGS;
     return new LongArray(values);
   }
 
+  /**
+   * May be used to convert the collection of {@code Long} to native long[] array:
+   * {@code LongArray.create(values).extractHostArray()}.
+   * @return LongArray containing elements from collection {@code values}
+   */
   public static LongArray create(@Nullable Collection<Long> values) {
     long[] host = EMPTY_LONGS;
     if (values != null && !values.isEmpty()) {
@@ -98,6 +135,9 @@ public final class LongArray extends AbstractWritableLongList {
     return new LongArray(host);
   }
 
+  /**
+   * @return LongArray containing {@code value}
+   */
   public static LongArray singleton(Long value) {
     return new LongArray(new long[]{value});
   }
@@ -115,10 +155,19 @@ public final class LongArray extends AbstractWritableLongList {
     return dest;
   }
 
-  public void ensureCapacity(int expectedSize) {
-    myArray = LongCollections.ensureCapacity(myArray, expectedSize);
+  /**
+   * Increases the capacity of this <tt>LongArray</tt> instance, if
+   * necessary, to ensure that it can hold at least the number of elements
+   * specified by the {@code expectedCapacity} argument.
+   * @param expectedCapacity the desired minimum capacity
+   */
+  public void ensureCapacity(int expectedCapacity) {
+    myArray = LongCollections.ensureCapacity(myArray, expectedCapacity);
   }
 
+  /**
+   * @return the capacity of this array
+   */
   public int getCapacity() {
     return myArray.length;
   }
@@ -239,6 +288,10 @@ public final class LongArray extends AbstractWritableLongList {
     return r == 0 || (r < 0 && !isUnique);
   }
 
+  /**
+   * @return true if size of this array equal to {@code array.length} and all elements
+   * in the specified array equals to corresponding elements
+   */
   public boolean equalOrder(long[] array) {
     if (size() != array.length)
       return false;
@@ -248,18 +301,24 @@ public final class LongArray extends AbstractWritableLongList {
     return true;
   }
 
+  /**
+   * Sorts this array using {@link Arrays#sort(int[])}, removes duplicates and updates size.
+   */
   @Override
   public void sortUnique() {
     Arrays.sort(myArray, 0, size());
     updateSize(LongCollections.removeSubsequentDuplicates(myArray, 0, size()));
   }
 
+  /**
+   * removes from this array all of its elements that are not contained in the {@code values}
+   */
   public void retain(LongList values) {
     retain(values, false);
   }
 
   /**
-   * removes from this set all of its elements that are not contained in the {@code values}
+   * removes from this array all of its elements that are not contained in the {@code values}
    * @param values sorted {@code LongList}
    * */
   public void retainSorted(LongList values) {
@@ -339,12 +398,22 @@ public final class LongArray extends AbstractWritableLongList {
     return counter;
   }
 
-  public void removeSorted(long value) {
+  /**
+   * Removes {@code value} from this sorted list, if it exist, keeping sorted order.
+   * @return true if this array was modified otherwise false
+   */
+  public boolean removeSorted(long value) {
     assert isSorted();
     int index = binarySearch(value);
+    if (index < 0) return false;
     if (index >= 0) removeAt(index);
+    return true;
   }
 
+  /**
+   * Extracts from this array inner buffer with {@code long[]} values and clears this array.
+   * @return long[] array with values from this array.
+   */
   public long[] extractHostArray() {
     long[] array = myArray;
     myArray = EMPTY_LONGS;
@@ -651,6 +720,9 @@ public final class LongArray extends AbstractWritableLongList {
     updateSize(i);
   }
 
+  /**
+   * Shuffles this array using {@code random} as number generator.
+   */
   public void shuffle(Random random) {
     for (int curSize = size() - 1; 0 < curSize; curSize--) {
       int ind = random.nextInt(curSize);
