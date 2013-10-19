@@ -35,7 +35,7 @@ public abstract class WritableSortedLongSetChecker extends WritableLongSetChecke
   @Override
   protected abstract WritableSortedLongSet[] createSetFromSortedList(LongList sortedList) ;
 
-  WritableSortedLongSet set;
+  protected WritableSortedLongSet set;
 
   public void setUp() throws Exception {
     super.setUp();

@@ -2,8 +2,9 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
+import com.almworks.integers.WritableLongSetChecker;
 
-public class LongSimpleHashSetTests extends IntegersFixture {
+public class ChainHashLongSetTests extends IntegersFixture {
 
   public void testSimple() {
     ChainHashLongSet set = new ChainHashLongSet(256, 512);

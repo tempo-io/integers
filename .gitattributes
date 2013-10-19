@@ -226,6 +226,7 @@ test/com/almworks/integers/optimized/SameValuesLongListTests.java -text
 test/com/almworks/integers/optimized/SegmentedLongArrayTests.java -text
 test/com/almworks/integers/optimized/TestEnvForSegmentedLongArray.java -text
 test/com/almworks/integers/util/AmortizedSortedLongSetTests.java -text
+test/com/almworks/integers/util/ChainHashLongSetTests.java -text
 test/com/almworks/integers/util/DiffIndexedLongListDecoratorTests.java -text
 test/com/almworks/integers/util/FindingLongIteratorTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
@@ -238,7 +239,6 @@ test/com/almworks/integers/util/LongMinusIteratorTests.java -text
 test/com/almworks/integers/util/LongObjMapTests.java -text
 test/com/almworks/integers/util/LongSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/LongSetBuilderTests.java -text
-test/com/almworks/integers/util/LongSimpleHashSetTests.java -text
 test/com/almworks/integers/util/LongTreeSetWrapper.java -text
 test/com/almworks/integers/util/LongTreeSetWrapperTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTests.java -text

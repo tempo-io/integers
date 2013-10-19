@@ -63,4 +63,16 @@ public class AmortizedSortedLongSetTests extends WritableSortedLongSetChecker {
     System.out.println(LongCollections.toBoundedString(set));
   }
 
+  public void test2Iterators() {
+    set.addAll(ap(0, 1, 10));
+    LongIterator it1 = set.iterator();
+    for (int i = 0; i < 5; i++) {
+      assertEquals(i, it1.nextValue());
+    }
+    // call coalesce
+    CHECK.order(new LongArray(ap(0, 1, 10)), set.toList());
+    CHECK.order(new LongArray(ap(0, 1, 10)).iterator(), set.iterator());
+    CHECK.order(new LongArray(ap(5, 1, 5)).iterator(), it1);
+  }
+
 }
