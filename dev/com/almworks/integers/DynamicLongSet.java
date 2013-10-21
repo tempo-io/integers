@@ -755,10 +755,6 @@ public class DynamicLongSet implements WritableSortedLongSet {
     return new LongArray(arr);
   }
 
-  public LongList toList() {
-    return toArray();
-  }
-
   public String toDebugString() {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     debugPrintTreeStructure(new PrintStream(baos));

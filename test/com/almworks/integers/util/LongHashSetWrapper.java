@@ -5,7 +5,7 @@ import com.almworks.integers.*;
 import java.util.*;
 
 public class LongHashSetWrapper implements WritableLongSet {
-  TreeSet<Long> set = new TreeSet<Long>();
+  HashSet<Long> set = new HashSet<Long>();
   int myModCount = 0;
 
   public LongHashSetWrapper() {}
@@ -106,11 +106,6 @@ public class LongHashSetWrapper implements WritableLongSet {
   }
 
   @Override
-  public LongList toList() {
-    return toArray();
-  }
-
-  @Override
   public LongArray toArray() {
     return new LongArray(iterator());
   }
@@ -144,18 +139,6 @@ public class LongHashSetWrapper implements WritableLongSet {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
-      }
-    };
-  }
-
-  public LongIterator tailIterator(final long value) {
-    return new FindingLongIterator() {
-      Iterator<Long> it = set.tailSet(value).iterator();
-      @Override
-      protected boolean findNext() {
-        if (!it.hasNext()) return false;
-        myCurrent = it.next();
-        return true;
       }
     };
   }

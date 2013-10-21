@@ -4,7 +4,7 @@ import com.almworks.integers.*;
 
 import java.util.*;
 
-public class LongTreeSetWrapper implements WritableLongSet {
+public class LongTreeSetWrapper implements WritableSortedLongSet {
   TreeSet<Long> set = new TreeSet<Long>();
   int myModCount = 0;
 
@@ -103,11 +103,6 @@ public class LongTreeSetWrapper implements WritableLongSet {
     for (long val: values) {
       set.add(val);
     }
-  }
-
-  @Override
-  public LongList toList() {
-    return toArray();
   }
 
   @Override

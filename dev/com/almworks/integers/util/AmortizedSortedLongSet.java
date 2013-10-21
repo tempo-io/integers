@@ -146,7 +146,7 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
         idx = -idx - 1;
       }
     }
-    myBaseList.mergeWithSmall(myAdded.toList(), myTempInsertionPoints);
+    myBaseList.mergeWithSmall(myAdded.toArray(), myTempInsertionPoints);
     myAdded.clear();
     myRemoved.clear();
   }
@@ -226,7 +226,12 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
     return size;
   }
 
-  public LongList toList() {
+  /**
+   * @return a sorted list of numbers, contained in this set,
+   * which should be used before any further mutation of the builder.
+   * Changes in set may affect the returned list
+   */
+  public LongList asList() {
     coalesce();
     return myBaseList;
   }

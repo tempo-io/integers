@@ -129,7 +129,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
       }
 
       private void check(LongList expectedValues) {
-        LongArray sorted = new LongArray(set.toList());
+        LongArray sorted = new LongArray(set.iterator());
         assertTrue( sorted.isSorted(true));
         assertEquals( expectedValues.size(), set.size());
         CHECK.unordered(sorted, expectedValues);
@@ -140,7 +140,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
   public void testSimple() {
     set.addAll(3, 1, 5, 2, 0, 4);
     LongList expected = LongProgression.arithmetic(0, 6);
-    CHECK.order(expected, set.toList());
+    CHECK.order(expected, set.toArray());
     set.removeAll(expected.toNativeArray());
     assertTrue(set.isEmpty());
 
@@ -159,7 +159,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
 
     set.addAll(1, 3, 2, Long.MIN_VALUE, Long.MAX_VALUE);
     assertEquals(set.size(), 5);
-    assertTrue(new LongArray(set.toList()).isSorted(true));
+    assertTrue(new LongArray(set.toArray()).isSorted(true));
     assertTrue(set.contains(1));
     assertTrue(set.contains(Long.MIN_VALUE));
     assertFalse(set.contains(0));
@@ -176,7 +176,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     assertEquals(set.size(), 4);
 
     res.sortUnique();
-    CHECK.order(res, set.toList());
+    CHECK.order(res, set.toArray());
     CHECK.order(res.iterator(), set.iterator());
   }
 
@@ -213,7 +213,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
       set.addAll(toAdd);
       anotherSet.addAll(toAdd);
       LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
-      LongList setList = set.toList();
+      LongList setList = set.toArray();
       System.err.println("attempt #" + attempt);
       CHECK.order(anotherSetList, setList);
 

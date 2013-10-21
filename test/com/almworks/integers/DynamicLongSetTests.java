@@ -106,7 +106,7 @@ public class DynamicLongSetTests extends WritableSortedLongSetChecker {
     DynamicLongSet set2 = DynamicLongSet.fromSortedList(ll);
     assertTrue(set2.isEmpty());
     set.addAll(1, 3, 2, MIN, Long.MAX_VALUE);
-    assertTrue(new LongArray(set.toList()).isSorted(true));
+    assertTrue(new LongArray(set.toArray()).isSorted(true));
     assertTrue(set.contains(1));
     assertTrue(set.contains(MIN));
     assertFalse(set.contains(0));

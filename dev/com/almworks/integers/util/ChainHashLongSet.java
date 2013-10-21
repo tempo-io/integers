@@ -81,11 +81,6 @@ public class ChainHashLongSet implements WritableLongSet {
   }
 
   @Override
-  public LongList toList() {
-    return toArray();
-  }
-
-  @Override
   public LongArray toArray() {
     LongArray res = new LongArray();
     for (int head = 0; head < headNum; head++) {

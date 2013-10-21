@@ -4,11 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface SortedLongSet extends LongSet {
   /**
-   * @return a sorted list containing all the elements in this set
-   * */
-  LongList toList();
-
-  /**
    * @return a uniquely sorted array containing all the elements in this set
    * */
   LongArray toArray();

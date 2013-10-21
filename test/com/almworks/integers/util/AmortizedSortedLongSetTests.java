@@ -48,7 +48,7 @@ public class AmortizedSortedLongSetTests extends WritableSortedLongSetChecker {
     set.addAll(0, 1, 2);
     it = set.iterator();
     it.next().next();
-    set.toList();
+    set.toArray();
     assertEquals(2, it.nextValue());
     assertFalse(it.hasNext());
   }
@@ -70,7 +70,7 @@ public class AmortizedSortedLongSetTests extends WritableSortedLongSetChecker {
       assertEquals(i, it1.nextValue());
     }
     // call coalesce
-    CHECK.order(new LongArray(ap(0, 1, 10)), set.toList());
+    CHECK.order(new LongArray(ap(0, 1, 10)), set.toArray());
     CHECK.order(new LongArray(ap(0, 1, 10)).iterator(), set.iterator());
     CHECK.order(new LongArray(ap(5, 1, 5)).iterator(), it1);
   }
