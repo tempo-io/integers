@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
-public class ChainHashLongSet implements WritableLongSet {
+class ChainHashLongSet implements WritableLongSet {
   private final int[] myHead;
   private final int[] myNext;
   private final long[] myKeys;
@@ -96,7 +96,7 @@ public class ChainHashLongSet implements WritableLongSet {
     return cnt == 1;
   }
 
-  // todo wrong
+  // todo fix size()
   @Override
   public int size() {
     return cnt - 1;
@@ -143,8 +143,8 @@ public class ChainHashLongSet implements WritableLongSet {
   }
 
   @Override
-  public WritableLongSet retain(LongList values) {
-    return null;
+  public ChainHashLongSet retain(LongList values) {
+    return this;
   }
 
   @Override

@@ -613,11 +613,12 @@ public class DynamicLongSet implements WritableSortedLongSet {
   /**
    * retain this set with the specified set
    * */
-  public void retain(DynamicLongSet set) {
+  public DynamicLongSet retain(DynamicLongSet set) {
     LongArray array = toArray();
     array.retainSorted(set.toArray());
     clear();
     fromSortedList0(array, ColoringType.BALANCED);
+    return this;
   }
 
   private void maybeShrink() {

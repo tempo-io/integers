@@ -19,7 +19,8 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
 //  private final DynamicLongSet myRemoved = new DynamicLongSet();
 
   private int myModCount = 0;
-  private boolean myCoalescing;
+  // true if set wasn't modified after last coalesce()
+  private boolean myCoalesced;
 
   private int[][] myTempInsertionPoints = {null};
 
@@ -124,7 +125,7 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
 
   private void modified() {
     myModCount++;
-    myCoalescing = false;
+    myCoalesced = false;
   }
 
   private void maybeCoalesce() {
@@ -134,7 +135,7 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
   }
 
   void coalesce() {
-    myCoalescing = true;
+    myCoalesced = true;
     // todo add method WLL.removeSortedFromSorted(LIterable)
     int idx = 0;
     LongIterator removeIt = sortedRemoveIterator();
@@ -252,17 +253,17 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
 
   private class CoalescingIterator extends FindingLongIterator {
     private LongIterator myIterator;
-    private boolean myCurrentCoalescing;
+    private boolean myShouldReactOnCoalesce;
 
     public CoalescingIterator(LongIterator baseIterator, LongIterator addedIterator) {
       myIterator = new LongUnionIteratorTwo(baseIterator, addedIterator);
-      myCurrentCoalescing = myCoalescing;
+      myShouldReactOnCoalesce = !myCoalesced;
     }
 
     @Override
     protected boolean findNext() {
-      if (myCurrentCoalescing != myCoalescing) {
-        myCurrentCoalescing = myCoalescing;
+      if (myShouldReactOnCoalesce && myCoalesced) {
+        myShouldReactOnCoalesce = false;
         // baseIndex always >= -1
         if (!myIterated) {
           myIterator = myBaseList.iterator();
