@@ -102,7 +102,7 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
   }
 
   /***
-   * Removes the first occurence of the specified element from this list if it exist.
+   * Removes the first occurence of the specified element from this list if it exists.
    * @return true if this list was modified otherwise false
    */
   public boolean remove(long value) {

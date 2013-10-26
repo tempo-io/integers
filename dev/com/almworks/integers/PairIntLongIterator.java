@@ -60,6 +60,10 @@ public class PairIntLongIterator implements Iterable<PairIntLongIterator>, Itera
     return myIt1.value();
   }
 
+  public boolean hasValue() {
+    return myIterated;
+  }
+
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

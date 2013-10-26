@@ -239,7 +239,7 @@ public class LongCollections {
    * @param array
    * @param capacity
    * @return {@code array} if {@code capacity <= array.length} otherwise copy {@code array} to new array
-   * with length equal to the max between {@code 16, capacity} and {@code (array.length * 2)}
+   * with length equal to the max between {@code 16}, {@code capacity} and {@code (array.length * 2)}
    */
   public static long[] ensureCapacity(@Nullable long[] array, int capacity) {
     int length = array == null ? -1 : array.length;
@@ -350,7 +350,7 @@ public class LongCollections {
   /**
    * @param a sorted {@code LongList}
    * @param b sorted {@code LongList}
-   * @return union of {@code a} and {@code b} without elements are contained both in {@code a} and {@code b}
+   * @return union of {@code a} and {@code b} without elements that are contained both in {@code a} and {@code b}
    */
   public static LongList diffSortedLists(LongList a, LongList b) {
     int ia = 0;
@@ -469,8 +469,8 @@ public class LongCollections {
   /**
    * @param includeSorted sorted {@code LongList}
    * @param excludeSorted sorted {@code LongList}
-   * @return {@code LongList} contains the elements from {@code includeSorted} and don't contains
-   * the elements from {@code excludeSorted}
+   * @return LongList that contains elements from {@code includeSorted}
+   * with the exception of those elements that are contained in {@code excludeSorted}.
    */
   @NotNull
   public static LongList complementSorted(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
@@ -571,7 +571,12 @@ public class LongCollections {
    * @return union of iterables.
    * */
   public static LongIterator unionIterators(LongIterable ... iterables) {
-    return new LongUnionIterator(iterables);
+    switch (iterables.length) {
+      case 0: return LongIterator.EMPTY;
+      case 1: return iterables[0].iterator();
+      case 2: return LongUnionIteratorTwo.create(iterables[0], iterables[1]);
+      default: return new LongUnionIterator(iterables);
+    }
   }
 
   /**

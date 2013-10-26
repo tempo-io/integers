@@ -31,7 +31,7 @@ import java.util.List;
  * */
 abstract class LongSetOperationsIterator extends FindingLongIterator {
   /**
-   * ArrayList is preferable implementation. Using LinkedList may not be effective.
+   * ArrayList is preferable implementation. Using LinkedList may be ineffective
    * */
   protected final List<LongIterator> myIts;
   /**

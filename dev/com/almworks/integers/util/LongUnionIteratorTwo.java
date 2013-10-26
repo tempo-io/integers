@@ -4,7 +4,7 @@ import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
 
 public class LongUnionIteratorTwo extends FindingLongIterator {
-  private final LongIterator myIts[] = new LongIterator[2];
+  private final LongIterator[] myIts = new LongIterator[2];
   private int myItsCount;
 
   public LongUnionIteratorTwo(LongIterator first, LongIterator second) {
@@ -15,8 +15,8 @@ public class LongUnionIteratorTwo extends FindingLongIterator {
     }
   }
 
-  public static LongUnionIteratorTwo create(LongIterable include, LongIterable exclude) {
-    return new LongUnionIteratorTwo(include.iterator(), exclude.iterator());
+  public static LongUnionIteratorTwo create(LongIterable first, LongIterable second) {
+    return new LongUnionIteratorTwo(first.iterator(), second.iterator());
   }
 
   protected boolean findNext() {

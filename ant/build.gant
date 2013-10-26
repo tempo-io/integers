@@ -203,6 +203,7 @@ target(name: 'test') {
             fileset(dir: testsClassesDir, includes: "**/*Test.class")
             fileset(dir: testsClassesDir, includes: "**/*Tests.class")
         }
+        jvmarg(value: "-Dcom.almworks.integers.check=true")
     }
     almMessage "${dirtyString}tests succeeded"
 }

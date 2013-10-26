@@ -40,13 +40,12 @@ public final class LongArray extends AbstractWritableLongList {
    * Constructs an empty array with the specified initial capacity.
    * */
   public LongArray(int capacity) {
-    if (capacity < 0)
-      throw new IllegalArgumentException();
+    if (capacity < 0) throw new IllegalArgumentException();
     myArray = capacity == 0 ? EMPTY_LONGS : new long[capacity];
   }
 
   /**
-   * Constructs a LongArray and add all elements from {@code copyFrom}
+   * Constructs a LongArray and adds all elements from {@code copyFrom}
    */
   public LongArray(LongList copyFrom) {
     this(copyFrom == null ? 0 : copyFrom.size());
@@ -65,8 +64,8 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Constructs a LongArray using {@code hostArray} for buffer {@code long[]} array where the elements
-   * of this array are stored. See {@link LongArray#copy(long[])} }, {@link LongArray#create(long...)}.
+   * Constructs a LongArray that is backed by {@code hostArray}
+   * See {@link LongArray#copy(long[])} }, {@link LongArray#create(long...)}.
    * */
   public LongArray(long[] hostArray) {
     this(hostArray, hostArray == null ? 0 : hostArray.length);
@@ -289,7 +288,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * @return true if size of this array equal to {@code array.length} and all elements
+   * @return true if size of this array equals to {@code array.length} and all elements
    * in the specified array equals to corresponding elements
    */
   public boolean equalOrder(long[] array) {
@@ -399,7 +398,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Removes {@code value} from this sorted list, if it exist, keeping sorted order.
+   * Removes {@code value} from this sorted list, if this list contains the {@code value}.
    * @return true if this array was modified otherwise false
    */
   public boolean removeSorted(long value) {
@@ -422,8 +421,9 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   private int getInsertionPoints(LongList src, int[][] insertionPoints) {
-    if (insertionPoints[0] == null || insertionPoints[0].length < src.size())
+    if (insertionPoints[0] == null || insertionPoints[0].length < src.size()) {
       insertionPoints[0] = new int[src.size()];
+    }
     int[] insertionPoints0 = insertionPoints[0];
     Arrays.fill(insertionPoints0, 0, src.size(), -1);
     int insertCount = 0;
@@ -473,7 +473,7 @@ public final class LongArray extends AbstractWritableLongList {
   /**
    * <p>Merge the specified sorted list and this sorted array. If src or this array are not sorted, result is undefined.
    * If there {@code getCapacity() < src.size() + size()}, will go reallocation.
-   * <p>Complexity: {@code O(eps * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
+   * <p>Complexity: {@code O(eps(N/T) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
    * {@code eps} depend on ratio of {@code N/T} and mixing of {@code src} and this array.
    * In the general case, if N/T > 4, then eps < 0.5.
    * <p>Prefer to use this method over {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
@@ -537,37 +537,9 @@ public final class LongArray extends AbstractWritableLongList {
       // merge in place
       // a) find insertion points and count how many to be inserted
       if (insertionPoints == null) insertionPoints = new int[][]{null};
-      if (insertionPoints[0] == null || insertionPoints[0].length < src.size())
-        insertionPoints[0] = new int[src.size()];
+      int insertCount = getInsertionPoints(src, insertionPoints);
       int[] insertionPoints0 = insertionPoints[0];
-      Arrays.fill(insertionPoints0, 0, src.size(), -1);
-      int insertCount = 0;
-      int destIndex = 0;
-      long last = 0;
-      for (int i = 0; i < src.size(); i++) {
-        long v = src.get(i);
-        if (i > 0 && v == last)
-          continue;
-        last = v;
-        if (destIndex < size()) {
-          int k = LongCollections.binarySearch(v, myArray, destIndex, size());
-          if (k >= 0) {
-            // found
-            continue;
-          }
-          int insertion = -k - 1;
-          if (insertion < destIndex) {
-            assert false : insertion + " " + destIndex;
-            continue;
-          }
-          destIndex = insertion;
-        }
-        insertionPoints0[i] = destIndex;
-        insertCount++;
-      }
-      // b) insertionPoints contains places in the dest for insertion
-      // insertCount contains number of insertions
-      destIndex = size();
+      int destIndex = size();
       updateSize(size() + insertCount);
       int i = src.size() - 1;
       while (insertCount > 0) {

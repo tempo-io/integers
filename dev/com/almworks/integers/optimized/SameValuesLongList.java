@@ -22,6 +22,7 @@ package com.almworks.integers.optimized;
 import com.almworks.integers.*;
 import com.almworks.integers.util.IntegersDebug;
 import org.jetbrains.annotations.NotNull;
+import org.testng.internal.annotations.IAfterClass;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
@@ -196,11 +197,14 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   @Override
   public void sortUnique() {
-    LongArray newValues = new LongArray(iterator());
+    LongArray newValues = new LongArray(myMap.valuesIterator(0, myMap.size()));
+    newValues.add(get(0));
     newValues.sortUnique();
-    IntArray newIndexes = new IntArray(IntProgression.arithmetic(0, newValues.size()));
+    int newSize = newValues.size();
+    IntArray newIndexes = new IntArray(newSize);
+    for (int i = 0; i < newSize; i++) newIndexes.add(i);
     myMap = new IntLongMap(newIndexes, newValues);
-    updateSize(newValues.size());
+    updateSize(newSize);
   }
 
 

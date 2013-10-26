@@ -15,7 +15,7 @@ public interface SortedLongSet extends LongSet {
   LongIterator iterator();
 
   /**
-   * @return an iterator over of this set whose elements are greater than or equal to fromElement.
+   * @return an iterator over of this set in the sorted order whose elements are greater than or equal to fromElement.
    */
   LongIterator tailIterator(long fromElement);
 }

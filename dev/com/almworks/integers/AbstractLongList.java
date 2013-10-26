@@ -71,15 +71,14 @@ public abstract class AbstractLongList implements LongList {
   public LongList get(final IntList indices) {
     if (indices == null) throw new NullPointerException("indices");
     return new AbstractLongList() {
-      final IntList ids = indices;
       @Override
       public int size() {
-        return ids.size();
+        return indices.size();
       }
 
       @Override
       public long get(int index) throws NoSuchElementException {
-        return AbstractLongList.this.get(ids.get(index));
+        return AbstractLongList.this.get(indices.get(index));
       }
     };
   }

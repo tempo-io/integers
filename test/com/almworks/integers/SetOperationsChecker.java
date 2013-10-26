@@ -89,10 +89,6 @@ public class SetOperationsChecker {
   }
 
   private void checkNewSetCreator(LongArray... arrays) {
-    if (arrays[0].size() == 1 && arrays[0].get(0) == Integer.MIN_VALUE &&
-        arrays[1].size() == 1 && arrays[1].get(0) == Integer.MIN_VALUE) {
-      arrays[0].set(0, Integer.MIN_VALUE);
-    }
     CHECK.order(creator.get(arrays).iterator(), expected.get(arrays).iterator());
     if (arrays.length == 2) {
       CHECK.order(creator.get(arrays[1], arrays[0]).iterator(), expected.get(arrays[1], arrays[0]).iterator());
@@ -115,6 +111,10 @@ public class SetOperationsChecker {
       for (int j = 0; j < (1 << someValues.size()); j++) {
         first = getSubList(someValues, i);
         second = getSubList(someValues, j);
+        if (i == 1 && j == 1) {
+          i += 0;
+        }
+//        System.out.println(i + " " + j);
         checkNewSetCreator(first, second);
       }
     }

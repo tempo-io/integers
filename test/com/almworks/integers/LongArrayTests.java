@@ -17,6 +17,7 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class LongArrayTests extends IntegersFixture {
@@ -149,8 +150,9 @@ public class LongArrayTests extends IntegersFixture {
   public void testRetain() {
     LongArray arr = LongArray.create(2, 3, 5, 6, 8, 9, 10, 13, 3, 4, 5, 3);
     LongList values = LongArray.create(1, 4, 5, 6, 7, 8, 10, 15);
+    LongArray expected = LongArray.create(5, 6, 8, 10, 4, 5);
     arr.retain(values);
-    CHECK.order(LongArray.create(5, 6, 8, 10, 4, 5), arr);
+    CHECK.order(expected, arr);
 
     arr = new LongArray(LongProgression.arithmetic(0, 20, 1));
     arr.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
@@ -399,7 +401,7 @@ public class LongArrayTests extends IntegersFixture {
     testReverse(new long[]{}, new long[]{});
     testReverse(new long[]{0}, new long[]{0});
     testReverse(new long[]{1,1,0}, new long[]{0,1,1});
-    testReverse(new long[]{0,1,3,6,10,15,21,28,36}, new long[]{36,28,21,15,10,6,3,1,0});
+    testReverse(new long[]{0, 1, 3, 6, 10, 15, 21, 28, 36}, new long[]{36, 28, 21, 15, 10, 6, 3, 1, 0});
 
     LongArray lst = new LongArray();
     for (int i = 0; i < 20; i++) {

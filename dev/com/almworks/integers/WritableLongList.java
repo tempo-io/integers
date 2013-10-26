@@ -44,7 +44,7 @@ public interface WritableLongList extends LongList, LongCollector {
   long removeAt(int index);
 
   /**
-   * This method remove from this list all values which are equals to {@code value}
+   * This method remove from this list all values that are equals to {@code value}
    */
   void removeAll(long value);
 
@@ -88,14 +88,14 @@ public interface WritableLongList extends LongList, LongCollector {
   /**
    * Replaces the elements in this list from the specified position
    * {@code index} to {@code index + count} with the elements from {@code values}
-   * beginning from index {@code sourceIndex} and ending {@code sourceIndex + count}
+   * beginning from index {@code sourceIndex} and ending with {@code sourceIndex + count}
    * @throws ArrayIndexOutOfBoundsException if
    * {@code index + count > size()} or {@code sourceIndex + count > values.size()};
    */
   void setAll(int index, LongList values, int sourceIndex, int count);
 
   /**
-   * Updates the values in this list at the specified index with result of applying
+   * Updates the values in this list at the specified interval with result of applying
    * {@code function} to elements at this interval.
    * @param from starting index, inclusive
    * @param to ending index, exclusive
@@ -109,7 +109,7 @@ public interface WritableLongList extends LongList, LongCollector {
   void sort(WritableLongList... sortAlso);
 
   /**
-   * Sorts this list and calls method {@link WritableLongList#removeDuplicates()}
+   * Sorts this list and removes duplicates
    */
   void sortUnique();
 

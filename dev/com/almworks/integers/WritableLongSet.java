@@ -40,7 +40,7 @@ public interface WritableLongSet extends LongCollector, LongSet {
    * unchanged and returns {@code false}. Otherwise {@code true}.
    *
    * @return {@code true} if size of set changed. Otherwise {@code false}.
-   * If return value is unused, better to use {@link WritableLongSet#add(long)}
+   * If return value is unused, better use {@link WritableLongSet#add(long)}
    * */
   boolean include(long value);
 
