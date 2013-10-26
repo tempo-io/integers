@@ -2,7 +2,7 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 
-public class AmortizedSortedLongSetTests extends WritableSortedLongSetChecker {
+public class AmortizedSortedLongSetTests extends WritableLongSetChecker {
 
   protected boolean isSupportTailIterator() {
     return true;

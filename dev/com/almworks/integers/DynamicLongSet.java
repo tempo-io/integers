@@ -93,7 +93,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
    * Constructs an empty <tt>DynamicLongSet</tt> with the specified initial capacity.
    * */
   public DynamicLongSet(int initialCapacity) {
-    assert initialCapacity > 0;
+    if (initialCapacity < 0) throw new IllegalArgumentException();
     initialCapacity += 1;
     myBlack = new BitSet(initialCapacity);
     myRemoved = new BitSet(initialCapacity);
@@ -269,8 +269,8 @@ public class DynamicLongSet implements WritableSortedLongSet {
     // grandparent
     int pp = ps[--psi];
     while (!myBlack.get(p)) {
-      assert !IntegersDebug.CHECK && checkChildParent(p, pp, debugKey);
-      assert !IntegersDebug.CHECK && checkChildParent(x, p, debugKey);
+      assert !IntegersDebug.CHECK || checkChildParent(p, pp, debugKey);
+      assert !IntegersDebug.CHECK || checkChildParent(x, p, debugKey);
       int[] branch1, branch2;
       if (p == myLeft[pp]) {
         branch1 = myLeft;
@@ -365,7 +365,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     int fh = height(size() + n) + 2;
     if (myStackCache.length < fh) {
       myStackCache = new int[fh];
-  }
+    }
     return myStackCache;
   }
 

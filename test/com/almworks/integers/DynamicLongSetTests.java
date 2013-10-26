@@ -23,7 +23,7 @@ import java.lang.reflect.Field;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class DynamicLongSetTests extends WritableSortedLongSetChecker {
+public class DynamicLongSetTests extends WritableLongSetChecker {
 
   private static final long MIN = Long.MIN_VALUE;
   private static final long MAX = Long.MAX_VALUE;

@@ -1,10 +1,25 @@
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.WritableLongSetChecker;
+import com.almworks.integers.*;
 
-public class ChainHashLongSetTests extends IntegersFixture {
+public class ChainHashLongSetTests extends WritableLongSetChecker {
+
+  @Override
+  protected WritableLongSet createSet() {
+    return new ChainHashLongSet(512, 1000);
+  }
+
+  @Override
+  protected WritableLongSet createSetWithCapacity(int capacity) {
+    return new ChainHashLongSet(512, capacity);
+  }
+
+  @Override
+  protected WritableLongSet[] createSetFromSortedList(LongList sortedList) {
+    WritableLongSet set = createSet();
+    set.addAll(sortedList);
+    return new WritableLongSet[]{set};
+  }
 
   public void testSimple() {
     ChainHashLongSet set = new ChainHashLongSet(256, 512);
