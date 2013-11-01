@@ -31,7 +31,7 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class DynamicLongSet implements WritableSortedLongSet {
+public class LongTreeSet implements WritableLongSortedSet {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { NIL_DUMMY_KEY };
@@ -66,8 +66,8 @@ public class DynamicLongSet implements WritableSortedLongSet {
   private int[] myStackCache = IntegersUtils.EMPTY_INTS;
 
   /**
-   * This enum is used in {@link DynamicLongSet#compactify(com.almworks.integers.DynamicLongSet.ColoringType)} and
-   * {@link DynamicLongSet#fromSortedList(LongList, com.almworks.integers.DynamicLongSet.ColoringType)}
+   * This enum is used in {@link LongTreeSet#compactify(LongTreeSet.ColoringType)} and
+   * {@link LongTreeSet#fromSortedList(LongList, LongTreeSet.ColoringType)}
    * methods to determine the way the new tree will be colored.
    */
   public enum ColoringType {
@@ -83,16 +83,16 @@ public class DynamicLongSet implements WritableSortedLongSet {
     public abstract int redLevelsDensity();
   }
 
-  public DynamicLongSet() {
+  public LongTreeSet() {
     myBlack = new BitSet();
     myRemoved = new BitSet();
     init();
   }
 
   /**
-   * Constructs an empty <tt>DynamicLongSet</tt> with the specified initial capacity.
+   * Constructs an empty <tt>LongTreeSet</tt> with the specified initial capacity.
    * */
-  public DynamicLongSet(int initialCapacity) {
+  public LongTreeSet(int initialCapacity) {
     if (initialCapacity < 0) throw new IllegalArgumentException();
     initialCapacity += 1;
     myBlack = new BitSet(initialCapacity);
@@ -155,6 +155,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     return x != 0;
   }
 
+  // todo optimize, if myRemoved.cardinality() little, it's cheaper run across myKeys
   public boolean containsAll(LongIterable iterable) {
     for (LongIterator it : iterable.iterator()) {
       if (!contains(it.value())) return false;
@@ -172,6 +173,8 @@ public class DynamicLongSet implements WritableSortedLongSet {
     return ret;
   }
 
+  // todo optimize, if keys small, it's cheaper create new LongArray and use fromSortedList(..)
+  // K* log(S + K) -> K*log(K) + (S + K)
   public void addAll(LongList keys) {
     modified();
     int[] ps = prepareAdd(keys.size());
@@ -203,12 +206,16 @@ public class DynamicLongSet implements WritableSortedLongSet {
     modified();
     if (!iterator.hasNext()) return;
     while (iterator.hasNext()) {
-      add(iterator.nextValue());
+      add0(iterator.nextValue());
     }
   }
 
   public void add(long key) {
     modified();
+    include(key);
+  }
+
+  private void add0(long key) {
     include(key);
   }
 
@@ -385,7 +392,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
   }
 
   /**
-   * This method rebuilds this DynamicLongSet, after that it will use just the amount of memory needed to hold size() elements.
+   * This method rebuilds this LongTreeSet, after that it will use just the amount of memory needed to hold size() elements.
    * (Usually it uses more memory before this method is run)
    * This method builds a new tree based on the same keyset.
    * All levels of the new tree are filled, except, probably, the last one.
@@ -403,12 +410,12 @@ public class DynamicLongSet implements WritableSortedLongSet {
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.DynamicLongSet#compactify()},
+   * This method is similar to {@link LongTreeSet#compactify()},
    * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored.
    *                     Internal levels are all levels except the last one (two if the last one is not full.)
    *   <ul><li>{@link ColoringType#TO_REMOVE} colors every 2nd non-last levels red, theoretically making subsequent removals faster.
-   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link com.almworks.integers.DynamicLongSet#compactify()}.
+   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link LongTreeSet#compactify()}.
    *       <li>{@link ColoringType#TO_ADD} colors all non-last levels black, theoretically making subsequent additions faster.
    *   </ul>
    */
@@ -419,30 +426,30 @@ public class DynamicLongSet implements WritableSortedLongSet {
   }
 
   /**
-   * Builds a new DynamicLongSet based on values of src.
+   * Builds a new LongTreeSet based on values of src.
    */
-  public static DynamicLongSet fromSortedIterable(LongIterable src) {
+  public static LongTreeSet fromSortedIterable(LongIterable src) {
     return fromSortedIterable(src, -1);
   }
 
   /**
-   * Builds a new DynamicLongSet with the specified initial capacity based on values of src.
+   * Builds a new LongTreeSet with the specified initial capacity based on values of src.
    */
-  public static DynamicLongSet fromSortedIterable(LongIterable src, int capacity) {
+  public static LongTreeSet fromSortedIterable(LongIterable src, int capacity) {
     return fromSortedIterable(src, capacity, ColoringType.BALANCED);
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)},
+   * This method is similar to {@link LongTreeSet#fromSortedList(LongList)},
    * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
    *                     if the last one is unfilled.
    *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)};
+   *   <br>BALANCED colors every 4th non-last level red, similar to {@link LongTreeSet#fromSortedList(LongList)};
    *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
    */
-  public static DynamicLongSet fromSortedIterable(LongIterable src, int capacity, ColoringType coloringType) {
-    DynamicLongSet res = new DynamicLongSet();
+  public static LongTreeSet fromSortedIterable(LongIterable src, int capacity, ColoringType coloringType) {
+    LongTreeSet res = new LongTreeSet();
     res.fromSortedIterable0(src, capacity, coloringType);
     return res;
   }
@@ -525,23 +532,23 @@ public class DynamicLongSet implements WritableSortedLongSet {
   }
 
   /**
-   * Builds a new DynamicLongSet based on values of src. src isn't used internally, its contents are copied.
+   * Builds a new LongTreeSet based on values of src. src isn't used internally, its contents are copied.
    */
-  public static DynamicLongSet fromSortedList(LongList src) {
+  public static LongTreeSet fromSortedList(LongList src) {
     return fromSortedList(src, ColoringType.BALANCED);
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)},
+   * This method is similar to {@link LongTreeSet#fromSortedList(LongList)},
    * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
    *                     if the last one is unfilled.
    *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.DynamicLongSet#fromSortedList(LongList)};
+   *   <br>BALANCED colors every 4th non-last level red, similar to {@link LongTreeSet#fromSortedList(LongList)};
    *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
    */
-  public static DynamicLongSet fromSortedList(LongList src, ColoringType coloringType) {
-    DynamicLongSet res = new DynamicLongSet();
+  public static LongTreeSet fromSortedList(LongList src, ColoringType coloringType) {
+    LongTreeSet res = new LongTreeSet();
     res.fromSortedList0(src, coloringType);
     return res;
   }
@@ -602,7 +609,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     return ret;
   }
 
-  public DynamicLongSet retain(LongList values) {
+  public LongTreeSet retain(LongList values) {
     LongArray array = toArray();
     array.retainSorted(values);
     clear();
@@ -613,7 +620,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
   /**
    * retain this set with the specified set
    * */
-  public DynamicLongSet retain(DynamicLongSet set) {
+  public LongTreeSet retain(LongTreeSet set) {
     LongArray array = toArray();
     array.retainSorted(set.toArray());
     clear();
@@ -709,7 +716,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
       }
 
       if (!myBlack.get(w)) {
-        // then loop is also finished after the current iteration
+        // the loop is also finished after the current iteration for any branch we take
         myBlack.set(w);
         myBlack.clear(parentOfX);
         rotate(parentOfX, parentsStack[xsi-1], mainBranch, otherBranch);
@@ -763,7 +770,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
       return baos.toString("US-ASCII");
     } catch (UnsupportedEncodingException e) {
       assert false: e;
-      return "DynamicLongSet";
+      return "LongTreeSet";
     }
   }
 
@@ -1006,7 +1013,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
 
     public LURIterator(long key) {
       this();
-      if (DynamicLongSet.this.size() == 0) return;
+      if (LongTreeSet.this.size() == 0) return;
       x = myRoot;
       // Parents stack top + 1
       psi = 0;
@@ -1026,7 +1033,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
           psi--;
         }
         psi--;
-        assert psi >= 0 : psi + Arrays.toString(ps) + DynamicLongSet.this.toString() + key;
+        assert psi >= 0 : psi + Arrays.toString(ps) + LongTreeSet.this.toString() + key;
         x = ps[psi];
       }
     }

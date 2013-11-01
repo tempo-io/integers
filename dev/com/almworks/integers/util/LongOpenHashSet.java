@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
-public class ChainHashLongSet extends AbstractWritableLongSet implements WritableLongSet {
+public class LongOpenHashSet extends AbstractWritableLongSet implements WritableLongSet {
   private int[] myHead;
   private int[] myNext;
   private long[] myKeys;
@@ -13,7 +13,7 @@ public class ChainHashLongSet extends AbstractWritableLongSet implements Writabl
   private int cnt = 1;
   private int myModCount = 0;
 
-  public ChainHashLongSet(int headNum, int maxSize) {
+  public LongOpenHashSet(int headNum, int maxSize) {
     this.headNum = headNum;
     myHead = new int[headNum];
     myNext = new int[maxSize + 1];
@@ -25,10 +25,9 @@ public class ChainHashLongSet extends AbstractWritableLongSet implements Writabl
   }
 
   // todo optimize(now effective only when size() < headNum)
-  public boolean include(long value) {
+  protected boolean include0(long value) {
     myKeys = LongCollections.ensureCapacity(myKeys, cnt + 1);
     myNext = IntCollections.ensureCapacity(myNext, cnt + 1);
-    modified();
     if (contains(value)) return false;
     int h = index(hash(value));
     myNext[cnt] = myHead[h];
@@ -39,8 +38,7 @@ public class ChainHashLongSet extends AbstractWritableLongSet implements Writabl
 
   // todo add BitSet
   @Override
-  public boolean exclude(long value) {
-    modified();
+  protected boolean exclude0(long value) {
     int h = index(hash(value));
     int i = myHead[h];
     if (i == 0) return false;
@@ -114,7 +112,7 @@ public class ChainHashLongSet extends AbstractWritableLongSet implements Writabl
   }
 
   // todo more effective
-  public ChainHashLongSet retain(LongList values) {
+  public LongOpenHashSet retain(LongList values) {
     LongArray array = toArray();
     array.retain(values);
     clear();

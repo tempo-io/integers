@@ -3,20 +3,15 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * @author Igor Sereda
  */
-public class AmortizedSortedLongSet implements WritableSortedLongSet {
+public class LongAmortizedSortedSet implements WritableLongSortedSet {
   private static final int DEFAULT_CHUNKSIZE = 512;
 
   private LongArray myBaseList;
-  private final DynamicLongSet myAdded = new DynamicLongSet();
-  //  private final ChainHashLongSet myRemoved = new ChainHashLongSet(509, 512);//HashSet<Long>(DEFAULT_CHUNKSIZE);
-  private final Set<Long> myRemoved = new HashSet<Long>(DEFAULT_CHUNKSIZE);
-//  private final DynamicLongSet myRemoved = new DynamicLongSet();
+  private final WritableLongSortedSet myAdded;// = new LongTreeSet();
+  private final WritableLongSet myRemoved;// = new LongChainHashSet(509, 512);
 
   private int myModCount = 0;
   // true if set wasn't modified after last coalesce()
@@ -24,19 +19,33 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
 
   private int[][] myTempInsertionPoints = {null};
 
-  public AmortizedSortedLongSet() {
+  public LongAmortizedSortedSet(WritableLongSortedSet myAddedSet, WritableLongSortedSet myRemovedSet) {
+    this(0, myAddedSet, myRemovedSet);
+  }
+
+  public LongAmortizedSortedSet(int capacity, WritableLongSortedSet myAddedSet, WritableLongSet myRemovedSet) {
+    myBaseList = new LongArray(capacity);
+    myAdded = myAddedSet;
+    myRemoved = myRemovedSet;
+  }
+
+  public LongAmortizedSortedSet() {
     this(0);
   }
 
-  public AmortizedSortedLongSet(int capacity) {
-    myBaseList = new LongArray(capacity);
+  public LongAmortizedSortedSet(int capacity) {
+    this(0, new LongTreeSet(), new LongChainHashSet(512));
+  }
+
+  private void add0(long value) {
+    myRemoved.remove(value);
+    myAdded.add(value);
+    maybeCoalesce();
   }
 
   public void add(long value) {
     modified();
-    myRemoved.remove(value);
-    myAdded.add(value);
-    maybeCoalesce();
+    add0(value);
   }
 
   public boolean include(long value) {
@@ -46,6 +55,7 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
     return true;
   }
 
+  // todo optimize
   public void addAll(LongList values) {
     modified();
     addAll(values.iterator());
@@ -54,7 +64,7 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
   public void addAll(LongIterator iterator) {
     modified();
     while (iterator.hasNext())
-      add(iterator.nextValue());
+      add0(iterator.nextValue());
   }
 
   public void addAll(long... values) {
@@ -99,7 +109,7 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
   }
 
   @Override
-  public AmortizedSortedLongSet retain(LongList values) {
+  public LongAmortizedSortedSet retain(LongList values) {
     modified();
     coalesce();
     myBaseList.retain(values);
@@ -107,9 +117,9 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
   }
 
   private LongIterator sortedRemovedIterator() {
-    LongArray removeArray = LongArray.create(myRemoved);
+    LongArray removeArray = new LongArray(myRemoved.iterator());
 //    LongArray removedArray = myRemoved.toLongArray();
-    removeArray.sortUnique();
+    removeArray.sort();
     return removeArray.iterator();
   }
 
@@ -140,15 +150,8 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
   void coalesce() {
     myCoalesced = true;
     // todo add method WLL.removeSortedFromSorted(LIterable)
-    int idx = 0;
-    LongIterator removeIt = sortedRemovedIterator();
-    while (removeIt.hasNext() && !myBaseList.isEmpty()) {
-      idx = myBaseList.binarySearch(removeIt.nextValue(), idx, myBaseList.size());
-      if (idx >= 0) {
-        myBaseList.removeAt(idx);
-      } else {
-        idx = -idx - 1;
-      }
+    for (LongIterator removeIt : sortedRemovedIterator()) {
+      myBaseList.removeAllSorted(removeIt.value());
     }
     myBaseList.mergeWithSmall(myAdded.toArray(), myTempInsertionPoints);
     myAdded.clear();
@@ -188,37 +191,37 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
   }
 
   /**
-   * @return new AmortizedSortedLongSet contained all elements from the specified iterator
+   * @return new LongAmortizedSortedSet contained all elements from the specified iterator
    */
-  public static AmortizedSortedLongSet fromSortedIterable(LongIterator src) {
+  public static LongAmortizedSortedSet fromSortedIterable(LongIterator src) {
     return fromSortedIterator(src, 0);
   }
 
   /**
    * @param capacity the capacity for new set
-   * @return new AmortizedSortedLongSet contained all elements from the specified iterator
+   * @return new LongAmortizedSortedSet contained all elements from the specified iterator
    */
-  public static AmortizedSortedLongSet fromSortedIterator(LongIterator src, int capacity) {
+  public static LongAmortizedSortedSet fromSortedIterator(LongIterator src, int capacity) {
     return fromSortedIterable0(src, capacity);
   }
 
   /**
-   * @return new AmortizedSortedLongSet contained all elements from the specified src
+   * @return new LongAmortizedSortedSet contained all elements from the specified src
    */
-  public static AmortizedSortedLongSet fromSortedList(LongList src) {
+  public static LongAmortizedSortedSet fromSortedList(LongList src) {
     return fromSortedIterable0(src, src.size());
   }
 
   /**
    * @param capacity the capacity for new set
-   * @return new AmortizedSortedLongSet contained all elements from the specified src
+   * @return new LongAmortizedSortedSet contained all elements from the specified src
    */
-  public static AmortizedSortedLongSet fromSortedList(LongList src, int capacity) {
+  public static LongAmortizedSortedSet fromSortedList(LongList src, int capacity) {
     return fromSortedIterable0(src, capacity);
   }
 
-  private static AmortizedSortedLongSet fromSortedIterable0(LongIterable iterable, int capacity) {
-    AmortizedSortedLongSet res = new AmortizedSortedLongSet();
+  private static LongAmortizedSortedSet fromSortedIterable0(LongIterable iterable, int capacity) {
+    LongAmortizedSortedSet res = new LongAmortizedSortedSet();
     res.myBaseList = LongCollections.collectIterables(capacity, iterable);
     return res;
   }
@@ -247,8 +250,8 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
 //    while (removedIt.hasNext()) {//removeIterator()) {
 //      if (myBaseList.binarySearch(removedIt.nextValue()) >= 0) size--;
 //    }
-    for(Long val: myRemoved) {
-      if (myBaseList.binarySearch(val) >= 0) size--;
+    for (LongIterator it : myRemoved) {
+      if (myBaseList.binarySearch(it.value()) >= 0) size--;
     }
     return size;
   }
@@ -270,7 +273,7 @@ public class AmortizedSortedLongSet implements WritableSortedLongSet {
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("AmortizedSortedLongSet\n");
+    builder.append("LongAmortizedSortedSet\n");
     builder.append("myBaseList: ").append(LongCollections.toBoundedString(myBaseList)).append('\n');
     builder.append("myAdded: ").append(LongCollections.toBoundedString(myAdded)).append('\n');
     builder.append("myRemoved: ").append(LongCollections.toBoundedString(sortedRemovedIterator()));

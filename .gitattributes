@@ -36,7 +36,6 @@ dev/com/almworks/integers/AbstractWritableIntList.java -text
 dev/com/almworks/integers/AbstractWritableLongList.java -text
 dev/com/almworks/integers/AbstractWritableLongSet.java -text
 dev/com/almworks/integers/DynamicIntSet.java -text
-dev/com/almworks/integers/DynamicLongSet.java -text
 dev/com/almworks/integers/EmptyIntIterator.java -text
 dev/com/almworks/integers/EmptyLongIterator.java -text
 dev/com/almworks/integers/IndexedIntIterator.java -text
@@ -70,6 +69,7 @@ dev/com/almworks/integers/LongList.java -text
 dev/com/almworks/integers/LongListIterator.java -text
 dev/com/almworks/integers/LongProgression.java -text
 dev/com/almworks/integers/LongSet.java -text
+dev/com/almworks/integers/LongTreeSet.java -text
 dev/com/almworks/integers/PairIntIntIterator.java -text
 dev/com/almworks/integers/PairIntLongIterator.java -text
 dev/com/almworks/integers/ParallelIntList.java -text
@@ -82,7 +82,7 @@ dev/com/almworks/integers/WritableIntListIterator.java -text
 dev/com/almworks/integers/WritableLongList.java -text
 dev/com/almworks/integers/WritableLongListIterator.java -text
 dev/com/almworks/integers/WritableLongSet.java -text
-dev/com/almworks/integers/WritableSortedLongSet.java -text
+dev/com/almworks/integers/WritableLongSortedSet.java -text
 dev/com/almworks/integers/func/IntFunction.java -text
 dev/com/almworks/integers/func/IntFunction2.java -text
 dev/com/almworks/integers/func/IntFunctions.java -text
@@ -109,8 +109,6 @@ dev/com/almworks/integers/optimized/SegmentedLongArrayHeapEnvironment.java -text
 dev/com/almworks/integers/util/AbstractIntListDecorator.java -text
 dev/com/almworks/integers/util/AbstractLongListDecorator.java -text
 dev/com/almworks/integers/util/AbstractLongListRemovingDecorator.java -text
-dev/com/almworks/integers/util/AmortizedSortedLongSet.java -text
-dev/com/almworks/integers/util/ChainHashLongSet.java -text
 dev/com/almworks/integers/util/DiffIndexedIntListDecorator.java -text
 dev/com/almworks/integers/util/DiffIndexedLongListDecorator.java -text
 dev/com/almworks/integers/util/FailFastLongIterator.java -text
@@ -121,6 +119,8 @@ dev/com/almworks/integers/util/IntListInsertingDecorator.java -text
 dev/com/almworks/integers/util/IntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/IntObjMap.java -text
 dev/com/almworks/integers/util/IntSetBuilder.java -text
+dev/com/almworks/integers/util/LongAmortizedSortedSet.java -text
+dev/com/almworks/integers/util/LongChainHashSet.java -text
 dev/com/almworks/integers/util/LongConcatIterator.java -text
 dev/com/almworks/integers/util/LongIntersectionIterator.java -text
 dev/com/almworks/integers/util/LongIterableLexicographicComparator.java -text
@@ -129,6 +129,7 @@ dev/com/almworks/integers/util/LongListInsertingDecorator.java -text
 dev/com/almworks/integers/util/LongListRemovingDecorator.java -text
 dev/com/almworks/integers/util/LongMinusIterator.java -text
 dev/com/almworks/integers/util/LongObjMap.java -text
+dev/com/almworks/integers/util/LongOpenHashSet.java -text
 dev/com/almworks/integers/util/LongSetBuilder.java -text
 dev/com/almworks/integers/util/LongSetOperationsIterator.java -text
 dev/com/almworks/integers/util/LongUnionIterator.java -text
