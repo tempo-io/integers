@@ -68,6 +68,7 @@ public class ParallelLongList {
   }
 
   public void set(int offset, int list, long value) {
+    assert 0 <= list && list < getListCount();
     myStorage.set(offset * getListCount() + list, value);
   }
 
@@ -149,6 +150,7 @@ public class ParallelLongList {
     }
 
     public void set(int offset, int list, long value) {
+      assert offset < getListCount();
       myIt.set(getListCount() * (offset - 1) + list + 1, value);
     }
 

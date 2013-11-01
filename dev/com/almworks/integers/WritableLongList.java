@@ -22,7 +22,7 @@ package com.almworks.integers;
 import com.almworks.integers.func.LongFunction;
 import org.jetbrains.annotations.NotNull;
 
-public interface WritableLongList extends LongList, LongCollector {
+  public interface WritableLongList extends LongList, LongCollector {
   @NotNull
   WritableLongListIterator iterator();
 
@@ -69,7 +69,7 @@ public interface WritableLongList extends LongList, LongCollector {
   void insertAll(int index, LongList values, int sourceIndex, int count);
 
   /**
-   * Inserts {@code value} in this sorted list, if it isn't exist, keeping sorted order.
+   * Inserts {@code value} in this sorted list, if this list doesn't contain {@code value}, keeping sorted order.
    * @return true if this list was modified otherwise false
    */
   boolean addSorted(long value);
@@ -103,15 +103,16 @@ public interface WritableLongList extends LongList, LongCollector {
   void apply(int from, int to, LongFunction function);
 
   /**
-   * Sorts this list using quicksort copied from {@link java.util.Arrays#sort(int[])} then corrected
+   * Sorts this list. Stability is not guaranteed
    * @param sortAlso lists in which the order is changed as well as this list
    */
-  void sort(WritableLongList... sortAlso);
+  WritableLongList sort(WritableLongList... sortAlso);
 
   /**
-   * Sorts this list and removes duplicates
+   * Sorts this list, removes duplicates and returns it.
+   * @return this list, sorted and with duplicates removed
    */
-  void sortUnique();
+  WritableLongList sortUnique();
 
   void sortByFirstThenBySecond(WritableLongList sortAlso);
 

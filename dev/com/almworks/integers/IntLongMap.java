@@ -173,7 +173,7 @@ public class IntLongMap {
     }
     long currValue;
     long lastValue = 0;
-    for (LongIterator ii : myValues) {
+    for (LongIterator ii : myValues.iterator()) {
       currValue = ii.value();
       if (currValue == lastValue) return false;
       lastValue = currValue;

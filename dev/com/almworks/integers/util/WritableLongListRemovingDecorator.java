@@ -25,10 +25,10 @@ import com.almworks.integers.*;
  * Removing decorator for a list of native ints that modifies the list of removed indices with which it works.
  * @author igor baltiyskiy
  */
-public class ModifyingLongListRemovingDecorator extends LongListRemovingDecorator {
+public class WritableLongListRemovingDecorator extends AbstractLongListRemovingDecorator {
   private final WritableIntList myRemovedSorted;
 
-  public ModifyingLongListRemovingDecorator(LongList base) {
+  public WritableLongListRemovingDecorator(LongList base) {
     this(base, new IntArray());
   }
 
@@ -36,7 +36,7 @@ public class ModifyingLongListRemovingDecorator extends LongListRemovingDecorato
     return myRemovedSorted;
   }
 
-  private ModifyingLongListRemovingDecorator(LongList base, WritableIntList removed) {
+  private WritableLongListRemovingDecorator(LongList base, WritableIntList removed) {
     super(base);
     myRemovedSorted = removed;
   }
@@ -46,9 +46,9 @@ public class ModifyingLongListRemovingDecorator extends LongListRemovingDecorato
    * @param base the decorated list
    * @param sortedRemoveIndexes collection passed for further use in decorator, don't reuse, don't prepare
    */
-  public static ModifyingLongListRemovingDecorator createFromSorted(LongList base, WritableIntList sortedRemoveIndexes) {
+  public static WritableLongListRemovingDecorator createFromSorted(LongList base, WritableIntList sortedRemoveIndexes) {
     prepareSortedIndicesInternal(sortedRemoveIndexes);
-    return new ModifyingLongListRemovingDecorator(base, sortedRemoveIndexes);
+    return new WritableLongListRemovingDecorator(base, sortedRemoveIndexes);
   }
 
   public void removeAt(int index) {
@@ -66,10 +66,10 @@ public class ModifyingLongListRemovingDecorator extends LongListRemovingDecorato
    * @param removeIndexes list of indices to remove. It is copied internally, so after the method returns, the contents of the list are neither read nor written by the created object.
    * @return
    */
-  public static ModifyingLongListRemovingDecorator createFromUnsorted(LongList base, int... removeIndexes) {
+  public static WritableLongListRemovingDecorator createFromUnsorted(LongList base, int... removeIndexes) {
     if (removeIndexes == null || removeIndexes.length == 0)
-      return new ModifyingLongListRemovingDecorator(base);
-    return new ModifyingLongListRemovingDecorator(base, prepareUnsortedIndicesInternal(removeIndexes));
+      return new WritableLongListRemovingDecorator(base);
+    return new WritableLongListRemovingDecorator(base, prepareUnsortedIndicesInternal(removeIndexes));
   }
 
 }

@@ -763,8 +763,9 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   // todo more effective
-  public void sort(WritableLongList... sortAlso) {
+  public SegmentedLongArray sort(WritableLongList... sortAlso) {
     super.sort(sortAlso);
+    return this;
   }
 
   // todo more effective

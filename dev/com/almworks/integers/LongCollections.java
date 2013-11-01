@@ -22,7 +22,6 @@ package com.almworks.integers;
 import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.optimized.CyclicLongQueue;
-import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
+import static com.almworks.integers.IntegersUtils.arrayCopy;
 
 public class LongCollections {
   public static long[] toNativeArray(LongIterable iterable) {
@@ -61,7 +61,7 @@ public class LongCollections {
       LongList list = (LongList) values;
       if ((unique && list.isUniqueSorted()) || (!unique && list.isSorted())) return list;
     }
-    LongArray buf = collectIterables(0, values);
+    LongArray buf = collectIterables(values);
     int bufSize = buf.size();
     if (bufSize == 0) return LongList.EMPTY;
     long[] array = buf.extractHostArray();
@@ -409,36 +409,46 @@ public class LongCollections {
   }
 
   /**
-   * @return SameValuesLongList with element {@code value} repeated {@code count} times.
+   * @return {@code LongList} with element {@code value} repeated {@code count} times.
    * */
-  public static SameValuesLongList repeat(long value, int count) {
+  public static LongList repeat(final long value, final int count) {
     if (count < 0)
       throw new IllegalArgumentException();
-    SameValuesLongList array = new SameValuesLongList(new IntLongMap(new IntArray(1), new LongArray(1)));
-    array.insertMultiple(0, value, count);
-    return array;
+    if (count == 0) return LongList.EMPTY;
+
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return count;
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        return value;
+      }
+    };
   }
 
   /**
    * @return union of the two sets
    */
-  public static DynamicLongSet union(LongSet first, LongSet second) {
+  public static LongTreeSet union(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     if (!(first instanceof SortedLongSet)) arrays[0].sortUnique();
     if (!(second instanceof SortedLongSet)) arrays[1].sortUnique();
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].merge(arrays[1 - dest]);
-    return DynamicLongSet.fromSortedList(arrays[dest]);
+    return LongTreeSet.fromSortedList(arrays[dest]);
   }
 
   /**
    * @return intersection of the two sets
    */
-  public static DynamicLongSet intersection(LongSet first, LongSet second) {
+  public static LongTreeSet intersection(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].retainSorted(arrays[1 - dest]);
-    return DynamicLongSet.fromSortedList(arrays[dest]);
+    return LongTreeSet.fromSortedList(arrays[dest]);
   }
 
   /**
@@ -551,6 +561,14 @@ public class LongCollections {
   }
 
   /**
+   * @return array with elements from the {@code iterables}.
+   * @see LongCollections#collectIterables(int, LongIterable...)
+   */
+  public static LongArray collectIterables(LongIterable ... iterables) {
+    return collectIterables(0, iterables);
+  }
+
+  /**
    * @param capacity initial capacity for array
    * @return array with elements from the {@code iterables}.
    */
@@ -564,6 +582,33 @@ public class LongCollections {
       }
     }
     return res;
+  }
+
+  public static LongIterator concatIterables(final LongIterable ... iterables) {
+    if (iterables == null || iterables.length == 0) return LongIterator.EMPTY;
+
+    return new FindingLongIterator() {
+      int curItNum = 0;
+      LongIterator curIt = LongIterator.EMPTY;
+      @Override
+      protected boolean findNext() {
+        if (curIt.hasNext()) {
+          myCurrent = curIt.nextValue();
+          return true;
+        }
+
+        // todo remove code duplicate?
+        while (!curIt.hasNext() && curItNum < iterables.length) {
+          curIt = iterables[curItNum++].iterator();
+        }
+
+        if (curIt.hasNext()) {
+          myCurrent = curIt.nextValue();
+          return true;
+        }
+        return false;
+      }
+    };
   }
 
   /**

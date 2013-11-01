@@ -22,7 +22,6 @@ package com.almworks.integers.optimized;
 import com.almworks.integers.*;
 import com.almworks.integers.util.IntegersDebug;
 import org.jetbrains.annotations.NotNull;
-import org.testng.internal.annotations.IAfterClass;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
@@ -49,7 +48,30 @@ public class SameValuesLongList extends AbstractWritableLongList {
     myMap = hostMap;
   }
 
-  public long get(int index) {
+  // todo javadoc, values.size() == counts0.size()
+  public static SameValuesLongList create(LongArray values, IntIterable counts0) {
+//    if (values.size() != counts0.size()) throw new IllegalArgumentException();
+    IntArray counts = new IntArray(values.size());
+    counts.add(0);
+    int last = 0, cur;
+    IntIterator it = counts0.iterator();
+    for (int i = 1; i < values.size(); i++) {
+      cur = last + it.nextValue();
+      counts.add(cur);
+      last = cur;
+    }
+    SameValuesLongList list = new SameValuesLongList();
+    list.myMap = new IntLongMap(counts, LongArray.copy(values));
+    list.updateSize(it.nextValue() + last);
+    return list;
+  }
+
+  public static SameValuesLongList create(LongArray values) {
+    return create(values, IntCollections.repeat(1, values.size()));
+  }
+
+
+    public long get(int index) {
     assert !IntegersDebug.CHECK || checkInvariants();
     if (index < 0 || index >= size())
       throw new IndexOutOfBoundsException(index + " " + this);
@@ -196,7 +218,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
   }
 
   @Override
-  public void sortUnique() {
+  public SameValuesLongList sortUnique() {
     LongArray newValues = new LongArray(myMap.valuesIterator(0, myMap.size()));
     newValues.add(get(0));
     newValues.sortUnique();
@@ -205,6 +227,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     for (int i = 0; i < newSize; i++) newIndexes.add(i);
     myMap = new IntLongMap(newIndexes, newValues);
     updateSize(newSize);
+    return this;
   }
 
 

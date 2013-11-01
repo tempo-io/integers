@@ -101,7 +101,7 @@ public final class LongArray extends AbstractWritableLongList {
    */
   public static LongArray copy(@Nullable LongIterable iterable) {
     if (iterable == null) return new LongArray();
-    return LongCollections.collectIterables(0, iterable);
+    return LongCollections.collectIterables(iterable);
   }
 
   /**
@@ -265,11 +265,12 @@ public final class LongArray extends AbstractWritableLongList {
     updateSize(newsz);
   }
 
-  public void sort(WritableLongList... sortAlso) {
+  public LongArray sort(WritableLongList... sortAlso) {
     if (sortAlso == null || sortAlso.length == 0)
       Arrays.sort(myArray, 0, size());
     else
       super.sort(sortAlso);
+    return this;
   }
 
   public void addAll(LongList list) {
@@ -304,9 +305,10 @@ public final class LongArray extends AbstractWritableLongList {
    * Sorts this array using {@link Arrays#sort(int[])}, removes duplicates and updates size.
    */
   @Override
-  public void sortUnique() {
+  public LongArray sortUnique() {
     Arrays.sort(myArray, 0, size());
     updateSize(LongCollections.removeSubsequentDuplicates(myArray, 0, size()));
+    return this;
   }
 
   /**
@@ -472,8 +474,8 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * <p>Merge the specified sorted list and this sorted array. If src or this array are not sorted, result is undefined.
-   * If there {@code getCapacity() < src.size() + size()}, will go reallocation.
-   * <p>Complexity: {@code O(eps(N/T) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
+   * If there {@code getCapacity() < src.size() + size()}, will do reallocation.
+   * <p>Complexity: {@code O(eps(N, T, N/T) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
    * {@code eps} depend on ratio of {@code N/T} and mixing of {@code src} and this array.
    * In the general case, if N/T > 4, then eps < 0.5.
    * <p>Prefer to use this method over {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
@@ -482,6 +484,7 @@ public final class LongArray extends AbstractWritableLongList {
    *
    * @param  src sorted list.
    * @return this.
+   * @see LongArray#merge(LongList)
    * */
   public LongArray mergeWithSmall(LongList src) {
     mergeWithSmall(src, new int[][]{null});

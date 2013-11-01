@@ -101,8 +101,8 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     }
   }
 
-  /***
-   * Removes the first occurence of the specified element from this list if it exists.
+  /**
+   * Removes the first occurrence of the specified element from this list, if it is present.
    * @return true if this list was modified otherwise false
    */
   public boolean remove(long value) {
@@ -130,8 +130,9 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
 
   /**
    * Removes all appearances of value if this collection is sorted
+   * @return true if this list was modified otherwise false
    */
-  public void removeAllSorted(long value) {
+  public boolean removeAllSorted(long value) {
     int from = binarySearch(value);
     if (from >= 0) {
       int to;
@@ -142,7 +143,9 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
       } else to = size();
       assert to > from : from + " " + to;
       removeRange(from, to);
+      return true;
     }
+    return false;
   }
 
   /**
@@ -241,7 +244,11 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
       set(i, function.invoke(get(i)));
   }
 
-  public void sort(final WritableLongList ... sortAlso) {
+  /**
+   * Sorts this list using quicksort copied from {@link java.util.Arrays#sort(int[])} then corrected
+   * @param sortAlso lists in which the order is changed as well as this list
+   */
+  public AbstractWritableLongList sort(final WritableLongList ... sortAlso) {
     if (sortAlso != null) {
       for (WritableLongList list : sortAlso) {
         assert list.size() == size();
@@ -260,11 +267,13 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
           }
       }
     });
+    return this;
   }
 
-  public void sortUnique() {
+  public AbstractWritableLongList sortUnique() {
     sort();
     removeDuplicates();
+    return this;
   }
 
 

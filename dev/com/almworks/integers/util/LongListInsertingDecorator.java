@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 public class LongListInsertingDecorator extends AbstractLongListDecorator {
   private final IntLongMap myInserted;
 
-  private LongListInsertingDecorator(LongList base, IntLongMap inserted) {
+  public LongListInsertingDecorator(LongList base, IntLongMap inserted) {
     super(base);
     myInserted = inserted;
   }

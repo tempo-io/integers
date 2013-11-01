@@ -78,7 +78,7 @@ public class LongUnionIterator extends LongSetOperationsIterator {
     return true;
   }
 
-  public int getTopIteratorIndex() {
+  public int getCurrentIteratorIndex() {
     return myHeap[TOP];
   }
 }

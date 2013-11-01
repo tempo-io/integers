@@ -593,4 +593,27 @@ public class IntCollections {
     }
     return new IntArray(newArray, i);
   }
+
+  /**
+   * @return {@code LongList} with element {@code value} repeated {@code count} times.
+   * */
+  public static IntList repeat(final int value, final int count) {
+    if (count < 0)
+      throw new IllegalArgumentException();
+    if (count == 0) return IntList.EMPTY;
+
+    return new AbstractIntList() {
+      int size = count;
+      int val = value;
+      @Override
+      public int size() {
+        return size;
+      }
+
+      @Override
+      public int get(int index) throws NoSuchElementException {
+        return val;
+      }
+    };
+  }
 }
