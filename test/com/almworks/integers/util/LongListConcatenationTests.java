@@ -19,8 +19,34 @@ package com.almworks.integers.util;
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
 import com.almworks.integers.LongList;
+import com.almworks.integers.LongListChecker;
 
-public class LongListConcatenationTests extends IntegersFixture {
+import java.util.ArrayList;
+import java.util.List;
+
+public class LongListConcatenationTests extends LongListChecker {
+
+  @Override
+  protected List<LongList> createLongListVariants(long... values) {
+    List<LongList> res = new ArrayList<LongList>();
+
+    // []
+    LongArray array = new LongArray(values);
+    res.add(new LongListConcatenation(array));
+    int len2 = values.length / 2;
+    if (values.length == 0 || len2 == 0) return res;
+
+    // [][]
+    res.add(new LongListConcatenation(new LongArray(array.subList(0, len2)), new LongArray(array.subList(len2, array.size()))));
+
+    // [][][][]...[]
+    LongList[] lists = new LongList[values.length];
+    for (int i = 0; i < values.length; i++) {
+      lists[i] = LongArray.create(values[i]);
+    }
+    res.add(new LongListConcatenation(lists));
+    return res;
+  }
 
   public void testConcatUnmodifiable() {
     LongList[] res = {LongArray.create(0, 1, 2), LongArray.create(3, 4), LongArray.create(5)};

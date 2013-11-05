@@ -16,13 +16,55 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntArray;
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongIterator;
+import com.almworks.integers.*;
 
-public class LongListInsertingDecoratorTests extends IntegersFixture {
+import java.util.ArrayList;
+import java.util.List;
+
+public class LongListInsertingDecoratorTests extends LongListChecker {
+
+  @Override
+  protected List<LongList> createLongListVariants(long... values) {
+    List<LongList> res = new ArrayList<LongList>();
+
+    // [...]
+    LongArray array = LongArray.copy(values);
+    res.add(new LongListInsertingDecorator(array));
+    if (array.size() == 0) return res;
+
+    // [...]~
+    array = LongArray.copy(array);
+    long lastVal = array.removeLast();
+    res.add(new LongListInsertingDecorator(array, new IntLongMap(IntArray.create(array.size()), LongArray.create(lastVal))));
+
+    if (values.length > 1) {
+      // ~[...]~
+      array = LongArray.copy(array);
+      long firstVal = array.removeAt(0);
+      res.add(new LongListInsertingDecorator(array, new IntLongMap(IntArray.create(0, values.length - 1), LongArray.create(firstVal, lastVal))));
+    }
+
+    // ~[...]
+    array = LongArray.copy(values);
+    long firstVal = array.removeAt(0);
+    res.add(new LongListInsertingDecorator(array, new IntLongMap(IntArray.singleton(0), LongArray.singleton(firstVal))));
+
+    // [..~..]
+    array = LongArray.copy(values);
+    int pos = array.size() / 2;
+    if (pos != 0) {
+      long posVal = array.removeAt(pos);
+      res.add(new LongListInsertingDecorator(array, new IntLongMap(IntArray.create(pos), LongArray.create(posVal))));
+    }
+    return res;
+  }
+
   private final LongArray myArray = new LongArray();
+
+  @Override
+  protected void setUp() throws Exception {
+    myArray.clear();
+  }
 
   public void testInsertDecorator() {
     LongListInsertingDecorator ins = new LongListInsertingDecorator(myArray);
@@ -115,5 +157,21 @@ public class LongListInsertingDecoratorTests extends IntegersFixture {
 
     source.clear();
     expected.clear();
+  }
+
+  public void testIteratorGet() {
+    LongArray source = LongArray.create(0, 20, 40, 60),
+        expected = LongArray.create(0, 10, 20, 30, 40, 50, 60),
+        result = new LongArray();
+    LongListInsertingDecorator tst2 =
+        new LongListInsertingDecorator(source, new IntLongMap(IntArray.create(1, 3, 5), LongArray.create(10, 30, 50)));
+    LongListIterator it = tst2.iterator(), expIt = expected.iterator();
+    while(it.hasNext()) {
+      assertEquals(it.nextValue(), expIt.nextValue());
+    }
+    assertEquals(it.hasNext(), expIt.hasNext());
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(it.get(-i), expIt.get(-i));
+    }
   }
 }

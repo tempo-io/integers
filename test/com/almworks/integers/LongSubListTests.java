@@ -21,7 +21,7 @@ import java.util.List;
 
 public class LongSubListTests extends LongListChecker {
   @Override
-  protected List<LongList> createLongList(long... values) {
+  protected List<LongList> createLongListVariants(long... values) {
     final int length = values.length;
 
     // [...]

@@ -2,7 +2,20 @@ package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
 
-public class SameValuesLongListTests extends IntegersFixture {
+import java.util.ArrayList;
+import java.util.List;
+
+public class SameValuesLongListTests extends LongListChecker {
+
+  @Override
+  protected List<LongList> createLongListVariants(long... values) {
+    List<LongList> res = new ArrayList<LongList>();
+    SameValuesLongList array = new SameValuesLongList();
+    array.addAll(values);
+    res.add(array);
+    return res;
+  }
+
   private SameValuesLongList list;
 
   public void setUp() throws Exception {
@@ -144,6 +157,29 @@ public class SameValuesLongListTests extends IntegersFixture {
     checkCollection(list, 1, 2, 2);
   }
 
+  public void testSetAll() {
+    for (int i = 0; i < 10; i++) {
+      LongArray array = generateRandomLongArray(1000, false, 500);
+      array.sort();
+      list.addAll(array);
+      int index = RAND.nextInt(list.size());
+      int len = list.size() - index;
+      LongList insertArray;
+      if (len != 0) {
+        insertArray = generateRandomLongArray(len, false, len / 2);
+      } else {
+        insertArray = LongList.EMPTY;
+      }
+      list.setAll(index, insertArray);
+
+      LongArray expected = new LongArray(list.iterator(0, index));
+      expected.addAll(insertArray);
+      expected.addAll(list.iterator(index + len));
+
+      CHECK.order(expected, list);
+    }
+  }
+
   public void testSetBySort() {
     for (int i = 0; i < 100; i++) {
       list.add(0);
@@ -174,6 +210,18 @@ public class SameValuesLongListTests extends IntegersFixture {
     checkCollectionM(list, ap(1, 0, 6), ap(2, 0, 5), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
     list.insertMultiple(6, 3, 1);
     checkCollectionM(list, ap(1, 0, 6), ap(3, 0, 1), ap(2, 0, 5), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
+  }
+
+  public void testInsertAll() {
+    list.addAll(0);
+    list.insertAll(1, LongArray.create(2, 4, 6).iterator());
+    CHECK.order(LongArray.create(0,2,4,6), list);
+
+    list.insertAll(2, LongArray.create(-5, -10, -15));
+    CHECK.order(LongArray.create(0, 2, -5, -10, -15, 4, 6), list);
+
+    list.insertAll(0, LongArray.create(0, 99, 99, 0), 1, 2);
+    CHECK.order(LongArray.create(99, 99, 0, 2, -5, -10, -15, 4, 6), list);
   }
 
   public void testGetNextDifferentValueIndex() {
@@ -266,8 +314,9 @@ public class SameValuesLongListTests extends IntegersFixture {
     result = new SameValuesLongList();
     for (WritableLongListIterator it : source.write()) {
       result.add(it.value());
-      it.set(0, 3);
+      it.set(0, -1);
     }
+    CHECK.order(source, LongCollections.repeat(-1, source.size()));
     assertEquals(expected, result);
   }
 
@@ -322,7 +371,7 @@ public class SameValuesLongListTests extends IntegersFixture {
     LongArray expected = LongArray.create(0, 1, 2, 3, 4, 5);
     list.addAll(expected.iterator());
     CHECK.order(list.iterator(), expected.iterator());
-    SameValuesLongList addedValues;
+    LongList addedValues;
 
     // value, count > 0, index
     int[][] arguments = {{10, 1000, 0}, {99, 10000, 0}, {77, 10000, 1000}, {33, 5000, 21006}};
@@ -337,7 +386,7 @@ public class SameValuesLongListTests extends IntegersFixture {
 
   public void testSortUnique() {
     for (int size = 64; size < 1024; size *= 2) {
-      LongArray expected = IntegersFixture.generateRandomArray(1000, false, 1000);
+      LongArray expected = IntegersFixture.generateRandomLongArray(size, false, size);
       list.clear();
       expected.sort();
       list.addAll(expected);
@@ -345,5 +394,25 @@ public class SameValuesLongListTests extends IntegersFixture {
       list.sortUnique();
       CHECK.order(list.iterator(), expected.iterator());
     }
+  }
+
+  // todo update with 0 in counts
+  public void testCreate() {
+    for (int i = 0; i < 10; i++) {
+      LongArray values = generateRandomLongArray(100, false);
+      IntArray counts = generateRandomIntArray(100, false, 1, 4);
+      LongArray expected = new LongArray(values.size() * 3);
+      for (int j = 0; j < values.size(); j++) {
+        for (int k = 0; k < counts.get(j); k++) {
+          expected.add(values.get(j));
+        }
+      }
+
+      SameValuesLongList actual = SameValuesLongList.create(values, counts);
+      CHECK.order(expected, actual);
+    }
+
+    LongArray expected = generateRandomLongArray(100, false);
+    CHECK.order(expected, SameValuesLongList.create(expected));
   }
 }

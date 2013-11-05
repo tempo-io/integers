@@ -3,14 +3,51 @@ package com.almworks.integers.optimized;
 import com.almworks.integers.*;
 import com.almworks.integers.func.LongFunction;
 
-public class SegmentedLongArrayTests extends IntegersFixture {
+import java.util.ArrayList;
+import java.util.List;
+
+public class SegmentedLongArrayTests extends LongListChecker {
   private TestEnvForSegmentedLongArray myEnv;
   private SegmentedLongArray array;
+  private final int segmentSize = 1024;
+  private final int checkedSize = segmentSize * 2 - 1;
 
   public void setUp() throws Exception {
     super.setUp();
     myEnv = new TestEnvForSegmentedLongArray();
     array = new SegmentedLongArray(myEnv);
+  }
+
+
+  @Override
+  protected List<LongList> createLongListVariants(long... values) {
+    List<LongList> res = new ArrayList<LongList>();
+    SegmentedLongArray array = new SegmentedLongArray();
+    array.addAll(values);
+    res.add(array);
+
+    if (values.length == checkedSize) {
+      LongArray vals = new LongArray(values);
+      int size = values.length;
+      int[] points = {0, segmentSize/2, segmentSize - 1, segmentSize, segmentSize + segmentSize/2, segmentSize * 2 - 1};
+      for (int point: points) {
+        array = new SegmentedLongArray();
+        array.addAll(vals.subList(0, point));
+        array.add(RAND.nextLong());
+        array.addAll(vals.subList(point, size));
+        array.removeAt(point);
+        res.add(array);
+      }
+    }
+    return res;
+  }
+
+  public void testBigArrays() {
+    for (int i = 0; i < 10; i++) {
+      long[] ar = generateRandomLongArray(checkedSize, false).extractHostArray();
+      _testCHECK(ar);
+      _testGetMethods(ar);
+    }
   }
 
   protected void tearDown() throws Exception {
@@ -98,7 +135,7 @@ public class SegmentedLongArrayTests extends IntegersFixture {
     array.remove(0);
     array.removeRange(0, 0);
     assertEquals(array, array.subList(0, 0));
-    array.toArray(0, new long[0], 0, 0);
+    array.toNativeArray(0, new long[0], 0, 0);
   }
 
   public void testInserts() {
@@ -420,4 +457,11 @@ public class SegmentedLongArrayTests extends IntegersFixture {
     }
     checkList(array, expected.toNativeArray());
   }
+
+  public void test()  {
+    for (int i = 0; i < 20; i++) {
+      array.addAll(LongCollections.repeat(i, 1<<i));
+    }
+  }
+
 }
