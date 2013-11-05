@@ -1,4 +1,4 @@
-/*
+  /*
  * Copyright 2010 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,12 +20,14 @@
 package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.*;
+
+import com.almworks.integers.util.LongMeasurableIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public interface LongList extends LongIterable {
+public interface LongList extends LongMeasurableIterable {
   LongList EMPTY = new LongArray(EMPTY_LONGS);
 
   /**
@@ -69,7 +71,7 @@ public interface LongList extends LongIterable {
    * Writes values to dest.
    * @return dest
    */
-  long[] toArray(int startIndex, long[] dest, int destOffset, int length);
+  long[] toNativeArray(int startIndex, long[] dest, int destOffset, int length);
 
   /**
    * Returns a sub-list, backed by this list. If the list changes, changes
@@ -138,4 +140,22 @@ public interface LongList extends LongIterable {
   * @return List filled with object wrappers
   */
   List<Long> toList();
+
+  class Single extends AbstractLongList {
+    private long myValue;
+
+    public Single(long value) {
+      myValue = value;
+    }
+
+    @Override
+    public int size() {
+      return 1;
+    }
+
+    @Override
+    public long get(int index) throws NoSuchElementException {
+      return myValue;
+    }
+  }
 }

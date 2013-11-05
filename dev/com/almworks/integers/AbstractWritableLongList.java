@@ -120,18 +120,17 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     return value;
   }
 
-  public void removeAll(long value) {
+  public boolean removeAll(long value) {
+    boolean modified = false;
     for (WritableLongListIterator ii : write()) {
       if (ii.value() == value) {
         ii.remove();
+        modified = true;
       }
     }
+    return modified;
   }
 
-  /**
-   * Removes all appearances of value if this collection is sorted
-   * @return true if this list was modified otherwise false
-   */
   public boolean removeAllSorted(long value) {
     int from = binarySearch(value);
     if (from >= 0) {
@@ -149,7 +148,6 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
   }
 
   /**
-   * Removes all values contained in collection.
    * <p/>
    * Method 1: iterate through this, lookup collection
    * Cost 1: N*cost(lookup(R))
@@ -160,15 +158,19 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
    * <p/>
    * // todo something effective
    */
-  public void removeAll(LongList collection) {
-    for (LongIterator ii : collection)
-      removeAll(ii.value());
+  public boolean removeAll(LongList collection) {
+    boolean modified = false;
+    for (LongIterator ii : collection) {
+      modified |= removeAll(ii.value());
+    }
+    return modified;
   }
 
-  public void removeAll(long... values) {
+  public boolean removeAll(long... values) {
     if (values != null && values.length > 0) {
-      removeAll(new LongArray(values));
+      return removeAll(new LongArray(values));
     }
+    return false;
   }
 
   public void clear() {
@@ -276,11 +278,6 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     return this;
   }
 
-
-  /**
-   * @param sortAlso ties in this array are broken via elements of this array. Must not be shorter than {@code a1}
-   * @throws IllegalArgumentException in case the second array is shorter than the first
-   * */
   public void sortByFirstThenBySecond(final WritableLongList sortAlso) {
     if (size() > sortAlso.size()) throw new IllegalArgumentException("This array is longer than sortAlso: " +
         size() + " > " + sortAlso.size());

@@ -22,7 +22,7 @@ package com.almworks.integers;
 import com.almworks.integers.func.LongFunction;
 import org.jetbrains.annotations.NotNull;
 
-  public interface WritableLongList extends LongList, LongCollector {
+public interface WritableLongList extends LongList, LongCollector {
   @NotNull
   WritableLongListIterator iterator();
 
@@ -45,8 +45,27 @@ import org.jetbrains.annotations.NotNull;
 
   /**
    * This method remove from this list all values that are equals to {@code value}
+   * @return true if this list was modified otherwise false
    */
-  void removeAll(long value);
+  boolean removeAll(long value);
+
+  /**
+   * Removes all appearances of value if this collection is sorted
+   * @return true if this list was modified otherwise false
+   */
+  public boolean removeAllSorted(long value);
+
+  /**
+   * Removes all values contained in collection.
+   * @return true if this list was modified otherwise false
+   */
+  public boolean removeAll(LongList collection);
+
+  /**
+   * Removes all values contained in the specified array.
+   * @return true if this list was modified otherwise false
+   */
+  public boolean removeAll(long... values);
 
   /**
    * Insert {@code value} {@code count} between indexes {@code index, index + 1}
@@ -114,6 +133,11 @@ import org.jetbrains.annotations.NotNull;
    */
   WritableLongList sortUnique();
 
+  /**
+   * // todo explanation
+   * @param sortAlso ties in this array are broken via elements of this array. Must not be shorter than {@code this list}
+   * @throws IllegalArgumentException in case the second array is shorter than the first
+   * */
   void sortByFirstThenBySecond(WritableLongList sortAlso);
 
   void swap(int index1, int index2);

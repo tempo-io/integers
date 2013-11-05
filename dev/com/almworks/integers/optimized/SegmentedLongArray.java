@@ -262,7 +262,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  public long[] toArray(int startIndex, long[] dest, int destOffset, int length) {
+  public long[] toNativeArray(int startIndex, long[] dest, int destOffset, int length) {
     if (length <= 0)
       return dest;
     assert !IntegersDebug.CHECK || checkInvariants();
@@ -343,7 +343,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     for (int i = 0; i < count;) {
       LongSegment seg = modify(di);
       int len = Math.min(count - i, mySegmentSize - dp);
-      list.toArray(sourceIndex + i, seg.data, dp, len);
+      list.toNativeArray(sourceIndex + i, seg.data, dp, len);
       i += len;
       dp = 0;
       di++;

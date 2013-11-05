@@ -1,6 +1,8 @@
 package com.almworks.integers;
 
-public interface LongSet extends LongIterable {
+import com.almworks.integers.util.LongMeasurableIterable;
+
+public interface LongSet extends LongMeasurableIterable {
   /**
    * @return true if this set contains element value. Otherwise false
    */

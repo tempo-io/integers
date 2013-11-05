@@ -1,5 +1,8 @@
 package com.almworks.integers;
 
+/**
+ *
+ */
 public abstract class AbstractWritableLongSet implements WritableLongSet {
   protected int myModCount = 0;
 

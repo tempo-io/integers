@@ -575,6 +575,7 @@ public class LongCollections {
   public static LongArray collectIterables(int capacity, LongIterable ... iterables) {
     LongArray res = new LongArray(capacity);
     for (LongIterable iterable: iterables) {
+      // todo add special case for LongSet
       if (iterable instanceof LongList) {
         res.addAll((LongList) iterable);
       } else {

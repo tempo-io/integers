@@ -19,6 +19,8 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.util.IntegersDebug;
+import com.almworks.integers.util.LongMeasurableIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import static com.almworks.integers.IntegersUtils.*;
@@ -149,7 +151,7 @@ public final class LongArray extends AbstractWritableLongList {
     return myArray[index];
   }
 
-  public long[] toArray(int sourceOffset, long[] dest, int destOffset, int length) {
+  public long[] toNativeArray(int sourceOffset, long[] dest, int destOffset, int length) {
     System.arraycopy(myArray, sourceOffset, dest, destOffset, length);
     return dest;
   }
@@ -222,7 +224,7 @@ public final class LongArray extends AbstractWritableLongList {
     if (count <= 0)
       return;
     makeSpaceForInsertion(index, index + count);
-    collection.toArray(sourceIndex, myArray, index, count);
+    collection.toNativeArray(sourceIndex, myArray, index, count);
   }
 
   private void makeSpaceForInsertion(int from, int to) {
@@ -248,7 +250,7 @@ public final class LongArray extends AbstractWritableLongList {
       throw new IndexOutOfBoundsException(index + " " + sz);
     if (index + count > sz)
       throw new IndexOutOfBoundsException(index + " " + count + " " + sz);
-    values.toArray(sourceIndex, myArray, index, count);
+    values.toNativeArray(sourceIndex, myArray, index, count);
   }
 
   public void swap(int index1, int index2) {
@@ -278,7 +280,7 @@ public final class LongArray extends AbstractWritableLongList {
     int sz = size();
     int newSize = sz + added;
     ensureCapacity(newSize);
-    list.toArray(0, myArray, sz, added);
+    list.toNativeArray(0, myArray, sz, added);
     updateSize(newSize);
   }
 
@@ -411,6 +413,25 @@ public final class LongArray extends AbstractWritableLongList {
     return true;
   }
 
+  // todo javadoc
+  // remove from this sorted array values from the specified sorted list
+  // @return true if this array was modified otherwise false
+  public void removeSortedIndexes(IntList list) {
+    IntIterator it = list.iterator();
+    if (!it.hasNext()) return;
+    int index = it.nextValue(), to, len;
+    int from = index + 1;
+    while (it.hasNext()) {
+      to = it.nextValue();
+      len = to - from;
+      System.arraycopy(myArray, from, myArray, index, len);
+      index += len;
+      from = to + 1;
+    }
+    System.arraycopy(myArray, from, myArray, index, size() - from);
+    updateSize(size() - list.size());
+  }
+
   /**
    * Extracts from this array inner buffer with {@code long[]} values and clears this array.
    * @return long[] array with values from this array.
@@ -422,7 +443,9 @@ public final class LongArray extends AbstractWritableLongList {
     return array;
   }
 
-  private int getInsertionPoints(LongList src, int[][] insertionPoints) {
+  // todo add javadoc
+  // [0,2,4,7,9,10], [0,4,8,9] --> [0,2, -1,
+  public int getInsertionPoints(LongMeasurableIterable src, int[][] insertionPoints) {
     if (insertionPoints[0] == null || insertionPoints[0].length < src.size()) {
       insertionPoints[0] = new int[src.size()];
     }
@@ -431,8 +454,9 @@ public final class LongArray extends AbstractWritableLongList {
     int insertCount = 0;
     int destIndex = 0;
     long last = 0;
+    LongIterator it = src.iterator();
     for (int i = 0, n = src.size(); i < n; i++) {
-      long v = src.get(i);
+      long v = it.nextValue();
       if (i > 0 && v == last)
         continue;
       last = v;
@@ -592,10 +616,10 @@ public final class LongArray extends AbstractWritableLongList {
     // 2. merge starting from the end
     if (size() > 0 && srcSize > 0 && myArray[0] > src.get(srcSize - 1)) {
       System.arraycopy(myArray, 0, myArray, srcSize, size());
-      src.toArray(0, myArray, 0, srcSize);
+      src.toNativeArray(0, myArray, 0, srcSize);
       updateSize(totalLength);
     } else if (size() > 0 && srcSize > 0 && myArray[size() - 1] < src.get(0)) {
-      src.toArray(0, myArray, size(), srcSize);
+      src.toNativeArray(0, myArray, size(), srcSize);
       updateSize(totalLength);
     } else {
       int insertCount = 0;
@@ -641,7 +665,7 @@ public final class LongArray extends AbstractWritableLongList {
       }
       if (pj >= 0) {
         int size = pj + 1;
-        src.toArray(0, myArray, 0, size);
+        src.toNativeArray(0, myArray, 0, size);
         i -= size;
       } else if (pi >= 0) {
         i -= pi + 1;
@@ -659,7 +683,7 @@ public final class LongArray extends AbstractWritableLongList {
     if (size() > 0 && srcSize > 0) {
       // boundary conditions: quickly merge disjoint sets
       if (myArray[0] > src.get(srcSize - 1)) {
-        src.toArray(0, newArray, 0, srcSize);
+        src.toNativeArray(0, newArray, 0, srcSize);
         i = pj = srcSize;
       } else if (myArray[size() - 1] < src.get(0)) {
         System.arraycopy(myArray, 0, newArray, 0, size());
@@ -688,7 +712,7 @@ public final class LongArray extends AbstractWritableLongList {
       i += size;
     } else if (pj < srcSize) {
       int size = srcSize - pj;
-      src.toArray(pj, newArray, i, size);
+      src.toNativeArray(pj, newArray, i, size);
       i += size;
     }
     myArray = newArray;

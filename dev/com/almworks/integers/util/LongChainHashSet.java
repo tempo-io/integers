@@ -26,6 +26,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
           loadFactor);
 
     headNum = 1;
+    // todo fix: now final capacity of set less that initialCapacity
     while (headNum < initialCapacity) headNum <<= 1;
 
     this.loadFactor = loadFactor;
@@ -33,7 +34,6 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     myHead = new int[this.headNum];
     myKeys = new long[threshold];
     myNext = new int[threshold];
-//    table = new Entry[capacity];
   }
 
   public LongChainHashSet(int initialCapacity){
@@ -82,13 +82,22 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   protected boolean include0(long value) {
     myKeys = LongCollections.ensureCapacity(myKeys, cnt + 1);
     myNext = IntCollections.ensureCapacity(myNext, cnt + 1);
-    modified();
     if (contains(value)) return false;
     int h = index(hash(value), headNum);
     myNext[cnt] = myHead[h];
     myKeys[cnt] = value;
     myHead[h] = cnt++;
     return true;
+  }
+
+  @Override
+  public void addAll(LongList values) {
+    modified();
+    int size = values.size();
+    myKeys = LongCollections.ensureCapacity(myKeys, cnt + size);
+    myNext = IntCollections.ensureCapacity(myNext, cnt + size);
+
+
   }
 
   // todo add BitSet
@@ -150,6 +159,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   @Override
   public LongArray toArray() {
+    // todo add BitSet and do more effective
     LongArray res = new LongArray();
     for (int head = 0; head < headNum; head++) {
       for(int i = myHead[head]; i != 0; i = myNext[i]) {

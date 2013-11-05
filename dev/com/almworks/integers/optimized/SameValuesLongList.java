@@ -20,7 +20,9 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
+import com.almworks.integers.util.IntMeasurableIterable;
 import com.almworks.integers.util.IntegersDebug;
+import com.almworks.integers.util.LongMeasurableIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
@@ -48,20 +50,21 @@ public class SameValuesLongList extends AbstractWritableLongList {
     myMap = hostMap;
   }
 
-  // todo javadoc, values.size() == counts0.size()
-  public static SameValuesLongList create(LongArray values, IntIterable counts0) {
-//    if (values.size() != counts0.size()) throw new IllegalArgumentException();
-    IntArray counts = new IntArray(values.size());
-    counts.add(0);
+  // todo javadoc, values.size() == counts.size()
+  public static SameValuesLongList create(LongMeasurableIterable values, IntIterable counts) {
+//    if (values.size() != counts.size()) throw new IllegalArgumentException();
+
+    IntArray counts1 = new IntArray(values.size());
+    counts1.add(0);
     int last = 0, cur;
-    IntIterator it = counts0.iterator();
-    for (int i = 1; i < values.size(); i++) {
+    IntIterator it = counts.iterator();
+    for (int i = 1, n = values.size(); i < n; i++) {
       cur = last + it.nextValue();
-      counts.add(cur);
+      counts1.add(cur);
       last = cur;
     }
     SameValuesLongList list = new SameValuesLongList();
-    list.myMap = new IntLongMap(counts, LongArray.copy(values));
+    list.myMap = new IntLongMap(counts1, LongCollections.collectIterables(values.size(), values));
     list.updateSize(it.nextValue() + last);
     return list;
   }

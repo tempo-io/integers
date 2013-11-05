@@ -39,7 +39,7 @@ public class LongListConcatenation extends AbstractLongList {
     mySlices.addAll(Arrays.asList(collections));
   }
 
-  public long[] toArray(int sourceOffset, long[] dest, int destOffset, int length) {
+  public long[] toNativeArray(int sourceOffset, long[] dest, int destOffset, int length) {
     int slices = mySlices.size();
     for (int i = 0; i < slices && length > 0; i++) {
       LongList list = mySlices.get(i);
@@ -48,7 +48,7 @@ public class LongListConcatenation extends AbstractLongList {
         sourceOffset -= size;
       } else {
         int x = Math.min(size - sourceOffset, length);
-        list.toArray(sourceOffset, dest, destOffset, x);
+        list.toNativeArray(sourceOffset, dest, destOffset, x);
         destOffset += x;
         sourceOffset = 0;
         length -= x;

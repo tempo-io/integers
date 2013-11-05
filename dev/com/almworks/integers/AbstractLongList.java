@@ -105,7 +105,7 @@ public abstract class AbstractLongList implements LongList {
     return indexOf(value) >= 0;
   }
 
-  public long[] toArray(int startIndex, long[] dest, int destOffset, int length) {
+  public long[] toNativeArray(int startIndex, long[] dest, int destOffset, int length) {
     if (length > 0) {
       LongIterator ii = iterator(startIndex, size());
       int e = destOffset + length;
@@ -130,7 +130,7 @@ public abstract class AbstractLongList implements LongList {
   public long[] toNativeArray() {
     int size = size();
     if (size == 0) return EMPTY_LONGS;
-    return toArray(0, new long[size], 0, size);
+    return toNativeArray(0, new long[size], 0, size);
   }
 
   public boolean equals(Object o) {

@@ -64,7 +64,7 @@ public class ParallelLongList {
   public void get(int offset, long[] dst) {
     if (dst == null || dst.length < getListCount())
       throw new IllegalArgumentException();
-    myStorage.toArray(offset * getListCount(), dst, 0, getListCount());
+    myStorage.toNativeArray(offset * getListCount(), dst, 0, getListCount());
   }
 
   public void set(int offset, int list, long value) {

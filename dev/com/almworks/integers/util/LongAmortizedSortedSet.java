@@ -3,6 +3,8 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 /**
  * @author Igor Sereda
  */
@@ -34,7 +36,7 @@ public class LongAmortizedSortedSet implements WritableLongSortedSet {
   }
 
   public LongAmortizedSortedSet(int capacity) {
-    this(0, new LongTreeSet(), new LongChainHashSet(512));
+    this(0, new LongTreeSet(), new LongChainHashSet());
   }
 
   private void add0(long value) {
@@ -150,6 +152,7 @@ public class LongAmortizedSortedSet implements WritableLongSortedSet {
   void coalesce() {
     myCoalesced = true;
     // todo add method WLL.removeSortedFromSorted(LIterable)
+    // todo optimize
     for (LongIterator removeIt : sortedRemovedIterator()) {
       myBaseList.removeAllSorted(removeIt.value());
     }

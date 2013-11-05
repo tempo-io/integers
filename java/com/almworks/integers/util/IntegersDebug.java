@@ -16,6 +16,13 @@
 
 package com.almworks.integers.util;
 
+/**
+ * add
+ * <br>{@code -Dcom.almworks.integers.check=true}
+ * <br>to add extra checks and
+ * <br>{@code -Dcom.almworks.integers.print=true}
+ * <br>to print some data
+ */
 public class IntegersDebug {
   public static final boolean CHECK = Boolean.getBoolean("com.almworks.integers.check");
   public static final boolean PRINT = Boolean.getBoolean("com.almworks.integers.print");
