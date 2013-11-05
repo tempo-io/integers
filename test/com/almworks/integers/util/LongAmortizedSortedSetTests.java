@@ -2,26 +2,26 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 
-public class AmortizedSortedLongSetTests extends WritableLongSetChecker {
+public class LongAmortizedSortedSetTests extends WritableLongSetChecker {
 
   protected boolean isSupportTailIterator() {
     return true;
   }
 
-  protected WritableSortedLongSet createSet() {
+  protected WritableLongSortedSet createSet() {
     return createSetWithCapacity(-1);
   }
 
-  protected WritableSortedLongSet createSetWithCapacity(int capacity) {
-    return new AmortizedSortedLongSet();
+  protected WritableLongSortedSet createSetWithCapacity(int capacity) {
+    return new LongAmortizedSortedSet();
   }
 
-  protected  WritableSortedLongSet[] createSetFromSortedList(LongList sortedList) {
-    return new WritableSortedLongSet[] {AmortizedSortedLongSet.fromSortedList(sortedList)};
+  protected  WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
+    return new WritableLongSortedSet[] {LongAmortizedSortedSet.fromSortedList(sortedList)};
   }
 
   public void testIteratorCoalesce() {
-    AmortizedSortedLongSet set = new AmortizedSortedLongSet();
+    LongAmortizedSortedSet set = new LongAmortizedSortedSet();
     set.addAll(2, 4, 6, 8);
     LongIterator it = set.iterator();
     // this is way to run coalesce()
@@ -54,7 +54,7 @@ public class AmortizedSortedLongSetTests extends WritableLongSetChecker {
   }
 
   public void _testToString() {
-    AmortizedSortedLongSet set = new AmortizedSortedLongSet();
+    LongAmortizedSortedSet set = new LongAmortizedSortedSet();
     set.addAll(0, 2, 4, 6, 8);
     set.coalesce();
     set.addAll(1, 3, 5, 7, 9);
@@ -73,6 +73,19 @@ public class AmortizedSortedLongSetTests extends WritableLongSetChecker {
     CHECK.order(new LongArray(ap(0, 1, 10)), set.toArray());
     CHECK.order(new LongArray(ap(0, 1, 10)).iterator(), set.iterator());
     CHECK.order(new LongArray(ap(5, 1, 5)).iterator(), it1);
+  }
+
+  public void testIsEmpty2() {
+    LongAmortizedSortedSet set = new LongAmortizedSortedSet(20);
+    assertTrue(set.isEmpty());
+    set.addAll(0,5,10);
+    assertFalse(set.isEmpty());
+    set.coalesce();
+    assertFalse(set.isEmpty());
+    set.removeAll(0, 5, 10);
+    assertTrue(set.isEmpty());
+    set.coalesce();
+    assertTrue(set.isEmpty());
   }
 
 }

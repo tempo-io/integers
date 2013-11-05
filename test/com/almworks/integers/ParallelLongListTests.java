@@ -28,7 +28,6 @@ public class ParallelLongListTests extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    // FILL DA LIST
   }
 
   public void testInsert() {
@@ -55,21 +54,15 @@ public class ParallelLongListTests extends TestCase {
     myList.get(1, res);
     CHECK.order(res, 2, 3);
 
-    boolean caught = false;
     try {
       myList.insert(0, null);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalArgumentException ex) {}
 
-    caught = false;
     try {
-      myList.insert(0, new long[]{1});
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      myList.insert(0, 1);
+      fail();
+    } catch (IllegalArgumentException ex) {}
   }
 
   public void testIteratorNextSet() {
@@ -193,8 +186,6 @@ public class ParallelLongListTests extends TestCase {
     checkStorage(1, 2);
   }
 
-
-
   private void checkStorage(long ... expected) {
     CHECK.order(myStorage.iterator(), expected);
   }
@@ -263,12 +254,9 @@ public class ParallelLongListTests extends TestCase {
     it.get(-1, vals);
     CHECK.order(vals, 2, 3);
 
-    boolean caught = false;
     try {
       it.next(vals);
-    } catch (NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (NoSuchElementException ex) {}
   }
 }

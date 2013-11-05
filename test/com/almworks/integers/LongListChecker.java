@@ -18,30 +18,34 @@ package com.almworks.integers;
 
 import java.util.List;
 
+/**
+ * class for test {@code LongList} implementation.
+ * @see com.almworks.integers.AbstractIntList.SubList
+ */
 public abstract class LongListChecker extends IntegersFixture {
-  protected abstract List<LongList> createLongList(long ... values);
+  /**
+   * @return list of different representations of LongList's with the specified values.
+   */
+  protected abstract List<LongList> createLongListVariants(long... values);
 
-  private void _testStatusMethods(long ... values) {
+  protected void _testCHECK(long... values) {
     LongList expected = LongArray.create(values);
-    for (LongList arr : createLongList(values)) {
-      assertEquals(expected.size(), arr.size());
-      assertEquals(expected.isEmpty(), arr.isEmpty());
-      assertEquals(expected.isSorted(), arr.isSorted());
-      assertEquals(expected.isUniqueSorted(), arr.isUniqueSorted());
+    for (LongList arr : createLongListVariants(values)) {
+      CHECK.order(expected, arr);
     }
   }
 
   public void testStatusMethods() {
-    _testStatusMethods();
-    _testStatusMethods(0, 2, 4, 6, 8);
-    _testStatusMethods(0, 10, 10, 20);
-    _testStatusMethods(0, 10, 9);
-    _testStatusMethods(Integer.MIN_VALUE, 10, 20, 40, Integer.MAX_VALUE);
+    _testCHECK();
+    _testCHECK(0, 2, 4, 6, 8);
+    _testCHECK(0, 10, 10, 20);
+    _testCHECK(0, 10, 9);
+    _testCHECK(Integer.MIN_VALUE, 10, 20, 40, Integer.MAX_VALUE);
   }
 
-  private void _testGetMethods(long ... values) {
+  protected void _testGetMethods(long ... values) {
     LongList expected = LongArray.create(values);
-    for (LongList arr : createLongList(values)) {
+    for (LongList arr : createLongListVariants(values)) {
       for (int i = 0; i < arr.size(); i++) {
         assertEquals(expected.get(i), arr.get(i));
       }
@@ -65,7 +69,7 @@ public abstract class LongListChecker extends IntegersFixture {
 
   private void _testIterator(long ... values) {
     LongList expected = LongArray.create(values);
-    for (LongList arr : createLongList(values)) {
+    for (LongList arr : createLongListVariants(values)) {
       CHECK.order(expected.iterator(), arr.iterator());
     }
   }
@@ -74,8 +78,8 @@ public abstract class LongListChecker extends IntegersFixture {
     LongList expected = LongArray.create(values);
     int length = values.length;
     long[] tmp = new long[length];
-    for (LongList arr : createLongList(values)) {
-      CHECK.order(expected.toArray(0, tmp, 0, length), arr.toArray(0, tmp, 0, length));
+    for (LongList arr : createLongListVariants(values)) {
+      CHECK.order(expected.toNativeArray(0, tmp, 0, length), arr.toNativeArray(0, tmp, 0, length));
       CHECK.order(expected.toNativeArray(), arr.toNativeArray());
       CHECK.order(expected.toList(), arr.toList());
     }
@@ -89,13 +93,13 @@ public abstract class LongListChecker extends IntegersFixture {
         arr[i] = RAND.nextInt();
       }
       _testGetMethods(arr);
-      _testStatusMethods(arr);
+      _testCHECK(arr);
       _testIterator(arr);
       _testToMethods(arr);
     }
   }
   public void testGetNextDifferentValueIndex() {
-    for (LongList arr : createLongList(0, 1, 1, 2, 2, 2, 3, 4, 5, 5, 5)) {
+    for (LongList arr : createLongListVariants(0, 1, 1, 2, 2, 2, 3, 4, 5, 5, 5)) {
       assertEquals(1, arr.getNextDifferentValueIndex(0));
       assertEquals(3, arr.getNextDifferentValueIndex(1));
       assertEquals(6, arr.getNextDifferentValueIndex(3));
@@ -106,24 +110,22 @@ public abstract class LongListChecker extends IntegersFixture {
 
   public void testBinarySearch() {
     BinarySearchChecker.test(new BinarySearchChecker.BinarySearcher() {
-      private LongArray arr;
-      private int length;
+      private LongList list;
 
-      public void init(long... values) {
-        arr = LongArray.copy(values);
-        length = values.length;
+      public void init(LongArray values) {
+        list = createLongListVariants(values.toNativeArray()).get(0);
       }
 
       public int size() {
-        return length;
+        return list.size();
       }
 
       public long get(int index) {
-        return arr.get(index);
+        return list.get(index);
       }
 
       public int binSearch(long value) {
-        return arr.binarySearch(value);
+        return list.binarySearch(value);
       }
     });
   }

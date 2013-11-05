@@ -16,8 +16,10 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.LongFunction;
+import com.almworks.integers.func.LongFunctions;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class LongArrayTests extends IntegersFixture {
@@ -40,6 +42,12 @@ public class LongArrayTests extends IntegersFixture {
 
     array.insertMultiple(1, -1, 3);
     CHECK.order(array, LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6));
+
+    assertEquals(2, array.addAllNotMore(LongArray.create(10, 20, 30, 50, 100).iterator(), 2));
+    CHECK.order(array, LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6, 10, 20));
+
+    assertEquals(1, array.addAllNotMore(LongArray.create(30).iterator(), 4));
+    CHECK.order(array, LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6, 10, 20, 30));
   }
   public void testCopy() {
     LongArray copiedArray = LongArray.copy(new long[]{10, 20, 30});
@@ -229,7 +237,7 @@ public class LongArrayTests extends IntegersFixture {
     array.remove(0);
     array.removeRange(0, 0);
     assertEquals(array, array.subList(0, 0));
-    array.toArray(0, new long[0], 0, 0);
+    array.toNativeArray(0, new long[0], 0, 0);
   }
 
   public void testInserts() {
@@ -475,7 +483,7 @@ public class LongArrayTests extends IntegersFixture {
 
   public void testGet() {
     for (int i = 0; i < 10; i++) {
-      array = generateRandomArray(1000, false);
+      array = generateRandomLongArray(1000, false);
       IntArray indices = new IntArray(100);//generateRandomArray(100, false, 0, 1000);
       for (int j = 0; j < 100; j++) {
         indices.add(RAND.nextInt(1000));
@@ -484,6 +492,73 @@ public class LongArrayTests extends IntegersFixture {
       for (int j = 0; j < actual.size(); j++) {
         assertEquals(array.get(indices.get(i)), actual.get(i));
       }
+    }
+  }
+
+  public void testUpdate() {
+    for (int i = 0; i < 10; i++) {
+      array = generateRandomLongArray(1000, false);
+      LongArray expected = LongArray.copy(array);
+
+      int ind = RAND.nextInt(array.size());
+      array.update(ind, -1, LongFunctions.NEG);
+      expected.set(ind, -expected.get(ind));
+      CHECK.order(expected, array);
+
+      long randValue = RAND.nextLong();
+      LongFunction fun = new LongFunction() {
+        @Override
+        public long invoke(long a) {
+          return a/2 + a/4;
+        }
+      };
+      ind = RAND.nextInt(array.size()) + array.size() + 1;
+
+      array.update(ind, randValue, fun);
+      expected.addAll(LongProgression.arithmetic(randValue, ind + 1 - expected.size(), 0));
+      expected.set(ind, fun.invoke(expected.get(ind)));
+      CHECK.order(expected, array);
+    }
+  }
+
+  public void testSortByFirstThenBySecond() {
+    int arSize = 1000;
+    array = generateRandomLongArray(arSize, false, arSize);
+    LongArray[] arrays = new LongArray[2];
+    for (int j = 0; j < 2; j++) {
+      arrays[j] = generateRandomLongArray(arSize, false, arSize);
+    }
+    LongArray expected = new LongArray();
+    for (int i = 0; i < arSize; i++) {
+      expected.add(arSize * arrays[0].get(i) + arrays[1].get(i));
+    }
+    expected.sort();
+
+    arrays[0].sortByFirstThenBySecond(arrays[1]);
+    LongArray actual = new LongArray();
+    for (int i = 0; i < arSize; i++) {
+      actual.add(arSize * arrays[0].get(i) + arrays[1].get(i));
+    }
+    CHECK.order(expected, actual);
+  }
+
+  public void testRemoveSortedIndexesFromSorted() {
+    int arSize = 100;
+    int indexesSize = 10;
+    int attempts = 10;
+    for (int attempt = 0; attempt < attempts; attempt++) {
+      array = generateRandomLongArray(arSize, false);
+      IntArray indexes = generateRandomIntArray(indexesSize, true, array.size());
+      if (attempt % 2 == 0) {
+        indexes.add(indexes.get(indexes.size() / 2) + 1);
+        indexes.sortUnique();
+      }
+      LongArray expected = LongArray.copy(array);
+      for (int i = indexes.size() - 1; i >= 0; i--) {
+        expected.removeAt(indexes.get(i));
+      }
+      array.removeSortedIndexes(indexes);
+      CHECK.order(array, expected);
     }
   }
 }

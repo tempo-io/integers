@@ -16,10 +16,10 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongIterator;
-import com.almworks.integers.LongIteratorSpecificationChecker;
+import com.almworks.integers.*;
+
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 
 public class FindingLongIteratorTests extends IntegersFixture {
   public void testIteratorSpecification() {
@@ -38,5 +38,60 @@ public class FindingLongIteratorTests extends IntegersFixture {
       }
     });
   }
+
+  public void test() {
+  LongIterator it1 = new AbstractLongIteratorWithFlag() {
+    @Override
+    protected long valueImpl() {
+      return 1;
+    }
+
+    @Override
+    protected void nextImpl() throws NoSuchElementException {
+    }
+
+    @Override
+    public boolean hasNext() throws ConcurrentModificationException {
+      return true;
+    }
+  };
+
+    LongIterator itSwap = new AbstractLongIteratorWithFlag() {
+      int val0 = 1, val3 = 3;
+      boolean cur = true;
+      @Override
+      protected long valueImpl() {
+        return cur ? val0 : val3;
+      }
+
+      @Override
+      protected void nextImpl() throws NoSuchElementException {
+        cur = !cur;
+      }
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return true;
+      }
+    };
+
+    LongIterator itInc = new AbstractLongIteratorWithFlag() {
+      int cur = 0;
+      @Override
+      protected long valueImpl() {
+        return cur;
+      }
+
+      @Override
+      protected void nextImpl() throws NoSuchElementException {
+        cur++;
+      }
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return true;
+      }
+    };
+}
 
 }

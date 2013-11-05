@@ -7,7 +7,7 @@ public class LongIteratorSpecificationChecker {
     LongIterator get(long ... values);
   }
 
-  public static void check(IteratorGetter getter, LongArray ... arrays) {
+  public static void check(IteratorGetter getter) {
     testSimple(getter);
     testValues(getter, 0, 1, 2);
     testValues(getter, 0, 2, 4, 6, 8);
@@ -15,9 +15,6 @@ public class LongIteratorSpecificationChecker {
     testValues(getter, 5, -10, 5, 0);
     testValues(getter, 0, 0, 1, 1, 2, 2);
     testValues(getter, Long.MAX_VALUE, Long.MIN_VALUE, 0);
-    for (LongArray values: arrays) {
-      testValues(getter, values.toNativeArray());
-    }
   }
 
   private static void testSimple(IteratorGetter getter) {

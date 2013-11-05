@@ -6,12 +6,12 @@ public class ChainHashLongSetTests extends WritableLongSetChecker {
 
   @Override
   protected WritableLongSet createSet() {
-    return new ChainHashLongSet(512, 1000);
+    return new LongChainHashSet();
   }
 
   @Override
   protected WritableLongSet createSetWithCapacity(int capacity) {
-    return new ChainHashLongSet(512, capacity);
+    return new LongChainHashSet();
   }
 
   @Override
@@ -22,7 +22,7 @@ public class ChainHashLongSetTests extends WritableLongSetChecker {
   }
 
   public void testSimple() {
-    ChainHashLongSet set = new ChainHashLongSet(256, 512);
+    LongChainHashSet set = new LongChainHashSet();
     for (long i: ap(0, 2, 10)) {
       set.add(i);
     }

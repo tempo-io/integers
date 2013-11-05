@@ -75,105 +75,6 @@ public class LongCollectionsTests extends IntegersFixture {
     checkCollection(concat, 1, 2, 3);
   }
 
-  public void testRemoveDecorator() {
-    ModifyingLongListRemovingDecorator rem = new ModifyingLongListRemovingDecorator(myArray);
-    checkCollection(rem);
-    checkRemovedIndexes(rem);
-    CHECK.order(rem.removedValueIterator());
-    assertEquals(0, rem.getRemoveCount());
-
-    myArray.add(-1);
-    checkCollection(rem, -1);
-    checkRemovedIndexes(rem);
-    CHECK.order(rem.removedValueIterator());
-    assertEquals(0, rem.getRemoveCount());
-
-    rem.removeAt(0);
-    checkCollection(rem);
-    CHECK.order(rem.removedValueIterator(), -1);
-    checkRemovedIndexes(rem, 0);
-    assertEquals(1, rem.getRemoveCount());
-
-    myArray.addAll(0, 1, 2, 3, 4, 5, 6);
-    checkRemovedIndexes(rem, 0);
-    rem.removeAt(6);
-    checkCollection(rem, 0, 1, 2, 3, 4, 5);
-    CHECK.order(rem.removedValueIterator(), -1, 6);
-    checkRemovedIndexes(rem, 0, 7);
-    assertEquals(2, rem.getRemoveCount());
-
-    rem.removeAt(0);
-    checkCollection(rem, 1, 2, 3, 4, 5);
-    CHECK.order(rem.removedValueIterator(), -1, 0, 6);
-    checkRemovedIndexes(rem, 0, 1, 7);
-    assertEquals(3, rem.getRemoveCount());
-
-    rem.removeAt(2);
-    checkCollection(rem, 1, 2, 4, 5);
-    CHECK.order(rem.removedValueIterator(), -1, 0, 3, 6);
-    checkRemovedIndexes(rem, 0, 1, 4, 7);
-    assertEquals(4, rem.getRemoveCount());
-
-    rem.removeAt(0);
-    checkCollection(rem, 2, 4, 5);
-    CHECK.order(rem.removedValueIterator(), -1, 0, 1, 3, 6);
-    checkRemovedIndexes(rem, 0, 1, 2, 4, 7);
-    assertEquals(5, rem.getRemoveCount());
-  }
-
-  public void testCreateModifyingRemoveDecorator() {
-    myArray.addAll(0, 1, 2, 3, 4, 5, 6);
-    ModifyingLongListRemovingDecorator rem = ModifyingLongListRemovingDecorator.createFromUnsorted(myArray, 0, 4, 1, 5);
-    checkCollection(rem, 2, 3, 6);
-    checkRemovedIndexes(rem, 0, 1, 4, 5);
-    assertEquals(4, rem.getRemoveCount());
-
-    rem = ModifyingLongListRemovingDecorator.createFromUnsorted(myArray, 2, 6, 1);
-    checkCollection(rem, 0, 3, 4, 5);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-
-    rem = ModifyingLongListRemovingDecorator.createFromUnsorted(myArray, 2, 6, 1, 2);
-    checkCollection(rem, 0, 3, 4, 5);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-  }
-
-  public void testCreateReadonlyRemoveDecorator() {
-    myArray.addAll(0, 1, 2, 3, 4, 5, 6);
-    LongList array2 = LongArray.create(10, 11, 12, 13, 14, 15, 16);
-
-    IntList removeIndices = ReadonlyLongListRemovingDecorator.prepareUnsortedIndices(0, 4, 1, 5);
-    ReadonlyLongListRemovingDecorator rem = ReadonlyLongListRemovingDecorator.createFromPrepared(myArray, removeIndices);
-    checkCollection(rem, 2, 3, 6);
-    checkRemovedIndexes(rem, 0, 1, 4, 5);
-    assertEquals(4, rem.getRemoveCount());
-    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(array2, removeIndices);
-    checkCollection(rem, 12, 13, 16);
-    checkRemovedIndexes(rem, 0, 1, 4, 5);
-    assertEquals(4, rem.getRemoveCount());
-
-    removeIndices = ReadonlyLongListRemovingDecorator.prepareUnsortedIndices(2, 6, 1);
-    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(myArray,removeIndices);
-    checkCollection(rem, 0, 3, 4, 5);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(array2,removeIndices);
-    checkCollection(rem, 10, 13, 14, 15);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-
-    removeIndices = ReadonlyLongListRemovingDecorator.prepareUnsortedIndices(2, 6, 1, 2);
-    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(myArray, removeIndices);
-    checkCollection(rem, 0, 3, 4, 5);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-    rem = ReadonlyLongListRemovingDecorator.createFromPrepared(array2, removeIndices);
-    checkCollection(rem, 10, 13, 14, 15);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-  }
-
   public void testUniteTwoLengthySortedSetsAndIntersectWithThirdShort() {
     doTestSimple();
     doTestMany();
@@ -347,7 +248,7 @@ public class LongCollectionsTests extends IntegersFixture {
 
   public void testToSorted() {
     int arrLength = 100;
-    int maxVal = 10000;
+    int maxVal = 150;
     LongArray expected;
     LongArray arr = new LongArray(LongProgression.arithmetic(0, arrLength, 0));
 
@@ -387,9 +288,9 @@ public class LongCollectionsTests extends IntegersFixture {
       private long[] arr;
       private int length;
 
-      public void init(long... values) {
-        arr = values;
-        length = values.length;
+      public void init(LongArray values) {
+        length = values.size();
+        arr = values.toNativeArray();
       }
 
       public int size() {
@@ -473,8 +374,8 @@ public class LongCollectionsTests extends IntegersFixture {
     LongList expected, actual;
     for (int i = 0; i < 5; i++) {
       for (int j = 0; j < 2; j++) {
-        arrays[j] = generateRandomArray(10000, true);
-        sets[j] = DynamicLongSet.fromSortedList(arrays[j]);
+        arrays[j] = generateRandomLongArray(10000, true);
+        sets[j] = LongTreeSet.fromSortedList(arrays[j]);
       }
       expected = union(arrays[0], arrays[1]);
       actual = union(sets[0], sets[1]).toArray();
@@ -489,8 +390,8 @@ public class LongCollectionsTests extends IntegersFixture {
     LongList expected, actual;
     for (int i = 0; i < 5; i++) {
       for (int j = 0; j < 2; j++) {
-        arrays[j] = generateRandomArray(10000, true);
-        sets[j] = DynamicLongSet.fromSortedList(arrays[j]);
+        arrays[j] = generateRandomLongArray(10000, true);
+        sets[j] = LongTreeSet.fromSortedList(arrays[j]);
       }
       expected = intersectionSorted(arrays[0], arrays[1]);
       actual = intersection(sets[0], sets[1]).toArray();
@@ -505,6 +406,16 @@ public class LongCollectionsTests extends IntegersFixture {
         return LongCollections.complementSorted(arrays[0], arrays[1]).iterator();
       }
     }, new SetOperationsChecker.MinusGetter(), true, true);
+  }
+
+  public void testConcatIterables() {
+    LongArray[] arrays = new LongArray[5];
+    for (int i = 0; i < 20; i++) {
+      for (int j = 0; j < arrays.length; j++) {
+        arrays[j] = generateRandomLongArray(30, false);
+      }
+      CHECK.order(collectIterables(300, arrays).iterator(), concatIterables(arrays));
+    }
   }
 
 }

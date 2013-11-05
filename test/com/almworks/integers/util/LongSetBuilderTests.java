@@ -51,7 +51,7 @@ public class LongSetBuilderTests extends IntegersFixture {
       LongArray set = new LongArray();
       LongSetBuilder builder = new LongSetBuilder(100);
       for (int j = 0; j < count; j++) {
-        LongArray v = IntegersFixture.generateRandomArray(elementsCount, false, size);
+        LongArray v = IntegersFixture.generateRandomLongArray(elementsCount, false, size);
         set.addAll(v);
         builder.addAll(v);
       }

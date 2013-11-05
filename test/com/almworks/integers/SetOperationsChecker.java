@@ -16,7 +16,7 @@
 
 package com.almworks.integers;
 
-import java.util.Arrays;
+import com.almworks.integers.util.IntegersDebug;
 
 import static com.almworks.integers.LongArray.create;
 
@@ -76,10 +76,10 @@ public class SetOperationsChecker {
         mValues[i + 1] = max;
       }
     }
-    LongArray intersection = IntegersFixture.generateRandomArray(intersectionLength, isSortUnique);
+    LongArray intersection = IntegersFixture.generateRandomLongArray(intersectionLength, isSortUnique);
     LongArray[] arrays = new LongArray[arraysNumber];
     for (int i = 0; i < arraysNumber; i++) {
-      arrays[i] = IntegersFixture.generateRandomArray(IntegersFixture.RAND.nextInt(maxArrayLength), false, mValues[i * 2], mValues[i * 2 + 1]);
+      arrays[i] = IntegersFixture.generateRandomLongArray(IntegersFixture.RAND.nextInt(maxArrayLength), false, mValues[i * 2], mValues[i * 2 + 1]);
       arrays[i].addAll(intersection);
       if (isSortUnique) {
         arrays[i].sortUnique();
@@ -114,7 +114,7 @@ public class SetOperationsChecker {
         if (i == 1 && j == 1) {
           i += 0;
         }
-//        System.out.println(i + " " + j);
+        IntegersDebug.println(i + " " + j);
         checkNewSetCreator(first, second);
       }
     }

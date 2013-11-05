@@ -23,7 +23,7 @@ import java.lang.reflect.Field;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class DynamicLongSetTests extends WritableLongSetChecker {
+public class LongTreeSetTests extends WritableLongSetChecker {
 
   private static final long MIN = Long.MIN_VALUE;
   private static final long MAX = Long.MAX_VALUE;
@@ -32,13 +32,13 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     return true;
   }
 
-  protected WritableSortedLongSet createSet() {
+  protected WritableLongSortedSet createSet() {
     return createSetWithCapacity(-1);
   }
 
-  protected WritableSortedLongSet createSetWithCapacity(int capacity) {
-    DynamicLongSet newSet;
-    newSet = capacity == -1 ? new DynamicLongSet() : new DynamicLongSet(capacity);
+  protected WritableLongSortedSet createSetWithCapacity(int capacity) {
+    LongTreeSet newSet;
+    newSet = capacity == -1 ? new LongTreeSet() : new LongTreeSet(capacity);
     try {
       setFinalStatic(newSet, "SHRINK_FACTOR", 6);
       setFinalStatic(newSet, "SHRINK_MIN_LENGTH", 4);
@@ -47,15 +47,15 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
       field.setAccessible(true);
       return newSet;
     } catch (Exception ex) {
-      return new DynamicLongSet();
+      return new LongTreeSet();
     }
   }
 
-  protected WritableSortedLongSet[] createSetFromSortedList(LongList sortedList) {
-    return new WritableSortedLongSet[]{
-        DynamicLongSet.fromSortedList(sortedList),
-        DynamicLongSet.fromSortedList(sortedList, DynamicLongSet.ColoringType.TO_ADD),
-        DynamicLongSet.fromSortedList(sortedList, DynamicLongSet.ColoringType.TO_REMOVE)
+  protected WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
+    return new WritableLongSortedSet[]{
+        LongTreeSet.fromSortedList(sortedList),
+        LongTreeSet.fromSortedList(sortedList, LongTreeSet.ColoringType.TO_ADD),
+        LongTreeSet.fromSortedList(sortedList, LongTreeSet.ColoringType.TO_REMOVE)
     };
   }
 
@@ -63,10 +63,10 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     int[] ns = new int[]{510, 513, 1025, 2049, 4097}; // testing sizes near 2^n
     int nAttempts = 5;
     LongSetBuilder anotherSet = new LongSetBuilder();
-    DynamicLongSet dynamicSet = new DynamicLongSet(510);
+    LongTreeSet dynamicSet = new LongTreeSet(510);
     WritableLongList toAdd = new LongArray();
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      toAdd.addAll(generateRandomArray(ns[attempt], false));
+      toAdd.addAll(generateRandomLongArray(ns[attempt], false));
       dynamicSet.addAll(toAdd);
       dynamicSet.compactify();
       anotherSet.addAll(toAdd);
@@ -95,7 +95,7 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
   }
 
   public void testEdgeCasesWithCompactify() {
-    DynamicLongSet set = new DynamicLongSet();
+    LongTreeSet set = new LongTreeSet();
     assertFalse(set.exclude(MIN));
     assertFalse(set.exclude(0));
     set.removeAll(12, 23, 12, 51);
@@ -103,7 +103,7 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     set.compactify();
     assertTrue(set.isEmpty());
     LongList ll = new LongArray();
-    DynamicLongSet set2 = DynamicLongSet.fromSortedList(ll);
+    LongTreeSet set2 = LongTreeSet.fromSortedList(ll);
     assertTrue(set2.isEmpty());
     set.addAll(1, 3, 2, MIN, Long.MAX_VALUE);
     assertTrue(new LongArray(set.toArray()).isSorted(true));
@@ -119,7 +119,7 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
   }
 
   public void testGetBounds() {
-    DynamicLongSet set = new DynamicLongSet();
+    LongTreeSet set = new LongTreeSet();
     assertEquals(MAX, set.getLowerBound());
     assertEquals(MIN, set.getUpperBound());
     set.addAll(0, 2);

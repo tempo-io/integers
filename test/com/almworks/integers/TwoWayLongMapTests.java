@@ -161,7 +161,8 @@ public class TwoWayLongMapTests extends IntegersFixture {
   public void testContains() {
     assertTrue(map.containsAllKeys(LongList.EMPTY));
     assertFalse(map.containsAnyKeys(LongList.EMPTY));
-    map.insertAll(LongArray.create(0, 3, 1, 5), LongArray.create(0, 30, 10, 50));
+    LongArray values = LongArray.create(0, 30, 10, 50);
+    map.insertAll(LongArray.create(0, 3, 1, 5), values);
     assertTrue(map.containsAllKeys(LongArray.create(1, 5)));
     assertTrue(map.containsAnyKeys(LongArray.create(1, 5)));
     assertTrue(map.containsAllKeys(LongArray.create(3, 5, 0, 1)));
@@ -172,6 +173,12 @@ public class TwoWayLongMapTests extends IntegersFixture {
     assertFalse(map.containsAnyKeys(LongArray.create(4, 6, 8, 10)));
     assertFalse(map.containsAllKeys(LongArray.create(8, 6, 10, 4)));
     assertFalse(map.containsAnyKeys(LongArray.create(8, 6, 10, 4)));
+
+    for (int i = 0; i < values.size(); i++) {
+      assertTrue(map.containsVal(values.get(i)));
+      assertFalse(map.containsVal(values.get(i) + 1));
+      assertFalse(map.containsVal(values.get(i) - 1));
+    }
   }
 
   public void testInsertAllRandom() {

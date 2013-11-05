@@ -30,7 +30,7 @@ public class LongProgressionTests extends IntegersFixture {
   }
 
   public void testIndexOf() {
-    IntProgression.Arithmetic progression = new IntProgression.Arithmetic(0, 5, 2);
+    LongProgression.Arithmetic progression = new LongProgression.Arithmetic(0, 5, 2);
     for( int i = 0; i < 5; i++) {
       assertEquals(i, progression.indexOf(i * 2));
     }

@@ -24,11 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /** This class is abstract to prevent it from running in the build. */
-public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
+public abstract class LongTreeSetPerf extends LongTreeSetTests {
   private final int n;
   private final int nAttempts;
 
-  public DynamicLongSetPerf(int n, int nAttempts) {
+  public LongTreeSetPerf(int n, int nAttempts) {
     this.n = n;
     this.nAttempts = nAttempts;
   }
@@ -42,7 +42,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     int n = Integer.parseInt(args[1]);
     int nAttempts = Integer.parseInt(args[2]);
     System.err.println("Starting perf test #" + testN + " with n = " + n + ", nCycles = " + nAttempts);
-    DynamicLongSetPerf perf = new DynamicLongSetPerf(n, nAttempts) {};
+    LongTreeSetPerf perf = new LongTreeSetPerf(n, nAttempts) {};
     switch (testN) {
     case 1: perf.testPerf(); break;
     case 2: perf.testPerf2(); break;
@@ -56,7 +56,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
   public void testPerf() {
     System.out.println("===");
     LongSetBuilder anotherSet = new LongSetBuilder();
-    DynamicLongSet dynamicSet = new DynamicLongSet(n*nAttempts);
+    LongTreeSet dynamicSet = new LongTreeSet(n*nAttempts);
     long[] toAdd = new long[n];
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
       for (int i = 0; i < n; ++i) toAdd[i] = RAND.nextLong();
@@ -71,8 +71,8 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
 
   public void testPerf2() {
     LongSetBuilder lsb = new LongSetBuilder();
-    DynamicLongSet dls = new DynamicLongSet();
-//    DynamicLongSet dls = new DynamicLongSet(n*nAttempts);
+    LongTreeSet dls = new LongTreeSet();
+//    LongTreeSet dls = new LongTreeSet(n*nAttempts);
     long[] toAdd = new long[n];
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
       for (int i = 0; i < n; ++i) toAdd[i] = RAND.nextLong();
@@ -91,7 +91,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
 
   public void testPerfAddIfAbsent() {
     LongSetBuilder lsb = new LongSetBuilder();
-    DynamicLongSet dls = new DynamicLongSet();
+    LongTreeSet dls = new LongTreeSet();
     for (int i = 0; i < n; ++i) {
       if (i % nAttempts == 0) {
         assertEquals(lsb.size(), dls.size());
@@ -108,7 +108,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     }
   }
 
-  private enum DlsOperation {
+  private enum LtsOperation {
     REMOVE, ADD
   }
 
@@ -118,17 +118,17 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     int sz = 8; //8200;
     int waitTime = 0;
 
-    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.ADD);
-    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.ADD);
-//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.ADD);
-//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.BALANCED, DlsOperation.REMOVE);
-//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_ADD, DlsOperation.REMOVE);
-//    testColoringTypes(waitTime, attempts, sz, DynamicLongSet.ColoringType.TO_REMOVE, DlsOperation.REMOVE);
+    testColoringTypes(waitTime, attempts, sz, LongTreeSet.ColoringType.BALANCED, LtsOperation.ADD);
+    testColoringTypes(waitTime, attempts, sz, LongTreeSet.ColoringType.TO_ADD, LtsOperation.ADD);
+//    testColoringTypes(waitTime, attempts, sz, LongTreeSet.ColoringType.TO_REMOVE, LtsOperation.ADD);
+//    testColoringTypes(waitTime, attempts, sz, LongTreeSet.ColoringType.BALANCED, LtsOperation.REMOVE);
+//    testColoringTypes(waitTime, attempts, sz, LongTreeSet.ColoringType.TO_ADD, LtsOperation.REMOVE);
+//    testColoringTypes(waitTime, attempts, sz, LongTreeSet.ColoringType.TO_REMOVE, LtsOperation.REMOVE);
   }
 
-  private void testColoringTypes(int waitTime, int attempts, int sz, DynamicLongSet.ColoringType cT, DlsOperation oper) {
+  private void testColoringTypes(int waitTime, int attempts, int sz, LongTreeSet.ColoringType cT, LtsOperation oper) {
     String opName;
-    if (oper == DlsOperation.REMOVE) {
+    if (oper == LtsOperation.REMOVE) {
       switch (cT) {
         case TO_ADD: opName = "type=toAdd, op=remove, time="; break;
         case BALANCED: opName = "type=balanced, op=remove, time="; break;
@@ -141,7 +141,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
         default: opName = "type=toRemove, op=add, time=";
       }
     }
-    List<DynamicLongSet> list = new ArrayList<DynamicLongSet>(attempts);
+    List<LongTreeSet> list = new ArrayList<LongTreeSet>(attempts);
     List<WritableLongList> list2 = new ArrayList<WritableLongList>(attempts);
     for (int att = 0; att < attempts; att++) {
       WritableLongList srcList = new LongArray();
@@ -151,24 +151,24 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
         addList.add(RAND.nextLong());
       }
       srcList.sort();
-      if (oper == DlsOperation.REMOVE) {
+      if (oper == LtsOperation.REMOVE) {
         list2.add(srcList);
       } else {
         list2.add(addList);
       }
-      DynamicLongSet dls = DynamicLongSet.fromSortedList(srcList, cT);
+      LongTreeSet dls = LongTreeSet.fromSortedList(srcList, cT);
       list.add(dls);
     }
 
     int i = 0;
     long res = 0, t;
-    Iterator<DynamicLongSet> it = list.iterator();
+    Iterator<LongTreeSet> it = list.iterator();
     Iterator<WritableLongList> it2 = list2.iterator();
     for (int att = 0; att < attempts; att++) {
-      DynamicLongSet dls = it.next();
+      LongTreeSet dls = it.next();
       WritableLongList nx = it2.next();
       t = System.currentTimeMillis();
-      if (oper == DlsOperation.REMOVE)
+      if (oper == LtsOperation.REMOVE)
         dls.removeAll(nx);
       else
         dls.addAll(nx);
@@ -198,7 +198,7 @@ public abstract class DynamicLongSetPerf extends DynamicLongSetTests {
     System.out.println("press any key");
     System.in.read();
     TLongLongHashMap hash = new TLongLongHashMap();
-    DynamicLongSet tree = new DynamicLongSet();
+    LongTreeSet tree = new LongTreeSet();
     for (int i = 0; i < n; ++i) {
       if ( i % nAttempts == 0) {
         assertEquals(hash.size(), tree.size());

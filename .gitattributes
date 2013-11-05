@@ -202,8 +202,6 @@ templates/com/almworks/integers/util/SortedPListMinusIterator.tpl -text
 test/com/almworks/integers/BinarySearchChecker.java -text
 test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
-test/com/almworks/integers/DynamicLongSetPerf.java -text
-test/com/almworks/integers/DynamicLongSetTests.java -text
 test/com/almworks/integers/IndexedLongIteratorTests.java -text
 test/com/almworks/integers/IndexedLongListIteratorTests.java -text
 test/com/almworks/integers/IntegersFixture.java -text
@@ -217,6 +215,8 @@ test/com/almworks/integers/LongIteratorSpecificationChecker.java -text
 test/com/almworks/integers/LongListChecker.java -text
 test/com/almworks/integers/LongProgressionTests.java -text
 test/com/almworks/integers/LongSubListTests.java -text
+test/com/almworks/integers/LongTreeSetPerf.java -text
+test/com/almworks/integers/LongTreeSetTests.java -text
 test/com/almworks/integers/PairIntLongIteratorTests.java -text
 test/com/almworks/integers/ParallelLongListTests.java -text
 test/com/almworks/integers/SetOperationsChecker.java -text
@@ -226,14 +226,14 @@ test/com/almworks/integers/optimized/CyclicLongQueueTests.java -text
 test/com/almworks/integers/optimized/SameValuesLongListTests.java -text
 test/com/almworks/integers/optimized/SegmentedLongArrayTests.java -text
 test/com/almworks/integers/optimized/TestEnvForSegmentedLongArray.java -text
-test/com/almworks/integers/util/AmortizedSortedLongSetTests.java -text
 test/com/almworks/integers/util/ChainHashLongSetTests.java -text
 test/com/almworks/integers/util/DiffIndexedLongListDecoratorTests.java -text
 test/com/almworks/integers/util/FindingLongIteratorTests.java -text
+test/com/almworks/integers/util/LongAmortizedSortedSetTests.java -text
 test/com/almworks/integers/util/LongCollectionsTests.java -text
 test/com/almworks/integers/util/LongConcatIteratorTests.java -text
-test/com/almworks/integers/util/LongHashSetWrapper.java -text
 test/com/almworks/integers/util/LongIntersectionIteratorTests.java -text
+test/com/almworks/integers/util/LongIterableLexicographicComparatorTests.java -text
 test/com/almworks/integers/util/LongListConcatenationTests.java -text
 test/com/almworks/integers/util/LongListInsertingDecoratorTests.java -text
 test/com/almworks/integers/util/LongListRemovingDecoratorTests.java -text
@@ -241,8 +241,6 @@ test/com/almworks/integers/util/LongMinusIteratorTests.java -text
 test/com/almworks/integers/util/LongObjMapTests.java -text
 test/com/almworks/integers/util/LongSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/LongSetBuilderTests.java -text
-test/com/almworks/integers/util/LongTreeSetWrapper.java -text
-test/com/almworks/integers/util/LongTreeSetWrapperTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTwoTests.java -text
 test/com/almworks/util/ArrayCopyTests.java -text
