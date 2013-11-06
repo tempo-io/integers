@@ -74,9 +74,10 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Constructs a LongArray with specified size - {@code length}, using {@code hostArray}
-   * for inner buffer {@code long[]} array where the elements
-   * of this array are stored. See {@link LongArray#copy(long[])}, {@link LongArray#create(long...)}.
+   * Constructs a LongArray with the specified size {@code length} that is backed by {@code hostArray}
+   * See {@link LongArray#copy(long[])}, {@link LongArray#create(long...)}.
+   * @param length size of the new array. If {@code length} >= {@code hostArray.length}
+   *               new size is equal to {@code hostArray.length} and equal to 0 if {@code length < 0}
    * */
   public LongArray(long[] hostArray, int length) {
     myArray = hostArray == null ? EMPTY_LONGS : hostArray;
@@ -134,13 +135,6 @@ public final class LongArray extends AbstractWritableLongList {
       }
     }
     return new LongArray(host);
-  }
-
-  /**
-   * @return LongArray containing {@code value}
-   */
-  public static LongArray singleton(Long value) {
-    return new LongArray(new long[]{value});
   }
 
   public int indexOf(long value) {
@@ -292,7 +286,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * @return true if size of this array equals to {@code array.length} and all elements
-   * in the specified array equals to corresponding elements
+   * in the specified array equal to corresponding elements
    */
   public boolean equalOrder(long[] array) {
     if (size() != array.length)
@@ -414,7 +408,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   // todo javadoc
-  // remove from this sorted array values from the specified sorted list
+  // remove from this sorted array indexes from the specified sorted list
   // @return true if this array was modified otherwise false
   public void removeSortedIndexes(IntList list) {
     IntIterator it = list.iterator();
@@ -444,7 +438,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   // todo add javadoc
-  // [0,2,4,7,9,10], [0,4,8,9] --> [0,2, -1,
+  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0,2, -1]
   public int getInsertionPoints(LongMeasurableIterable src, int[][] insertionPoints) {
     if (insertionPoints[0] == null || insertionPoints[0].length < src.size()) {
       insertionPoints[0] = new int[src.size()];
@@ -464,6 +458,7 @@ public final class LongArray extends AbstractWritableLongList {
         int k = LongCollections.binarySearch(v, myArray, destIndex, size());
         if (k >= 0) {
           // found
+          destIndex = k;
           continue;
         }
         int insertion = -k - 1;

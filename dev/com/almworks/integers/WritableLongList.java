@@ -98,16 +98,16 @@ public interface WritableLongList extends LongList, LongCollector {
   void setRange(int from, int to, long value);
 
   /**
-   * Replaces the elements in this list from the specified position
-   * {@code index} to {@code index + values.size()} with the elements from {@code values}
+   * Replaces the elements in this list from {@code index} to {@code index + values.size()}
+   * with the elements from {@code values}
    * @throws ArrayIndexOutOfBoundsException if {@code index + values.size > size()};
    */
   void setAll(int index, LongList values);
 
   /**
-   * Replaces the elements in this list from the specified position
-   * {@code index} to {@code index + count} with the elements from {@code values}
-   * beginning from index {@code sourceIndex} and ending with {@code sourceIndex + count}
+   * Replaces the elements in this list from {@code index} to {@code index + count}
+   * with the elements from {@code values} beginning from index {@code sourceIndex}
+   * and ending with {@code sourceIndex + count}
    * @throws ArrayIndexOutOfBoundsException if
    * {@code index + count > size()} or {@code sourceIndex + count > values.size()};
    */

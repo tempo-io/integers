@@ -253,7 +253,8 @@ public class LongCollections {
   }
 
   /**
-   * @return array with the specified length with copied elements from the specified array.
+   * @return {@code array} if {@code array.length} equals {@code length},
+   * otherwise its copy(subarray) whose length equals {@code length}.
    */
   public static long[] reallocArray(@Nullable long[] array, int length) {
     assert length >= 0 : length;

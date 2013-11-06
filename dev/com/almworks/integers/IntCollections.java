@@ -603,16 +603,14 @@ public class IntCollections {
     if (count == 0) return IntList.EMPTY;
 
     return new AbstractIntList() {
-      int size = count;
-      int val = value;
       @Override
       public int size() {
-        return size;
+        return count;
       }
 
       @Override
       public int get(int index) throws NoSuchElementException {
-        return val;
+        return value;
       }
     };
   }

@@ -23,7 +23,7 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class FailFastLongIterator extends AbstractLongIterator {
-  private LongIterator myIterator;
+  private final LongIterator myIterator;
   private final int myModCountAtCreation = getCurrentModCount();
 
   public FailFastLongIterator(LongIterator it) {

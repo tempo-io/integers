@@ -618,7 +618,7 @@ public class LongTreeSet implements WritableLongSortedSet {
   }
 
   /**
-   * retain this set with the specified set
+   * Retains this set with the specified set
    * */
   public LongTreeSet retain(LongTreeSet set) {
     LongArray array = toArray();
