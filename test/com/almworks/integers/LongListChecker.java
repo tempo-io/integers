@@ -16,6 +16,9 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.optimized.SameValuesLongList;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -126,6 +129,20 @@ public abstract class LongListChecker extends IntegersFixture {
 
       public int binSearch(long value) {
         return list.binarySearch(value);
+      }
+    });
+  }
+
+  public void testIteratorSpecification() {
+    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+      @Override
+      public List<LongIterator> get(long... values) {
+        List<LongList> lists = createLongListVariants(values);
+        List<LongIterator> res = new ArrayList<LongIterator>(lists.size());
+        for (LongList list : lists) {
+          res.add(list.iterator());
+        }
+        return res;
       }
     });
   }

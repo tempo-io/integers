@@ -64,6 +64,7 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testExpand() {
+    array = new LongArray();
     array = LongArray.create(0, 1, 2, 3);
     array.expand(1, 4);
     CHECK.order(array, LongArray.create(0, 1, 2, 3, 0, 1, 2, 3));
@@ -118,7 +119,7 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testOthersMethods() {
-    CHECK.order(LongArray.singleton(Long.valueOf(-239)), LongArray.create(-239));
+    CHECK.order(LongArray.create(-239), LongArray.create(-239));
 
     long[] a = array.extractHostArray();
     CHECK.order(array, a);

@@ -16,9 +16,28 @@
 
 package com.almworks.integers;
 
-public class LongArrayIteratorTests extends IntegersFixture {
+import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class LongArrayIteratorTests extends LongListChecker {
   private static LongArray arr;
   private static WritableLongListIterator iter;
+
+  @Override
+  protected List<LongList> createLongListVariants(long... values) {
+    List<LongList> res = new ArrayList<LongList>(3);
+    res.add(LongArray.copy(values));
+    LongArray ar = LongArray.copy(values);
+    ar.add(0);
+    ar.removeLast();
+    res.add(ar);
+    ar = new LongArray(values.length + values.length/2);
+    ar.addAll(values);
+    res.add(ar);
+    return res;
+  }
 
   public void setUp() throws Exception {
     super.setUp();
@@ -118,14 +137,5 @@ public class LongArrayIteratorTests extends IntegersFixture {
     assertEquals(1, it.nextValue());
     assertTrue(it.hasNext());
     assertEquals(1, it.value());
-  }
-
-  public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
-      @Override
-      public LongIterator get(long... values) {
-        return new LongArray(values).iterator();
-      }
-    });
   }
 }

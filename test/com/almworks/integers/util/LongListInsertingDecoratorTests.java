@@ -47,7 +47,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     // ~[...]
     array = LongArray.copy(values);
     long firstVal = array.removeAt(0);
-    res.add(new LongListInsertingDecorator(array, new IntLongMap(IntArray.singleton(0), LongArray.singleton(firstVal))));
+    res.add(new LongListInsertingDecorator(array, new IntLongMap(IntArray.create(0), LongArray.create(firstVal))));
 
     // [..~..]
     array = LongArray.copy(values);

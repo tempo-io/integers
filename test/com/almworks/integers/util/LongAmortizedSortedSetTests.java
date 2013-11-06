@@ -63,7 +63,7 @@ public class LongAmortizedSortedSetTests extends WritableLongSetChecker {
     System.out.println(LongCollections.toBoundedString(set));
   }
 
-  public void test2Iterators() {
+  public void testIterators2() {
     set.addAll(ap(0, 1, 10));
     LongIterator it1 = set.iterator();
     for (int i = 0; i < 5; i++) {

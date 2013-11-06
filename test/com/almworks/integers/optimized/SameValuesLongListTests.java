@@ -282,17 +282,6 @@ public class SameValuesLongListTests extends LongListChecker {
     testReverse(new long[]{2, 2, 3, 3, 3}, new long[]{3, 3, 3, 2, 2});
   }
 
-  public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
-      @Override
-      public LongIterator get(long... values) {
-        SameValuesLongList list = new SameValuesLongList();
-        list.addAll(values);
-        return list.iterator();
-      }
-    });
-  }
-
   public void testIteratorRemove() {
     list.addAll(1, 1, 1, 2, 2, 3, 3, 3);
     WritableLongListIterator i = list.iterator();
@@ -323,6 +312,7 @@ public class SameValuesLongListTests extends LongListChecker {
   public void testExpandSimpleCase() {
     int[] elements = {5, 10, 4, 2, 1};
     int[] counts = {1, 2, 1, 1, 1};
+//    list.expand(0, 4);
     for ( int i = 0; i < 5; i++) {
       for ( int j = 0; j < counts[i]; j++) {
         list.add(elements[i]);
@@ -398,21 +388,27 @@ public class SameValuesLongListTests extends LongListChecker {
 
   // todo update with 0 in counts
   public void testCreate() {
+    LongArray values          ;//= LongArray.create(0,2,4,6,8);
+    IntArray counts           ;//= IntArray.create(0, 1, 0, 3, 0);
+    LongArray expected        ;//= LongArray.create(2, 6, 6, 6);
+    SameValuesLongList actual ;//= SameValuesLongList.create(values, counts);
+//    CHECK.order(expected, actual);
+
     for (int i = 0; i < 10; i++) {
-      LongArray values = generateRandomLongArray(100, false);
-      IntArray counts = generateRandomIntArray(100, false, 1, 4);
-      LongArray expected = new LongArray(values.size() * 3);
+      values = generateRandomLongArray(100, false);
+      counts = generateRandomIntArray(100, false, 1, 4);
+      expected = new LongArray(values.size() * 3);
       for (int j = 0; j < values.size(); j++) {
         for (int k = 0; k < counts.get(j); k++) {
           expected.add(values.get(j));
         }
       }
 
-      SameValuesLongList actual = SameValuesLongList.create(values, counts);
+      actual = SameValuesLongList.create(values, counts);
       CHECK.order(expected, actual);
     }
 
-    LongArray expected = generateRandomLongArray(100, false);
-    CHECK.order(expected, SameValuesLongList.create(expected));
+    expected = generateRandomLongArray(100, false);
+//    CHECK.order(expected, SameValuesLongList.create(expected));
   }
 }
