@@ -211,28 +211,27 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
       }
     }
   }
+  public void testRandom() {
+    int maxVal = Integer.MAX_VALUE;
+    int setSize = 510, listSize = 510;
+    int nAttempts = 10;
 
-  public void testRandom() throws Exception {
-    int[] setSizes = new int[]{510, 513, 1025, 2049, 4097}; // testing sizes near 2^n
-    int nAttempts = 5;
-    LongSetBuilder anotherSet = new LongSetBuilder();
-//    set = createSet();
-    set = createSetWithCapacity(510);
-    WritableLongList toAdd = new LongArray();
+    LongArray toAdd = new LongArray(listSize);
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      toAdd.addAll(generateRandomLongArray(setSizes[attempt], false));
-      set.addAll(toAdd);
-      anotherSet.addAll(toAdd);
-      LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
-      checkSet(set, anotherSetList);
-      System.err.println("attempt #" + attempt);
+      LongArray expected = generateRandomLongArray(setSize, false, maxVal);
+      set.clear();
+      set.addAll(expected);
+      expected.sortUnique();
 
-      // testRemove runs long, so it's ran only twice
-      if (attempt > 1) continue;
-      testRemove(toAdd, toAdd);
-      testRemove(toAdd, anotherSetList);
-      testRemove(anotherSetList, toAdd);
-      testRemove(anotherSetList, anotherSetList);
+      toAdd.clear();
+      toAdd.addAll(generateRandomLongArray(listSize, true, maxVal));
+      for (LongIterator it: set) {
+        toAdd.removeAllSorted(it.value());
+      }
+
+      set.addAll(toAdd);
+      set.removeAll(toAdd);
+      CHECK.unordered(expected, set.toArray());
     }
   }
 

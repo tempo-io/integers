@@ -309,7 +309,7 @@ public class SameValuesLongListTests extends LongListChecker {
     assertEquals(expected, result);
   }
 
-  public void testExpandSimpleCase() {
+  public void testExpandSimple() {
     int[] elements = {5, 10, 4, 2, 1};
     int[] counts = {1, 2, 1, 1, 1};
 //    list.expand(0, 4);
@@ -357,7 +357,15 @@ public class SameValuesLongListTests extends LongListChecker {
     CHECK.order(list.iterator(), expected.iterator());
   }
 
-  public void testExpandComplexCase() {
+  public void testExpandSimple2() {
+    list.add(10);
+    list.removeLast();
+    assertTrue(list.isEmpty());
+    list.expand(0, 10);
+    CHECK.order(list, LongCollections.repeat(0, 10));
+  }
+
+  public void testExpandComplex() {
     LongArray expected = LongArray.create(0, 1, 2, 3, 4, 5);
     list.addAll(expected.iterator());
     CHECK.order(list.iterator(), expected.iterator());
@@ -388,22 +396,25 @@ public class SameValuesLongListTests extends LongListChecker {
 
   // todo update with 0 in counts
   public void testCreate() {
-    LongArray values          ;//= LongArray.create(0,2,4,6,8);
-    IntArray counts           ;//= IntArray.create(0, 1, 0, 3, 0);
-    LongArray expected        ;//= LongArray.create(2, 6, 6, 6);
-    SameValuesLongList actual ;//= SameValuesLongList.create(values, counts);
-//    CHECK.order(expected, actual);
+    LongArray values          = LongArray.create(0,2,4,6,8);
+    IntArray counts           = IntArray.create(0, 1, 0, 3, 0);
+    LongArray expected        = LongArray.create(2, 6, 6, 6);
+    SameValuesLongList actual = SameValuesLongList.create(values, counts);
+    CHECK.order(expected, actual);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 12; i++) {
       values = generateRandomLongArray(100, false);
-      counts = generateRandomIntArray(100, false, 1, 4);
+      counts = generateRandomIntArray(100, false, 4);
+      if (i == 11) {
+        values.add(RAND.nextLong());
+        counts.add(0);
+      }
       expected = new LongArray(values.size() * 3);
       for (int j = 0; j < values.size(); j++) {
         for (int k = 0; k < counts.get(j); k++) {
           expected.add(values.get(j));
         }
       }
-
       actual = SameValuesLongList.create(values, counts);
       CHECK.order(expected, actual);
     }

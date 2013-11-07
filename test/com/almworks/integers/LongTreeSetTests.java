@@ -53,35 +53,33 @@ public class LongTreeSetTests extends WritableLongSetChecker {
 
   protected WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
     return new WritableLongSortedSet[]{
-        LongTreeSet.fromSortedList(sortedList),
-        LongTreeSet.fromSortedList(sortedList, LongTreeSet.ColoringType.TO_ADD),
-        LongTreeSet.fromSortedList(sortedList, LongTreeSet.ColoringType.TO_REMOVE)
+        LongTreeSet.createFromSortedUnique(sortedList),
+        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), LongTreeSet.ColoringType.TO_ADD),
+        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), LongTreeSet.ColoringType.TO_REMOVE)
     };
   }
 
   public void testRandom2() {
-    int[] ns = new int[]{510, 513, 1025, 2049, 4097}; // testing sizes near 2^n
-    int nAttempts = 5;
-    LongSetBuilder anotherSet = new LongSetBuilder();
-    LongTreeSet dynamicSet = new LongTreeSet(510);
-    WritableLongList toAdd = new LongArray();
-    for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      toAdd.addAll(generateRandomLongArray(ns[attempt], false));
-      dynamicSet.addAll(toAdd);
-      dynamicSet.compactify();
-      anotherSet.addAll(toAdd);
-      LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
-      LongList setList = dynamicSet.toArray();
-//      System.err.println("attempt #" + attempt);
-      CHECK.order(dynamicSet.iterator(), anotherSet.iterator());
-      CHECK.order(anotherSetList, setList);
+    int setSize = 510, listSize = 510;
+    int nAttempts = 10;
 
-      // testRemove runs long, so it's ran only twice
-      if (attempt > 1) continue;
-      testRemove(toAdd, toAdd);
-      testRemove(toAdd, anotherSetList);
-      testRemove(anotherSetList, toAdd);
-      testRemove(anotherSetList, anotherSetList);
+    LongArray toAdd = new LongArray(listSize);
+    for (int attempt = 0; attempt < nAttempts; ++attempt) {
+      LongTreeSet dynamicSet = new LongTreeSet(setSize);
+      LongArray expected = generateRandomLongArray(setSize, false);
+      dynamicSet.addAll(expected);
+      expected.sortUnique();
+
+      toAdd.clear();
+      toAdd.addAll(generateRandomLongArray(listSize, true));
+      for (LongIterator it: dynamicSet) {
+        toAdd.removeAllSorted(it.value());
+      }
+
+      dynamicSet.addAll(toAdd);
+      dynamicSet.removeAll(toAdd);
+      dynamicSet.compactify();
+      CHECK.order(expected, dynamicSet.toArray());
     }
   }
 
@@ -103,7 +101,7 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     set.compactify();
     assertTrue(set.isEmpty());
     LongList ll = new LongArray();
-    LongTreeSet set2 = LongTreeSet.fromSortedList(ll);
+    LongTreeSet set2 = LongTreeSet.createFromSortedUnique(ll);
     assertTrue(set2.isEmpty());
     set.addAll(1, 3, 2, MIN, Long.MAX_VALUE);
     assertTrue(new LongArray(set.toArray()).isSorted(true));

@@ -562,4 +562,11 @@ public class LongArrayTests extends IntegersFixture {
       CHECK.order(array, expected);
     }
   }
+
+  public void testExpand2() {
+    array.addAll(generateRandomLongArray(20, false));
+    array.clear();
+    array.expand(0, 10);
+    System.out.println(array);
+  }
 }

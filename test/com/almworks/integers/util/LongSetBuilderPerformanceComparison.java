@@ -60,7 +60,7 @@ public abstract class LongSetBuilderPerformanceComparison extends TestCase {
           set.add(j);
         }
       }
-      collection = set.toSortedList();
+      collection = set.commitToArray();
     }
     long time = System.currentTimeMillis() - start;
     System.out.println("size = " + collection.size());

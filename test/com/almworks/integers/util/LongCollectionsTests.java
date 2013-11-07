@@ -375,7 +375,7 @@ public class LongCollectionsTests extends IntegersFixture {
     for (int i = 0; i < 5; i++) {
       for (int j = 0; j < 2; j++) {
         arrays[j] = generateRandomLongArray(10000, true);
-        sets[j] = LongTreeSet.fromSortedList(arrays[j]);
+        sets[j] = LongTreeSet.createFromSortedUnique(arrays[j]);
       }
       expected = union(arrays[0], arrays[1]);
       actual = union(sets[0], sets[1]).toArray();
@@ -391,7 +391,7 @@ public class LongCollectionsTests extends IntegersFixture {
     for (int i = 0; i < 5; i++) {
       for (int j = 0; j < 2; j++) {
         arrays[j] = generateRandomLongArray(10000, true);
-        sets[j] = LongTreeSet.fromSortedList(arrays[j]);
+        sets[j] = LongTreeSet.createFromSortedUnique(arrays[j]);
       }
       expected = intersectionSorted(arrays[0], arrays[1]);
       actual = intersection(sets[0], sets[1]).toArray();

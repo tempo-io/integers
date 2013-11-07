@@ -62,7 +62,7 @@ public abstract class LongTreeSetPerf extends LongTreeSetTests {
       for (int i = 0; i < n; ++i) toAdd[i] = RAND.nextLong();
       dynamicSet.addAll(toAdd);
       anotherSet.addAll(toAdd);
-      LongList anotherSetList = anotherSet.toTemporaryReadOnlySortedCollection();
+      LongList anotherSetList = anotherSet.toList();
       LongList setList = dynamicSet.toArray();
       System.err.println("attempt #" + attempt);
       CHECK.order(anotherSetList, setList);
@@ -78,7 +78,7 @@ public abstract class LongTreeSetPerf extends LongTreeSetTests {
       for (int i = 0; i < n; ++i) toAdd[i] = RAND.nextLong();
       lsb.addAll(toAdd);
       dls.addAll(toAdd);
-      LongList lsbList = lsb.toTemporaryReadOnlySortedCollection();
+      LongList lsbList = lsb.toList();
       for (int i = 0; i < n; ++i) {
         long l = RAND.nextLong();
         boolean expected = lsbList.binarySearch(l) >= 0;
@@ -98,7 +98,7 @@ public abstract class LongTreeSetPerf extends LongTreeSetTests {
         System.out.println(i + " set size: " + lsb.size() + " ratio: " + lsb.size()*1./i);
       }
       long key = RAND.nextInt(n);
-      boolean lsbContains = lsb.toTemporaryReadOnlySortedCollection().binarySearch(key) >= 0;
+      boolean lsbContains = lsb.toList().binarySearch(key) >= 0;
       boolean dlsContains = dls.contains(key);
       assertEquals(lsbContains, dlsContains);
       if (!lsbContains) {
@@ -156,7 +156,7 @@ public abstract class LongTreeSetPerf extends LongTreeSetTests {
       } else {
         list2.add(addList);
       }
-      LongTreeSet dls = LongTreeSet.fromSortedList(srcList, cT);
+      LongTreeSet dls = LongTreeSet.createFromSortedUnique(srcList, srcList.size(), cT);
       list.add(dls);
     }
 

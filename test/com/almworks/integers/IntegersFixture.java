@@ -41,7 +41,7 @@ public abstract class IntegersFixture extends TestCase {
   }
 
   protected void checkSet(LongSetBuilder builder, long[]... v) {
-    LongList collection = builder.clone().toSortedList();
+    LongList collection = builder.clone().commitToArray();
     checkSet(collection, v);
   }
 

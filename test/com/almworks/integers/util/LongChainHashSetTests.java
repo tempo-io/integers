@@ -2,7 +2,7 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 
-public class ChainHashLongSetTests extends WritableLongSetChecker {
+public class LongChainHashSetTests extends WritableLongSetChecker {
 
   @Override
   protected WritableLongSet createSet() {
