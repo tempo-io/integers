@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.*;
 
-public final class LongSetBuilder implements Cloneable, LongCollector, LongIterable {
+public final class LongSetBuilder implements Cloneable, LongCollector, SortedLongSet {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;
 
   private final int myTempLength;
@@ -116,15 +116,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
     myTemp.clear();
   }
 
-  public LongList toSortedList() {
-    myFinished = true;
-    mergeTemp();
-    if (mySorted.size() == 0)
-      return LongList.EMPTY;
-    return mySorted;
-  }
-
-  public LongArray toLongArray() {
+  public LongArray commitToArray() {
     myFinished = true;
     mergeTemp();
     return mySorted;
@@ -135,19 +127,16 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
    *
    * This method does not finalize the builder.
    */
-  public LongList toTemporaryReadOnlySortedCollection() {
+  public LongList toList() {
     mergeTemp();
     if (mySorted.size() == 0)
       return LongList.EMPTY;
     return mySorted;
   }
 
-  public long[] toNativeArray() {
-    myFinished = true;
-    mergeTemp();
-    if (mySorted.size() == 0)
-      return EMPTY_LONGS;
-    return mySorted.toNativeArray();
+  @Override
+  public LongArray toArray() {
+    return LongArray.copy(toList());
   }
 
   public LongSetBuilder clone() {
@@ -168,6 +157,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   public boolean isEmpty() {
     return mySorted.size() + myTemp.size() == 0;
   }
+
 
   public void clear(boolean reuseArrays) {
     mySorted.clear();
@@ -190,6 +180,14 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongItera
   public boolean contains(long value) {
     return mySorted.binarySearch(value) >= 0 ||
         myTemp.indexOf(value) != -1;
+  }
+
+  @Override
+  public boolean containsAll(LongIterable iterable) {
+    for (LongIterator iterator : iterable.iterator()) {
+      if (!contains(iterator.value())) return false;
+    }
+    return true;
   }
 
   public String toString() {

@@ -239,7 +239,7 @@ public class LongCollections {
    * @param array
    * @param capacity
    * @return {@code array} if {@code capacity <= array.length} otherwise copy {@code array} to new array
-   * with length equal to the max between {@code 16}, {@code capacity} and {@code (array.length * 2)}
+   * with length equal to the maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
    */
   public static long[] ensureCapacity(@Nullable long[] array, int capacity) {
     int length = array == null ? -1 : array.length;
@@ -254,7 +254,7 @@ public class LongCollections {
 
   /**
    * @return {@code array} if {@code array.length} equals {@code length},
-   * otherwise its copy(subarray) whose length equals {@code length}.
+   * otherwise its copy(or subarray) whose length equals {@code length}.
    */
   public static long[] reallocArray(@Nullable long[] array, int length) {
     assert length >= 0 : length;
@@ -439,7 +439,7 @@ public class LongCollections {
     if (!(second instanceof SortedLongSet)) arrays[1].sortUnique();
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].merge(arrays[1 - dest]);
-    return LongTreeSet.fromSortedList(arrays[dest]);
+    return LongTreeSet.createFromSortedUnique(arrays[dest]);
   }
 
   /**
@@ -449,7 +449,7 @@ public class LongCollections {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].retainSorted(arrays[1 - dest]);
-    return LongTreeSet.fromSortedList(arrays[dest]);
+    return LongTreeSet.createFromSortedUnique(arrays[dest]);
   }
 
   /**
@@ -472,7 +472,7 @@ public class LongCollections {
         }
       }
     }
-    if (builder != null) union = builder.toSortedList();
+    if (builder != null) union = builder.commitToArray();
     if (union == null) union = LongList.EMPTY;
     return union;
   }

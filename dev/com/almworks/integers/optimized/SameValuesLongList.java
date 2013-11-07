@@ -55,17 +55,25 @@ public class SameValuesLongList extends AbstractWritableLongList {
 //    if (values.size() != counts.size()) throw new IllegalArgumentException();
 
     IntArray counts1 = new IntArray(values.size());
+    LongArray values1 = new LongArray(values.size());
     counts1.add(0);
-    int last = 0, cur;
+    int last = 0, cur, curCount;
+    long curValue;
     IntIterator it = counts.iterator();
-    for (int i = 1, n = values.size(); i < n; i++) {
-      cur = last + it.nextValue();
-      counts1.add(cur);
-      last = cur;
+    LongIterator valIt = values.iterator();
+    for (int i = 0, n = values.size(); i < n; i++) {
+      curCount = it.nextValue();
+      curValue = valIt.nextValue();
+      if (curCount != 0) {
+        values1.add(curValue);
+        cur = last + curCount;
+        counts1.add(cur);
+        last = cur;
+      }
     }
     SameValuesLongList list = new SameValuesLongList();
-    list.myMap = new IntLongMap(counts1, LongCollections.collectIterables(values.size(), values));
-    list.updateSize(it.nextValue() + last);
+    list.updateSize(counts1.removeLast());
+    list.myMap = new IntLongMap(counts1, values1);
     return list;
   }
 
@@ -74,7 +82,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
   }
 
 
-    public long get(int index) {
+  public long get(int index) {
     assert !IntegersDebug.CHECK || checkInvariants();
     if (index < 0 || index >= size())
       throw new IndexOutOfBoundsException(index + " " + this);
@@ -141,6 +149,19 @@ public class SameValuesLongList extends AbstractWritableLongList {
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
+  /**
+   * Increases the list size and shifts all values to the right of {@code index}.
+   * If {@code 0 <= index} and {@code index < size()} the resulting "hole"
+   * in the range {@code [index; index + count)} contains {@code count} values equal to {@code get(index)}.
+   * If {@code index == size()} method works as if {@code index == size() - 1}.
+   * Invoking {@code expand(0, count)} will add {@code count} zeros.
+   *
+   * @param index where to insert the "hole", index must be >= 0 and <= size()
+   * @param count how much size increase is needed, must be >= 0
+   *
+   * @throws IndexOutOfBoundsException when index < 0 or index > size
+   * @throws IllegalArgumentException when count < 0
+   */
   public void expand(int index, int count) {
     assert !IntegersDebug.CHECK || checkInvariants();
     if (count < 0)
@@ -433,7 +454,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
     // Case c.
     if (m.getKey(msz - 1) == sz) m.removeAt(msz - 1);
-    
+
     m.commit();
     assert !IntegersDebug.CHECK || checkInvariants();
   }

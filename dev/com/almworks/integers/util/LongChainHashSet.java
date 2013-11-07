@@ -45,18 +45,13 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   private void modified() {
-    assert size() < threshold;
-    if (size() + 1 == threshold) {
-      resize();
-    }
     myModCount++;
   }
 
-  private void resize() {
-    int newHeadNum = myHead.length<<1;
-    int thresholdNew = (int)(newHeadNum * loadFactor);
+  private void resize(int newCapacity) {
+    int thresholdNew = (int)(newCapacity * loadFactor);
 
-    int[] myHeadNew = new int[newHeadNum];
+    int[] myHeadNew = new int[newCapacity];
     int[] myNextNew = new int[thresholdNew];
 
     cnt = 1;
@@ -67,7 +62,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     long[] myKeysNew = buffer.extractHostArray();
 
     for (int i = 0; i < values.size(); i++) {
-      int h = index(hash(values.get(i)), newHeadNum);
+      int h = index(hash(values.get(i)), newCapacity);
       myNextNew[cnt] = myHeadNew[h];
       myHeadNew[h] = cnt++;
     }
@@ -75,11 +70,14 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     myKeys = myKeysNew;
     myHead = myHeadNew;
     threshold = thresholdNew;
-    headNum = newHeadNum;
+    headNum = newCapacity;
   }
 
   // todo optimize(now effective only when size() < headNum)
   protected boolean include0(long value) {
+    if (size() + 1 > threshold) {
+      resize(myHead.length << 1);
+    }
     myKeys = LongCollections.ensureCapacity(myKeys, cnt + 1);
     myNext = IntCollections.ensureCapacity(myNext, cnt + 1);
     if (contains(value)) return false;
@@ -93,11 +91,13 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   @Override
   public void addAll(LongList values) {
     modified();
-    int size = values.size();
-    myKeys = LongCollections.ensureCapacity(myKeys, cnt + size);
-    myNext = IntCollections.ensureCapacity(myNext, cnt + size);
-
-
+    int valuesSize = values.size();
+    if (size() + valuesSize > threshold) {
+      resize(myHead.length << 1);
+    }
+    myKeys = LongCollections.ensureCapacity(myKeys, cnt + valuesSize);
+    myNext = IntCollections.ensureCapacity(myNext, cnt + valuesSize);
+    addAll(values.iterator());
   }
 
   // todo add BitSet

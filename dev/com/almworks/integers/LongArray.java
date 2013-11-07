@@ -77,9 +77,11 @@ public final class LongArray extends AbstractWritableLongList {
    * Constructs a LongArray with the specified size {@code length} that is backed by {@code hostArray}
    * See {@link LongArray#copy(long[])}, {@link LongArray#create(long...)}.
    * @param length size of the new array. If {@code length} >= {@code hostArray.length}
-   *               new size is equal to {@code hostArray.length} and equal to 0 if {@code length < 0}
+   *               new size is equal to {@code hostArray.length} otherwise equal to {@code length}.
+   * @throws IllegalArgumentException if {@code length < 0}
    * */
   public LongArray(long[] hostArray, int length) {
+    if (length < 0) throw new IllegalArgumentException();
     myArray = hostArray == null ? EMPTY_LONGS : hostArray;
     updateSize(length < 0 ? 0 : length >= myArray.length ? myArray.length : length);
   }

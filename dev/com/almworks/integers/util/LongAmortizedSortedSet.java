@@ -185,15 +185,6 @@ public class LongAmortizedSortedSet implements WritableLongSortedSet {
   }
 
   /**
-   * Clears this set and add all elements from the specified builder
-   */
-  public void replaceFrom(LongSetBuilder builder) {
-    myAdded.clear();
-    myRemoved.clear();
-    myBaseList = new LongArray(builder.toTemporaryReadOnlySortedCollection());
-  }
-
-  /**
    * @return new LongAmortizedSortedSet contained all elements from the specified iterator
    */
   public static LongAmortizedSortedSet fromSortedIterable(LongIterator src) {

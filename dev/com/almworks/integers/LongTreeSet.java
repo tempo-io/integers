@@ -22,6 +22,7 @@ package com.almworks.integers;
 import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.util.FailFastLongIterator;
 import com.almworks.integers.util.IntegersDebug;
+import com.almworks.integers.util.LongMeasurableIterable;
 
 import java.io.*;
 import java.util.*;
@@ -421,40 +422,25 @@ public class LongTreeSet implements WritableLongSortedSet {
    */
   void compactify(ColoringType coloringType) {
     modified();
-    fromSortedIterable0(this, size(), coloringType);
+    createFromSorted0(this, size(), coloringType);
     assert checkRedsAmount(coloringType);
   }
 
   /**
-   * Builds a new LongTreeSet based on values of src.
-   */
-  public static LongTreeSet fromSortedIterable(LongIterable src) {
-    return fromSortedIterable(src, -1);
-  }
-
-  /**
-   * Builds a new LongTreeSet with the specified initial capacity based on values of src.
-   */
-  public static LongTreeSet fromSortedIterable(LongIterable src, int capacity) {
-    return fromSortedIterable(src, capacity, ColoringType.BALANCED);
-  }
-
-  /**
-   * This method is similar to {@link LongTreeSet#fromSortedList(LongList)},
-   * except the way the internal levels are colored.
    * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
    *                     if the last one is unfilled.
    *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link LongTreeSet#fromSortedList(LongList)};
+   *   <br>BALANCED colors every 4th non-last level red;
    *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+   * @return new {@code LongTreeSet} with elements from {@code src} with the specified capacity and coloring type.
    */
-  public static LongTreeSet fromSortedIterable(LongIterable src, int capacity, ColoringType coloringType) {
+  public static LongTreeSet createFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
     LongTreeSet res = new LongTreeSet();
-    res.fromSortedIterable0(src, capacity, coloringType);
+    res.createFromSorted0(src, capacity, coloringType);
     return res;
   }
 
-  private void fromSortedIterable0(LongIterable src, int capacity, ColoringType coloringType) {
+  private void createFromSorted0(LongIterable src, int capacity, ColoringType coloringType) {
     long[] newKeys;
     if (capacity == 0 && !src.iterator().hasNext())
       newKeys = EMPTY_KEYS;
@@ -468,16 +454,29 @@ public class LongTreeSet implements WritableLongSortedSet {
       }
       newKeys = buf.extractHostArray();
     }
-    fromPreparedArray(newKeys, capacity, coloringType);
+    createFromPreparedArray(newKeys, capacity, coloringType);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("fromSortedLongIterable");
+  }
+
+  /**
+   * @return {@code LongTreeSet} with capacity equals to {@code src.size()}.
+   * To create {@code LongTreeSet} with another capacity use
+   * {@link com.almworks.integers.LongTreeSet#createFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
+   */
+  public static LongTreeSet createFromSortedUnique(LongMeasurableIterable src) {
+    LongTreeSet res = new LongTreeSet();
+    res.createFromSorted0(src, src.size(), ColoringType.BALANCED);
+    return res;
   }
 
   /**
    * @param newKeys array which will become the new myKeys
    * @param usedSize a number of actual elements in newKeys
    */
-  private void fromPreparedArray(long[] newKeys, int usedSize, ColoringType coloringType) {
+  private void createFromPreparedArray(long[] newKeys, int usedSize, ColoringType coloringType) {
     myBlack.clear();
+    myRemoved = new BitSet(usedSize);
+
     init();
     myKeys = newKeys;
     myFront = usedSize+1;
@@ -529,33 +528,6 @@ public class LongTreeSet implements WritableLongSortedSet {
       myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, colorCounter, maxCounter, lpab);
     }
     return index;
-  }
-
-  /**
-   * Builds a new LongTreeSet based on values of src. src isn't used internally, its contents are copied.
-   */
-  public static LongTreeSet fromSortedList(LongList src) {
-    return fromSortedList(src, ColoringType.BALANCED);
-  }
-
-  /**
-   * This method is similar to {@link LongTreeSet#fromSortedList(LongList)},
-   * except the way the internal levels are colored.
-   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
-   *                     if the last one is unfilled.
-   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link LongTreeSet#fromSortedList(LongList)};
-   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
-   */
-  public static LongTreeSet fromSortedList(LongList src, ColoringType coloringType) {
-    LongTreeSet res = new LongTreeSet();
-    res.fromSortedList0(src, coloringType);
-    return res;
-  }
-
-  private void fromSortedList0(LongList src, ColoringType coloringType) {
-    fromSortedIterable0(src, src.size(), coloringType);
-    assert checkRedsAmount(coloringType);
   }
 
   public LongIterator iterator() {
@@ -613,7 +585,7 @@ public class LongTreeSet implements WritableLongSortedSet {
     LongArray array = toArray();
     array.retainSorted(values);
     clear();
-    fromSortedList0(array, ColoringType.BALANCED);
+    createFromSorted0(array, array.size(), ColoringType.BALANCED);
     return this;
   }
 
@@ -624,7 +596,7 @@ public class LongTreeSet implements WritableLongSortedSet {
     LongArray array = toArray();
     array.retainSorted(set.toArray());
     clear();
-    fromSortedList0(array, ColoringType.BALANCED);
+    createFromSortedUnique(array);
     return this;
   }
 
@@ -989,7 +961,7 @@ public class LongTreeSet implements WritableLongSortedSet {
   private boolean checkRedsAmount(ColoringType coloringType) {
     int sz = size();
     int expected = redsExpected(sz, coloringType);
-    int actual = sz - myBlack.cardinality() - myRemoved.cardinality() + 1;
+    int actual = sz - myBlack.cardinality() + 1;
     assert expected == actual : sz + " " + actual + " " + expected;
     return true;
   }
