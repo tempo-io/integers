@@ -28,10 +28,6 @@ public class LongTreeSetTests extends WritableLongSetChecker {
   private static final long MIN = Long.MIN_VALUE;
   private static final long MAX = Long.MAX_VALUE;
 
-  protected boolean isSupportTailIterator() {
-    return true;
-  }
-
   protected WritableLongSortedSet createSet() {
     return createSetWithCapacity(-1);
   }
@@ -65,21 +61,21 @@ public class LongTreeSetTests extends WritableLongSetChecker {
 
     LongArray toAdd = new LongArray(listSize);
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
-      LongTreeSet dynamicSet = new LongTreeSet(setSize);
+      LongTreeSet treeSet = new LongTreeSet(setSize);
       LongArray expected = generateRandomLongArray(setSize, false);
-      dynamicSet.addAll(expected);
+      treeSet.addAll(expected);
       expected.sortUnique();
 
       toAdd.clear();
       toAdd.addAll(generateRandomLongArray(listSize, true));
-      for (LongIterator it: dynamicSet) {
+      for (LongIterator it: treeSet) {
         toAdd.removeAllSorted(it.value());
       }
 
-      dynamicSet.addAll(toAdd);
-      dynamicSet.removeAll(toAdd);
-      dynamicSet.compactify();
-      CHECK.order(expected, dynamicSet.toArray());
+      treeSet.addAll(toAdd);
+      treeSet.removeAll(toAdd);
+      treeSet.compactify();
+      CHECK.order(expected, treeSet.toArray());
     }
   }
 

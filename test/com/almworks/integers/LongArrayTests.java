@@ -172,6 +172,7 @@ public class LongArrayTests extends IntegersFixture {
       public LongIterable get(LongArray... arrays) {
         LongArray res = LongArray.copy(arrays[0]);
         res.retain(arrays[1]);
+        res.sortUnique();
         return res;
       }
     }, new SetOperationsChecker.IntersectionGetter(false), false, true);

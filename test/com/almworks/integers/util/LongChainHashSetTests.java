@@ -2,6 +2,8 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 
+import java.util.BitSet;
+
 public class LongChainHashSetTests extends WritableLongSetChecker {
 
   @Override
@@ -30,9 +32,7 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
       assertTrue(i % 2 == 0 ? set.contains(i) : !set.contains(i));
     }
     LongArray expected = new LongArray(ap(0, 2, 10));
-    LongArray actual = set.toArray();
-    actual.sortUnique();
-    CHECK.order(expected, actual);
+    checkSet(set, expected);
 
     for (int i = 0; i < 20; i++) {
       if (i % 2 == 0) {
@@ -44,9 +44,7 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
       }
     }
     expected = new LongArray(ap(0, 4, 5));
-    actual = set.toArray();
-    actual.sortUnique();
-    CHECK.order(expected, actual);
+    checkSet(set, expected);
     for (int i = 0; i < 20; i++) {
       assertTrue(i % 4 == 0 ? set.contains(i) : !set.contains(i));
     }

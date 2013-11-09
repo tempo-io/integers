@@ -197,7 +197,7 @@ public class SetOperationsChecker {
         }
         if (exist) expected.add(value);
       }
-      return expected;
+      return expected.sortUnique();
     }
   }
 

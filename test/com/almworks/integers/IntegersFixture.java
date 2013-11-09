@@ -5,6 +5,8 @@ import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 public abstract class IntegersFixture extends TestCase {
@@ -282,6 +284,26 @@ public abstract class IntegersFixture extends TestCase {
     }, arrayLength, minMaxValues);
     if (isSortUnique) res.sortUnique();
     return res;
+  }
+
+  public static LongIterator randomIterator() {
+    return new AbstractLongIteratorWithFlag() {
+      int myValue;
+      @Override
+      protected long valueImpl() {
+        return myValue;
+      }
+
+      @Override
+      protected void nextImpl() throws NoSuchElementException {
+        myValue = RAND.nextInt();
+      }
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return true;
+      }
+    };
   }
 
   static void setFinalStatic(Object obj, String name, int newValue) throws Exception {
