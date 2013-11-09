@@ -238,8 +238,9 @@ public class LongCollections {
   /**
    * @param array
    * @param capacity
-   * @return {@code array} if {@code capacity <= array.length} otherwise copy {@code array} to new array
-   * with length equal to the maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
+   * @return {@code array} if {@code capacity <= array.length} otherwise
+   * new array that contains all values of array and has length equal to the
+   * maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
    */
   public static long[] ensureCapacity(@Nullable long[] array, int capacity) {
     int length = array == null ? -1 : array.length;

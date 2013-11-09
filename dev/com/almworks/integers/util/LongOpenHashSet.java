@@ -6,117 +6,44 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 
 public class LongOpenHashSet extends AbstractWritableLongSet implements WritableLongSet {
-  private int[] myHead;
-  private int[] myNext;
-  private long[] myKeys;
-  private int headNum;
-  private int cnt = 1;
-  private int myModCount = 0;
 
-  public LongOpenHashSet(int headNum, int maxSize) {
-    this.headNum = headNum;
-    myHead = new int[headNum];
-    myNext = new int[maxSize + 1];
-    myKeys = new long[maxSize + 1];
-  }
-
-  private void modified() {
-    myModCount++;
-  }
-
-  // todo optimize(now effective only when size() < headNum)
-  protected boolean include0(long value) {
-    myKeys = LongCollections.ensureCapacity(myKeys, cnt + 1);
-    myNext = IntCollections.ensureCapacity(myNext, cnt + 1);
-    if (contains(value)) return false;
-    int h = index(hash(value));
-    myNext[cnt] = myHead[h];
-    myKeys[cnt] = value;
-    myHead[h] = cnt++;
-    return true;
-  }
-
-  // todo add BitSet
   @Override
-  protected boolean exclude0(long value) {
-    int h = index(hash(value));
-    int i = myHead[h];
-    if (i == 0) return false;
-    if (myKeys[i] == value) {
-      myHead[h] = myNext[i];
-      return true;
-    }
-    int prev;
-    for (prev = i, i = myNext[i]; i != 0; i = myNext[i]) {
-      if (myKeys[i] == value) {
-        myNext[prev] = myNext[i];
-        return true;
-      }
-    }
+  protected boolean include0(long value) {
     return false;
   }
 
-  private int hash(long value) {
-    return ((int)(value ^ (value >>> 32))) + 1;
+  @Override
+  protected boolean exclude0(long value) {
+    return false;
   }
 
-  private int index(int hash) {
-    return (hash > 0 ? hash : -hash) % headNum;
+  @Override
+  public void clear() {
   }
 
-  // todo fix size()
+  @Override
+  public WritableLongSet retain(LongList values) {
+    return null;
+  }
+
+  @Override
+  public boolean contains(long value) {
+    return false;
+  }
+
   @Override
   public int size() {
-    int count = 0;
-    for (int head = 0; head < headNum; head++) {
-      for(int i = myHead[head]; i != 0; i = myNext[i]) {
-        count++;
-      }
-    }
-    return count;
-  }
-
-  @Override
-  @NotNull
-  public LongIterator iterator() {
-    return new FailFastLongIterator(toArray().iterator()) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  public void clear() {
-    modified();
-    cnt = 1;
-    Arrays.fill(myHead, 0);
+    return 0;
   }
 
   @Override
   public LongArray toArray() {
-    LongArray res = new LongArray();
-    for (int head = 0; head < headNum; head++) {
-      for(int i = myHead[head]; i != 0; i = myNext[i]) {
-        res.add(myKeys[i]);
-      }
-    }
-    return res;
+    return null;
   }
 
-  public boolean contains(long value) {
-    int h = index(hash(value));
-    for (int i = myHead[h]; i != 0; i = myNext[i])
-      if (myKeys[i] == value) return true;
-    return false;
-  }
-
-  // todo more effective
-  public LongOpenHashSet retain(LongList values) {
-    LongArray array = toArray();
-    array.retain(values);
-    clear();
-    addAll(array);
-    return this;
+  @NotNull
+  @Override
+  public LongIterator iterator() {
+    return null;
   }
 }

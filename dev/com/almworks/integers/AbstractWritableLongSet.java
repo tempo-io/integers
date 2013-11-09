@@ -1,8 +1,5 @@
 package com.almworks.integers;
 
-/**
- *
- */
 public abstract class AbstractWritableLongSet implements WritableLongSet {
   protected int myModCount = 0;
 
@@ -11,7 +8,7 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   }
 
   /**
-   * include element without invocation {@code AbstractWritableLongSet#modified()}
+   * include element without invocation of {@code AbstractWritableLongSet#modified()}
    */
   protected abstract boolean include0(long value);
 
@@ -22,7 +19,7 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   }
 
   /**
-   * exclude element without invocation {@code AbstractWritableLongSet#modified()}
+   * exclude element without invocation of {@code AbstractWritableLongSet#modified()}
    */
   protected abstract boolean exclude0(long value);
 
@@ -32,29 +29,21 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
     return exclude0(value);
   }
 
-  protected void add0(long value) {
-    include0(value);
-  }
-
   public void add(long value) {
     modified();
-    add0(value);
-  }
-
-  protected void remove0(long value) {
-    exclude0(value);
+    include0(value);
   }
 
   public void remove(long value) {
     modified();
-    remove0(value);
+    exclude0(value);
   }
 
   @Override
   public void removeAll(long... keys) {
     modified();
     for (long key : keys) {
-      remove0(key);
+      exclude0(key);
     }
   }
 
@@ -68,7 +57,7 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   public void removeAll(LongIterator iterator) {
     modified();
     while (iterator.hasNext()) {
-      remove0(iterator.nextValue());
+      exclude0(iterator.nextValue());
     }
   }
 
@@ -82,7 +71,7 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   public void addAll(LongIterator iterator) {
     modified();
     while (iterator.hasNext()) {
-      add0(iterator.nextValue());
+      exclude0(iterator.nextValue());
     }
   }
 

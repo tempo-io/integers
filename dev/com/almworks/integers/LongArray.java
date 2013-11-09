@@ -311,6 +311,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * removes from this array all of its elements that are not contained in the {@code values}
+   * <p>Complexity: {@code O((M + N) * log(M))}, where N - {@code size()}, M - {@code values.size()}
    */
   public void retain(LongList values) {
     retain(values, false);
@@ -318,6 +319,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * removes from this array all of its elements that are not contained in the {@code values}
+   * <p>Complexity: {@code O(N * log(M)}, where N - {@code size()}, M - {@code values.size()}
    * @param values sorted {@code LongList}
    * */
   public void retainSorted(LongList values) {

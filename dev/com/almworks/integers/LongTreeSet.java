@@ -23,6 +23,7 @@ import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.util.FailFastLongIterator;
 import com.almworks.integers.util.IntegersDebug;
 import com.almworks.integers.util.LongMeasurableIterable;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -46,7 +47,7 @@ public class LongTreeSet implements WritableLongSortedSet {
   /** Tree structure: contains indexes into key, left, right, black. */
   private int[] myRight;
   /** Node color : false for red, true for black. */
-  private final BitSet myBlack;
+  private BitSet myBlack;
   /** List of removed nodes. Null if no internal nodes are removed */
   private BitSet myRemoved;
   /** Index into key, left, right, black that denotes the current root node. */
@@ -68,7 +69,7 @@ public class LongTreeSet implements WritableLongSortedSet {
 
   /**
    * This enum is used in {@link LongTreeSet#compactify(LongTreeSet.ColoringType)} and
-   * {@link LongTreeSet#fromSortedList(LongList, LongTreeSet.ColoringType)}
+   * {@link LongTreeSet#createFromSortedUnique(com.almworks.integers.util.LongMeasurableIterable)}
    * methods to determine the way the new tree will be colored.
    */
   public enum ColoringType {
@@ -254,14 +255,17 @@ public class LongTreeSet implements WritableLongSortedSet {
   }
 
   private int createNode(long key) {
-    int x = myRemoved.isEmpty() ? myFront++ : myRemoved.nextSetBit(0);
+    int x;
+    if (myRemoved.isEmpty()) {
+      x = myFront++;
+    } else {
+      x = myRemoved.nextSetBit(0);
+      myRemoved.clear(x);
+    }
     myKeys[x] = key;
     myLeft[x] = 0;
     myRight[x] = 0;
     myBlack.clear(x);
-    if (!myRemoved.isEmpty()) {
-      myRemoved.clear(x);
-    }
     return x;
   }
 
@@ -422,7 +426,7 @@ public class LongTreeSet implements WritableLongSortedSet {
    */
   void compactify(ColoringType coloringType) {
     modified();
-    createFromSorted0(this, size(), coloringType);
+    createFromSortedUnique0(this, size(), coloringType);
     assert checkRedsAmount(coloringType);
   }
 
@@ -436,11 +440,11 @@ public class LongTreeSet implements WritableLongSortedSet {
    */
   public static LongTreeSet createFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
     LongTreeSet res = new LongTreeSet();
-    res.createFromSorted0(src, capacity, coloringType);
+    res.createFromSortedUnique0(src, capacity, coloringType);
     return res;
   }
 
-  private void createFromSorted0(LongIterable src, int capacity, ColoringType coloringType) {
+  private void createFromSortedUnique0(LongIterable src, int capacity, ColoringType coloringType) {
     long[] newKeys;
     if (capacity == 0 && !src.iterator().hasNext())
       newKeys = EMPTY_KEYS;
@@ -465,7 +469,7 @@ public class LongTreeSet implements WritableLongSortedSet {
    */
   public static LongTreeSet createFromSortedUnique(LongMeasurableIterable src) {
     LongTreeSet res = new LongTreeSet();
-    res.createFromSorted0(src, src.size(), ColoringType.BALANCED);
+    res.createFromSortedUnique0(src, src.size(), ColoringType.BALANCED);
     return res;
   }
 
@@ -474,7 +478,7 @@ public class LongTreeSet implements WritableLongSortedSet {
    * @param usedSize a number of actual elements in newKeys
    */
   private void createFromPreparedArray(long[] newKeys, int usedSize, ColoringType coloringType) {
-    myBlack.clear();
+    myBlack = new BitSet(usedSize);
     myRemoved = new BitSet(usedSize);
 
     init();
@@ -488,7 +492,7 @@ public class LongTreeSet implements WritableLongSortedSet {
     int levels = log(2, usedSize);
     int top = 1 << levels;
     int redLevelsDensity = coloringType.redLevelsDensity();
-    // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
+    // Definition: last pair is any pair of nodes which belong to one parent and don't have children.
     // If the last level contains only left children, then, due to the way the last level is filled,
     // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
     // Otherwise they belong entirely to the last level and are red.
@@ -530,6 +534,7 @@ public class LongTreeSet implements WritableLongSortedSet {
     return index;
   }
 
+  @NotNull
   public LongIterator iterator() {
     return new FailFastLongIterator(new IndexedLongIterator(new LongArray(myKeys), new LURIterator())) {
       @Override
@@ -582,10 +587,14 @@ public class LongTreeSet implements WritableLongSortedSet {
   }
 
   public LongTreeSet retain(LongList values) {
-    LongArray array = toArray();
-    array.retainSorted(values);
+    LongArray res = new LongArray();
+    for (LongIterator it: values.iterator()) {
+      long value = it.value();
+      if (contains(value)) res.add(value);
+    }
     clear();
-    createFromSorted0(array, array.size(), ColoringType.BALANCED);
+    res.sortUnique();
+    createFromSortedUnique0(res, res.size(), ColoringType.BALANCED);
     return this;
   }
 
@@ -664,7 +673,6 @@ public class LongTreeSet implements WritableLongSortedSet {
     if (y == myFront - 1) {
       myFront--;
     } else {
-      if (myRemoved.isEmpty()) myRemoved = new BitSet(y+1);
       myRemoved.set(y);
     }
   }
@@ -748,7 +756,10 @@ public class LongTreeSet implements WritableLongSortedSet {
 
   @Override
   public String toString() {
-    return LongCollections.toBoundedString(this);
+    StringBuilder builder = new StringBuilder();
+    builder.append("LongAmortizedSortedSet: ");
+    builder.append(LongCollections.toBoundedString(this));
+    return builder.toString();
   }
 
   /**
@@ -958,6 +969,9 @@ public class LongTreeSet implements WritableLongSortedSet {
     return result;
   }
 
+  /**
+   * Checks that amount of red nodes in newly constructed set is correct.
+   */
   private boolean checkRedsAmount(ColoringType coloringType) {
     int sz = size();
     int expected = redsExpected(sz, coloringType);

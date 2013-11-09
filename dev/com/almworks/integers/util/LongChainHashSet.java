@@ -4,15 +4,19 @@ import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.BitSet;
 
 public class LongChainHashSet extends AbstractWritableLongSet implements WritableLongSet {
   private int[] myHead;
   private int[] myNext;
+  // todo myKeys LongArray
   private long[] myKeys;
-  private int headNum;
+  private int myHeadNum;
   private int cnt = 1;
   private float loadFactor;
   private int threshold;
+  private int mySize = 0;
+  private BitSet myRemoved = new BitSet();
 
   static final int DEFAULT_INITIAL_CAPACITY = 16;
   static final float DEFAULT_LOAD_FACTOR = 0.75f;
@@ -25,13 +29,12 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
       throw new IllegalArgumentException("Illegal load factor: " +
           loadFactor);
 
-    headNum = 1;
-    // todo fix: now final capacity of set less that initialCapacity
-    while (headNum < initialCapacity) headNum <<= 1;
+    myHeadNum = 1;
+    while (myHeadNum < initialCapacity) myHeadNum <<= 1;
 
     this.loadFactor = loadFactor;
-    threshold = (int)(this.headNum * loadFactor);
-    myHead = new int[this.headNum];
+    threshold = (int)(this.myHeadNum * loadFactor);
+    myHead = new int[this.myHeadNum];
     myKeys = new long[threshold];
     myNext = new int[threshold];
   }
@@ -49,42 +52,54 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   private void resize(int newCapacity) {
+    // check that newCapacity = 2^k
+    assert (newCapacity & (newCapacity - 1)) == 0 && newCapacity > 0;
     int thresholdNew = (int)(newCapacity * loadFactor);
-
-    int[] myHeadNew = new int[newCapacity];
-    int[] myNextNew = new int[thresholdNew];
+    int[] myHeadNew = new int[newCapacity + 1];
+    int[] myNextNew = new int[thresholdNew + 1];
 
     cnt = 1;
-    // todo more effective, refactor
-    LongArray values = toArray();
-
-    LongArray buffer = LongCollections.collectIterables(thresholdNew, new LongIterator.Single(0), toArray());
+    LongArray buffer = LongCollections.collectIterables(thresholdNew + 1, new LongIterator.Single(0), toArray());
     long[] myKeysNew = buffer.extractHostArray();
 
-    for (int i = 0; i < values.size(); i++) {
-      int h = index(hash(values.get(i)), newCapacity);
+    for (int i = 1; i <= mySize; i++) {
+      int h = index(hash(myKeysNew[i]), newCapacity);
       myNextNew[cnt] = myHeadNew[h];
       myHeadNew[h] = cnt++;
     }
+
     myNext = myNextNew;
     myKeys = myKeysNew;
     myHead = myHeadNew;
     threshold = thresholdNew;
-    headNum = newCapacity;
+    myHeadNum = newCapacity;
   }
 
-  // todo optimize(now effective only when size() < headNum)
   protected boolean include0(long value) {
-    if (size() + 1 > threshold) {
-      resize(myHead.length << 1);
+    if (size() + 1 >= threshold) {
+      resize(myHeadNum << 1);
     }
-    myKeys = LongCollections.ensureCapacity(myKeys, cnt + 1);
-    myNext = IntCollections.ensureCapacity(myNext, cnt + 1);
+    return include1(value);
+  }
+
+  protected boolean include1(long value) {
     if (contains(value)) return false;
-    int h = index(hash(value), headNum);
-    myNext[cnt] = myHead[h];
-    myKeys[cnt] = value;
-    myHead[h] = cnt++;
+    mySize++;
+    int h = index(hash(value), myHeadNum);
+
+    int x;
+    if (myRemoved.isEmpty()) {
+      x = cnt++;
+    } else {
+      x = myRemoved.nextSetBit(0);
+      myRemoved.clear(x);
+    }
+//    if (myNext.length == 49) {
+//      System.out.println(myNext.length + " " + myKeys.length + " " + x);
+//    }
+    myNext[x] = myHead[h];
+    myKeys[x] = value;
+    myHead[h] = x;
     return true;
   }
 
@@ -92,32 +107,47 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   public void addAll(LongList values) {
     modified();
     int valuesSize = values.size();
-    if (size() + valuesSize > threshold) {
-      resize(myHead.length << 1);
+    int newSize = size() + valuesSize;
+    if (newSize >= threshold) {
+      int newCap = myHeadNum << 1;
+      for (int minCap = (int)(newSize / loadFactor); newCap < minCap; ) {
+        newCap <<= 1;
+      }
+      resize(newCap);
     }
-    myKeys = LongCollections.ensureCapacity(myKeys, cnt + valuesSize);
-    myNext = IntCollections.ensureCapacity(myNext, cnt + valuesSize);
-    addAll(values.iterator());
+    for (LongIterator it: values.iterator()) {
+      include1(it.value());
+    }
   }
 
-  // todo add BitSet
   @Override
   protected boolean exclude0(long value) {
-    int h = index(hash(value), headNum);
+    int h = index(hash(value), myHeadNum);
     int i = myHead[h];
     if (i == 0) return false;
     if (myKeys[i] == value) {
       myHead[h] = myNext[i];
+      removeNode(i);
       return true;
     }
     int prev;
     for (prev = i, i = myNext[i]; i != 0; i = myNext[i]) {
       if (myKeys[i] == value) {
         myNext[prev] = myNext[i];
+        removeNode(i);
         return true;
       }
     }
     return false;
+  }
+
+  private void removeNode(int i) {
+    if (i == cnt - 1) {
+      cnt--;
+    } else {
+      myRemoved.set(i);
+    }
+    mySize--;
   }
 
   private int hash(long value) {
@@ -125,19 +155,13 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   private int index(int hash, int length) {
+    // length = 2^k
+    assert length > 0 && (length & (length - 1)) == 0;
     return (hash > 0 ? hash : -hash) & (length - 1);
   }
 
-  // todo fix size()
-  @Override
   public int size() {
-    int count = 0;
-    for (int head = 0; head < headNum; head++) {
-      for(int i = myHead[head]; i != 0; i = myNext[i]) {
-        count++;
-      }
-    }
-    return count;
+    return mySize;
   }
 
   @Override
@@ -154,34 +178,53 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   public void clear() {
     modified();
     cnt = 1;
+    mySize = 0;
     Arrays.fill(myHead, 0);
+    Arrays.fill(myNext, 0);
+    Arrays.fill(myKeys, 0);
+    myRemoved.clear();
   }
 
   @Override
   public LongArray toArray() {
-    // todo add BitSet and do more effective
-    LongArray res = new LongArray();
-    for (int head = 0; head < headNum; head++) {
-      for(int i = myHead[head]; i != 0; i = myNext[i]) {
-        res.add(myKeys[i]);
+    // todo add 2 variants: below and new LongArray(iterator()) if myRemoved.cardinality() > size() / 10
+    long[] res = new long[size()];
+    LongArray myKeysArray = new LongArray(myKeys, size());
+    int from = 1, to = myRemoved.nextSetBit(from);
+    int index = 0;
+    while (to != -1) {
+      int len = to - from;
+      if (len != 0){
+        myKeysArray.toNativeArray(from, res, index, len);
+        index += len;
       }
+      from = to + 1;
+      to = myRemoved.nextSetBit(from);
     }
-    return res;
+    myKeysArray.toNativeArray(from, res, index, res.length - index);
+    return new LongArray(res);
   }
 
   public boolean contains(long value) {
-    int h = index(hash(value), headNum);
+    int h = index(hash(value), myHeadNum);
     for (int i = myHead[h]; i != 0; i = myNext[i])
       if (myKeys[i] == value) return true;
     return false;
   }
 
-  // todo more effective
   public LongChainHashSet retain(LongList values) {
-    LongArray array = toArray();
-    array.retain(values);
+    LongArray res = new LongArray();
+    for (LongIterator it: values.iterator()) {
+      long value = it.value();
+      if (contains(value)) res.add(value);
+    }
     clear();
-    addAll(array);
+    addAll(res);
     return this;
+  }
+
+  @Override
+  public String toString() {
+    return LongCollections.toBoundedString(iterator());
   }
 }
