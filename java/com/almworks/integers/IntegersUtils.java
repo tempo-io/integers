@@ -267,5 +267,36 @@ public final class IntegersUtils {
     return i;
   }
 
+  /**
+   * Copied from hppc.
+   * @return the next highest power of two, or the current value if it's already a power of two or zero
+   */
+  public static int nextHighestPowerOfTwo(int v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+  }
+
+  /**
+   * Copied from hppc.
+   * @return the next highest power of two, or the current value if it's already a power of two or zero
+   */
+  public static long nextHighestPowerOfTwo(long v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v |= v >> 32;
+    v++;
+    return v;
+  }
+
   private IntegersUtils() {}
 }

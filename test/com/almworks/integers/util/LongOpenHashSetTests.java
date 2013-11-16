@@ -2,18 +2,16 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 
-import java.util.BitSet;
-
-public class LongChainHashSetTests extends WritableLongSetChecker {
+public class LongOpenHashSetTests extends WritableLongSetChecker {
 
   @Override
   protected WritableLongSet createSet() {
-    return new LongChainHashSet();
+    return new LongOpenHashSet();
   }
 
   @Override
   protected WritableLongSet createSetWithCapacity(int capacity) {
-    return new LongChainHashSet(capacity);
+    return new LongOpenHashSet(capacity);
   }
 
   @Override
@@ -24,7 +22,7 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
   }
 
   public void testSimple() {
-    LongChainHashSet set = new LongChainHashSet();
+    WritableLongSet set = new LongOpenHashSet();
     for (long i: ap(0, 2, 10)) {
       set.add(i);
     }
@@ -33,8 +31,9 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
     }
     LongArray expected = new LongArray(ap(0, 2, 10));
     checkSet(set, expected);
-
+//    System.out.println(set.size());
     for (int i = 0; i < 20; i++) {
+//      System.out.println(set.size());
       if (i % 2 == 0) {
         if (i % 4 != 0) {
           assertTrue(set.exclude(i));
@@ -55,4 +54,16 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
       assertFalse(set.contains(i));
     }
   }
+
+  public void testSimple2() {
+    LongArray expected = generateRandomLongArray(20, true);
+    expected.sortUnique();
+    set.addAll(expected);
+    for (LongIterator it: set.iterator()) {
+      System.out.println(it.value());
+    }
+    LongArray actual = new LongArray(set.iterator());
+//    CHECK.order(expected, actual.sortUnique());
+  }
 }
+

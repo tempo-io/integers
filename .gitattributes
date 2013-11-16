@@ -69,12 +69,12 @@ dev/com/almworks/integers/LongList.java -text
 dev/com/almworks/integers/LongListIterator.java -text
 dev/com/almworks/integers/LongProgression.java -text
 dev/com/almworks/integers/LongSet.java -text
+dev/com/almworks/integers/LongSortedSet.java -text
 dev/com/almworks/integers/LongTreeSet.java -text
 dev/com/almworks/integers/PairIntIntIterator.java -text
 dev/com/almworks/integers/PairIntLongIterator.java -text
 dev/com/almworks/integers/ParallelIntList.java -text
 dev/com/almworks/integers/ParallelLongList.java -text
-dev/com/almworks/integers/SortedLongSet.java -text
 dev/com/almworks/integers/TwoWayIntMap.java -text
 dev/com/almworks/integers/TwoWayLongMap.java -text
 dev/com/almworks/integers/WritableIntList.java -text
@@ -120,7 +120,7 @@ dev/com/almworks/integers/util/IntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/IntMeasurableIterable.java -text
 dev/com/almworks/integers/util/IntObjMap.java -text
 dev/com/almworks/integers/util/IntSetBuilder.java -text
-dev/com/almworks/integers/util/LongAmortizedSortedSet.java -text
+dev/com/almworks/integers/util/LongAmortizedSet.java -text
 dev/com/almworks/integers/util/LongChainHashSet.java -text
 dev/com/almworks/integers/util/LongConcatIterator.java -text
 dev/com/almworks/integers/util/LongIntersectionIterator.java -text
@@ -217,7 +217,6 @@ test/com/almworks/integers/LongIteratorSpecificationChecker.java -text
 test/com/almworks/integers/LongListChecker.java -text
 test/com/almworks/integers/LongProgressionTests.java -text
 test/com/almworks/integers/LongSubListTests.java -text
-test/com/almworks/integers/LongTreeSetPerf.java -text
 test/com/almworks/integers/LongTreeSetTests.java -text
 test/com/almworks/integers/PairIntLongIteratorTests.java -text
 test/com/almworks/integers/ParallelLongListTests.java -text
@@ -241,6 +240,7 @@ test/com/almworks/integers/util/LongListInsertingDecoratorTests.java -text
 test/com/almworks/integers/util/LongListRemovingDecoratorTests.java -text
 test/com/almworks/integers/util/LongMinusIteratorTests.java -text
 test/com/almworks/integers/util/LongObjMapTests.java -text
+test/com/almworks/integers/util/LongOpenHashSetTests.java -text
 test/com/almworks/integers/util/LongSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/LongSetBuilderTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTests.java -text

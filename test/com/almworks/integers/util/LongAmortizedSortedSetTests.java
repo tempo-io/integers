@@ -13,15 +13,15 @@ public class LongAmortizedSortedSetTests extends WritableLongSetChecker {
   }
 
   protected WritableLongSortedSet createSetWithCapacity(int capacity) {
-    return new LongAmortizedSortedSet();
+    return new LongAmortizedSet();
   }
 
   protected  WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
-    return new WritableLongSortedSet[] {LongAmortizedSortedSet.fromSortedList(sortedList)};
+    return new WritableLongSortedSet[] {LongAmortizedSet.fromSortedList(sortedList)};
   }
 
   public void testIteratorCoalesce() {
-    LongAmortizedSortedSet set = new LongAmortizedSortedSet();
+    LongAmortizedSet set = new LongAmortizedSet();
     set.addAll(2, 4, 6, 8);
     LongIterator it = set.iterator();
     // this is way to run coalesce()
@@ -54,7 +54,7 @@ public class LongAmortizedSortedSetTests extends WritableLongSetChecker {
   }
 
   public void _testToString() {
-    LongAmortizedSortedSet set = new LongAmortizedSortedSet();
+    LongAmortizedSet set = new LongAmortizedSet();
     set.addAll(0, 2, 4, 6, 8);
     set.coalesce();
     set.addAll(1, 3, 5, 7, 9);
@@ -76,7 +76,7 @@ public class LongAmortizedSortedSetTests extends WritableLongSetChecker {
   }
 
   public void testIsEmpty2() {
-    LongAmortizedSortedSet set = new LongAmortizedSortedSet(20);
+    LongAmortizedSet set = new LongAmortizedSet(20);
     assertTrue(set.isEmpty());
     set.addAll(0,5,10);
     assertFalse(set.isEmpty());

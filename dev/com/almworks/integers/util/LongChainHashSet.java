@@ -29,8 +29,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
       throw new IllegalArgumentException("Illegal load factor: " +
           loadFactor);
 
-    myHeadNum = 1;
-    while (myHeadNum < initialCapacity) myHeadNum <<= 1;
+    myHeadNum = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
 
     this.loadFactor = loadFactor;
     threshold = (int)(this.myHeadNum * loadFactor);
@@ -46,6 +45,17 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   public LongChainHashSet(){
     this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
   }
+
+
+  public static LongChainHashSet createWithCapacity(int extCapacity, float loadFactor) {
+    int initialCapacity = (int)(extCapacity / loadFactor) + 1;
+    return new LongChainHashSet(initialCapacity, loadFactor);
+  }
+
+  public static LongChainHashSet createWithCapacity(int initialCapacity) {
+    return createWithCapacity(initialCapacity, DEFAULT_LOAD_FACTOR);
+  }
+
 
   private void modified() {
     myModCount++;
@@ -167,10 +177,28 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   @Override
   @NotNull
   public LongIterator iterator() {
-    return new FailFastLongIterator(toArray().iterator()) {
+    return new FailFastLongIterator(iterator1()) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
+      }
+    };
+  }
+
+  private LongIterator iterator1() {
+    return new FindingLongIterator() {
+      private int curHead = 0;
+      private int curIndex = 0;
+
+      @Override
+      protected boolean findNext() {
+        while (curIndex == 0) {
+          if (curHead == myHeadNum) return false;
+          curIndex = myHead[curHead++];
+        }
+        myCurrent = myKeys[curIndex];
+        curIndex = myNext[curIndex];
+        return true;
       }
     };
   }
@@ -223,8 +251,18 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     return this;
   }
 
-  @Override
-  public String toString() {
-    return LongCollections.toBoundedString(iterator());
+  public StringBuilder toString(StringBuilder builder) {
+    builder.append("LCHS ").append(size()).append(" [");
+    String sep = "";
+    for  (LongIterator i : this) {
+      builder.append(sep).append(i.value());
+      sep = ",";
+    }
+    builder.append("]");
+    return builder;
+  }
+
+  public final String toString() {
+    return toString(new StringBuilder()).toString();
   }
 }

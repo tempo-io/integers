@@ -22,13 +22,7 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.ConcurrentModificationException;
-import java.util.NoSuchElementException;
-
-import static com.almworks.integers.IntegersUtils.*;
-
-public final class LongSetBuilder implements Cloneable, LongCollector, SortedLongSet {
+public final class LongSetBuilder implements Cloneable, LongCollector, LongSortedSet {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;
 
   private final int myTempLength;
@@ -190,12 +184,29 @@ public final class LongSetBuilder implements Cloneable, LongCollector, SortedLon
     return true;
   }
 
-  public String toString() {
+  public String toDebugString() {
     StringBuilder builder = new StringBuilder();
     builder.append("LongSetBuilder\n");
     builder.append("mySorted: ").append(LongCollections.toBoundedString(mySorted)).append('\n');
     builder.append("myTemp: ").append(LongCollections.toBoundedString(myTemp)).append('\n');
     return builder.toString();
+  }
+
+  public StringBuilder toString(StringBuilder builder) {
+    builder.append("LSB ").append(size()).append(" [");
+    String sep = "";
+    LongArray res = LongCollections.collectIterables(mySorted.size() + myTemp.size(), mySorted);
+    mergeTemp();
+    for  (LongIterator i : res.iterator()) {
+      builder.append(sep).append(i.value());
+      sep = ", ";
+    }
+    builder.append("]");
+    return builder;
+  }
+
+  public final String toString() {
+    return toString(new StringBuilder()).toString();
   }
 
   @NotNull

@@ -22,7 +22,7 @@ package com.almworks.integers;
 import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.util.FailFastLongIterator;
 import com.almworks.integers.util.IntegersDebug;
-import com.almworks.integers.util.LongMeasurableIterable;
+import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -69,7 +69,7 @@ public class LongTreeSet implements WritableLongSortedSet {
 
   /**
    * This enum is used in {@link LongTreeSet#compactify(LongTreeSet.ColoringType)} and
-   * {@link LongTreeSet#createFromSortedUnique(com.almworks.integers.util.LongMeasurableIterable)}
+   * {@link LongTreeSet#createFromSortedUnique(com.almworks.integers.util.LongSizedIterable)}
    * methods to determine the way the new tree will be colored.
    */
   public enum ColoringType {
@@ -157,7 +157,6 @@ public class LongTreeSet implements WritableLongSortedSet {
     return x != 0;
   }
 
-  // todo optimize, if myRemoved.cardinality() little, it's cheaper run across myKeys
   public boolean containsAll(LongIterable iterable) {
     for (LongIterator it : iterable.iterator()) {
       if (!contains(it.value())) return false;
@@ -208,24 +207,25 @@ public class LongTreeSet implements WritableLongSortedSet {
     modified();
     if (!iterator.hasNext()) return;
     while (iterator.hasNext()) {
-      add0(iterator.nextValue());
+      include0(iterator.nextValue());
     }
   }
 
   public void add(long key) {
     modified();
-    include(key);
+    include0(key);
   }
 
-  private void add0(long key) {
-    include(key);
+  @Override
+  public boolean include(long key) {
+    modified();
+    return include0(key);
   }
 
   /**
    * @return false if set already contains key
    * */
-  public boolean include(long key) {
-    modified();
+  public boolean include0(long key) {
     return include0(key, prepareAdd(1));
   }
 
@@ -350,9 +350,12 @@ public class LongTreeSet implements WritableLongSortedSet {
   private void maybeGrow(int n) {
     int oldSz = myKeys.length;
     int futureSize = size() + n + 1;
-    myKeys = LongCollections.ensureCapacity(myKeys, futureSize);
-    myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
-    myRight = IntCollections.ensureCapacity(myRight, futureSize);
+    if (futureSize > myKeys.length) {
+      // length of myKeys, myLeft, myRight are always the same
+      myKeys = LongCollections.ensureCapacity(myKeys, futureSize);
+      myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
+      myRight = IntCollections.ensureCapacity(myRight, futureSize);
+    }
     if (IntegersDebug.PRINT) IntegersDebug.format("%20s %4d -> %4d  %H  %s\n", "grow", oldSz, myKeys.length, this, last4MethodNames());
   }
 
@@ -439,6 +442,7 @@ public class LongTreeSet implements WritableLongSortedSet {
    * @return new {@code LongTreeSet} with elements from {@code src} with the specified capacity and coloring type.
    */
   public static LongTreeSet createFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
+    if (capacity < 0) throw new IllegalArgumentException();
     LongTreeSet res = new LongTreeSet();
     res.createFromSortedUnique0(src, capacity, coloringType);
     return res;
@@ -449,13 +453,9 @@ public class LongTreeSet implements WritableLongSortedSet {
     if (capacity == 0 && !src.iterator().hasNext())
       newKeys = EMPTY_KEYS;
     else {
-      int arraySize = (coloringType == ColoringType.TO_ADD) ? capacity * EXPAND_FACTOR : capacity+1;
-      arraySize = Math.max(SHRINK_MIN_LENGTH, arraySize);
-      LongArray buf = LongCollections.collectIterables(arraySize, new LongIterator.Single(NIL_DUMMY_KEY), src);
+      LongArray buf = LongCollections.collectIterables(capacity, new LongIterator.Single(NIL_DUMMY_KEY), src);
       assert buf.isUniqueSorted();
-      if (capacity < 0) {
-        capacity = buf.size() - 1;
-      }
+      int size = buf.size() - 1;
       newKeys = buf.extractHostArray();
     }
     createFromPreparedArray(newKeys, capacity, coloringType);
@@ -467,7 +467,7 @@ public class LongTreeSet implements WritableLongSortedSet {
    * To create {@code LongTreeSet} with another capacity use
    * {@link com.almworks.integers.LongTreeSet#createFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
    */
-  public static LongTreeSet createFromSortedUnique(LongMeasurableIterable src) {
+  public static LongTreeSet createFromSortedUnique(LongSizedIterable src) {
     LongTreeSet res = new LongTreeSet();
     res.createFromSortedUnique0(src, src.size(), ColoringType.BALANCED);
     return res;
@@ -476,6 +476,38 @@ public class LongTreeSet implements WritableLongSortedSet {
   /**
    * @param newKeys array which will become the new myKeys
    * @param usedSize a number of actual elements in newKeys
+   *
+   *   An idea of another BALANCED coloring that is a good tradeoff between TO_ADD and TO_REMOVE.
+   * We don't do rotations in add() if the parent is black;
+   * we don't do rotations in remove() if the removed node is red.
+   *
+   * Obviously, the probability of both events depends on the ratio of red nodes to all nodes,
+   * and in first case it should be minimal (TO_ADD gives 0),
+   * whereas in the second case in should be maximal (TO_REMOVE gives 2/3 + Θ(1/N));
+   *
+   * also, if we do inverse operations (remove() in the first case, add() in the second),
+   * it's quite clear that the probability of rotations will reach the maximum with these colorings,
+   * so as we take a somewhat-in-between ratio, this probability goes down.
+   *
+   * The consequence is that a good BALANCED setting will be the one that colors roughly half of the nodes red.
+   *
+   * Let's consider the full tree case first.
+   * It's obvious that if we color the last level red, the ratio will be 1/2 + Θ(1/N).
+   *
+   * Now, if the last level is not fully packed, let's do it this way:
+   * If more than 7/8 of the last level is filled, then we color just the last level.
+   * The ratio in this case has lower bound 7/16 or ~44%.
+   * Otherwise, color the level two levels higher (it contains 1/4 of what the last level would contain, if it had been fully packed.)
+   * If it's not enough, add level four levels higher, and so on.
+   * So we check if the number of nodes on the last level, d, falls into these segments:
+   *
+   * | if d > 7/8 = 1/2 + 3/4*1/2      | color 1 level (the last one) | ratio: 44..50% |
+   * | otherwise, if d > 1/2 + 3/4*1/4 | 2 levels                     | ratio: 47..56% |
+   * | otherwise, if d > 1/2 + 3/4*1/8 | 3 levels                     | ratio: 48..53% |
+   * ...
+   * We can just use a simple formula to get the amount of levels, starting from the last one, that need to be colored red:
+   * k = floor(log_2(n)); d = n - (2^k - 1); [amount of levels] = - floor(4/3*log_2(d/(2^k) - 1/2))
+   * And then just color these amount of lower levels.
    */
   private void createFromPreparedArray(long[] newKeys, int usedSize, ColoringType coloringType) {
     myBlack = new BitSet(usedSize);
@@ -754,12 +786,19 @@ public class LongTreeSet implements WritableLongSortedSet {
     }
   }
 
-  @Override
-  public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("LongAmortizedSortedSet: ");
-    builder.append(LongCollections.toBoundedString(this));
-    return builder.toString();
+  public StringBuilder toString(StringBuilder builder) {
+    builder.append("LTS ").append(size()).append(" [");
+    String sep = "";
+    for  (LongIterator ii : this) {
+      builder.append(sep).append(ii.value());
+      sep = ", ";
+    }
+    builder.append("]");
+    return builder;
+  }
+
+  public final String toString() {
+    return toString(new StringBuilder()).toString();
   }
 
   /**

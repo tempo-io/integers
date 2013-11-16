@@ -3,12 +3,10 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 /**
  * @author Igor Sereda
  */
-public class LongAmortizedSortedSet implements WritableLongSortedSet {
+public class LongAmortizedSet implements WritableLongSortedSet {
   private static final int DEFAULT_CHUNKSIZE = 512;
 
   private LongArray myBaseList;
@@ -21,22 +19,22 @@ public class LongAmortizedSortedSet implements WritableLongSortedSet {
 
   private int[][] myTempInsertionPoints = {null};
 
-  public LongAmortizedSortedSet(WritableLongSortedSet myAddedSet, WritableLongSortedSet myRemovedSet) {
+  public LongAmortizedSet(WritableLongSortedSet myAddedSet, WritableLongSortedSet myRemovedSet) {
     this(0, myAddedSet, myRemovedSet);
   }
 
-  public LongAmortizedSortedSet(int capacity, WritableLongSortedSet myAddedSet, WritableLongSet myRemovedSet) {
+  public LongAmortizedSet(int capacity, WritableLongSortedSet myAddedSet, WritableLongSet myRemovedSet) {
     myBaseList = new LongArray(capacity);
     myAdded = myAddedSet;
     myRemoved = myRemovedSet;
   }
 
-  public LongAmortizedSortedSet() {
+  public LongAmortizedSet() {
     this(0);
   }
 
-  public LongAmortizedSortedSet(int capacity) {
-    this(0, new LongTreeSet(), new LongChainHashSet());
+  public LongAmortizedSet(int capacity) {
+    this(capacity, new LongTreeSet(), new LongChainHashSet());
   }
 
   private void add0(long value) {
@@ -111,7 +109,7 @@ public class LongAmortizedSortedSet implements WritableLongSortedSet {
   }
 
   @Override
-  public LongAmortizedSortedSet retain(LongList values) {
+  public LongAmortizedSet retain(LongList values) {
     modified();
     coalesce();
     myBaseList.retain(values);
@@ -185,37 +183,37 @@ public class LongAmortizedSortedSet implements WritableLongSortedSet {
   }
 
   /**
-   * @return new LongAmortizedSortedSet contained all elements from the specified iterator
+   * @return new LongAmortizedSet contained all elements from the specified iterator
    */
-  public static LongAmortizedSortedSet fromSortedIterable(LongIterator src) {
+  public static LongAmortizedSet fromSortedIterable(LongIterator src) {
     return fromSortedIterator(src, 0);
   }
 
   /**
    * @param capacity the capacity for new set
-   * @return new LongAmortizedSortedSet contained all elements from the specified iterator
+   * @return new LongAmortizedSet contained all elements from the specified iterator
    */
-  public static LongAmortizedSortedSet fromSortedIterator(LongIterator src, int capacity) {
+  public static LongAmortizedSet fromSortedIterator(LongIterator src, int capacity) {
     return fromSortedIterable0(src, capacity);
   }
 
   /**
-   * @return new LongAmortizedSortedSet contained all elements from the specified src
+   * @return new LongAmortizedSet contained all elements from the specified src
    */
-  public static LongAmortizedSortedSet fromSortedList(LongList src) {
+  public static LongAmortizedSet fromSortedList(LongList src) {
     return fromSortedIterable0(src, src.size());
   }
 
   /**
    * @param capacity the capacity for new set
-   * @return new LongAmortizedSortedSet contained all elements from the specified src
+   * @return new LongAmortizedSet contained all elements from the specified src
    */
-  public static LongAmortizedSortedSet fromSortedList(LongList src, int capacity) {
+  public static LongAmortizedSet fromSortedList(LongList src, int capacity) {
     return fromSortedIterable0(src, capacity);
   }
 
-  private static LongAmortizedSortedSet fromSortedIterable0(LongIterable iterable, int capacity) {
-    LongAmortizedSortedSet res = new LongAmortizedSortedSet();
+  private static LongAmortizedSet fromSortedIterable0(LongIterable iterable, int capacity) {
+    LongAmortizedSet res = new LongAmortizedSet();
     res.myBaseList = LongCollections.collectIterables(capacity, iterable);
     return res;
   }
@@ -265,13 +263,28 @@ public class LongAmortizedSortedSet implements WritableLongSortedSet {
     return LongArray.copy(myBaseList);
   }
 
-  public String toString() {
+  public String toDebugString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("LongAmortizedSortedSet\n");
+    builder.append("LongAmortizedSet\n");
     builder.append("myBaseList: ").append(LongCollections.toBoundedString(myBaseList)).append('\n');
     builder.append("myAdded: ").append(LongCollections.toBoundedString(myAdded)).append('\n');
     builder.append("myRemoved: ").append(LongCollections.toBoundedString(sortedRemovedIterator()));
     return builder.toString();
+  }
+
+  public StringBuilder toString(StringBuilder builder) {
+    builder.append("LAS ").append(size()).append(" [");
+    String sep = "";
+    for  (LongIterator i : this) {
+      builder.append(sep).append(i.value());
+      sep = ", ";
+    }
+    builder.append("]");
+    return builder;
+  }
+
+  public final String toString() {
+    return toString(new StringBuilder()).toString();
   }
 
   private class CoalescingIterator extends FindingLongIterator {

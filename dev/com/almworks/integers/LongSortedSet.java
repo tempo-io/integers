@@ -2,7 +2,7 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface SortedLongSet extends LongSet {
+public interface LongSortedSet extends LongSet {
   /**
    * @return a uniquely sorted array containing all the elements in this set
    * */

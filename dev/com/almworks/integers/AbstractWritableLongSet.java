@@ -71,7 +71,7 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   public void addAll(LongIterator iterator) {
     modified();
     while (iterator.hasNext()) {
-      exclude0(iterator.nextValue());
+      include0(iterator.nextValue());
     }
   }
 
