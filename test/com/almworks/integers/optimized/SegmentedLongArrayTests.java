@@ -6,6 +6,9 @@ import com.almworks.integers.func.LongFunction;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
+ * */
 public class SegmentedLongArrayTests extends LongListChecker {
   private TestEnvForSegmentedLongArray myEnv;
   private SegmentedLongArray array;
@@ -20,7 +23,7 @@ public class SegmentedLongArrayTests extends LongListChecker {
 
 
   @Override
-  protected List<LongList> createLongListVariants(long... values) {
+  protected List<? extends LongList> createLongListVariants(long... values) {
     List<LongList> res = new ArrayList<LongList>();
     SegmentedLongArray array = new SegmentedLongArray();
     array.addAll(values);
@@ -441,10 +444,10 @@ public class SegmentedLongArrayTests extends LongListChecker {
     checkList(array, expected.toNativeArray());
   }
 
-  public void test()  {
-    for (int i = 0; i < 20; i++) {
-      array.addAll(LongCollections.repeat(i, 1<<i));
-    }
+  public void testSimpleResize()  {
+    array.addAll(0);
+    LongList repeat1 = LongCollections.repeat(1, 1040);
+    array.addAll(repeat1);
+    CHECK.order(array.iterator(), LongCollections.concatIterables(LongArray.create(0), repeat1));
   }
-
 }

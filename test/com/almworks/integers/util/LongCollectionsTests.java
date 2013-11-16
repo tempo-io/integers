@@ -356,15 +356,24 @@ public class LongCollectionsTests extends IntegersFixture {
 
   public void testToBoundedString() {
     LongArray array = new LongArray();
+    WritableLongSortedSet set = new LongTreeSet();
     array.addAll(LongProgression.arithmetic(0, 10));
+    set.addAll(LongProgression.arithmetic(0, 10));
     assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(array, 5));
     assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(array.iterator(), 5));
+    assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(set, 5));
+
     array.add(10);
+    set.add(10);
     assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(array, 5));
     assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(array.iterator(), 5));
+    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(set, 5));
+
     array.addAll(LongProgression.arithmetic(11, 10));
+    set.addAll(LongProgression.arithmetic(11, 10));
     assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array, 5));
     assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array.iterator(), 5));
+    assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(set, 5));
   }
 
   // TODO add test union for unsortable hash set

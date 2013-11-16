@@ -25,7 +25,7 @@ import java.util.List;
 public class LongListRemovingDecoratorTests extends LongListChecker {
 
   @Override
-  protected List<LongList> createLongListVariants(long... values) {
+  protected List<? extends LongList> createLongListVariants(long... values) {
     List<LongList> res = new ArrayList<LongList>();
 
     // [...]

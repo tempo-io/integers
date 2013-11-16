@@ -36,7 +36,7 @@ public abstract class AbstractLongList implements LongList {
     String sep = "";
     for  (LongIterator ii : this) {
       builder.append(sep).append(ii.value());
-      sep = ",";
+      sep = ", ";
     }
     builder.append("]");
     return builder;

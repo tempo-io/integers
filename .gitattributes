@@ -128,12 +128,12 @@ dev/com/almworks/integers/util/LongIterableLexicographicComparator.java -text
 dev/com/almworks/integers/util/LongListConcatenation.java -text
 dev/com/almworks/integers/util/LongListInsertingDecorator.java -text
 dev/com/almworks/integers/util/LongListRemovingDecorator.java -text
-dev/com/almworks/integers/util/LongMeasurableIterable.java -text
 dev/com/almworks/integers/util/LongMinusIterator.java -text
 dev/com/almworks/integers/util/LongObjMap.java -text
 dev/com/almworks/integers/util/LongOpenHashSet.java -text
 dev/com/almworks/integers/util/LongSetBuilder.java -text
 dev/com/almworks/integers/util/LongSetOperationsIterator.java -text
+dev/com/almworks/integers/util/LongSizedIterable.java -text
 dev/com/almworks/integers/util/LongUnionIterator.java -text
 dev/com/almworks/integers/util/LongUnionIteratorTwo.java -text
 dev/com/almworks/integers/util/ModifyingIntListRemovingDecorator.java -text

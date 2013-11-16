@@ -44,6 +44,12 @@ public interface WritableLongList extends LongList, LongCollector {
   long removeAt(int index);
 
   /**
+   * Removes the first occurrence of the specified element from this list, if it is present.
+   * @return true if this list was modified otherwise false
+   */
+  public boolean remove(long value);
+
+  /**
    * This method remove from this list all values that are equals to {@code value}
    * @return true if this list was modified otherwise false
    */

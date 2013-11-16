@@ -101,10 +101,6 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     }
   }
 
-  /**
-   * Removes the first occurrence of the specified element from this list, if it is present.
-   * @return true if this list was modified otherwise false
-   */
   public boolean remove(long value) {
     int index = indexOf(value);
     if (index >= 0) {

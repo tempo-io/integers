@@ -7,7 +7,7 @@ import com.almworks.integers.LongIterable;
  * @see com.almworks.integers.LongList
  * @see com.almworks.integers.LongSet
  */
-public interface LongMeasurableIterable extends LongIterable {
+public interface LongSizedIterable extends LongIterable {
   /**
    * @return size of this iterable
    */

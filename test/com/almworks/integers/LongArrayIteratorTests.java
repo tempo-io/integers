@@ -16,8 +16,6 @@
 
 package com.almworks.integers;
 
-import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +24,7 @@ public class LongArrayIteratorTests extends LongListChecker {
   private static WritableLongListIterator iter;
 
   @Override
-  protected List<LongList> createLongListVariants(long... values) {
+  protected List<? extends LongList> createLongListVariants(long... values) {
     List<LongList> res = new ArrayList<LongList>(3);
     res.add(LongArray.copy(values));
     LongArray ar = LongArray.copy(values);

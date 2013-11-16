@@ -29,7 +29,7 @@ public abstract class LongListChecker extends IntegersFixture {
   /**
    * @return list of different representations of LongList's with the specified values.
    */
-  protected abstract List<LongList> createLongListVariants(long... values);
+  protected abstract List<? extends LongList> createLongListVariants(long... values);
 
   protected void _testCHECK(long... values) {
     LongList expected = LongArray.create(values);
@@ -137,7 +137,7 @@ public abstract class LongListChecker extends IntegersFixture {
     LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<LongIterator> get(long... values) {
-        List<LongList> lists = createLongListVariants(values);
+        List<? extends LongList> lists = createLongListVariants(values);
         List<LongIterator> res = new ArrayList<LongIterator>(lists.size());
         for (LongList list : lists) {
           res.add(list.iterator());

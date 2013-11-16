@@ -19,8 +19,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.util.IntegersDebug;
-import com.almworks.integers.util.LongMeasurableIterable;
+import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import static com.almworks.integers.IntegersUtils.*;
@@ -443,7 +442,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   // todo add javadoc
   // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0,2, -1]
-  public int getInsertionPoints(LongMeasurableIterable src, int[][] insertionPoints) {
+  public int getInsertionPoints(LongSizedIterable src, int[][] insertionPoints) {
     if (insertionPoints[0] == null || insertionPoints[0].length < src.size()) {
       insertionPoints[0] = new int[src.size()];
     }

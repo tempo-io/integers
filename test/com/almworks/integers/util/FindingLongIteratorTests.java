@@ -16,9 +16,9 @@
 
 package com.almworks.integers.util;
 
-import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
 import com.almworks.integers.*;
 
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,63 +37,7 @@ public class FindingLongIteratorTests extends IntegersFixture {
             myCurrent = innerIt.nextValue();
             return true;
           }
-        }});
-      }
+        }});}
     });
   }
-  public void test() {
-    LongIterator it1 = new AbstractLongIteratorWithFlag() {
-      @Override
-      protected long valueImpl() {
-        return 1;
-      }
-
-      @Override
-      protected void nextImpl() throws NoSuchElementException {
-      }
-
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return true;
-      }
-    };
-
-    LongIterator itSwap = new AbstractLongIteratorWithFlag() {
-      int val0 = 1, val3 = 3;
-      boolean cur = true;
-      @Override
-      protected long valueImpl() {
-        return cur ? val0 : val3;
-      }
-
-      @Override
-      protected void nextImpl() throws NoSuchElementException {
-        cur = !cur;
-      }
-
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return true;
-      }
-    };
-
-    LongIterator itInc = new AbstractLongIteratorWithFlag() {
-      int cur = 0;
-      @Override
-      protected long valueImpl() {
-        return cur;
-      }
-
-      @Override
-      protected void nextImpl() throws NoSuchElementException {
-        cur++;
-      }
-
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return true;
-      }
-    };
-  }
-
 }

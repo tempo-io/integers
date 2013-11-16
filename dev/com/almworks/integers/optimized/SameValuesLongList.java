@@ -20,9 +20,8 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
-import com.almworks.integers.util.IntMeasurableIterable;
 import com.almworks.integers.util.IntegersDebug;
-import com.almworks.integers.util.LongMeasurableIterable;
+import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
@@ -51,7 +50,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
   }
 
   // todo javadoc, values.size() == counts.size()
-  public static SameValuesLongList create(LongMeasurableIterable values, IntIterable counts) {
+  public static SameValuesLongList create(LongSizedIterable values, IntIterable counts) {
 //    if (values.size() != counts.size()) throw new IllegalArgumentException();
 
     IntArray counts1 = new IntArray(values.size());

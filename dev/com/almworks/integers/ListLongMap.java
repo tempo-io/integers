@@ -158,16 +158,10 @@ public class ListLongMap {
    * Modifies all keys within range by adding increment to each key.
    */
   public void adjustKeys(int from, int to, long increment) {
-    if (from >= to) {
-      return;
-    }
-    if (from < 0) {
-      throw new IndexOutOfBoundsException(from + " " + this);
-    }
+    if (from >= to) return;
+    if (from < 0) throw new IndexOutOfBoundsException(from + " " + this);
     int sz = size();
-    if (to > sz) {
-      throw new IndexOutOfBoundsException(to + " " + this);
-    }
+    if (to > sz) throw new IndexOutOfBoundsException(to + " " + this);
     if (from > 0) {
       long b = (long)(getKey(from) + increment);
       if (getKey(from- 1) >= b)

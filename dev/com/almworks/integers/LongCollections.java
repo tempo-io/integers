@@ -36,6 +36,10 @@ import static com.almworks.integers.IntegersUtils.arrayCopy;
 public class LongCollections {
   public static long[] toNativeArray(LongIterable iterable) {
     if (iterable instanceof LongList) return ((LongList) iterable).toNativeArray();
+    if (iterable instanceof LongSizedIterable) {
+      LongSizedIterable sized = (LongSizedIterable)iterable;
+      return LongCollections.collectIterables(sized.size(), sized).extractHostArray();
+    }
     return toNativeArray(iterable.iterator());
   }
 
@@ -436,8 +440,8 @@ public class LongCollections {
    */
   public static LongTreeSet union(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
-    if (!(first instanceof SortedLongSet)) arrays[0].sortUnique();
-    if (!(second instanceof SortedLongSet)) arrays[1].sortUnique();
+    if (!(first instanceof LongSortedSet)) arrays[0].sortUnique();
+    if (!(second instanceof LongSortedSet)) arrays[1].sortUnique();
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].merge(arrays[1 - dest]);
     return LongTreeSet.createFromSortedUnique(arrays[dest]);
@@ -577,10 +581,12 @@ public class LongCollections {
   public static LongArray collectIterables(int capacity, LongIterable ... iterables) {
     LongArray res = new LongArray(capacity);
     for (LongIterable iterable: iterables) {
-      // todo add special case for LongSet
       if (iterable instanceof LongList) {
         res.addAll((LongList) iterable);
       } else {
+        if (iterable instanceof LongSizedIterable) {
+          res.ensureCapacity(res.size() + ((LongSizedIterable) iterable).size());
+        }
         res.addAll(iterable.iterator());
       }
     }
@@ -662,17 +668,31 @@ public class LongCollections {
   public static String toBoundedString(LongIterable iterable, int lim) {
     if (iterable instanceof LongList) {
       LongList list = (LongList)iterable;
-      if (list.size() > lim * 2) {
+      int size = list.size();
+      if (size > lim * 2) {
         LongListIterator lastElemsIt = list.iterator();
-        int size = list.size();
-        lastElemsIt.move(list.size() - lim);
+        lastElemsIt.move(size - lim);
         return toShortString(size, lim, list.iterator(), lastElemsIt);
       } else {
         return append(null, list).toString();
       }
-    } else {
-      return outputIterator(iterable.iterator(), lim);
     }
+    if (iterable instanceof LongSizedIterable) {
+      LongSizedIterable sizedIterable = (LongSizedIterable)iterable;
+      int size = sizedIterable.size();
+      if (size > lim * 2) {
+        LongIterator it = sizedIterable.iterator();
+        LongArray head = new LongArray(lim);
+        head.addAllNotMore(it, lim);
+        for (int i = 0; i < size - lim * 2; i++) {
+          it.next();
+        }
+        return toShortString(size, lim, head.iterator(), it);
+      } else {
+        return append(null, sizedIterable).toString();
+      }
+    }
+      return outputIterator(iterable.iterator(), lim);
   }
 
   private static String outputIterator(LongIterator it, int lim) {

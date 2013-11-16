@@ -16,7 +16,6 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
 import com.almworks.integers.LongList;
 import com.almworks.integers.LongListChecker;
@@ -27,7 +26,7 @@ import java.util.List;
 public class LongListConcatenationTests extends LongListChecker {
 
   @Override
-  protected List<LongList> createLongListVariants(long... values) {
+  protected List<? extends LongList> createLongListVariants(long... values) {
     List<LongList> res = new ArrayList<LongList>();
 
     // []

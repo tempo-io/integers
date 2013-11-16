@@ -8,7 +8,7 @@ import java.util.List;
 public class SameValuesLongListTests extends LongListChecker {
 
   @Override
-  protected List<LongList> createLongListVariants(long... values) {
+  protected List<? extends LongList> createLongListVariants(long... values) {
     List<LongList> res = new ArrayList<LongList>();
     SameValuesLongList array = new SameValuesLongList();
     array.addAll(values);

@@ -531,6 +531,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     updateSize(sz - count);
   }
 
+  // todo refactor, simplify method increaseSize and add checkInvariants() in method expandSingleSegment().
   private void increaseSize(int added, boolean leftward) {
     assert !IntegersDebug.CHECK || checkInvariants();
     int relatedOffset = leftward ? myLeftOffset : myRightOffset;
@@ -545,6 +546,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
           mySegmentSize = SEGS_LARGE;
           mySegmentMask = SEGS_LARGE - 1;
           expandSingleSegment(leftward);
+          relatedOffset = leftward ? myLeftOffset : myRightOffset;
           assert added > relatedOffset : leftward + " " + relatedOffset + " " + added;
         }
         int allocateCount = ((added - relatedOffset - 1) >> mySegmentBits) + 1;

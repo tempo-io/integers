@@ -21,13 +21,13 @@ package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.*;
 
-import com.almworks.integers.util.LongMeasurableIterable;
+import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public interface LongList extends LongMeasurableIterable {
+public interface LongList extends LongSizedIterable {
   LongList EMPTY = new LongArray(EMPTY_LONGS);
 
   /**
