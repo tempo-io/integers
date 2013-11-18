@@ -2,6 +2,7 @@ package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
 import com.almworks.integers.func.LongFunction;
+import com.almworks.integers.util.IntegersDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class SegmentedLongArrayTests extends LongListChecker {
+public class SegmentedLongArrayTests extends WritableLongListChecker {
   private TestEnvForSegmentedLongArray myEnv;
   private SegmentedLongArray array;
   private final int segmentSize = 1024;
@@ -23,13 +24,19 @@ public class SegmentedLongArrayTests extends LongListChecker {
 
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
-    List<LongList> res = new ArrayList<LongList>();
+  protected List<WritableLongList> createWritableLongListVariants(long... values) {
+    List<WritableLongList> res = new ArrayList<WritableLongList>();
     SegmentedLongArray array = new SegmentedLongArray();
     array.addAll(values);
     res.add(array);
 
-    if (values.length == checkedSize) {
+    array = new SegmentedLongArray();
+    array.addAll(LongCollections.repeat(-1, 1025));
+    array.clear();
+    array.addAll(values);
+    res.add(array);
+
+    if (values.length == checkedSize && IntegersDebug.CHECK) {
       LongArray vals = new LongArray(values);
       int size = values.length;
       int[] points = {0, segmentSize/2, segmentSize - 1, segmentSize, segmentSize + segmentSize/2, segmentSize * 2 - 1};
@@ -58,15 +65,6 @@ public class SegmentedLongArrayTests extends LongListChecker {
     array = null;
     myEnv = null;
     super.tearDown();
-  }
-
-  public void testSimple() {
-    for (int i = 0; i < 10000; i++) {
-      array.add(i);
-    }
-    for (int i = 0; i < 10000; i++) {
-      assertEquals(i, array.get(i));
-    }
   }
 
   public void testCopy() {
@@ -98,30 +96,7 @@ public class SegmentedLongArrayTests extends LongListChecker {
     assertEquals(2, myEnv.freeCount);
   }
 
-  public void testInsertOneByOneInTheBeginning() {
-    for (int i = 0; i < 10000; i++)
-      array.insert(0, i);
-    new CollectionsCompare().order(array.toNativeArray(),
-        new LongProgression.Arithmetic(9999, 10000, -1).toNativeArray());
-  }
-
-  public void testRemoveByIterator() {
-    int COUNT = 10000;
-    for (int i = 0; i < COUNT; i++)
-      array.add(COUNT - i);
-    int x = 10000;
-    for (WritableLongListIterator ii : array.write()) {
-      assertEquals(x, ii.value());
-      assertEquals(x, ii.get(0));
-      if (x > 1)
-        assertEquals(x - 1, ii.get(1));
-      ii.set(0, 999);
-      assertEquals(999, ii.get(0));
-      ii.remove();
-      x--;
-    }
-  }
-
+  @Override
   public void testBoundary() {
     assertEquals(0, array.size());
     array.apply(0, 0, null);
@@ -141,7 +116,7 @@ public class SegmentedLongArrayTests extends LongListChecker {
     array.toNativeArray(0, new long[0], 0, 0);
   }
 
-  public void testInserts() {
+  public void testInserts2() {
     array.insertMultiple(0, 1, 2048);
     checkList(array, ap(1, 0, 2048));
     array.insert(0, 2);
@@ -181,7 +156,7 @@ public class SegmentedLongArrayTests extends LongListChecker {
     checkList(array, ap(1, 0, 2000), ap(3, 0, 1024), ap(1, 0, 7024 - 3024), ap(2, 0, 1024), ap(1, 0, 1024 * 12 - 8048));
   }
 
-  public void testRemoves() {
+  public void testRemoves2() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
     myEnv.clear();
@@ -199,63 +174,7 @@ public class SegmentedLongArrayTests extends LongListChecker {
     checkList(array, ap(1034, 1, 5000), ap(6035, 1, 2941));
   }
 
-  public void testIteratorRemove() {
-    LongArray expected = LongArray.create(1, 2, 3, 5);
-    array.addAll(1, 2, 3, 4, 5);
-    for (WritableLongListIterator it : array.write()) {
-      if (it.value() == 4) {
-        it.remove();
-      }
-    }
-    CHECK.order(expected, array);
-  }
-
-  public void testIteratorRemoveRange() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    WritableLongListIterator ii = array.iterator(100, 600);
-    for (int i = 0; i < 10; i++)
-      ii.nextValue();
-    ii.removeRange(-9, 1);
-    try {
-      ii.removeRange(-9, 1);
-      fail();
-    } catch (IllegalStateException e) {
-      // ok
-    }
-    ii.next();
-    ii.move(19);
-    ii.removeRange(-9, 1);
-    checkList(array, ap(0, 1, 100), ap(110, 1, 10), ap(130, 1, 9870));
-    ii.next();
-    ii.removeRange(-10, 0);
-    checkList(array, ap(0, 1, 100), ap(130, 1, 9870));
-  }
-
-  public void testIteratorRemoveFromEnd() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    WritableLongListIterator ii = array.iterator(8191, 9192);
-    ii.nextValue();
-    while (ii.hasNext()) {
-      ii.nextValue();
-      ii.remove();
-    }
-    checkList(array, ap(0, 1, 8192), ap(9192, 1, 808));
-  }
-
-  public void testIteratorSkip() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    WritableLongListIterator ii = array.iterator();
-    for (int i = 0; i < 100; i++) {
-      assertTrue(ii.hasNext());
-      assertEquals(100 * i, ii.nextValue());
-      ii.move(99);
-    }
-    assertFalse(ii.hasNext());
-  }
-
+  @Override
   public void testSubList() {
     for (int i = 0; i < 10000; i++)
       array.add(i);
@@ -270,15 +189,7 @@ public class SegmentedLongArrayTests extends LongListChecker {
     assertEquals(0, myEnv.copied);
   }
 
-  public void testSubSubList() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    LongList sub = array.subList(1000, 2000);
-    checkList(sub, ap(1000, 1, 1000));
-    LongList subsub = sub.subList(200, 300);
-    checkList(subsub, ap(1200, 1, 100));
-  }
-
+  @Override
   public void testCopySubList() {
     for (int i = 0; i < 10240; i++) {
       array.add(i);
@@ -322,32 +233,6 @@ public class SegmentedLongArrayTests extends LongListChecker {
 
   }
 
-  public void testCopyInsertList() {
-    array.addAll(LongProgression.arithmetic(0, 10240, 1));
-    LongArray list = new LongArray();
-    list.addAll(array);
-    array.insertAll(2000, list, 100, 10000);
-    checkList(array, ap(0, 1, 2000), ap(100, 1, 10000), ap(2000, 1, 8240));
-    array.setAll(5000, list);
-    checkList(array, ap(0, 1, 2000), ap(100, 1, 3000), ap(0, 1, 10240), ap(5240, 1, 5000));
-  }
-
-  private void testReverse(int[] a, int[] b) {
-    SegmentedIntArray lst = new SegmentedIntArray();
-    lst.addAll(a);
-    SegmentedIntArray referenceLst = new SegmentedIntArray();
-    referenceLst.addAll(b);
-    lst.reverse();
-    assertEquals(lst, referenceLst);
-  }
-
-  public void testReverse() {
-    testReverse(new int[]{}, new int[]{});
-    testReverse(new int[]{0}, new int[]{0});
-    testReverse(new int[]{1, 1, 0}, new int[]{0, 1, 1});
-    testReverse(new int[]{0, 1, 3, 6, 10, 15, 21, 28, 36}, new int[]{36, 28, 21, 15, 10, 6, 3, 1, 0});
-  }
-
   public static void segmentedLongArrayChecker(LongList expected, SegmentedLongArray actual) {
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
@@ -376,21 +261,15 @@ public class SegmentedLongArrayTests extends LongListChecker {
     array.expand(6, 2);
     segmentedLongArrayChecker(expected, array);
 
-    boolean caught = false;
     try {
       array.expand(array.size() + 1, 5);
-    } catch (IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IndexOutOfBoundsException ex) {}
 
-    caught = false;
     try {
       array.expand(-1, 3);
-    } catch (IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IndexOutOfBoundsException ex) { }
 
     array.expand(array.size(), 5);
     for (int i = 0; i < 5; i++) {
@@ -399,55 +278,20 @@ public class SegmentedLongArrayTests extends LongListChecker {
     segmentedLongArrayChecker(expected, array);
   }
 
-  public void testExpandComplexCase() {
-    LongList addedValues = LongProgression.arithmetic(1, 10000);
-    LongArray expected = new LongArray(addedValues);
-    array.addAll(addedValues);
-    CHECK.order(array.iterator(), expected.iterator());
-
-    // count, index
-    int[][] arguments = {{1000, 0}, {10000, 0}, {10000, 0}, {5000, 31000}};
-    for(int[] args : arguments) {
-      addedValues = LongCollections.repeat(-1, args[0]);
-      expected.insertAll(args[1], addedValues);
-      array.expand(args[1], args[0]);
-      segmentedLongArrayChecker(expected, array);
-    }
-  }
-
-    public void testSetRange() {
-    LongArray expected = new LongArray(LongProgression.arithmetic(0, 20));
-    array.addAll(expected);
-
-    array.setRange(0, 5, -1);
-    expected.setRange(0, 5, -1);
-      segmentedLongArrayChecker(expected, array);
-
-    array.setRange(5, 10, 4);
-    expected.setRange(5, 10, 4);
-      segmentedLongArrayChecker(expected, array);
-  }
-
-  public void testApply() {
-    LongArray expected = new LongArray(LongProgression.arithmetic(0, 10));
-    array.addAll(expected);
-    array.apply(2, 8, new LongFunction() {
-      @Override
-      public long invoke(long a) {
-        return a * a - 1;
-      }
-    });
-    for (int i = 2; i < 8; i++) {
-      long val = expected.get(i);
-      expected.set(i, val * val - 1);
-    }
-    checkList(array, expected.toNativeArray());
-  }
-
   public void testSimpleResize()  {
     array.addAll(0);
     LongList repeat1 = LongCollections.repeat(1, 1040);
     array.addAll(repeat1);
     CHECK.order(array.iterator(), LongCollections.concatIterables(LongArray.create(0), repeat1));
+  }
+
+  public void test() {
+    int j = 0;
+    for (int i = 0; i < 20; i++) {
+      if (i == 15) {
+        i += 0;
+      }
+      array.insert(0, i);
+    }
   }
 }

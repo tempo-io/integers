@@ -146,4 +146,35 @@ public abstract class LongListChecker extends IntegersFixture {
       }
     });
   }
+
+
+  public void testGet() {
+    for (int attempt = 0; attempt < 10; attempt++) {
+
+      for (LongList list:
+          createLongListVariants(generateRandomLongArray(1000, false).extractHostArray())) {
+        IntArray indices = generateRandomIntArray(100, false, 0, 1000);
+        if (!(list instanceof AbstractLongList)) return;
+        AbstractLongList abstractList = (AbstractLongList)list;
+        LongList actual = abstractList.get(indices);
+        for (int j = 0; j < actual.size(); j++) {
+          assertEquals(abstractList.get(indices.get(j)), actual.get(j));
+        }
+      }
+    }
+  }
+
+  public void testGetLast() {
+    for (int attempt = 0; attempt < 10; attempt++) {
+      long[] array = generateRandomLongArray(1000, false).extractHostArray();
+      for (LongList list:
+          createLongListVariants(array)) {
+        if (!(list instanceof AbstractLongList)) return;
+        AbstractLongList abstractList = (AbstractLongList)list;
+        for (int j = 0; j < array.length; j++) {
+          assertEquals(abstractList.getLast(j), array[array.length - j - 1]);
+        }
+      }
+    }
+  }
 }

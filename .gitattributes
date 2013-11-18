@@ -223,6 +223,7 @@ test/com/almworks/integers/PairIntLongIteratorTests.java -text
 test/com/almworks/integers/ParallelLongListTests.java -text
 test/com/almworks/integers/SetOperationsChecker.java -text
 test/com/almworks/integers/TwoWayLongMapTests.java -text
+test/com/almworks/integers/WritableLongListChecker.java -text
 test/com/almworks/integers/WritableLongSetChecker.java -text
 test/com/almworks/integers/optimized/CyclicLongQueueTests.java -text
 test/com/almworks/integers/optimized/SameValuesLongListTests.java -text

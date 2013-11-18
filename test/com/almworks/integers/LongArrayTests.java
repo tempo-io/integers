@@ -22,33 +22,49 @@ import com.almworks.integers.func.LongFunctions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LongArrayTests extends IntegersFixture {
-  private static final CollectionsCompare CHECK = new CollectionsCompare();
+public class LongArrayTests extends WritableLongListChecker {
   private LongArray array = new LongArray();
   private SetOperationsChecker setOperations = new SetOperationsChecker();
 
-  public void testAdd() {
-    array.addAll(0, 1, 2);
-    CHECK.order(array, LongArray.create(0, 1, 2));
+  protected void tearDown() throws Exception {
+    array.clear();
+    array = null;
+    super.tearDown();
+  }
 
+  @Override
+  protected List<WritableLongList> createWritableLongListVariants(long... values) {
+    List<WritableLongList> res = new ArrayList<WritableLongList>();
+    LongArray arr = LongArray.copy(values);
+    res.add(arr);
+
+    arr = new LongArray(values.length * 2);
+    arr.addAll(values);
+    res.add(arr);
+
+    arr = new LongArray(values.length * 2);
+    arr.addAll(values);
+    arr.addAll(generateRandomLongArray(values.length, false));
+    arr.removeRange(values.length, values.length * 2);
+    res.add(arr);
+
+    return res;
+  }
+
+  public void testAddAllNotMore() {
     array.addAllNotMore(LongArray.create(3, 4, 10, 20), 2);
-    CHECK.order(array, LongArray.create(0, 1, 2, 3, 4));
+    CHECK.order(array, LongArray.create(3, 4));
 
     array.addAllNotMore(LongArray.create(5, 6, 10, 20), 2);
-    CHECK.order(array, LongArray.create(0, 1, 2, 3, 4, 5, 6));
-
-    array.insert(3, 100);
-    CHECK.order(array, LongArray.create(0, 1, 2, 100, 3, 4, 5, 6));
-
-    array.insertMultiple(1, -1, 3);
-    CHECK.order(array, LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6));
+    CHECK.order(array, LongArray.create(3, 4, 5, 6));
 
     assertEquals(2, array.addAllNotMore(LongArray.create(10, 20, 30, 50, 100).iterator(), 2));
-    CHECK.order(array, LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6, 10, 20));
+    CHECK.order(array, LongArray.create(3, 4, 5, 6, 10, 20));
 
     assertEquals(1, array.addAllNotMore(LongArray.create(30).iterator(), 4));
-    CHECK.order(array, LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6, 10, 20, 30));
+    CHECK.order(array, LongArray.create(3, 4, 5, 6, 10, 20, 30));
   }
+
   public void testCopy() {
     LongArray copiedArray = LongArray.copy(new long[]{10, 20, 30});
     CHECK.order(copiedArray, LongArray.create(10, 20, 30));
@@ -64,74 +80,17 @@ public class LongArrayTests extends IntegersFixture {
   }
 
   public void testExpand() {
+    // todo add more cases
     array = new LongArray();
     array = LongArray.create(0, 1, 2, 3);
     array.expand(1, 4);
     CHECK.order(array, LongArray.create(0, 1, 2, 3, 0, 1, 2, 3));
   }
 
-  public void testIndexOf() {
-    array = new LongArray(LongProgression.arithmetic(99, 100, -1));
-    for (int i = 0; i < 100; i++) {
-      assertEquals(99 - i, array.indexOf(i));
-    }
-  }
-
-  public void testRemove() {
-    array = LongArray.create(0, -1, -1, -1, 1, 2, 3);
-    array.removeRange(1, 4);
-    CHECK.order(array, LongArray.create(0, 1, 2, 3));
-
-    LongArray test = LongArray.create(0, 20, 21, 30, 35, 80);
-    test.removeSorted(20);
-    CHECK.order(test, LongArray.create(0, 21, 30, 35, 80));
-  }
-
-  public void testSet() {
-    array = LongArray.create(0, 1, 2, 3, 4, 5);
-    array.set(0, 10);
-    array.setAll(3, LongArray.create(5, 31, 36, 100), 1, 2);
-    CHECK.order(array, LongArray.create(10, 1, 2, 31, 36, 5));
-
-    array.setRange(1, 3, -9);
-    CHECK.order(array, LongArray.create(10, -9, -9, 31, 36, 5));
-  }
-
-  public void testSort() {
-    int arrayLength = 200;
-    int maxValue = Integer.MAX_VALUE;
-    LongArray res = new LongArray();
-
-    for (int j = 0; j < arrayLength; j++) {
-      res.add((long) RAND.nextInt(maxValue));
-    }
-
-    array = LongArray.copy(res);
-    for (int i = 0; i < arrayLength; i++) {
-      for (int j = 0; j < arrayLength - 1; j++) {
-        if (array.get(j) > array.get(j+1)) {
-          array.swap(j, j + 1);
-        }
-      }
-    }
-    res.sort();
-    CHECK.order(res, array);
-  }
-
-  public void testOthersMethods() {
-    CHECK.order(LongArray.create(-239), LongArray.create(-239));
-
-    long[] a = array.extractHostArray();
-    CHECK.order(array, a);
-  }
-
-  public void testGetNextDifferentValueIndex() {
-    array = LongArray.create(0, 1, 1, 2, 2, 2, 3, 4, 5, 5, 5);
-    assertEquals(1, array.getNextDifferentValueIndex(0));
-    assertEquals(3, array.getNextDifferentValueIndex(1));
-    assertEquals(6, array.getNextDifferentValueIndex(3));
-    assertEquals(7, array.getNextDifferentValueIndex(6));
-    assertEquals(array.size(), array.getNextDifferentValueIndex(8));
+  public void testRemoveSorted() {
+    array = LongArray.create(0, 20, 21, 30, 35, 80);
+    array.removeSorted(20);
+    CHECK.order(array, LongArray.create(0, 21, 30, 35, 80));
   }
 
   public void testEnsureCapacity() {
@@ -147,13 +106,10 @@ public class LongArrayTests extends IntegersFixture {
     CHECK.order(array, expected);
     assertEquals(40, array.getCapacity());
 
-    boolean caught = false;
     try {
       array.ensureCapacity(-1);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue("caught IAE", caught);
+      fail("not caught IAE");
+    } catch (IllegalArgumentException ex) { }
   }
 
   public void testRetain() {
@@ -187,206 +143,6 @@ public class LongArrayTests extends IntegersFixture {
     }, new SetOperationsChecker.IntersectionGetter(true), true, true);
   }
 
-  protected void tearDown() throws Exception {
-    array.clear();
-    array = null;
-    super.tearDown();
-  }
-
-  public void testSimple() {
-    for (int i = 0; i < 10000; i++) {
-      array.add(i);
-    }
-    for (int i = 0; i < 10000; i++) {
-      assertEquals(i, array.get(i));
-    }
-  }
-
-  public void testInsertOneByOneInTheBeginning() {
-    for (int i = 0; i < 10000; i++)
-      array.insert(0, i);
-    new CollectionsCompare().order(array.toNativeArray(),
-        new LongProgression.Arithmetic(9999, 10000, -1).toNativeArray());
-  }
-
-  public void testRemoveByIterator() {
-    int COUNT = 10000;
-    for (int i = 0; i < COUNT; i++)
-      array.add(COUNT - i);
-    int x = 10000;
-    for (WritableLongListIterator ii : array.write()) {
-      assertEquals(x, ii.value());
-      assertEquals(x, ii.get(0));
-      if (x > 1)
-        assertEquals(x - 1, ii.get(1));
-      ii.set(0, 999);
-      assertEquals(999, ii.get(0));
-      ii.remove();
-      x--;
-    }
-  }
-
-  public void testBoundary() {
-    assertEquals(0, array.size());
-    array.apply(0, 0, null);
-    array.clear();
-    try {
-      array.get(0);
-      fail();
-    } catch (IndexOutOfBoundsException e) {
-      // ok
-    }
-    array.remove(0);
-    array.removeRange(0, 0);
-    assertEquals(array, array.subList(0, 0));
-    array.toNativeArray(0, new long[0], 0, 0);
-  }
-
-  public void testInserts() {
-    array.insertMultiple(0, 1, 2048);
-    checkList(array, ap(1, 0, 2048));
-    array.insert(0, 2);
-    array.insert(array.size(), 3);
-    checkList(array, new long[] {2}, ap(1, 0, 2048), new long[] {3});
-    array.insertMultiple(1, 2, 2000);
-    checkList(array, ap(2, 0, 2001), ap(1, 0, 2048), new long[] {3});
-    array.clear();
-
-    // test shifts reusing whole segments
-    array.insertMultiple(0, 1, 1024);
-    array.insertMultiple(0, 2, 1024);
-    checkList(array, ap(2, 0, 1024), ap(1, 0, 1024));
-    array.insertMultiple(1024, 3, 1024);
-    checkList(array, ap(2, 0, 1024), ap(3, 0, 1024), ap(1, 0, 1024));
-    array.insertMultiple(1024, 4, 1024);
-    checkList(array, ap(2, 0, 1024), ap(4, 0, 1024), ap(3, 0, 1024), ap(1, 0, 1024));
-    array.clear();
-    array.insertMultiple(0, 1, 10240);
-    checkList(array, ap(1, 0, 10240));
-    array.insertMultiple(6000, 2, 1024);
-    checkList(array, ap(1, 0, 6000), ap(2, 0, 1024), ap(1, 0, 1024 * 11 - 7024));
-    array.insertMultiple(2000, 3, 1024);
-    checkList(array, ap(1, 0, 2000), ap(3, 0, 1024), ap(1, 0, 7024 - 3024), ap(2, 0, 1024), ap(1, 0, 1024 * 12 - 8048));
-  }
-
-  public void testRemoves() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    array.removeRange(0, 1024);
-    array.removeRange(10000 - 2048, 10000 - 1024);
-    array.removeRange(0, 10);
-    checkList(array, ap(1034, 1, 7942));
-    array.removeAt(5000);
-    checkList(array, ap(1034, 1, 5000), ap(6035, 1, 2941));
-  }
-
-  public void testIteratorRemoveRange() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    WritableLongListIterator ii = array.iterator(100, 600);
-    for (int i = 0; i < 10; i++)
-      ii.nextValue();
-    ii.removeRange(-9, 1);
-    try {
-      ii.removeRange(-9, 1);
-      fail();
-    } catch (IllegalStateException e) {
-      // ok
-    }
-    ii.next();
-    ii.move(19);
-    ii.removeRange(-9, 1);
-    checkList(array, ap(0, 1, 100), ap(110, 1, 10), ap(130, 1, 9870));
-    ii.next();
-    ii.removeRange(-10, 0);
-    checkList(array, ap(0, 1, 100), ap(130, 1, 9870));
-  }
-
-  public void testIteratorRemoveFromEnd() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    WritableLongListIterator ii = array.iterator(8191, 9192);
-    ii.nextValue();
-    while (ii.hasNext()) {
-      ii.nextValue();
-      ii.remove();
-    }
-    checkList(array, ap(0, 1, 8192), ap(9192, 1, 808));
-  }
-
-  public void testIteratorSkip() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    WritableLongListIterator ii = array.iterator();
-    for (int i = 0; i < 100; i++) {
-      assertTrue(ii.hasNext());
-      assertEquals(100 * i, ii.nextValue());
-      ii.move(99);
-    }
-    assertFalse(ii.hasNext());
-  }
-
-  public void testSubList() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    checkList(array.subList(10, 20), ap(10, 1, 10));
-    checkList(array.subList(10, 10000), ap(10, 1, 9990));
-    checkList(array.subList(9990, 10000), ap(9990, 1, 10));
-    checkList(array.subList(9990, 9990));
-    assertEquals(array, array.subList(0, 10000));
-    assertTrue(array == array.subList(0, 10000));
-  }
-
-  public void testSubSubList() {
-    for (int i = 0; i < 10000; i++)
-      array.add(i);
-    LongList sub = array.subList(1000, 2000);
-    checkList(sub, ap(1000, 1, 1000));
-    LongList subsub = sub.subList(200, 300);
-    checkList(subsub, ap(1200, 1, 100));
-  }
-
-  public void testCopySubList() {
-    for (int i = 0; i < 10240; i++) {
-      array.add(i);
-    }
-    array.addAll(array);
-    checkList(array, ap(0, 1, 10240), ap(0, 1, 10240));
-
-    array.setAll(100, array, 100, 100);
-    checkList(array, ap(0, 1, 10240), ap(0, 1, 10240));
-    array.setAll(100, array.subList(200, 300));
-    checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 10040), ap(0, 1, 10240));
-
-    array.insertAll(5000, array.subList(3000, 5000));
-    checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 4800), ap(3000, 1, 2000), ap(5000, 1, 5240), ap(0, 1, 10240));
-
-  }
-
-  public void testCopyInsertList() {
-    array.addAll(LongProgression.arithmetic(0, 10240, 1));
-    LongArray list = new LongArray();
-    list.addAll(array);
-    array.insertAll(2000, list, 100, 10000);
-    checkList(array, ap(0, 1, 2000), ap(100, 1, 10000), ap(2000, 1, 8240));
-    array.setAll(5000, list);
-    checkList(array, ap(0, 1, 2000), ap(100, 1, 3000), ap(0, 1, 10240), ap(5240, 1, 5000));
-  }
-
-  public void testRemoveAll() {
-    array.addAll(2, 0, 2, 1, 2, 2, 2, 2, 3, 2);
-    CHECK.order(array.iterator(), 2, 0, 2, 1, 2, 2, 2, 2, 3, 2);
-    array.removeAll();
-    array.removeAll(2);
-    CHECK.order(array.iterator(), 0, 1, 3);
-    array.removeAll(2);
-    CHECK.order(array.iterator(), 0, 1, 3);
-    array.removeAll(0, 3);
-    CHECK.order(array.iterator(), 1);
-    array.removeAll(1);
-    CHECK.empty(array);
-  }
-
   public void testFromCollection() {
     List<Long> l = new ArrayList<Long>();
     l.add(2L);
@@ -396,32 +152,6 @@ public class LongArrayTests extends IntegersFixture {
     CHECK.order(a.toNativeArray(), 2, 3, 9);
     LongList il = LongCollections.asLongList(l);
     CHECK.order(il.toNativeArray(), 2, 3, 9);
-  }
-
-  private void testReverse(long[] a, long[] b) {
-    LongArray lst = new LongArray();
-    lst.addAll(a);
-    LongArray referenceLst = new LongArray();
-    referenceLst.addAll(b);
-    lst.reverse();
-    assertEquals(lst, referenceLst);
-  }
-
-  public void testReverse() {
-    testReverse(new long[]{}, new long[]{});
-    testReverse(new long[]{0}, new long[]{0});
-    testReverse(new long[]{1,1,0}, new long[]{0,1,1});
-    testReverse(new long[]{0, 1, 3, 6, 10, 15, 21, 28, 36}, new long[]{36, 28, 21, 15, 10, 6, 3, 1, 0});
-
-    LongArray lst = new LongArray();
-    for (int i = 0; i < 20; i++) {
-      lst.add(RAND.nextInt(200));
-    }
-    lst.sortUnique();
-    lst.reverse();
-    for (int i = 1; i < lst.size(); i++) {
-      assertFalse(lst.get(i - 1) <= lst.get(i));
-    }
   }
 
   public void testUnion() {
@@ -463,87 +193,6 @@ public class LongArrayTests extends IntegersFixture {
     }, unionGetter, true, true);
   }
 
-  public void testRemoveAllSorted() {
-    long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
-    long[][] tests = {{MIN, MIN, 0, 0, MAX, MAX},
-        {-10, -5, 0, 0, 5, 10},
-        {MIN, MIN, MIN},
-        {0, 0, 0},
-        {MAX, MAX, MAX}};
-    long[] values = {MIN, -10, -5, 0, 5, 10, 0, MAX};
-    LongArray actual, expected;
-    for (long[] test: tests) {
-      for (long value: values) {
-        actual = LongArray.copy(test);
-        actual.removeAllSorted(value);
-        expected = LongArray.create(test);
-        expected.removeAll(value);
-        CHECK.order(expected, actual);
-      }
-    }
-  }
-
-  public void testGet() {
-    for (int i = 0; i < 10; i++) {
-      array = generateRandomLongArray(1000, false);
-      IntArray indices = new IntArray(100);//generateRandomArray(100, false, 0, 1000);
-      for (int j = 0; j < 100; j++) {
-        indices.add(RAND.nextInt(1000));
-      }
-      LongList actual = array.get(indices);
-      for (int j = 0; j < actual.size(); j++) {
-        assertEquals(array.get(indices.get(i)), actual.get(i));
-      }
-    }
-  }
-
-  public void testUpdate() {
-    for (int i = 0; i < 10; i++) {
-      array = generateRandomLongArray(1000, false);
-      LongArray expected = LongArray.copy(array);
-
-      int ind = RAND.nextInt(array.size());
-      array.update(ind, -1, LongFunctions.NEG);
-      expected.set(ind, -expected.get(ind));
-      CHECK.order(expected, array);
-
-      long randValue = RAND.nextLong();
-      LongFunction fun = new LongFunction() {
-        @Override
-        public long invoke(long a) {
-          return a/2 + a/4;
-        }
-      };
-      ind = RAND.nextInt(array.size()) + array.size() + 1;
-
-      array.update(ind, randValue, fun);
-      expected.addAll(LongProgression.arithmetic(randValue, ind + 1 - expected.size(), 0));
-      expected.set(ind, fun.invoke(expected.get(ind)));
-      CHECK.order(expected, array);
-    }
-  }
-
-  public void testSortByFirstThenBySecond() {
-    int arSize = 1000;
-    array = generateRandomLongArray(arSize, false, arSize);
-    LongArray[] arrays = new LongArray[2];
-    for (int j = 0; j < 2; j++) {
-      arrays[j] = generateRandomLongArray(arSize, false, arSize);
-    }
-    LongArray expected = new LongArray();
-    for (int i = 0; i < arSize; i++) {
-      expected.add(arSize * arrays[0].get(i) + arrays[1].get(i));
-    }
-    expected.sort();
-
-    arrays[0].sortByFirstThenBySecond(arrays[1]);
-    LongArray actual = new LongArray();
-    for (int i = 0; i < arSize; i++) {
-      actual.add(arSize * arrays[0].get(i) + arrays[1].get(i));
-    }
-    CHECK.order(expected, actual);
-  }
-
   public void testRemoveSortedIndexesFromSorted() {
     int arSize = 100;
     int indexesSize = 10;
@@ -564,10 +213,18 @@ public class LongArrayTests extends IntegersFixture {
     }
   }
 
-  public void testExpand2() {
-    array.addAll(generateRandomLongArray(20, false));
-    array.clear();
-    array.expand(0, 10);
-    System.out.println(array);
+  public void testCreate() {
+    int size = 1000, maxVal = Integer.MAX_VALUE;
+    long[] values = new long[size];
+    for (int attempt = 0; attempt < 10; attempt++) {
+      for (int i = 0; i < size; i++) {
+        values[i] = RAND.nextInt(maxVal);
+      }
+      LongArray actual = LongArray.create(values);
+      assertEquals(values.length, actual.size());
+      for (int i = 0; i < size; i++) {
+        assertEquals(values[i], actual.get(i));
+      }
+    }
   }
 }

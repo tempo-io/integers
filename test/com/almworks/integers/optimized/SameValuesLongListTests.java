@@ -5,14 +5,27 @@ import com.almworks.integers.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SameValuesLongListTests extends LongListChecker {
+public class SameValuesLongListTests extends WritableLongListChecker {
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
-    List<LongList> res = new ArrayList<LongList>();
+  protected List<WritableLongList> createWritableLongListVariants(long... values) {
+    List<WritableLongList> res = new ArrayList<WritableLongList>();
     SameValuesLongList array = new SameValuesLongList();
     array.addAll(values);
     res.add(array);
+
+    array = new SameValuesLongList();
+    array.addAll(LongCollections.repeat(0, 10));
+    array.addAll(values);
+    array.removeRange(0, 10);
+    res.add(array);
+
+    array = new SameValuesLongList();
+    array.addAll(values);
+    array.addAll(LongCollections.repeat(0, 10));
+    array.removeRange(values.length, values.length + 10);
+    res.add(array);
+
     return res;
   }
 
@@ -26,37 +39,6 @@ public class SameValuesLongListTests extends LongListChecker {
   protected void tearDown() throws Exception {
     list = null;
     super.tearDown();
-  }
-
-  public void testAdditions() {
-    checkCollection(list);
-    list.add(0);
-    checkCollection(list, 0);
-    list.add(0);
-    checkCollection(list, 0, 0);
-    list.clear();
-    for (int i = 0; i < 100; i++) {
-      list.add(i);
-      checkCollection(list, ap(0, 1, i + 1));
-    }
-    list.addAll(list);
-    checkCollection(list.subList(0, 100), ap(0, 1, 100));
-    checkCollection(list.subList(100, 200), ap(0, 1, 100));
-  }
-
-  public void testRemove1() {
-    list.addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-    checkCollection(list, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-    list.remove(5);
-    checkCollection(list, 1, 2, 3, 4, 6, 7, 8, 9, 10);
-    list.removeRange(6, 8);
-    checkCollection(list, 1, 2, 3, 4, 6, 7, 10);
-    list.removeRange(5, 7);
-    checkCollection(list, 1, 2, 3, 4, 6);
-    list.removeRange(0, 3);
-    checkCollection(list, 4, 6);
-    list.removeRange(0, 2);
-    checkCollection(list);
   }
 
   public void testRemove2() {
@@ -191,181 +173,30 @@ public class SameValuesLongListTests extends LongListChecker {
     assertEquals(1, list.getChangeCount());
   }
 
-  public void testInsert() {
-    list.insertMultiple(0, 0, 10);
-    checkCollection(list, ap(0, 0, 10));
-    list.insertMultiple(0, 0, 10);
-    checkCollection(list, ap(0, 0, 20));
-    list.insertMultiple(0, 1, 10);
-    checkCollectionM(list, ap(1, 0, 10), ap(0, 0, 20));
-    list.insertMultiple(5, 2, 4);
-    checkCollectionM(list, ap(1, 0, 5), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 20));
-    list.insertMultiple(34, 0, 4);
-    checkCollectionM(list, ap(1, 0, 5), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 24));
-    list.insertMultiple(38, 100, 4);
-    checkCollectionM(list, ap(1, 0, 5), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
-    list.insertMultiple(5, 1, 1);
-    checkCollectionM(list, ap(1, 0, 6), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
-    list.insertMultiple(6, 2, 1);
-    checkCollectionM(list, ap(1, 0, 6), ap(2, 0, 5), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
-    list.insertMultiple(6, 3, 1);
-    checkCollectionM(list, ap(1, 0, 6), ap(3, 0, 1), ap(2, 0, 5), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
-  }
-
-  public void testInsertAll() {
-    list.addAll(0);
-    list.insertAll(1, LongArray.create(2, 4, 6).iterator());
-    CHECK.order(LongArray.create(0,2,4,6), list);
-
-    list.insertAll(2, LongArray.create(-5, -10, -15));
-    CHECK.order(LongArray.create(0, 2, -5, -10, -15, 4, 6), list);
-
-    list.insertAll(0, LongArray.create(0, 99, 99, 0), 1, 2);
-    CHECK.order(LongArray.create(99, 99, 0, 2, -5, -10, -15, 4, 6), list);
-  }
-
-  public void testGetNextDifferentValueIndex() {
-    list.insertMultiple(0, 1, 10);
-    list.insert(10, 2);
-    list.insertMultiple(11, 1, 5);
-    list.insertMultiple(16, 3, 3);
-    assertEquals("for index 0", 10, list.getNextDifferentValueIndex(0));
-    assertEquals("for index 5", 10, list.getNextDifferentValueIndex(5));
-    assertEquals("for index 9", 10, list.getNextDifferentValueIndex(9));
-    assertEquals("for index 10", 11, list.getNextDifferentValueIndex(10));
-    assertEquals("for index 11", 16, list.getNextDifferentValueIndex(11));
-    assertEquals("for index 16", list.size(), list.getNextDifferentValueIndex(16));
-    assertEquals("for index 18", list.size(), list.getNextDifferentValueIndex(18));
-    // check for OOBE
-    boolean caught = false;
-    try {
-      list.getNextDifferentValueIndex(-1);
-    } catch(IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue("caught OOBE for index - 1", caught);
-    try {
-      list.getNextDifferentValueIndex(list.size());
-    } catch(IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue("caught OOBE for index = size", caught);
-  }
-
   private SameValuesLongList create() {
     return new SameValuesLongList();
   }
 
-  private void testReverse(long[] a, long[] b) {
-    SameValuesLongList lst = new SameValuesLongList ();
-    lst.addAll(a);
-    SameValuesLongList referenceLst = new SameValuesLongList ();
-    referenceLst.addAll(b);
-    lst.reverse();
-    assertEquals(lst, referenceLst);
+  @Override
+  protected void checkExpand(long[] expected, int index, int count, WritableLongList checked) {
+    assert index <= expected.length;
+    checked.expand(index, count);
+
+    assertEquals(expected.length + count, checked.size());
+    LongListIterator it = checked.iterator();
+
+    for (int i = 0; i < index; i++) {
+      assertEquals(expected[i], it.nextValue());
+    }
+    for (int i = 0; i < count; i++) {
+      assertEquals(expected[index], it.nextValue());
+    }
+    for (int i = index; i < expected.length; i++) {
+      assertEquals(expected[i], it.nextValue());
+    }
   }
 
-  public void testReverse() {
-    testReverse(new long[]{0,1,3,6,10,15,21,28,36}, new long[]{36,28,21,15,10,6,3,1,0});
-    testReverse(new long[]{2, 4, 4, 5, 5, 5, 7, 7, 7, 7}, new long[]{7, 7, 7, 7, 5, 5, 5, 4, 4, 2});
-    testReverse(new long[]{0,0,0,1,1}, new long[]{1,1,0,0,0});
-    testReverse(new long[]{1,1,0}, new long[]{0,1,1});
-    testReverse(new long[]{0,0,0,0,1,1,0}, new long[]{0,1,1,0,0,0,0});
-    testReverse(new long[]{0,0,1,2,2,2,3,3,3,3}, new long[]{3,3,3,3,2,2,2,1,0,0});
-    testReverse(new long[]{4,4,1,2,2,2,3,3,3,3}, new long[]{3,3,3,3,2,2,2,1,4,4});
-    testReverse(new long[]{0,0,1,2,2,2,0,0,0,0}, new long[]{0,0,0,0,2,2,2,1,0,0});
-    testReverse(new long[]{4,4,1,2,2,2,0,0,0,0}, new long[]{0,0,0,0,2,2,2,1,4,4});
-    testReverse(new long[]{}, new long[]{});
-    testReverse(new long[]{0}, new long[]{0});
-    testReverse(new long[]{0, 0, 0}, new long[]{0, 0, 0});
-    testReverse(new long[]{1, 1, 1}, new long[]{1, 1, 1});
-    testReverse(new long[]{2, 2, 3, 3, 3}, new long[]{3, 3, 3, 2, 2});
-  }
-
-  public void testIteratorRemove() {
-    list.addAll(1, 1, 1, 2, 2, 3, 3, 3);
-    WritableLongListIterator i = list.iterator();
-    i.next().next().next().next();
-    assertEquals(2, i.value());
-    i.remove();
-    assertEquals(2, i.nextValue());
-  }
-
-  public void testIteratorWrite() {
-    SameValuesLongList result, expected, source;
-
-    source = new SameValuesLongList();
-    source.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
-
-    expected = new SameValuesLongList();
-    expected.addAll(1, 1, 1, 2, 2, 3, 3, 3, 3);
-
-    result = new SameValuesLongList();
-    for (WritableLongListIterator it : source.write()) {
-      result.add(it.value());
-      it.set(0, -1);
-    }
-    CHECK.order(source, LongCollections.repeat(-1, source.size()));
-    assertEquals(expected, result);
-  }
-
-  public void testExpandSimple() {
-    int[] elements = {5, 10, 4, 2, 1};
-    int[] counts = {1, 2, 1, 1, 1};
-//    list.expand(0, 4);
-    for ( int i = 0; i < 5; i++) {
-      for ( int j = 0; j < counts[i]; j++) {
-        list.add(elements[i]);
-      }
-    }
-    LongArray expected = LongArray.create(5, 10, 10, 4, 2, 1);
-    CHECK.order(list.iterator(), expected.iterator());
-
-    for (int i = 0; i < 3; i++) {
-      expected.insert(3, 4);
-    }
-    list.expand(3, 3);
-    CHECK.order(list.iterator(), expected.iterator());
-
-    for (int i = 0; i < 2; i++) {
-      expected.insert(3, 4);
-    }
-    list.expand(6, 2);
-    CHECK.order(list.iterator(), expected.iterator());
-
-    boolean caught = false;
-    try {
-      list.expand(list.size() + 1, 5);
-    } catch (IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
-
-    caught = false;
-    try {
-      list.expand(-1, 3);
-    } catch (IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
-
-    list.expand(list.size(), 5);
-    long val = expected.getLast(0);
-    for (long i = 0; i < 5; i++) {
-      expected.add(val);
-    }
-    CHECK.order(list.iterator(), expected.iterator());
-  }
-
-  public void testExpandSimple2() {
-    list.add(10);
-    list.removeLast();
-    assertTrue(list.isEmpty());
-    list.expand(0, 10);
-    CHECK.order(list, LongCollections.repeat(0, 10));
-  }
-
-  public void testExpandComplex() {
+  public void testExpandComplex2() {
     LongArray expected = LongArray.create(0, 1, 2, 3, 4, 5);
     list.addAll(expected.iterator());
     CHECK.order(list.iterator(), expected.iterator());
@@ -382,19 +213,6 @@ public class SameValuesLongListTests extends LongListChecker {
     }
   }
 
-  public void testSortUnique() {
-    for (int size = 64; size < 1024; size *= 2) {
-      LongArray expected = IntegersFixture.generateRandomLongArray(size, false, size);
-      list.clear();
-      expected.sort();
-      list.addAll(expected);
-      expected.sortUnique();
-      list.sortUnique();
-      CHECK.order(list.iterator(), expected.iterator());
-    }
-  }
-
-  // todo update with 0 in counts
   public void testCreate() {
     LongArray values          = LongArray.create(0,2,4,6,8);
     IntArray counts           = IntArray.create(0, 1, 0, 3, 0);
