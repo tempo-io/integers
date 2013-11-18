@@ -49,6 +49,8 @@ public class SameValuesLongList extends AbstractWritableLongList {
     myMap = hostMap;
   }
 
+  // todo write setAll
+
   // todo javadoc, values.size() == counts.size()
   public static SameValuesLongList create(LongSizedIterable values, IntIterable counts) {
 //    if (values.size() != counts.size()) throw new IllegalArgumentException();
@@ -480,7 +482,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
           p = -p - 2;
         myIterator = myMap.iterator(p);
         myIterator.next();
-        myValue = myIterator.value2();
+        myValue = myIterator.right();
       }
       advanceToNextChange();
     }
@@ -488,7 +490,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     private void advanceToNextChange() {
       if (myIterator.hasNext()) {
         myIterator.next();
-        myNextChangeIndex = myIterator.value1();
+        myNextChangeIndex = myIterator.left();
       } else myNextChangeIndex = size();
     }
 
@@ -498,7 +500,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       if (getNextIndex() == myNextChangeIndex) {
-        myValue = myIterator.value2();
+        myValue = myIterator.right();
         advanceToNextChange();
       }
       setNext(getNextIndex() + 1);

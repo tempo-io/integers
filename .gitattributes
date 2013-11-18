@@ -65,6 +65,7 @@ dev/com/almworks/integers/LongCollectorAdapter.java -text
 dev/com/almworks/integers/LongIterable.java -text
 dev/com/almworks/integers/LongIterables.java -text
 dev/com/almworks/integers/LongIterator.java -text
+dev/com/almworks/integers/LongIterators.java -text
 dev/com/almworks/integers/LongList.java -text
 dev/com/almworks/integers/LongListIterator.java -text
 dev/com/almworks/integers/LongProgression.java -text

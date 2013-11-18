@@ -434,18 +434,15 @@ public class TwoWayLongMapTests extends IntegersFixture {
 //    System.out.println(map.size());
     for (int i = 0; i < map.size(); ++i) assertEquals(i*10+1, map.get(i));
 
-    boolean caught = false;
     try {
       map.transformKeys(new LongFunction() {
         public long invoke(long a) {
           return a + 1 + a%2;
         }
       });
+      fail();
     } catch (TwoWayLongMap.NonInjectiveFunctionException ex) {
-      caught = true;
       assertEquals(3, ex.getDuplicateValue());
     }
-    assertTrue(caught);
-
   }
 }

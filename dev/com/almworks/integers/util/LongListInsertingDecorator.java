@@ -147,7 +147,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
     private void advanceToNextInsert() {
       if (myInsertedIterator.hasNext()) {
         myInsertedIterator.next();
-        myCurInsert = myInsertedIterator.value1();
+        myCurInsert = myInsertedIterator.left();
       } else myCurInsert = -1;
     }
 
@@ -172,7 +172,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       if (!hasValue())
         throw new NoSuchElementException();
       if (myCurInsert >= 0 && myCurInsert == getNextIndex()-1)
-        return myInsertedIterator.value2();
+        return myInsertedIterator.right();
       else
         return myBaseIterator.value();
     }

@@ -35,14 +35,10 @@ public class IndexedLongListIteratorTests extends IntegersFixture {
     // check .get
     assertEquals(3, res.get(2));
 
-    // check index, move
-    boolean caught = false;
     try {
       res.index();
-    } catch (NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue("caught NSEE", caught);
+      fail("caught NSEE");
+    } catch (NoSuchElementException ex) { }
 
     for(int i = 0; i < 3; i++) {
       res.next();
@@ -66,12 +62,9 @@ public class IndexedLongListIteratorTests extends IntegersFixture {
     IndexedLongListIterator res = new IndexedLongListIterator(list, indexes);
 
     // check for NSEE
-    boolean caught = false;
     try {
       res.value();
-    } catch(NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue("caught NSEE", caught);
+      fail("not caught NSEE");
+    } catch(NoSuchElementException ex) { }
   }
 }

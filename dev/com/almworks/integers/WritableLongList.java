@@ -56,8 +56,8 @@ public interface WritableLongList extends LongList, LongCollector {
   boolean removeAll(long value);
 
   /**
-   * Removes all appearances of value if this collection is sorted
-   * @return true if this list was modified otherwise false
+   * Removes all appearances of {@code value} from this sorted list, if this list contains the {@code value}.
+   * @return true if this array was modified otherwise false
    */
   public boolean removeAllSorted(long value);
 

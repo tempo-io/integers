@@ -66,7 +66,9 @@ public abstract class AbstractLongList implements LongList {
   }
 
   /**
-   * List indexed by list. Analogy: get(index) returns one value, get(LL) return LL with many values, which are contained in this list.
+   * List indexed by list.
+   * Analogy: get(index) returns one value,
+   * get(LL) return LL with many values, which are contained in this list.
    * [get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]
    * <br>Use for MATLAB-like indexing, i.e. vector indexed by vector.
    * @return LongList with values

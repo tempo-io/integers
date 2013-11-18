@@ -91,13 +91,10 @@ public class LongArrayIteratorTests extends LongListChecker {
     iter.move(2);
     iter.remove();
 
-    boolean caught = false;
     try {
       iter.move(1);
-    } catch (IllegalStateException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalStateException ex) { }
 
     iter.next();
     CHECK.order(arr, LongArray.create(0, 2, 3, 4, 5, 6, 7, 8, 9));

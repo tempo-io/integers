@@ -83,13 +83,10 @@ public class ListLongMapTests extends TestCase {
     CHECK.order(myMap.valuesIterator(0, myMap.size()), expectedValues.iterator());
 
     myMap.setKey(1, 3);
-    boolean caught = false;
     try {
       myMap.setKey(1, 4);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalArgumentException ex) { }
 
     myMap.setValue(1, 100);
     expectedKeys = LongArray.create(-1, 3, 4, 6, 8);
@@ -107,37 +104,25 @@ public class ListLongMapTests extends TestCase {
     expectedKeys = LongArray.create(0, 1, 3, 6, 8);
     CHECK.order(myMap.keysIterator(0, myMap.size()), expectedKeys.iterator());
 
-    boolean caught = false;
     try {
       myMap.adjustKeys(-1, 2, 5);
-    } catch (IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IndexOutOfBoundsException ex) { }
 
-    caught = false;
     try {
       myMap.adjustKeys(1, 6, 5);
-    } catch (IndexOutOfBoundsException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IndexOutOfBoundsException ex) { }
 
-    caught = false;
     try {
       myMap.adjustKeys(1, 2, -1);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalArgumentException ex) { }
 
-    caught = false;
     try {
       myMap.adjustKeys(4, 5, -2);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalArgumentException ex) { }
   }
 
   public void testPut() {
@@ -175,21 +160,15 @@ public class ListLongMapTests extends TestCase {
     ListLongMap.Iterator it = myMap.iterator(1);
     assertTrue(it.hasNext());
 
-    boolean caught = false;
     try {
       it.key();
-    } catch (NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (NoSuchElementException ex) { }
 
-    caught = false;
     try {
       it.value();
-    } catch (NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (NoSuchElementException ex) { }
 
     it.next();
     assertEquals(2, it.key());

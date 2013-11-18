@@ -19,25 +19,20 @@ import java.util.NoSuchElementException;
 
 public class LongIteratorSingleTests extends IntegersFixture {
   public void testAll() {
-  LongIterator.Single element = new LongIterator.Single(1);
-  assertTrue(element.hasNext());
+    LongIterator.Single element = new LongIterator.Single(1);
+    assertTrue(element.hasNext());
 
-  boolean caught = false;
-  try {
-    element.value();
-  } catch(NoSuchElementException ex) {
-    caught = true;
-  }
-  assertTrue("caught NSEE", caught);
+    try {
+      element.value();
+      fail("not caught NSEE");
+    } catch(NoSuchElementException ex) { }
 
-  element.next();
-  assertEquals(1, element.value());
-
-  try {
     element.next();
-  } catch(NoSuchElementException ex) {
-    caught = true;
-  }
-  assertTrue("caught NSEE", caught);
+    assertEquals(1, element.value());
+
+    try {
+      element.next();
+      fail("not caught NSEE");
+    } catch(NoSuchElementException ex) { }
   }
 }

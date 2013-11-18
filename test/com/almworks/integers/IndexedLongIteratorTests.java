@@ -48,14 +48,10 @@ public class IndexedLongIteratorTests extends IntegersFixture {
       res.nextValue();
     }
 
-    // check for NSEE
-    boolean caught = false;
     try {
       res.nextValue();
-    } catch(NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue("caught NSEE", caught);
+      fail("not caught NSEE");
+    } catch(NoSuchElementException ex) { }
   }
 
   public void testRandomCase() {

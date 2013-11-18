@@ -33,43 +33,31 @@ public class PairIntLongIteratorTests extends IntegersFixture {
   }
 
   public void testNoSuchElementException(){
-    boolean caught = false;
     try {
-      res.value1();
-    } catch(NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue("caught NSEE", caught);
+      res.left();
+      fail("not caught NSEE");
+    } catch(NoSuchElementException ex) { }
 
-    caught = false;
     try {
-      res.value2();
-    } catch(NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue("caught NSEE", caught);
+      res.right();
+      fail("not caught NSEE");
+    } catch(NoSuchElementException ex) { }
 
     while (res.hasNext()) res.next();
 
-    caught = false;
     try {
       res.next();
-    } catch(NoSuchElementException ex) {
-      caught = true;
-    }
-    assertTrue("caught NSEE", caught);
+      fail("not caught NSEE");
+    } catch(NoSuchElementException ex) { }
   }
 
   public void testUOE() {
     res = res.iterator();
     res.next();
-    boolean caught = false;
     try {
       res.remove();
-    } catch(UnsupportedOperationException ex) {
-      caught = true;
-    }
-    assertTrue("caught UOE", caught);
+      fail("not caught UOE");
+    } catch(UnsupportedOperationException ex) { }
   }
 
   public void testValueSimpleCase() {
@@ -80,8 +68,8 @@ public class PairIntLongIteratorTests extends IntegersFixture {
     long e2;
     for (int i = 1; i <= 5; i++) {
       res.next();
-      e1 = res.value1();
-      e2 = res.value2();
+      e1 = res.left();
+      e2 = res.right();
       assertEquals(e1, i);
       assertEquals(e2, i*5);
     }
@@ -104,8 +92,8 @@ public class PairIntLongIteratorTests extends IntegersFixture {
     res = new PairIntLongIterator(keys.iterator(), values.iterator());
     for (int i = 0; i < 1000; i++) {
       res.next();
-      int v1 = res.value1();
-      long v2 = res.value2();
+      int v1 = res.left();
+      long v2 = res.right();
       assertEquals(i, v1);
       assertEquals(i * i - i, v2);
     }

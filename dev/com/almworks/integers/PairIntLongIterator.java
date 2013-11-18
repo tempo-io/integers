@@ -48,16 +48,16 @@ public class PairIntLongIterator implements Iterable<PairIntLongIterator>, Itera
     return this;
   }
 
-  public long value2() {
-    if (!myIterated)
-      throw new NoSuchElementException();
-    return myIt2.value();
-  }
-
-  public int value1() {
+  public int left() {
     if (!myIterated)
       throw new NoSuchElementException();
     return myIt1.value();
+  }
+
+  public long right() {
+    if (!myIterated)
+      throw new NoSuchElementException();
+    return myIt2.value();
   }
 
   public boolean hasValue() {

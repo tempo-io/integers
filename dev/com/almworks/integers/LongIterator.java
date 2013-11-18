@@ -69,6 +69,7 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
 
     @Override
     protected void nextImpl() throws NoSuchElementException {
+      if (!hasNext()) throw new NoSuchElementException();
     }
 
     @Override

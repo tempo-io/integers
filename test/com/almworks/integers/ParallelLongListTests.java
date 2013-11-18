@@ -111,22 +111,16 @@ public class ParallelLongListTests extends TestCase {
     myList.get(1, vals);
     CHECK.order(vals, 1, 2);
 
-    boolean caught = false;
     try {
       myList.get(0, null);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalArgumentException ex) { }
 
-    caught = false;
     try {
       long[] vals1 = new long[1];
       myList.get(0, vals1);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalArgumentException ex) { }
   }
 
   public void testIteratorGetRemoveRange() {
@@ -153,13 +147,10 @@ public class ParallelLongListTests extends TestCase {
     it.get(0, vals);
     CHECK.order(vals, 10, 20);
 
-    boolean caught = false;
     try {
       it.get(0, 2);
-    } catch (IllegalArgumentException ex) {
-      caught = true;
-    }
-    assertTrue(caught);
+      fail();
+    } catch (IllegalArgumentException ex) { }
 
     it.removeRange(0, 1);
     checkStorage(-2, -3, 1, 2, 3, 4, 30, 40);

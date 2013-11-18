@@ -252,36 +252,36 @@ public abstract class IntegersFixture extends TestCase {
    *                 <ul><li>0 - {@code min = 0, max = Integer.MAX_VALUE}
    *                     <li>1 - {@code min = 0, max = minMaxValues[0]}
    *                     <li>2 - {@code min = minMaxValues[0], max = minMaxValues[1]}
-   * @param arrayLength the length of returned array.
+   * @param maxLength the maximum length of returned array. If {@code isSortUnique = true} may be less.
    * @return {@link LongArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static LongArray generateRandomLongArray(int arrayLength, boolean isSortUnique, int... minMaxValues) {
-    final LongArray res = new LongArray(arrayLength);
+  public static LongArray generateRandomLongArray(int maxLength, boolean isSortUnique, int... minMaxValues) {
+    final LongArray res = new LongArray(maxLength);
     fillRandomArray(new IntCollectorAdapter() {
       public void add(int value) {
         res.add(value);
       }
-    }, arrayLength, minMaxValues);
+    }, maxLength, minMaxValues);
     if (isSortUnique) res.sortUnique();
     return res;
   }
 
   /**
    *
-   * @param arrayLength the length of returned array.
+   * @param maxLength the maximum length of returned array.
    * @param minMaxValues the min and max values for arrays. There is 3 possible values for minMaxValues.length
    *                 <ul><li>0 - {@code min = 0, max = Integer.MAX_VALUE}
    *                     <li>1 - {@code min = 0, max = minMaxValues[0]}
    *                     <li>2 - {@code min = minMaxValues[0], max = minMaxValues[1]}</ul>
    * @return {@link IntArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static IntArray generateRandomIntArray(int arrayLength, boolean isSortUnique, int... minMaxValues) {
-    final IntArray res = new IntArray(arrayLength);
+  public static IntArray generateRandomIntArray(int maxLength, boolean isSortUnique, int... minMaxValues) {
+    final IntArray res = new IntArray(maxLength);
     fillRandomArray(new IntCollectorAdapter() {
       public void add(int value) {
         res.add(value);
       }
-    }, arrayLength, minMaxValues);
+    }, maxLength, minMaxValues);
     if (isSortUnique) res.sortUnique();
     return res;
   }

@@ -218,6 +218,12 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     if (count <= 0) return;
     int sz = size();
     checkAddedCount(index, count, sz);
+    if (values == this || values instanceof SubList && ((SubList) values).getParent() == this) {
+      for (int i = 0, sourceIndex = sourceOffset; i < count; i++, sourceIndex++) {
+        set(index + i, values.get(sourceIndex));
+      }
+      return;
+    }
     transfer(values.iterator(sourceOffset, sourceOffset + count), iterator(index, sz), count);
   }
 
@@ -335,7 +341,9 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
 
   public void reverse() {
     int j = size() - 1;
-    for (int i = 0; i < j; i++, j--) swap(i,j);
+    for (int i = 0; i < j; i++, j--) {
+      swap(i,j);
+    }
   }
 
   /** Updates the value in this list at the specified index; if list is currently shorter, it is first appended
@@ -349,7 +357,6 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     set(idx, updated);
     return updated;
   }
-
 
   protected class WritableIndexIterator extends IndexIterator implements WritableLongListIterator {
     private int myIterationModCount = myModCount;

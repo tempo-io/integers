@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -38,7 +39,10 @@ public class LongCollections {
     if (iterable instanceof LongList) return ((LongList) iterable).toNativeArray();
     if (iterable instanceof LongSizedIterable) {
       LongSizedIterable sized = (LongSizedIterable)iterable;
-      return LongCollections.collectIterables(sized.size(), sized).extractHostArray();
+      int size = sized.size();
+      long[] res = LongCollections.collectIterables(size, sized).extractHostArray();
+      assert res.length == sized.size();
+      return res;
     }
     return toNativeArray(iterable.iterator());
   }
@@ -696,7 +700,6 @@ public class LongCollections {
   }
 
   private static String outputIterator(LongIterator it, int lim) {
-//    System.out.println(new LongArray(it));
     int itSize = 0;
     LongArray headValues = new LongArray(lim);
     for ( ;it.hasNext() && itSize < lim; itSize++) {
@@ -735,4 +738,31 @@ public class LongCollections {
     return sb.append(")").toString();
   }
 
+  public static LongIterator range(final long start, final long stop, final long step) {
+    return new AbstractLongIteratorWithFlag() {
+      long cur = start;
+      @Override
+      protected long valueImpl() {
+        return cur;
+      }
+
+      @Override
+      protected void nextImpl() throws NoSuchElementException {
+        if (hasNext()) cur += step;
+      }
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return cur < stop;
+      }
+    };
+  }
+
+  public static LongIterator range(long start, long stop) {
+    return range(start, stop, 1);
+  }
+
+  public static LongIterator range(long stop) {
+    return range(0, stop, 1);
+  }
 }
