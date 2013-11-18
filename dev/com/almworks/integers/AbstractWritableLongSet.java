@@ -88,6 +88,7 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
 
   @Override
   public boolean containsAll(LongIterable iterable) {
+    if (iterable == this) return true;
     for (LongIterator it: iterable.iterator()) {
       if (!contains(it.nextValue())) return false;
     }

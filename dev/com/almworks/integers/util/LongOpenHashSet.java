@@ -43,6 +43,15 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     //    myNext = new int[threshold];
   }
 
+  public static LongOpenHashSet createForAdd(int count, float loadFactor) {
+    int initialCapacity = (int)(count / loadFactor) + 1;
+    return new LongOpenHashSet(initialCapacity, loadFactor);
+  }
+
+  public static LongOpenHashSet createWithCapacity(int initialCapacity) {
+    return createForAdd(initialCapacity, DEFAULT_LOAD_FACTOR);
+  }
+
   private int hash(long value) {
     return ((int)(value ^ (value >>> 32))) + 1;
   }
@@ -102,14 +111,15 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
 
   /**
    * Shift all the slot-conflicting keys allocated to (and including) <code>slot</code>.
+   * copied from hppc
    */
-  protected void shiftConflictingKeys(int slotCurr)
-  {
+  protected void shiftConflictingKeys(int slotCurr) {
     // Copied nearly verbatim from fastutil's impl.
-    final int mask = myKeys.length - 1;
+    int mask = myKeys.length - 1;
     int slotPrev, slotOther;
     while (true) {
-      slotCurr = ((slotPrev = slotCurr) + 1) & mask;
+      slotPrev = slotCurr;
+      slotCurr = (slotCurr + 1) & mask;
 
       while (myAllocated.get(slotCurr)) {
         slotOther = hash(myKeys[slotCurr]) & mask;
@@ -136,6 +146,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   public boolean exclude0(long key) {
+    // todo exctract mask
     int mask = myKeysLength - 1;
     int slot = index(hash(key), myKeysLength);
 

@@ -4,7 +4,7 @@ import com.almworks.integers.util.LongSizedIterable;
 
 public interface LongSet extends LongSizedIterable {
   /**
-   * @return true if this set contains element value. Otherwise false
+   * @return true if this set contains element {@code value}. Otherwise false
    */
   boolean contains(long value);
 

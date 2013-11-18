@@ -56,14 +56,19 @@ public class LongOpenHashSetTests extends WritableLongSetChecker {
   }
 
   public void testSimple2() {
-    LongArray expected = generateRandomLongArray(20, true);
-    expected.sortUnique();
-    set.addAll(expected);
-    for (LongIterator it: set.iterator()) {
-      System.out.println(it.value());
+    int size = 20, maxVal = 1000;
+    for (int attempt = 0; attempt < 10; attempt++) {
+      if (attempt % 2 == 0) {
+        set = createSet();
+      } else {
+        set.clear();
+      }
+      LongArray expected = generateRandomLongArray(size, false, maxVal);
+      set.addAll(expected);
+      expected.sortUnique();
+      LongArray actual = new LongArray(set.iterator());
+      CHECK.order(expected, actual.sortUnique());
     }
-    LongArray actual = new LongArray(set.iterator());
-//    CHECK.order(expected, actual.sortUnique());
   }
 }
 

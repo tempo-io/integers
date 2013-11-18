@@ -298,8 +298,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     try {
       iterator.next();
       fail();
-    } catch (Exception _) {}
-//    } catch (NoSuchElementException e) {}
+    } catch (NoSuchElementException e) {}
   }
 
   public void testIteratorConcurrentModificationException() {

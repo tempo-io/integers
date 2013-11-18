@@ -130,6 +130,7 @@ public class LongAmortizedSet implements WritableLongSortedSet {
   }
 
   public boolean containsAll(LongIterable iterable) {
+    if (iterable == this) return true;
     for (LongIterator iterator : iterable.iterator()) {
       if (!contains(iterator.value())) return false;
     }

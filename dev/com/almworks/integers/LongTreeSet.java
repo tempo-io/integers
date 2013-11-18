@@ -158,6 +158,7 @@ public class LongTreeSet implements WritableLongSortedSet {
   }
 
   public boolean containsAll(LongIterable iterable) {
+    if (iterable == this) return true;
     for (LongIterator it : iterable.iterator()) {
       if (!contains(it.value())) return false;
     }

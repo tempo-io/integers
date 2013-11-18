@@ -178,6 +178,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
 
   @Override
   public boolean containsAll(LongIterable iterable) {
+    if (iterable == this) return true;
     for (LongIterator iterator : iterable.iterator()) {
       if (!contains(iterator.value())) return false;
     }

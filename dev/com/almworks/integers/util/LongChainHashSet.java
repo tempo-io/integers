@@ -47,13 +47,13 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
 
-  public static LongChainHashSet createWithCapacity(int extCapacity, float loadFactor) {
-    int initialCapacity = (int)(extCapacity / loadFactor) + 1;
+  public static LongChainHashSet createForAdd(int count, float loadFactor) {
+    int initialCapacity = (int)(count / loadFactor) + 1;
     return new LongChainHashSet(initialCapacity, loadFactor);
   }
 
   public static LongChainHashSet createWithCapacity(int initialCapacity) {
-    return createWithCapacity(initialCapacity, DEFAULT_LOAD_FACTOR);
+    return createForAdd(initialCapacity, DEFAULT_LOAD_FACTOR);
   }
 
 
