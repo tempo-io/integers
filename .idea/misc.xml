@@ -7,7 +7,15 @@
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
+  <component name="ExportToHTMLSettings">
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/exportToHTML" />
+  </component>
   <component name="IdProvider" IDEtalkID="940B95994EF6A8B64E08990DEF7B192D" />
+  <component name="IntelliCalc">
+    <mode value="0" />
+    <system value="10" />
+    <angles value="deg" />
+  </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
     <option name="OPTION_SCOPE" value="protected" />
