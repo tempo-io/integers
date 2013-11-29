@@ -64,6 +64,9 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
     return true;
   }
 
+  /**
+   * @return count of elements, removed before {@code index}
+   */
   protected final int removedBefore(int index) {
     int idx = getRemovedPrepared().binarySearch(index + 1);
     if (idx < 0)
@@ -153,39 +156,58 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
   }
 
   private class LocalIterator extends AbstractLongListIndexIterator {
-    private int myNextRemoved;
     private LongListIterator myBaseIterator;
-    private long myValue;
+    private int myNextRemovedIndex;
 
     private LocalIterator(int from, int to) {
       super(from, to);
-      myNextRemoved = removedBefore(from);
-      myBaseIterator = base().iterator(from + myNextRemoved);
+      int count = removedBefore(from);
+      // super iterator checking borders, so we can simply create myBaseIterator without from and to
+      myBaseIterator = base().iterator();
+      int offset = from + count;
+      if (offset != 0) {
+        myBaseIterator.move(offset);
+      }
+      updateMyNextRemovedIndex(count);
+    }
+
+    /**
+     * Converts {@code count} in removed indices to the corresponding position in myBaseList
+     * and sets the obtained value to the myNextRemovedIndex
+     */
+    private void updateMyNextRemovedIndex(int count) {
+      assert count >= 0;
+      if (count < getRemoveCount()) {
+        myNextRemovedIndex = getRemovedPrepared().get(count) + count;
+      } else {
+        myNextRemovedIndex = -1;
+      }
     }
 
     public LongListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      if (getNextIndex() >= getTo())
-        throw new NoSuchElementException();
-      setNext(getNextIndex() + 1);
-      myValue = myBaseIterator.nextValue();
-      IntList removedPrepared = getRemovedPrepared();
-      int rs = removedPrepared.size();
-      if (myNextRemoved < rs) {
-        int nr = removedPrepared.binarySearch(getNextIndex() + 1, myNextRemoved, rs);
-        if (nr < 0)
-          nr = -nr - 1;
-        if (nr > myNextRemoved) {
-          myBaseIterator.move(nr - myNextRemoved);
-          myNextRemoved = nr;
-        }
+      super.next();
+      myBaseIterator.next();
+      if (myBaseIterator.index() == myNextRemovedIndex) {
+        updateBaseIterator();
       }
       return this;
     }
 
+    /**
+     * Updates position of myBaseIterator in accordance with this iterator position.
+     */
+    private void updateBaseIterator() {
+      int count = removedBefore(index());
+      int offset = index() + count - (myBaseIterator.hasValue() ? myBaseIterator.index() : -1);
+      myBaseIterator.move(offset);
+      updateMyNextRemovedIndex(count);
+    }
+
     public long value() {
-      if (!hasValue())
+      if (!hasValue()) {
         throw new NoSuchElementException();
-      return myValue;
+      }
+      return myBaseIterator.value();
     }
 
     public boolean hasNext() {
@@ -193,11 +215,9 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
-      // todo more effective move?
       super.move(count);
       if (count != 0) {
-        myNextRemoved = removedBefore(getNextIndex());
-        myBaseIterator = base().iterator(getNextIndex() + myNextRemoved);
+        updateBaseIterator();
       }
     }
 

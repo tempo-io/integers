@@ -88,13 +88,13 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert mySegments != null || size == 0 : size + " " + mySegments;
     assert mySegments == null || mySegments.segments != null : mySegments;
     assert
-      mySegmentCount >= 0 && (mySegmentCount == 0 || mySegmentCount <= mySegments.segments.length) :
-      mySegmentCount + " " + mySegments;
+        mySegmentCount >= 0 && (mySegmentCount == 0 || mySegmentCount <= mySegments.segments.length) :
+        mySegmentCount + " " + mySegments;
     assert myCapacity == mySegmentCount << mySegmentBits : mySegmentBits + " " + mySegmentCount + " " + myCapacity;
     assert size <= myCapacity : size + " " + myCapacity;
     assert
-      size + myLeftOffset + myRightOffset == myCapacity :
-      size + " " + myLeftOffset + " " + myRightOffset + " " + myCapacity;
+        size + myLeftOffset + myRightOffset == myCapacity :
+        size + " " + myLeftOffset + " " + myRightOffset + " " + myCapacity;
     if (mySegments != null) {
       assert mySegments.refCount > 0 : mySegments;
       if (mySegments.segments != null) {
@@ -142,19 +142,11 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
     int p = size();
     increaseSize(1, false);
-    writeLong(myLeftOffset + p, value);
+    set(p, value);
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  public void insert(int index, long value) {
-    assert !IntegersDebug.CHECK || checkInvariants();
-    int sz = size();
-    if (index < 0 || index > sz)
-      throw new IndexOutOfBoundsException(index + " " + this);
-    increaseSize(1, index < (sz >> 1));
-    writeLong(myLeftOffset + index, value);
-    assert !IntegersDebug.CHECK || checkInvariants();
-  }
+  // todo replace [writeLong(myLeftOffset + index, value)] -> set(..)
 
   @NotNull
   public WritableLongListIterator iterator(int from, int to) {
@@ -166,13 +158,15 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
   public void expand(int index, int count) {
+    if (count < 0) {
+      throw new IllegalArgumentException();
+    }
     if (index < 0 || index > size())
       throw new IndexOutOfBoundsException(index + " " + this);
     assert !IntegersDebug.CHECK || checkInvariants();
-    if (count < 0)
-      throw new IllegalArgumentException();
-    if (count == 0)
+    if (count == 0) {
       return;
+    }
     doExpand(index, count);
     assert !IntegersDebug.CHECK || checkInvariants();
   }
@@ -180,12 +174,19 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   public void insertMultiple(int index, long value, int count) {
     assert !IntegersDebug.CHECK || checkInvariants();
     if (count < 0) throw new IllegalArgumentException();
+    int sz = size();
+    if (index < 0 || index > sz)
+      throw new IndexOutOfBoundsException(index + " " + this);
     if (count == 0) return;
 
     doExpand(index, count);
-    for (WritableLongListIterator ii = iterator(index, index + count); ii.hasNext();) {
-      ii.next();
-      ii.set(0, value);
+    if (count == 1) {
+      set(index, value);
+    } else {
+      for (WritableLongListIterator ii = iterator(index, index + count); ii.hasNext();) {
+        ii.next();
+        ii.set(0, value);
+      }
     }
     assert !IntegersDebug.CHECK || checkInvariants();
   }
@@ -396,6 +397,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
   }
 
+  // todo refactor - make method makeSpaceForInsertion like in LongArray
   private void doExpand(int index, int count) {
     boolean leftward = isLeftwardExpand(index, count);
     if (leftward) {
@@ -764,13 +766,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     return super.binarySearch(value, from, to);
   }
 
-  // todo more effective
-  public SegmentedLongArray sort(WritableLongList... sortAlso) {
+  // todo more effective sort
+  public void sort(WritableLongList... sortAlso) {
     super.sort(sortAlso);
-    return this;
   }
 
-  // todo more effective
+  // todo more effective swap
   public void swap(int index1, int index2) {
     super.swap(index1, index2);
   }
@@ -814,13 +815,13 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       int p = myNext - 1 + offset;
       if (p < myFrom || p >= myTo)
         throw new NoSuchElementException(offset + " " + this);
-      myOffset = myOffset - 1 + offset;
-      adjustOffset();
-      if (mySegment == null)
+      updateOffset(myOffset - 1 + offset);
+      if (mySegment == null) {
         mySegment = mySegments.segments[mySegmentIndex];
+      }
+      myCurrent = mySegment.data[myOffset];
       myNext = p + 1;
-      myOffset++;
-      adjustOffset();
+      updateOffset(myOffset + 1);
       assert !IntegersDebug.CHECK || checkIterator();
     }
 
@@ -835,8 +836,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         mySegment = mySegments.segments[mySegmentIndex];
       myCurrent = mySegment.data[myOffset];
       myNext++;
-      myOffset++;
-      adjustOffset();
+      updateOffset(myOffset + 1);
       assert !IntegersDebug.CHECK || checkIterator();
       return this;
     }
@@ -851,7 +851,9 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       return myCurrent;
     }
 
-    private void adjustOffset() {
+    // update myOffset, mySegment, mySegmentIndex
+    private void updateOffset(int newOffset) {
+      myOffset = newOffset;
       if (myOffset < 0 || myOffset >= mySegmentSize) {
         mySegment = null;
         if (myOffset < 0) {
@@ -977,12 +979,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         }
       } else {
         // shift to left
-        myOffset--;
-        if (myOffset < 0) {
-          mySegmentIndex--;
-          mySegment = null;
-          myOffset = mySegmentSize - 1;
-        }
+        updateOffset(myOffset - 1);
       }
       myIterationModCount = modCount();
       myNext = -myNext-1;

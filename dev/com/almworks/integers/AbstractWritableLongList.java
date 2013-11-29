@@ -19,7 +19,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.func.LongFunction;
 // function on indices, hence int
 import com.almworks.integers.func.IntFunction2;
@@ -252,7 +251,7 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
    * Sorts this list using quicksort copied from {@link java.util.Arrays#sort(int[])} then corrected
    * @param sortAlso lists in which the order is changed as well as this list
    */
-  public AbstractWritableLongList sort(final WritableLongList ... sortAlso) {
+  public void sort(final WritableLongList... sortAlso) {
     if (sortAlso != null) {
       for (WritableLongList list : sortAlso) {
         assert list.size() == size();
@@ -271,33 +270,11 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
           }
       }
     });
-    return this;
   }
 
-  public AbstractWritableLongList sortUnique() {
+  public void sortUnique() {
     sort();
     removeDuplicates();
-    return this;
-  }
-
-  public void sortByFirstThenBySecond(final WritableLongList sortAlso) {
-    if (size() > sortAlso.size()) throw new IllegalArgumentException("This array is longer than sortAlso: " +
-        size() + " > " + sortAlso.size());
-    IntegersUtils.quicksort(size(), new IntFunction2() {
-          @Override
-          public int invoke(int a, int b) {
-            int comp = LongCollections.compare(get(a), get(b));
-            if (comp == 0) comp = LongCollections.compare(sortAlso.get(a), sortAlso.get(b));
-            return comp;
-          }
-        },
-        new IntProcedure2() {
-          @Override
-          public void invoke(int a, int b) {
-            swap(a, b);
-            sortAlso.swap(a, b);
-          }
-        });
   }
 
   public void swap(int index1, int index2) {

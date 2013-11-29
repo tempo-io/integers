@@ -66,12 +66,16 @@ public abstract class AbstractLongList implements LongList {
   }
 
   /**
-   * List indexed by list.
-   * Analogy: get(index) returns one value,
-   * get(LL) return LL with many values, which are contained in this list.
-   * [get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]
-   * <br>Use for MATLAB-like indexing, i.e. vector indexed by vector.
-   * @return LongList with values
+   * Creates and returns a list which is this list indexed by {@code indices}<br>
+   *
+   * Analogy: get(index) returns one value from this list,
+   * get(indices) returns a list with multiple values from this list.
+   * The values are
+   * <pre>[get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]</pre><br>
+   *
+   * One of the possible usages is for MATLAB-like indexing, i.e. vector indexed by vector.
+   * Also {@link IndexedLongIterator} and {@link IndexedLongListIterator} are suit to iterate this list.
+   * @return LongList with values located at {@code indices} in this list
    * @see IndexedLongIterator
    * @see IndexedLongListIterator
    * */
@@ -179,11 +183,17 @@ public abstract class AbstractLongList implements LongList {
     return true;
   }
 
+  /**
+   * @return true if this list sorted unique otherwise false
+   */
   @Override
   public boolean isUniqueSorted() {
     return isSorted(true);
   }
 
+  /**
+   * @return true if this list sorted otherwise false
+   */
   @Override
   public boolean isSorted() {
     return isSorted(false);
@@ -219,7 +229,7 @@ public abstract class AbstractLongList implements LongList {
     }
 
     while (low <= high) {
-      int mid = (low + high) >> 1;
+      int mid = (low + high) >>> 1;
       comp = LongCollections.compare(get(mid), value);
       if (comp < 0) {
         low = mid + 1;

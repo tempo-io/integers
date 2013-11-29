@@ -30,6 +30,7 @@ public class LongListRemovingDecorator extends AbstractLongListRemovingDecorator
 
   protected LongListRemovingDecorator(LongList base) {
     super(base);
+    myRemovedSorted = IntList.EMPTY;
   }
 
   private LongListRemovingDecorator(LongList base, IntList preparedIndices) {
@@ -41,9 +42,6 @@ public class LongListRemovingDecorator extends AbstractLongListRemovingDecorator
    * Indices must be prepared for use by the removing decorator.
    * @see #prepareSortedIndices
    * @see #prepareUnsortedIndices
-   * @param base
-   * @param preparedIndices
-   * @return
    */
   public static LongListRemovingDecorator createFromPrepared(LongList base, IntList preparedIndices) {
     return new LongListRemovingDecorator(base, preparedIndices);

@@ -74,7 +74,7 @@ public interface WritableLongList extends LongList, LongCollector {
   public boolean removeAll(long... values);
 
   /**
-   * Insert {@code value} {@code count} between indexes {@code index, index + 1}
+   * Insert {@code value} {@code count} times between indexes {@code index, index + 1}
    * @throws IllegalArgumentException if count < 0
    * */
   void insertMultiple(int index, long value, int count);
@@ -131,20 +131,12 @@ public interface WritableLongList extends LongList, LongCollector {
    * Sorts this list. Stability is not guaranteed
    * @param sortAlso lists in which the order is changed as well as this list
    */
-  WritableLongList sort(WritableLongList... sortAlso);
+  void sort(WritableLongList... sortAlso);
 
   /**
-   * Sorts this list, removes duplicates and returns it.
-   * @return this list, sorted and with duplicates removed
+   * Sorts this list, removes duplicates.
    */
-  WritableLongList sortUnique();
-
-  /**
-   * // todo explanation
-   * @param sortAlso ties in this array are broken via elements of this array. Must not be shorter than {@code this list}
-   * @throws IllegalArgumentException in case the second array is shorter than the first
-   * */
-  void sortByFirstThenBySecond(WritableLongList sortAlso);
+  void sortUnique();
 
   void swap(int index1, int index2);
 

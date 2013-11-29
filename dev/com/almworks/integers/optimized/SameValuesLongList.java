@@ -53,11 +53,9 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   // todo javadoc, values.size() == counts.size()
   public static SameValuesLongList create(LongSizedIterable values, IntIterable counts) {
-//    if (values.size() != counts.size()) throw new IllegalArgumentException();
-
-    IntArray counts1 = new IntArray(values.size());
-    LongArray values1 = new LongArray(values.size());
-    counts1.add(0);
+    IntArray mapKeys = new IntArray(values.size());
+    LongArray mapValues = new LongArray(values.size());
+    mapKeys.add(0);
     int last = 0, cur, curCount;
     long curValue;
     IntIterator it = counts.iterator();
@@ -66,15 +64,16 @@ public class SameValuesLongList extends AbstractWritableLongList {
       curCount = it.nextValue();
       curValue = valIt.nextValue();
       if (curCount != 0) {
-        values1.add(curValue);
+        mapValues.add(curValue);
         cur = last + curCount;
-        counts1.add(cur);
+        mapKeys.add(cur);
         last = cur;
       }
     }
     SameValuesLongList list = new SameValuesLongList();
-    list.updateSize(counts1.removeLast());
-    list.myMap = new IntLongMap(counts1, values1);
+    list.updateSize(mapKeys.removeLast());
+    list.myMap = new IntLongMap(mapKeys, mapValues);
+    list.checkInvariants();
     return list;
   }
 
@@ -106,7 +105,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     assert !IntegersDebug.CHECK || checkInvariants();
     int sz = size();
     int msz = myMap.size();
-    long lastValue = msz == 0 ? 0 : myMap.getValueAt(msz - 1);
+    long lastValue = msz == 0 ? value + 1 : myMap.getValueAt(msz - 1);
     if (value != lastValue) {
       myMap.insertAt(msz, sz, value);
     }
@@ -165,13 +164,15 @@ public class SameValuesLongList extends AbstractWritableLongList {
    */
   public void expand(int index, int count) {
     assert !IntegersDebug.CHECK || checkInvariants();
-    if (count < 0)
+    if (count < 0) {
       throw new IllegalArgumentException();
-    if (count == 0)
-      return;
+    }
     int size = size();
     if (index < 0 || index > size)
       throw new IndexOutOfBoundsException(index + " " + this);
+    if (count == 0) {
+      return;
+    }
     int ki = myMap.findKey(index);
     // will shift all rightward indexes by +count
     int shiftFrom = ki >= 0 ? ki + 1 : -ki - 1;
@@ -186,12 +187,11 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   public void setRange(int from, int to, long value) {
     assert !IntegersDebug.CHECK || checkInvariants();
-
-    if (from >= to)
-      return;
+    if (from >= to) return;
     int size = size();
-    if (from < 0 || to > size)
+    if (from < 0 || to > size) {
       throw new IndexOutOfBoundsException(from + " " + to + " " + this);
+    }
 
     int fi = myMap.findKey(from);
     int removeFrom = fi >= 0 ? fi : -fi - 1;
@@ -206,12 +206,9 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
     int p = removeFrom;
     if (value != prevValue) {
-      if (p != 0 || value != 0) {
-        myMap.insertAt(p, from, value);
-        p++;
-      }
+      myMap.insertAt(p, from, value);
+      p++;
     }
-
     if (to < size && value != nextValue) {
       myMap.insertAt(p, to, nextValue);
     }
@@ -221,38 +218,40 @@ public class SameValuesLongList extends AbstractWritableLongList {
   }
 
   private long prevValueForFindIndex(int findIndex) {
-    return findIndex == -1 || findIndex == 0 ? 0 : myMap.getValueAt(findIndex < 0 ? -findIndex - 2 : findIndex - 1);
+    return findIndex == -1 || findIndex == 0 ? Integer.MIN_VALUE : myMap.getValueAt(findIndex < 0 ? -findIndex - 2 : findIndex - 1);
   }
 
   private boolean checkInvariants() {
     assert myMap != null;
     int size = size();
-    assert size >= 0 : size;
-    long lastValue = 0;
-    int lastKey = -1;
-    for (int i = 0; i < myMap.size(); i++) {
-      int key = myMap.getKey(i);
-      long value = myMap.getValueAt(i);
-      assert key > lastKey : i + " " + lastKey + " " + key;
-      assert value != lastValue : i + " " + value;
-      assert key < size : i + " " + key + " " + size;
-      lastKey = key;
-      lastValue = value;
+    if (myMap.size() == 0) {
+      assert size == 0;
+    } else {
+      assert size >= 0 : size;
+      long lastValue = myMap.isEmpty() ? 0 : myMap.getValueAt(0) - 1;
+      int lastKey = -1;
+      for (int i = 0; i < myMap.size(); i++) {
+        int key = myMap.getKeyAt(i);
+        long value = myMap.getValueAt(i);
+        assert key > lastKey : i + " " + lastKey + " " + key;
+        assert value != lastValue : i + " " + value;
+        assert key < size : i + " " + key + " " + size;
+        lastKey = key;
+        lastValue = value;
+      }
     }
     return true;
   }
 
   @Override
-  public SameValuesLongList sortUnique() {
+  public void sortUnique() {
     LongArray newValues = new LongArray(myMap.valuesIterator(0, myMap.size()));
-    newValues.add(get(0));
     newValues.sortUnique();
     int newSize = newValues.size();
     IntArray newIndexes = new IntArray(newSize);
     for (int i = 0; i < newSize; i++) newIndexes.add(i);
     myMap = new IntLongMap(newIndexes, newValues);
     updateSize(newSize);
-    return this;
   }
 
 
@@ -351,13 +350,24 @@ public class SameValuesLongList extends AbstractWritableLongList {
     return new SameValuesIterator(from, to);
   }
 
+  @Override
+  public void swap(int index1, int index2) {
+    if (index1 != index2) {
+      long t = get(index1);
+      long d = get(index2);
+      if (t == d) return;
+      set(index1, d);
+      set(index2, t);
+    }
+  }
+
   public void clear() {
     myMap.clear();
     updateSize(0);
   }
 
   public int getChangeCount() {
-    return myMap.size();
+    return isEmpty() ? 0: myMap.size() - 1;
   }
 
   public int getNextDifferentValueIndex(int curIndex) {
@@ -368,93 +378,37 @@ public class SameValuesLongList extends AbstractWritableLongList {
     if(ki < 0) ki = -ki - 2;
     // increase the found key to get the next different value
     ++ki;
-    return ki < myMap.size() ? myMap.getKey(ki) : size();
+    return ki < myMap.size() ? myMap.getKeyAt(ki) : size();
   }
 
-  /**
-   * Due to the leading-zeros optimization, a list starting with zeros and ending with nonzeros
-   * might be allocated in less amount of memory compared to its reversion.
-   * Hence, calling this method on such lists might result in additional (possibly huge) memory allocation.
-   */
   public void reverse() {
-    int sz = size();
-    int msz = myMap.size();
-    if (msz == 0) return;
-    int i = 0;
-    int keySwp;
-    long valSwp;
+    int mSize = myMap.size();
+    if (mSize < 2) return;
 
-    // Shorthands used in comments:
-    // k[i] - myMap.myKeys.get(i) before reversion.
-    // k'[i] - myMap.myKeys.get(i) after reversion.
-    // v[i], v'[i] - respectively, myMap.myValues
+    int idx = 0, sz = size();
+
+    // example
+    // keys:   (0, 2, 3, 6)  -> (0, 4, 7, 8); size = 10
+    // values: (4, 1, 2, 3)  -> (3, 2, 1, 4)
 
     IntLongMap.ConsistencyViolatingMutator m = myMap.startMutation();
 
-    // Initial adjustments section.
-    //
-    // SameValuesLongList is designed in such a way, that, if it starts with zeros,
-    // then normally k[0] != 0 && v[0] != 0, i.e starting zeros are omitted in myMap.
-    // Hence, 4 variants are possible:
-    //   a) List starts with zeros and ends with zeros:
-    //     No adjustments needed, main loop will do all the work.
-    //   b) List starts with zeros and ends with non-zeros:
-    //     A list will have to be expanded by one element. k[] will be expanded
-    //     with sz, and main loop will still work correctly.
-    //   c) List starts with non-zeros and ends with zeros:
-    //     A list will have to be shrinked by one element.
-    //     After main loop is finished, a last element will contain unnecesary data,
-    //     which is to be removed.
-    //   d) List starts with non-zeros and ends with non-zeros:
-    //     First element won't be used in a loop, edge values will be swapped outside the loop.
-    if (m.getValue(msz - 1) != 0) {
-      if (m.getKey(0) != 0) {
-        // Case b.
-        m.insertAt(msz, sz, 0);
-        msz++;
-      } else {
-        // Case d.
-        i++;
-        valSwp = m.getValue(0);
-        m.setValue(0, m.getValue(msz - 1));
-        m.setValue(msz - 1, valSwp);
-      }
-    }
-    int j = msz - 1;
+    for (int j = mSize - 1; idx < j; j--) {
+      long valSwp = m.getValue(idx);
+      m.setValue(idx, m.getValue(j));
+      m.setValue(j, valSwp);
 
-    // Main loop section.
-    //
-    // Given the values of i, j after the initial adjustment, it can be shown by induction on x that
-    // k'[i+x] == sz - k[j-x].
-    // for any non-negative x such that i + x < j - x.
-    // To prove it, note that k'[i+x+1]-k'[i+x] is the length of the (i+x)-th block in the reversed array,
-    // but it is also (j-(i+x)-1)-th block in the initial array, and its length is k[j-(i+x)]-k[j-(i+x)-1];
-    // equaling these expressions gives the expression above.
-    // Similarly, k'[j-x] == sz - k[i+x], so the loop modifies k[] "simultaneously" from both ends.
-    //
-    // Also, loop performs a simple reversion of v[].
-    // Note that v[] are taken with shifted index, j-1 instead of j.
-    // This way, v[msz-1] is not engaged in the reversion here.
-    // Depending on a case, there are different explanations:
-    //   a) v[msz-1] is 0, and only v[0 .. msz-2] should be engaged.
-    //   b) It's inserted manually and is 0, and only native values should be reversed.
-    //   c) It will be removed, and only v[0 .. msz-2] should be engaged.
-    //   d) It should be swapped with v[0], but in this case v[0] is skipped in a loop,
-    //     so they are swapped in initial adjustments section separately.
-    for (; i < j; i++, j--) {
-      keySwp = m.getKey(i);
-      m.setKey(i, sz - m.getKey(j));
+      idx++;
+      if (idx == j) break;
+
+      int keySwp = m.getKey(idx);
+      m.setKey(idx, sz - m.getKey(j));
       m.setKey(j, sz - keySwp);
-
-      valSwp = m.getValue(i);
-      m.setValue(i, m.getValue(j - 1));
-      m.setValue(j - 1, valSwp);
     }
 
-    if (i == j) m.setKey(i, sz - m.getKey(i));
-
-    // Case c.
-    if (m.getKey(msz - 1) == sz) m.removeAt(msz - 1);
+    if ((mSize & 1) == 0) {
+      m.setKey(idx, sz - m.getKey(idx));
+    }
 
     m.commit();
     assert !IntegersDebug.CHECK || checkInvariants();
@@ -462,7 +416,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
 
   private final class SameValuesIterator extends WritableIndexIterator {
-    private PairIntLongIterator myIterator;
+    private IntLongIterator myIterator;
     private long myValue;
     private int myNextChangeIndex;
 
@@ -473,13 +427,14 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
     protected void sync() {
       super.sync();
-      int p = myMap.findKey(getNextIndex());
+      int p = hasValue() ? myMap.findKey(index()) : myMap.findKey(getNextIndex());
       if (p == -1) {
         myValue = 0;
         myIterator = myMap.iterator();
       } else {
-        if (p < 0)
+        if (p < 0) {
           p = -p - 2;
+        }
         myIterator = myMap.iterator(p);
         myIterator.next();
         myValue = myIterator.right();

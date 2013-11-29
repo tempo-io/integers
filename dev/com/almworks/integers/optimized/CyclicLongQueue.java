@@ -6,10 +6,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static com.almworks.integers.IntCollections.range;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-// todo make a queue-like interface (because it is really a queue)
 public class CyclicLongQueue extends AbstractLongList {
   private long[] myHostArray;
   private int myL;
@@ -18,8 +18,16 @@ public class CyclicLongQueue extends AbstractLongList {
   private List<PinnedIterator> myIterators;
 
   public CyclicLongQueue(int initialCapacity) {
-    // Can hold myHostArray.length - 1 values
-    myHostArray = new long[initialCapacity + 1];
+    if (initialCapacity == 0) {
+      myHostArray = IntegersUtils.EMPTY_LONGS;
+    } else {
+      // Can hold myHostArray.length - 1 values
+      myHostArray = new long[initialCapacity + 1];
+    }
+  }
+
+  public CyclicLongQueue() {
+    this(0);
   }
 
   private int normalizeOver(int index) {
@@ -35,6 +43,17 @@ public class CyclicLongQueue extends AbstractLongList {
     return myHostArray[normalizeOver(myL + i)];
   }
 
+  /**
+   * Retrieves, but does not remove, the head of this queue,
+   * or returns <tt>null</tt> if this queue is empty.
+   *
+   * @return the head of this queue, or <tt>null</tt> if this queue is empty
+   */
+  public long peek() {
+    if (isEmpty()) throw new NoSuchElementException();
+    return myHostArray[myL];
+  }
+
   public int size() {
     return normalizeUnder(myR - myL);
   }
@@ -44,6 +63,7 @@ public class CyclicLongQueue extends AbstractLongList {
   }
 
   private void checkIterators(int toRemove) throws IllegalStateException {
+    assert toRemove <= size();
     if (myIterators != null && toRemove > 0) {
       int removalPoint = normalizeOver(myL + toRemove);
       for (PinnedIterator it : myIterators) {
@@ -58,8 +78,8 @@ public class CyclicLongQueue extends AbstractLongList {
     return
         // |-------------myR-----[myL*****p)----|
         myL <= idx && idx < p ||
-            // |****p)-------myR-----[myL***********|
-            p < myL && (idx < p || myL <= idx);
+        // |****p)-------myR-----[myL***********|
+        p < myL && (idx < p || myL <= idx);
   }
 
   /** @throws IllegalStateException if there is any attached {@link #pinnedIterator pinned iterator}. */
@@ -95,7 +115,7 @@ public class CyclicLongQueue extends AbstractLongList {
    * @throws IllegalStateException if there is a {@link #pinnedIterator()} pointing at the first element
    * */
   public long removeFirst() throws NoSuchElementException, IllegalStateException {
-    if (size() == 0) throw new NoSuchElementException();
+    if (isEmpty()) throw new NoSuchElementException();
     checkIterators(1);
     long ret = myHostArray[myL];
     myL = normalizeOver(myL + 1);
@@ -191,8 +211,8 @@ public class CyclicLongQueue extends AbstractLongList {
     }
   }
 
-  public StringBuilder toStringWithPiterators() {
-    return new ToStringWithPiteratorsBuilder().build();
+  public String toStringWithPiterators() {
+    return new ToStringWithPiteratorsBuilder().build().toString();
   }
 
   public class PinnedIterator extends AbstractLongIterator {
@@ -200,10 +220,11 @@ public class CyclicLongQueue extends AbstractLongList {
     private int myAge;
 
     protected PinnedIterator(int offset) {
-      myHostIdx = myL + offset;
+      myHostIdx = normalizeOver(myL + offset);
     }
 
     protected void onRealloc(int oldL) {
+      assert myHostIdx >= oldL;
       myHostIdx = normalizeUnder(myHostIdx - oldL);
     }
 
@@ -221,7 +242,7 @@ public class CyclicLongQueue extends AbstractLongList {
     }
 
     public boolean hasValue() {
-      return myAge != 0;
+      return myAge > 0;
     }
 
     @Override
@@ -263,7 +284,7 @@ public class CyclicLongQueue extends AbstractLongList {
   private class ToStringWithPiteratorsBuilder {
     private final StringBuilder mySb = new StringBuilder();
     private final IntArray myPiPos = new IntArray(myIterators == null ? 0 : myIterators.size());
-    private final IntArray indexes = new IntArray();
+    private final IntArray myIndices = new IntArray();
     private final boolean myShortForm = size() > 10 + myPiPos.size();
 
     public StringBuilder build() {
@@ -276,31 +297,33 @@ public class CyclicLongQueue extends AbstractLongList {
       }
       if (myShortForm) {
         mySb.append('[').append(size()).append("] (");
-        indexes.addAll(IntProgression.arithmetic(0, min(size(), 5)));
-        indexes.addAll(IntProgression.arithmetic(max(size() - 5, 0), 5));
-        indexes.addAll(myPiPos);
-        indexes.sortUnique();
+
+        myIndices.addAll(IntProgression.arithmetic(0, min(size(), 5)));
+        myIndices.addAll(IntProgression.arithmetic(max(size() - 5, 0), 5));
+        myIndices.addAll(myPiPos);
+        myIndices.sortUnique();
       } else {
         mySb.append('(');
-        indexes.addAll(IntProgression.arithmetic(0, size()));
+        myIndices.addAll(range(size()));
       }
-      appendIndexes();
+      appendIndices();
       mySb.append(')');
       return mySb;
     }
 
-    private void appendIndexes() {
-      int last, cur = indexes.get(0);
-      mySb.append(get(cur));
-      if (myPiPos.contains(cur)) mySb.append('*');
-      for (int i = 1; i < indexes.size(); i++) {
-        last = cur;
-        cur = indexes.get(i);
-        if (last + 1 == cur) mySb.append(", ");
-        else                 mySb.append(", ..., ");
-
+    private void appendIndices() {
+      if (myIndices.size() == 0) return;
+      int i = 1, last, cur = myIndices.get(0);
+      assert myIndices.size() >= 1;
+      while (true) {
         mySb.append(get(cur));
         if (myPiPos.contains(cur)) mySb.append('*');
+
+        if (i == myIndices.size()) break;
+
+        last = cur;
+        cur = myIndices.get(i++);
+        mySb.append(last + 1 == cur ? ", " : ", ..., ");
       }
     }
   }
