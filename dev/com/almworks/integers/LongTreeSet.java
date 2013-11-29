@@ -33,7 +33,7 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class LongTreeSet implements WritableLongSortedSet {
+public class LongTreeSet extends AbstractWritableLongSet implements WritableLongSortedSet {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { NIL_DUMMY_KEY };
@@ -52,8 +52,6 @@ public class LongTreeSet implements WritableLongSortedSet {
   private BitSet myRemoved;
   /** Index into key, left, right, black that denotes the current root node. */
   private int myRoot;
-
-  private int myModCount = 0;
 
   private static final int SHRINK_FACTOR = 3; // for testing try 6
   private static final int SHRINK_MIN_LENGTH = 8; // for testing try 4
@@ -124,10 +122,6 @@ public class LongTreeSet implements WritableLongSortedSet {
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("clear");
   }
 
-  private void modified() {
-    myModCount++;
-  }
-
   /** @return {@link Long#MIN_VALUE} in case the set is empty */
   public long getUpperBound() {
     return myKeys[traverseToEnd(myRight)];
@@ -135,7 +129,7 @@ public class LongTreeSet implements WritableLongSortedSet {
 
   /** @return {@link Long#MAX_VALUE} in case the set is empty */
   public long getLowerBound() {
-    if (size() == 0) return Long.MAX_VALUE;
+    if (isEmpty()) return Long.MAX_VALUE;
     return myKeys[traverseToEnd(myLeft)];
   }
 
@@ -157,18 +151,11 @@ public class LongTreeSet implements WritableLongSortedSet {
     return x != 0;
   }
 
-  public boolean containsAll(LongIterable iterable) {
-    if (iterable == this) return true;
-    for (LongIterator it : iterable.iterator()) {
-      if (!contains(it.value())) return false;
-    }
-    return true;
-  }
-
   public int size() {
     return myRemoved.isEmpty() ? myFront - 1 : myFront - 1 - myRemoved.cardinality();
   }
 
+  @Override
   public boolean isEmpty() {
     boolean ret = myRoot == 0;
     assert (size() == 0) == ret : size() + " " + myRoot;
@@ -177,15 +164,12 @@ public class LongTreeSet implements WritableLongSortedSet {
 
   // todo optimize, if keys small, it's cheaper create new LongArray and use fromSortedList(..)
   // K* log(S + K) -> K*log(K) + (S + K)
+  @Override
   public void addAll(LongList keys) {
-    modified();
-    int[] ps = prepareAdd(keys.size());
-    for (LongIterator i : keys) {
-      include0(i.value(), ps);
-    }
+    addAll((LongSizedIterable)keys);
   }
 
-  public void addAll(LongSet keys) {
+  public void addAll(LongSizedIterable keys) {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (LongIterator ii : keys) {
@@ -193,6 +177,7 @@ public class LongTreeSet implements WritableLongSortedSet {
     }
   }
 
+  @Override
   public void addAll(long... values) {
     modified();
     if (values != null && values.length != 0) {
@@ -204,6 +189,9 @@ public class LongTreeSet implements WritableLongSortedSet {
     }
   }
 
+
+  // todo optimize - we can don't check myStackCache on the every adding
+  @Override
   public void addAll(LongIterator iterator) {
     modified();
     if (!iterator.hasNext()) return;
@@ -212,21 +200,10 @@ public class LongTreeSet implements WritableLongSortedSet {
     }
   }
 
-  public void add(long key) {
-    modified();
-    include0(key);
-  }
-
-  @Override
-  public boolean include(long key) {
-    modified();
-    return include0(key);
-  }
-
   /**
    * @return false if set already contains key
    * */
-  public boolean include0(long key) {
+  protected boolean include0(long key) {
     return include0(key, prepareAdd(1));
   }
 
@@ -454,9 +431,8 @@ public class LongTreeSet implements WritableLongSortedSet {
     if (capacity == 0 && !src.iterator().hasNext())
       newKeys = EMPTY_KEYS;
     else {
-      LongArray buf = LongCollections.collectIterables(capacity, new LongIterator.Single(NIL_DUMMY_KEY), src);
+      LongArray buf = LongCollections.collectIterables(capacity + 1, new LongIterator.Single(NIL_DUMMY_KEY), src);
       assert buf.isUniqueSorted();
-      int size = buf.size() - 1;
       newKeys = buf.extractHostArray();
     }
     createFromPreparedArray(newKeys, capacity, coloringType);
@@ -471,6 +447,12 @@ public class LongTreeSet implements WritableLongSortedSet {
   public static LongTreeSet createFromSortedUnique(LongSizedIterable src) {
     LongTreeSet res = new LongTreeSet();
     res.createFromSortedUnique0(src, src.size(), ColoringType.BALANCED);
+    return res;
+  }
+
+  public static LongTreeSet createFromSortedUnique(LongIterable src) {
+    LongTreeSet res = new LongTreeSet();
+    res.createFromSortedUnique0(src, 0, ColoringType.BALANCED);
     return res;
   }
 
@@ -568,13 +550,8 @@ public class LongTreeSet implements WritableLongSortedSet {
   }
 
   @NotNull
-  public LongIterator iterator() {
-    return new FailFastLongIterator(new IndexedLongIterator(new LongArray(myKeys), new LURIterator())) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
+  protected LongIterator iterator1() {
+    return new IndexedLongIterator(new LongArray(myKeys), new LURIterator());
   }
 
   public LongIterator tailIterator(long fromElement) {
@@ -586,19 +563,13 @@ public class LongTreeSet implements WritableLongSortedSet {
     };
   }
 
-  public void removeAll(long... keys) {
+  @Override
+  public void removeAll(long... values) {
     modified();
-    int[] parentsStack = fetchStackCache(0);
-    for (long key : keys) {
-      exclude0(key, parentsStack);
-    }
-    maybeShrink();
+    removeAll(new LongArrayIterator(values));
   }
 
-  public void removeAll(LongList keys) {
-    removeAll(keys.iterator());
-  }
-
+  @Override
   public void removeAll(LongIterator iterator) {
     modified();
     int[] parentStack = fetchStackCache(0);
@@ -608,12 +579,7 @@ public class LongTreeSet implements WritableLongSortedSet {
     maybeShrink();
   }
 
-  public void remove(long key) {
-    exclude(key);
-  }
-
-  public boolean exclude(long key) {
-    modified();
+  protected boolean exclude0(long key) {
     boolean ret = exclude0(key, fetchStackCache(0));
     maybeShrink();
     return ret;
@@ -634,10 +600,11 @@ public class LongTreeSet implements WritableLongSortedSet {
   /**
    * Retains this set with the specified set
    * */
-  public LongTreeSet retain(LongTreeSet set) {
+  public LongTreeSet retain(LongSortedSet set) {
     LongArray array = toArray();
     array.retainSorted(set.toArray());
     clear();
+    createFromSortedUnique0(array, array.size(), ColoringType.BALANCED);
     createFromSortedUnique(array);
     return this;
   }
@@ -764,9 +731,6 @@ public class LongTreeSet implements WritableLongSortedSet {
     return myKeys[x] == NIL_DUMMY_KEY ? "NIL" : String.valueOf(myKeys[x]);
   }
 
-  /**
-   * @return sorted LongArray with values from this set
-   * */
   public LongArray toArray() {
     long[] arr = new long[size()];
     int i = 0;
@@ -785,21 +749,6 @@ public class LongTreeSet implements WritableLongSortedSet {
       assert false: e;
       return "LongTreeSet";
     }
-  }
-
-  public StringBuilder toString(StringBuilder builder) {
-    builder.append("LTS ").append(size()).append(" [");
-    String sep = "";
-    for  (LongIterator ii : this) {
-      builder.append(sep).append(ii.value());
-      sep = ", ";
-    }
-    builder.append("]");
-    return builder;
-  }
-
-  public final String toString() {
-    return toString(new StringBuilder()).toString();
   }
 
   /**

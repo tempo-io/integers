@@ -110,7 +110,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   /**
-   * Shift all the slot-conflicting keys allocated to (and including) <code>slot</code>.
+   * Shift all the slot-conflicting values allocated to (and including) <code>slot</code>.
    * copied from hppc
    */
   protected void shiftConflictingKeys(int slotCurr) {
@@ -145,13 +145,13 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
         /*  */
   }
 
-  public boolean exclude0(long key) {
+  public boolean exclude0(long value) {
     // todo exctract mask
     int mask = myKeysLength - 1;
-    int slot = index(hash(key), myKeysLength);
+    int slot = index(hash(value), myKeysLength);
 
     while (myAllocated.get(slot)) {
-      if (key == myKeys[slot]) {
+      if (value == myKeys[slot]) {
         mySize--;
         shiftConflictingKeys(slot);
         return true;
@@ -182,11 +182,11 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   @Override
-  public boolean contains(long key) {
+  public boolean contains(long value) {
     int mask = myKeysLength - 1;
-    int slot = index(hash(key), myKeysLength);
+    int slot = index(hash(value), myKeysLength);
     while (myAllocated.get(slot)) {
-      if (key == myKeys[slot]) return true;
+      if (value == myKeys[slot]) return true;
       slot = (slot + 1) & mask;
     }
     return false;
@@ -207,22 +207,12 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   @NotNull
-  @Override
-  public LongIterator iterator() {
-    return new FailFastLongIterator(iterator1()) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  @NotNull
-  private LongIterator iterator1() {
+  protected LongIterator iterator1() {
     return new FindingLongIterator() {
       int curSlot = 0;
       @Override
       protected boolean findNext() {
+        if (curSlot == -1) return false;
         curSlot = myAllocated.nextSetBit(curSlot);
         if (curSlot == -1) return false;
         myCurrent = myKeys[curSlot];
@@ -241,9 +231,5 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     }
     builder.append("]");
     return builder;
-  }
-
-  public final String toString() {
-    return toString(new StringBuilder()).toString();
   }
 }

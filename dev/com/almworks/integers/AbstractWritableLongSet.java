@@ -1,27 +1,32 @@
 package com.almworks.integers;
 
+import com.almworks.integers.util.FailFastLongIterator;
+import org.jetbrains.annotations.NotNull;
+
 public abstract class AbstractWritableLongSet implements WritableLongSet {
   protected int myModCount = 0;
-
-  private void modified() {
-    myModCount++;
-  }
 
   /**
    * include element without invocation of {@code AbstractWritableLongSet#modified()}
    */
   protected abstract boolean include0(long value);
 
+  /**
+   * exclude element without invocation of {@code AbstractWritableLongSet#modified()}
+   */
+  protected abstract boolean exclude0(long value);
+
+  protected abstract LongIterator iterator1();
+
+  protected void modified() {
+    myModCount++;
+  }
+
   @Override
   public boolean include(long value) {
     modified();
     return include0(value);
   }
-
-  /**
-   * exclude element without invocation of {@code AbstractWritableLongSet#modified()}
-   */
-  protected abstract boolean exclude0(long value);
 
   @Override
   public boolean exclude(long value) {
@@ -31,19 +36,29 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
 
   public void add(long value) {
     modified();
+    add0(value);
+  }
+
+  protected void add0(long value) {
     include0(value);
   }
 
   public void remove(long value) {
     modified();
+    remove0(value);
+  }
+
+  protected void remove0(long value) {
     exclude0(value);
   }
 
   @Override
-  public void removeAll(long... keys) {
+  public void removeAll(long... values) {
     modified();
-    for (long key : keys) {
-      exclude0(key);
+    if (values.length == 1) {
+      remove(values[0]);
+    } else {
+      removeAll(new LongArrayIterator(values));
     }
   }
 
@@ -57,7 +72,7 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   public void removeAll(LongIterator iterator) {
     modified();
     while (iterator.hasNext()) {
-      exclude0(iterator.nextValue());
+      remove0(iterator.nextValue());
     }
   }
 
@@ -78,10 +93,8 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   public void addAll(long... values) {
     modified();
     if (values != null && values.length != 0) {
-      if (values.length == 1) {
-        add(values[0]);
-      } else {
-        addAll(new LongArray(values));
+      for (long value: values) {
+        add0(value);
       }
     }
   }
@@ -98,5 +111,39 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   @Override
   public boolean isEmpty() {
     return size() == 0;
+  }
+
+  @NotNull
+  @Override
+  public LongIterator iterator() {
+    return new FailFastLongIterator(iterator1()) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
+  }
+
+  public StringBuilder toString(StringBuilder builder) {
+    String name = getClass().getSimpleName();
+    // LongAmortizedSet -> LAS, LongTreeSet -> LTS
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if ('A' <= c && c <= 'Z') {
+        builder.append(c);
+      }
+    }
+    builder.append(" ").append(size()).append(" [");
+    String sep = "";
+    for  (LongIterator ii : this) {
+      builder.append(sep).append(ii.value());
+      sep = ", ";
+    }
+    builder.append("]");
+    return builder;
+  }
+
+  public final String toString() {
+    return toString(new StringBuilder()).toString();
   }
 }

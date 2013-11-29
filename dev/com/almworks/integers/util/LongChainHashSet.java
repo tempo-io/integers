@@ -57,10 +57,6 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
 
-  private void modified() {
-    myModCount++;
-  }
-
   private void resize(int newCapacity) {
     // check that newCapacity = 2^k
     assert (newCapacity & (newCapacity - 1)) == 0 && newCapacity > 0;
@@ -119,10 +115,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     int valuesSize = values.size();
     int newSize = size() + valuesSize;
     if (newSize >= threshold) {
-      int newCap = myHeadNum << 1;
-      for (int minCap = (int)(newSize / loadFactor); newCap < minCap; ) {
-        newCap <<= 1;
-      }
+      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / loadFactor) + 1);
       resize(newCap);
     }
     for (LongIterator it: values.iterator()) {
@@ -140,8 +133,11 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
       removeNode(i);
       return true;
     }
-    int prev;
-    for (prev = i, i = myNext[i]; i != 0; i = myNext[i]) {
+    while (true) {
+      int prev = i;
+      i = myNext[i];
+      if (i == 0) break;
+
       if (myKeys[i] == value) {
         myNext[prev] = myNext[i];
         removeNode(i);
@@ -155,6 +151,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     if (i == cnt - 1) {
       cnt--;
     } else {
+      assert !myRemoved.get(i);
       myRemoved.set(i);
     }
     mySize--;
@@ -174,18 +171,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     return mySize;
   }
 
-  @Override
-  @NotNull
-  public LongIterator iterator() {
-    return new FailFastLongIterator(iterator1()) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  private LongIterator iterator1() {
+  protected LongIterator iterator1() {
     return new FindingLongIterator() {
       private int curHead = 0;
       private int curIndex = 0;
@@ -249,20 +235,5 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     clear();
     addAll(res);
     return this;
-  }
-
-  public StringBuilder toString(StringBuilder builder) {
-    builder.append("LCHS ").append(size()).append(" [");
-    String sep = "";
-    for  (LongIterator i : this) {
-      builder.append(sep).append(i.value());
-      sep = ",";
-    }
-    builder.append("]");
-    return builder;
-  }
-
-  public final String toString() {
-    return toString(new StringBuilder()).toString();
   }
 }

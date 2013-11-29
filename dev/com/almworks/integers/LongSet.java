@@ -9,7 +9,8 @@ public interface LongSet extends LongSizedIterable {
   boolean contains(long value);
 
   /**
-   * @return true if this set contains all of the elements in iterable. Otherwise false
+   * @return true if this set contains all of the elements produced by {@code iterable}.
+   * Otherwise false
    */
   boolean containsAll(LongIterable iterable);
 

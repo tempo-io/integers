@@ -87,7 +87,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
 
   public void mergeFrom(LongSetBuilder other) {
     other.mergeTemp();
-    if (other.mySorted.size() == 0)
+    if (other.mySorted.isEmpty())
       return;
     mergeFromSortedCollection(other.mySorted);
   }
@@ -102,7 +102,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
   }
 
   private void mergeTemp() {
-    if (myTemp.size() == 0)
+    if (myTemp.isEmpty())
       return;
     modified();
     myTemp.sort();
@@ -123,7 +123,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
    */
   public LongList toList() {
     mergeTemp();
-    if (mySorted.size() == 0)
+    if (mySorted.isEmpty())
       return LongList.EMPTY;
     return mySorted;
   }
@@ -149,7 +149,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
   }
 
   public boolean isEmpty() {
-    return mySorted.size() + myTemp.size() == 0;
+    return mySorted.isEmpty() && myTemp.isEmpty();
   }
 
 

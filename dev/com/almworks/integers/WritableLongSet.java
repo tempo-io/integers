@@ -9,22 +9,22 @@ public interface WritableLongSet extends LongCollector, LongSet {
   void clear();
 
   /**
-  * Removes the specified element from this set if it is present
+  * Removes the specified element from this set.
   * */
   void remove(long value);
 
   /**
-   * Removes from this set all elements that are contained in the values
+   * Removes from this set all elements that are contained in the {@code values}
    */
   void removeAll(long ... values);
 
   /**
-   * Removes from this set all elements that are contained in the list values
+   * Removes from this set all elements that are contained in the list {@code values}
    */
   void removeAll(LongList values);
 
   /**
-   * Removes from this set all elements that are contained in the iterator
+   * Removes from this set all elements that are produced by {@code iterator}
    */
   void removeAll(LongIterator iterator);
 
@@ -45,12 +45,12 @@ public interface WritableLongSet extends LongCollector, LongSet {
   boolean include(long value);
 
   /**
-   * Removes the specified element from this set if it is present.
-   * If this set don't contain the element, the call leaves the set
+   * Removes the specified element from this set.
+   * If this set didn't contain the element, the call leaves the set
    * unchanged and returns {@code false}. Otherwise {@code true}.
    *
-   * @return {@code true} if size of set changed. Otherwise {@code false}.
-   * If return value is unused, better to use {@link WritableLongSet#exclude(long)}
+   * @return {@code true} if size of set has changed. Otherwise {@code false}.
+   * If return value is unused, better use {@link WritableLongSet#exclude(long)}
    * */
   boolean exclude(long value);
 }

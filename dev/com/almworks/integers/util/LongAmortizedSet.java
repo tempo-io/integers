@@ -4,16 +4,17 @@ import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
 /**
+ * Operations {@link LongAmortizedSet#include(long)} and {@link LongAmortizedSet#exclude(long)}
+ * may be slower than {@link LongAmortizedSet#add(long)} and {@link LongAmortizedSet#remove(long)} respectively
  * @author Igor Sereda
  */
-public class LongAmortizedSet implements WritableLongSortedSet {
+public class LongAmortizedSet extends AbstractWritableLongSet implements WritableLongSortedSet {
   private static final int DEFAULT_CHUNKSIZE = 512;
 
   private LongArray myBaseList;
   private final WritableLongSortedSet myAdded;// = new LongTreeSet();
   private final WritableLongSet myRemoved;// = new LongChainHashSet(509, 512);
 
-  private int myModCount = 0;
   // true if set wasn't modified after last coalesce()
   private boolean myCoalesced;
 
@@ -37,78 +38,52 @@ public class LongAmortizedSet implements WritableLongSortedSet {
     this(capacity, new LongTreeSet(), new LongChainHashSet());
   }
 
-  private void add0(long value) {
+  protected void add0(long value) {
     myRemoved.remove(value);
     myAdded.add(value);
     maybeCoalesce();
   }
 
-  public void add(long value) {
-    modified();
-    add0(value);
+  /**
+   * {@inheritDoc}
+   * May be slower than {@link LongAmortizedSet#add(long)}
+   */
+  @Override
+  public boolean include(long value) {
+    return super.include(value);    //To change body of overridden methods use File | Settings | File Templates.
   }
 
-  public boolean include(long value) {
-    modified();
+  protected boolean include0(long value) {
     if (contains(value)) return false;
     add(value);
     return true;
   }
 
-  // todo optimize
-  public void addAll(LongList values) {
-    modified();
-    addAll(values.iterator());
-  }
+  // todo optimize addAll(LongList)
 
-  public void addAll(LongIterator iterator) {
-    modified();
-    while (iterator.hasNext())
-      add0(iterator.nextValue());
-  }
-
-  public void addAll(long... values) {
-    modified();
-    if (values != null && values.length != 0) {
-      if (values.length == 1) {
-        add(values[0]);
-      } else {
-        addAll(new LongArray(values));
-      }
-    }
-  }
-
-  public void remove(long value) {
-    modified();
+  @Override
+  protected void remove0(long value) {
     myAdded.remove(value);
     myRemoved.add(value);
     maybeCoalesce();
   }
 
+  /**
+   * {@inheritDoc}
+   * May be slower than {@link LongAmortizedSet#remove(long)}
+   */
   public boolean exclude(long value) {
-    modified();
+    return super.exclude(value);    //To change body of overridden methods use File | Settings | File Templates.
+  }
+
+  protected boolean exclude0(long value) {
     if (!contains(value)) return false;
     remove(value);
     return true;
   }
 
-  public void removeAll(long ... values) {
-    for (long value : values) {
-      remove(value);
-    }
-  }
+// todo optimize removeAll
 
-  public void removeAll(LongList values) {
-    removeAll(values.iterator());
-  }
-
-  public void removeAll(LongIterator iterator) {
-    for (LongIterator it: iterator) {
-      remove(it.value());
-    }
-  }
-
-  @Override
   public LongAmortizedSet retain(LongList values) {
     modified();
     coalesce();
@@ -129,19 +104,6 @@ public class LongAmortizedSet implements WritableLongSortedSet {
     return myBaseList.binarySearch(value) >= 0;
   }
 
-  public boolean containsAll(LongIterable iterable) {
-    if (iterable == this) return true;
-    for (LongIterator iterator : iterable.iterator()) {
-      if (!contains(iterator.value())) return false;
-    }
-    return true;
-  }
-
-  private void modified() {
-    myModCount++;
-    myCoalesced = false;
-  }
-
   private void maybeCoalesce() {
     if (myAdded.size() >= DEFAULT_CHUNKSIZE || myRemoved.size() >= DEFAULT_CHUNKSIZE) {
       coalesce();
@@ -160,6 +122,12 @@ public class LongAmortizedSet implements WritableLongSortedSet {
     myRemoved.clear();
   }
 
+  @Override
+  protected void modified() {
+    super.modified();
+    myCoalesced = false;
+  }
+
   public LongIterator tailIterator(long fromElement) {
     int baseIndex = myBaseList.binarySearch(fromElement);
     if (baseIndex < 0) baseIndex = -baseIndex - 1;
@@ -173,52 +141,31 @@ public class LongAmortizedSet implements WritableLongSortedSet {
   }
 
   @NotNull
-  public LongIterator iterator() {
+  protected LongIterator iterator1() {
     LongIterator baseIterator = myBaseList.iterator();
-    return new FailFastLongIterator(new CoalescingIterator(baseIterator, myAdded.iterator())) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
+    return new CoalescingIterator(baseIterator, myAdded.iterator());
   }
 
   /**
-   * @return new LongAmortizedSet contained all elements from the specified iterator
-   */
-  public static LongAmortizedSet fromSortedIterable(LongIterator src) {
-    return fromSortedIterator(src, 0);
-  }
-
-  /**
+   * @param iterable sorted unique
    * @param capacity the capacity for new set
-   * @return new LongAmortizedSet contained all elements from the specified iterator
+   * @return new LongAmortizedSet contained all elements from the specified iterable
    */
-  public static LongAmortizedSet fromSortedIterator(LongIterator src, int capacity) {
-    return fromSortedIterable0(src, capacity);
-  }
-
-  /**
-   * @return new LongAmortizedSet contained all elements from the specified src
-   */
-  public static LongAmortizedSet fromSortedList(LongList src) {
-    return fromSortedIterable0(src, src.size());
-  }
-
-  /**
-   * @param capacity the capacity for new set
-   * @return new LongAmortizedSet contained all elements from the specified src
-   */
-  public static LongAmortizedSet fromSortedList(LongList src, int capacity) {
-    return fromSortedIterable0(src, capacity);
-  }
-
-  private static LongAmortizedSet fromSortedIterable0(LongIterable iterable, int capacity) {
+  public static LongAmortizedSet createFromSortedUnique(LongIterable iterable, int capacity) {
     LongAmortizedSet res = new LongAmortizedSet();
     res.myBaseList = LongCollections.collectIterables(capacity, iterable);
+    assert res.myBaseList.isSorted();
     return res;
   }
 
+  /**
+   * @return new LongAmortizedSet contained all elements from the specified iterable
+   */
+  public static LongAmortizedSet createFromSortedUnique(LongIterable iterable) {
+    return createFromSortedUnique(iterable, 0);
+  }
+
+  @Override
   public boolean isEmpty() {
     if (!myAdded.isEmpty()) return false;
     if (myBaseList.isEmpty()) return true;
@@ -236,8 +183,14 @@ public class LongAmortizedSet implements WritableLongSortedSet {
   public int size() {
     int size = myBaseList.size();
     // intersection of myRemoved and myAdded is empty
+    int from = 0, to = myBaseList.size();
     for (LongIterator iterator: myAdded.iterator()) {
-      if (myBaseList.binarySearch(iterator.value()) < 0) size++;
+      int idx = myBaseList.binarySearch(iterator.value(), from, to);
+      if (idx < 0) {
+        size++;
+        idx = -idx - 1;
+      }
+      from = idx;
     }
 //    LongIterator removedIt = myRemoved.iterator();
 //    while (removedIt.hasNext()) {//removeIterator()) {
@@ -271,21 +224,6 @@ public class LongAmortizedSet implements WritableLongSortedSet {
     builder.append("myAdded: ").append(LongCollections.toBoundedString(myAdded)).append('\n');
     builder.append("myRemoved: ").append(LongCollections.toBoundedString(sortedRemovedIterator()));
     return builder.toString();
-  }
-
-  public StringBuilder toString(StringBuilder builder) {
-    builder.append("LAS ").append(size()).append(" [");
-    String sep = "";
-    for  (LongIterator i : this) {
-      builder.append(sep).append(i.value());
-      sep = ", ";
-    }
-    builder.append("]");
-    return builder;
-  }
-
-  public final String toString() {
-    return toString(new StringBuilder()).toString();
   }
 
   private class CoalescingIterator extends FindingLongIterator {
