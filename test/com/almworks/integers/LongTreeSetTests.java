@@ -126,4 +126,22 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     assertEquals(MIN, set.getLowerBound());
     assertEquals(MIN, set.getUpperBound());
   }
+
+  public void testRetainSimple2() {
+    LongTreeSet set = new LongTreeSet();
+    set.addAll(ap(0, 2, 30));
+    LongSortedSet otherSet = createSetFromSortedList(LongArray.create(ap(0, 3, 20)))[0];
+    set.retain(otherSet);
+    checkSet(set, LongArray.create(ap(0, 6, 10)));
+
+    set = new LongTreeSet();
+    for (int i = 0; i < 2; i++) {
+      set.addAll(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24);
+      otherSet = createSetFromSortedList(LongArray.create(3, 6, 9, 12, 15, 18, 21, 24))[0];
+      set.retain(otherSet);
+      checkSet(set, LongArray.create(6, 12, 18, 24));
+      set.clear();
+    }
+
+  }
 }

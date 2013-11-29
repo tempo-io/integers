@@ -2,11 +2,7 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 
-public class LongAmortizedSortedSetTests extends WritableLongSetChecker {
-
-  protected boolean isSupportTailIterator() {
-    return true;
-  }
+public class LongAmortizedSetTests extends WritableLongSetChecker {
 
   protected WritableLongSortedSet createSet() {
     return createSetWithCapacity(-1);
@@ -17,7 +13,7 @@ public class LongAmortizedSortedSetTests extends WritableLongSetChecker {
   }
 
   protected  WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
-    return new WritableLongSortedSet[] {LongAmortizedSet.fromSortedList(sortedList)};
+    return new WritableLongSortedSet[] {LongAmortizedSet.createFromSortedUnique(sortedList)};
   }
 
   public void testIteratorCoalesce() {

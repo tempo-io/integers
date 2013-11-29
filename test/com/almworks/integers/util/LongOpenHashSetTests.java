@@ -67,7 +67,8 @@ public class LongOpenHashSetTests extends WritableLongSetChecker {
       set.addAll(expected);
       expected.sortUnique();
       LongArray actual = new LongArray(set.iterator());
-      CHECK.order(expected, actual.sortUnique());
+      actual.sortUnique();
+      CHECK.order(expected, actual);
     }
   }
 }
