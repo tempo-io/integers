@@ -160,7 +160,9 @@ public class LongArrayTests extends WritableLongListChecker {
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
-        return arrays[0].mergeWithSameLength(arrays[1]);
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.mergeWithSameLength(arrays[1]);
+        return copy;
       }
     }, unionGetter, true, true);
 
@@ -170,7 +172,8 @@ public class LongArrayTests extends WritableLongListChecker {
       public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return copy.mergeWithSameLength(arrays[1]);
+        copy.mergeWithSameLength(arrays[1]);
+        return copy;
       }
     }, unionGetter, true, true);
 
@@ -178,7 +181,9 @@ public class LongArrayTests extends WritableLongListChecker {
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
-        return arrays[0].mergeWithSmall(arrays[1]);
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.mergeWithSmall(arrays[1]);
+        return copy;
       }
     }, unionGetter, true, true);
 
@@ -188,7 +193,8 @@ public class LongArrayTests extends WritableLongListChecker {
       public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
         copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        return copy.mergeWithSmall(arrays[1]);
+        copy.mergeWithSmall(arrays[1]);
+        return copy;
       }
     }, unionGetter, true, true);
   }
@@ -208,7 +214,7 @@ public class LongArrayTests extends WritableLongListChecker {
       for (int i = indexes.size() - 1; i >= 0; i--) {
         expected.removeAt(indexes.get(i));
       }
-      array.removeSortedIndexes(indexes);
+      array.removeAllAtSorted(indexes);
       CHECK.order(array, expected);
     }
   }

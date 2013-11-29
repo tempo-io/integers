@@ -4,8 +4,12 @@ import com.almworks.integers.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-public class SameValuesLongListTests extends WritableLongListChecker {
+/**
+ * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
+ * */
+public class  SameValuesLongListTests extends WritableLongListChecker {
 
   @Override
   protected List<WritableLongList> createWritableLongListVariants(long... values) {
@@ -33,7 +37,7 @@ public class SameValuesLongListTests extends WritableLongListChecker {
 
   public void setUp() throws Exception {
     super.setUp();
-    list = create();
+    list = new SameValuesLongList();
   }
 
   protected void tearDown() throws Exception {
@@ -75,7 +79,7 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     list.addAll(ap(1, 0, 10));
     list.removeRange(5, 25);
     checkCollection(list, ap(1, 0, 10));
-    assertEquals(1, list.getChangeCount());
+    assertEquals(0, list.getChangeCount());
   }
 
   public void testSet() {
@@ -90,7 +94,7 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     for (int i = 0; i < 10; i++) {
       list.set(i, 100);
       checkCollectionM(list, ap(100, 0, i + 1), ap(0, 0, 9 -i));
-      assertEquals(i == 9 ? 1 : 2, list.getChangeCount());
+      assertEquals(i == 9 ? 0 : 1, list.getChangeCount());
     }
     list.clear();
     list.addAll(ap(1, 0, 10));
@@ -98,7 +102,7 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     list.addAll(ap(1, 0, 10));
     list.setRange(5, 25, 1);
     checkCollection(list, ap(1, 0, 30));
-    assertEquals(1, list.getChangeCount());
+    assertEquals(0, list.getChangeCount());
 
     list.clear();
     list.add(0);
@@ -124,7 +128,7 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     checkCollection(list, 0, 1);
     list.set(0, 1);
     checkCollection(list, 1, 1);
-    assertEquals(1, list.getChangeCount());
+    assertEquals(0, list.getChangeCount());
     list.set(0, 2);
     checkCollection(list, 2, 1);
     list.set(0, 0);
@@ -162,6 +166,24 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     }
   }
 
+  public void testSetBySort0() {
+    int s = 5;
+    list.addAll(LongCollections.repeat(0, s));
+    list.addAll(LongCollections.repeat(1, s));
+//    list.swap(0, 1);
+    list.setRange(0, 1, 0);
+    assertEquals(1, list.getChangeCount());
+    checkCollection(list.subList(0, s), ap(0, 0, s));
+    list.setRange(1, 2, 0);
+    assertEquals(1, list.getChangeCount());
+    checkCollection(list.subList(0, s), ap(0, 0, s));
+    list.swap(0, 1);
+    checkCollection(list.subList(0, s), ap(0, 0, s));
+    checkCollection(list.subList(s, s * 2), ap(1, 0, s));
+    assertEquals(1, list.getChangeCount());
+  }
+
+
   public void testSetBySort() {
     for (int i = 0; i < 100; i++) {
       list.add(0);
@@ -171,10 +193,6 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     checkCollection(list.subList(0, 100), ap(0, 0, 100));
     checkCollection(list.subList(100, 200), ap(1, 0, 100));
     assertEquals(1, list.getChangeCount());
-  }
-
-  private SameValuesLongList create() {
-    return new SameValuesLongList();
   }
 
   @Override
@@ -240,4 +258,41 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     expected = generateRandomLongArray(100, false);
 //    CHECK.order(expected, SameValuesLongList.create(expected));
   }
+
+  public void testRemoveFromBeginning() {
+    list = SameValuesLongList.create(LongArray.create(0, 1, 2));
+    LongArray expected = LongArray.create(-1, 0, 1, 2);
+    list = SameValuesLongList.create(expected);
+    list.removeAt(0);
+    expected.removeAt(0);
+    CHECK.order(expected, list);
+  }
+
+  public void testCreateSimple() {
+    int count = 4;
+    LongArray values = LongArray.create(0, 2, 4);
+    LongArray expected = new LongArray(values.size() * count);
+    for (int i = 0; i < values.size(); i++) {
+      expected.addAll(LongCollections.repeat(values.get(i), count));
+    }
+    list = SameValuesLongList.create(values, IntCollections.repeat(4, values.size()));
+    CHECK.order(expected, list);
+    list.setRange(0, 1, 1);
+    expected.setRange(0, 1, 1);
+    CHECK.order(expected, list);
+
+    list.setRange(1, 2, 1);
+    expected.setRange(1, 2, 1);
+    CHECK.order(expected, list);
+  }
+
+  public void testIntLongMap() {
+    IntLongMap map = new IntLongMap();
+    map.insertAt(0, 5, 10);
+    IntLongMap.ConsistencyViolatingMutator m = map.startMutation();
+    m.commit();
+    assertEquals(5, map.getKeyAt(0));
+    assertEquals(10, map.getValueAt(0));
+  }
+
 }

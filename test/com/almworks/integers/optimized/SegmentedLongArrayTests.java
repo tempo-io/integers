@@ -1,11 +1,12 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
-import com.almworks.integers.func.LongFunction;
 import com.almworks.integers.util.IntegersDebug;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.almworks.integers.LongIterators.concat;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -282,16 +283,45 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
     array.addAll(0);
     LongList repeat1 = LongCollections.repeat(1, 1040);
     array.addAll(repeat1);
-    CHECK.order(array.iterator(), LongCollections.concatIterables(LongArray.create(0), repeat1));
+    CHECK.order(array.iterator(), concat(LongArray.create(0), repeat1));
   }
 
-  public void test() {
-    int j = 0;
-    for (int i = 0; i < 20; i++) {
-      if (i == 15) {
-        i += 0;
-      }
-      array.insert(0, i);
-    }
+  public void testMoveAndSet() {
+    LongArray expected = new LongArray(LongProgression.arithmetic(0, 1050));
+    array.addAll(expected);
+    WritableLongListIterator it = array.iterator();
+    it.move(1049);
+    assertEquals(1048, it.value());
+    it.remove();
+    assertEquals(1049, it.nextValue());
+
+
+    it.set(-48, -1000);
+    assertEquals(-1000, array.get(1000));
+    it.set(-48, 1000);
+
+    it.move(-49);
+    assertEquals(1000, it.nextValue());
+    assertEquals(1030, it.get(30));
+    it.set(30, -1030);
+    assertEquals(-1030, array.get(1030));
+    it.set(30, 1030);
+
+    it.move(30);
+    assertEquals(1000, it.get(-30));
+
+    expected.removeLast();
+    expected.removeLast();
+    expected.add(1049);
+    CHECK.order(expected, array);
+  }
+
+  public void testInserts3() {
+    LongArray expected = new LongArray(ap(0, 1, 10));
+    array.addAll(ap(0, 1, 10));
+    array.insertMultiple(3, 100, 5);
+    expected.insertMultiple(3, 100, 5);
+
+    CHECK.order(expected, array);
   }
 }

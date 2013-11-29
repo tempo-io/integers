@@ -23,9 +23,9 @@ public class LongSubListTests extends LongListChecker {
   @Override
   protected List<? extends LongList> createLongListVariants(long... values) {
     final int length = values.length;
+    List<LongList> result = new ArrayList<LongList>(4);
 
     // [...]
-    List<LongList> result = new ArrayList<LongList>(4);
     result.add(new AbstractLongList.SubList(LongArray.create(values), 0, length));
 
     // ~[...]

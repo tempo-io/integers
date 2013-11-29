@@ -16,15 +16,14 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.optimized.SameValuesLongList;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * class for test {@code LongList} implementation.
- * @see com.almworks.integers.AbstractIntList.SubList
- */
+ * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
+ * */
 public abstract class LongListChecker extends IntegersFixture {
   /**
    * @return list of different representations of LongList's with the specified values.
@@ -147,6 +146,38 @@ public abstract class LongListChecker extends IntegersFixture {
     });
   }
 
+  public void testIteratorMove() {
+    LongArray res = new LongArray(ap(1, 2, 10));
+    for (LongList list: createLongListVariants(ap(1, 2, 10))) {
+      LongListIterator it = list.iterator();
+      assertFalse(it.hasValue());
+      try {
+        it.value();
+        fail();
+      } catch (NoSuchElementException ex) {}
+      it.move(1);
+      assertEquals(0, it.index());
+      assertEquals(res.get(0), it.value());
+      assertEquals(res.get(1), it.nextValue());
+      assertEquals(1, it.index());
+      assertEquals(res.get(0), it.get(-1));
+      assertEquals(res.get(9), it.get(8));
+      try {
+        it.move(-2);
+        fail();
+      } catch (NoSuchElementException ex) {}
+
+      it.move(3);
+//      it.next();
+      assertEquals(4, it.index());
+      assertEquals(res.get(4), it.value());
+      assertEquals(res.get(4), it.get(0));
+      it.move(-1);
+      assertEquals(3, it.index());
+      assertEquals(res.get(4), it.get(1));
+      assertEquals(res.get(4), it.nextValue());
+    }
+  }
 
   public void testGet() {
     for (int attempt = 0; attempt < 10; attempt++) {

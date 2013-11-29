@@ -1,14 +1,42 @@
 package com.almworks.integers.optimized;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongProgression;
+import com.almworks.integers.*;
 
-public class CyclicLongQueueTests extends IntegersFixture {
-  private final CyclicLongQueue myArray = new CyclicLongQueue(5);
+import java.util.ArrayList;
+import java.util.List;
+
+public class CyclicLongQueueTests extends LongListChecker {
+  private CyclicLongQueue myArray = new CyclicLongQueue(5);
 
   public void setUp() throws Exception {
     super.setUp();
-    myArray.clear();
+    myArray = new CyclicLongQueue(5);
+  }
+
+  @Override
+  protected List<? extends LongList> createLongListVariants(long... values) {
+    List<CyclicLongQueue> res = new ArrayList<CyclicLongQueue>();
+
+    CyclicLongQueue queue = new CyclicLongQueue(values.length);
+    queue.addAll(values);
+    res.add(queue);
+
+    int count = values.length / 2;
+    LongArray randomArray = generateRandomLongArray(count, false);
+
+    queue = new CyclicLongQueue(values.length);
+    queue.addAll(randomArray);
+    queue.removeFirst(count);
+    queue.addAll(values);
+    res.add(queue);
+
+    queue = new CyclicLongQueue(values.length * 2);
+    queue.addAll(randomArray);
+    queue.addAll(values);
+    queue.removeFirst(count);
+    res.add(queue);
+
+    return res;
   }
 
   public void testGrow() {
@@ -16,6 +44,7 @@ public class CyclicLongQueueTests extends IntegersFixture {
     myArray.add(10);
     assertEquals(1, myArray.size());
     assertEquals(10, myArray.get(0));
+    assertEquals(10, myArray.peek());
     for (int i = 1; i < 5; ++i) {
       myArray.add(10 + i);
     }
@@ -44,6 +73,7 @@ public class CyclicLongQueueTests extends IntegersFixture {
     assertEquals(10, myArray.removeFirst());
     assertEquals(11, myArray.removeFirst());
     assertEquals(12, myArray.get(0));
+    assertEquals(12, myArray.peek());
     assertEquals(1, myArray.size());
     for (int i = 0; i < 4; ++i) {
       myArray.add(20 + i);
@@ -73,40 +103,13 @@ public class CyclicLongQueueTests extends IntegersFixture {
           myArray.add(next);
           next += 1;
         } else if (min < next) {
-          assertEquals(msg, min, myArray.removeFirst());
+          assertEquals(msg + " i=" + i, min, myArray.removeFirst());
           min += 1;
         }
         assertEquals(msg + " i=" + i, next - min, myArray.size());
       }
       CHECK.order(LongProgression.arithmetic(min, next - min), myArray); // fix msg
     }
-  }
-
-  public void testBinSearch() {
-    for (int i = 0; i < 5; ++i) {
-      myArray.add(10 + i*2);
-    }
-    for (int i = 0; i < 3; ++i) {
-      myArray.removeFirst();
-    }
-    for (int i = 5; i < 8; ++i) {
-      myArray.add(10 + i*2);
-    }
-    CHECK.order(myArray, 16, 18, 20, 22, 24);
-    assertEquals(0, myArray.binarySearch(16));
-    assertEquals(1, myArray.binarySearch(18));
-    assertEquals(2, myArray.binarySearch(20));
-    assertEquals(3, myArray.binarySearch(22));
-    assertEquals(4, myArray.binarySearch(24));
-    assertEquals(-1, myArray.binarySearch(10));
-    assertEquals(-1, myArray.binarySearch(14));
-    assertEquals(-1, myArray.binarySearch(15));
-    assertEquals(-2, myArray.binarySearch(17));
-    assertEquals(-3, myArray.binarySearch(19));
-    assertEquals(-4, myArray.binarySearch(21));
-    assertEquals(-5, myArray.binarySearch(23));
-    assertEquals(-6, myArray.binarySearch(25));
-    assertEquals(-6, myArray.binarySearch(27));
   }
 
   public void testPinnedIterator() {
@@ -126,6 +129,7 @@ public class CyclicLongQueueTests extends IntegersFixture {
     } catch (IllegalStateException expected) {}
     assertEquals(11, it.value());
     assertEquals(11, myArray.get(0));
+    assertEquals(11, myArray.peek());
 
     assertEquals(12, it.nextValue());
 
@@ -202,33 +206,44 @@ public class CyclicLongQueueTests extends IntegersFixture {
   }
 
   public void testCheckToStringWithPiterators() {
-    CyclicLongQueue clq = new CyclicLongQueue(5);
+    CyclicLongQueue clq = new CyclicLongQueue();
 
     clq.addAll(10, 11, 12, 13, 14);
-    assertEquals("(10, 11, 12, 13, 14)", clq.toStringWithPiterators().toString());
+    assertEquals("(10, 11, 12, 13, 14)", clq.toStringWithPiterators());
 
     CyclicLongQueue.PinnedIterator i1 = clq.pinnedIterator().next();
     CyclicLongQueue.PinnedIterator i2 = clq.pinnedIterator().next().next().next();
     CyclicLongQueue.PinnedIterator i3 = clq.pinnedIterator().next().next().next().next().next();
-    assertEquals("(10*, 11, 12*, 13, 14*)", clq.toStringWithPiterators().toString());
+    assertEquals("(10*, 11, 12*, 13, 14*)", clq.toStringWithPiterators());
 
     clq.detach(i1);
     clq.removeFirst(2);
     clq.addAll(15, 16);
-    assertEquals("(12*, 13, 14*, 15, 16)", clq.toStringWithPiterators().toString());
+    assertEquals("(12*, 13, 14*, 15, 16)", clq.toStringWithPiterators());
 
     clq.addAll(LongProgression.arithmetic(17, 10, 1));
     i3.next().next().next().next().next();
-    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators().toString());
+    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators());
 
     CyclicLongQueue.PinnedIterator i4 = clq.pinnedIterator();
     for (int i = 0; i < 7; ++i) i4.next();
-    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 18*, 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators().toString());
+    assertEquals("[15] (12*, 13, 14, 15, 16, ..., 18*, 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators());
 
     CyclicLongQueue.PinnedIterator i5 = clq.pinnedIterator();
     CyclicLongQueue.PinnedIterator i6 = clq.pinnedIterator();
     for (int i = 0; i < 6; ++i) i5.next();
     for (int i = 0; i < 10; ++i) i6.next();
-    assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 21*, 22, 23, 24, 25, 26)", clq.toStringWithPiterators().toString());
+    assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 21*, 22, 23, 24, 25, 26)", clq.toStringWithPiterators());
+
+    clq = new CyclicLongQueue(11);
+    clq.addAll(ap(0, 1, 11));
+    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", clq.toStringWithPiterators());
+    CyclicLongQueue.PinnedIterator it = clq.pinnedIterator(5);
+    assertEquals("[11] (0, 1, 2, 3, 4, 5*, 6, 7, 8, 9, 10)", clq.toStringWithPiterators());
+
+    clq.removeFirst(5);
+    clq.addAll(11, 12, 13);
+    clq.pinnedIterator(8);
+    assertEquals("(5*, 6, 7, 8, 9, 10, 11*, 12, 13)", clq.toStringWithPiterators());
   }
 }

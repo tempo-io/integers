@@ -19,6 +19,7 @@ package com.almworks.integers.util;
 import com.almworks.integers.LongArray;
 import com.almworks.integers.LongList;
 import com.almworks.integers.LongListChecker;
+import com.almworks.integers.optimized.SegmentedLongArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,5 +89,29 @@ public class LongListConcatenationTests extends LongListChecker {
     }
 
     CHECK.order(LongArray.create(5, 4, 3, 2).iterator(), res.iterator(0, 4));
+  }
+
+  public void testSimple() {
+    LongArray myArray = new LongArray();
+    LongListConcatenation concat = new LongListConcatenation();
+    assertEquals(0, concat.getSliceCount());
+    checkCollection(concat);
+    concat.addSlice(LongList.EMPTY);
+    assertEquals(1, concat.getSliceCount());
+    checkCollection(concat);
+    concat.addSlice(myArray);
+    checkCollection(concat);
+    myArray.add(1);
+    checkCollection(concat, 1);
+    concat.addSlice(LongList.EMPTY);
+    checkCollection(concat, 1);
+    SegmentedLongArray segarray = new SegmentedLongArray();
+    concat.addSlice(segarray);
+    concat.addSlice(LongList.EMPTY);
+    checkCollection(concat, 1);
+    segarray.add(3);
+    checkCollection(concat, 1, 3);
+    myArray.add(2);
+    checkCollection(concat, 1, 2, 3);
   }
 }

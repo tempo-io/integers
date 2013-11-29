@@ -5,7 +5,11 @@ import com.almworks.integers.func.LongFunctions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+/**
+ * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
+ * */
 public abstract class WritableLongListChecker extends LongListChecker {
 
   @Override
@@ -21,35 +25,78 @@ public abstract class WritableLongListChecker extends LongListChecker {
 
   public void testAdd() {
     for (WritableLongList list: empty()) {
-      list.addAll(0, 1, 2);
-      CHECK.order(LongArray.create(0, 1, 2), list);
+      for (int j = 0; j < 2; j++) {
 
-      list.addAll(LongArray.create(3, 4, 5, 6));
-      CHECK.order(LongArray.create(0, 1, 2, 3, 4, 5, 6), list);
+        list.addAll(0, 1, 2);
+        CHECK.order(LongArray.create(0, 1, 2), list);
 
-      list.insert(3, 100);
-      CHECK.order(LongArray.create(0, 1, 2, 100, 3, 4, 5, 6), list);
+        list.addAll(LongArray.create(3, 4, 5, 6));
+        CHECK.order(LongArray.create(0, 1, 2, 3, 4, 5, 6), list);
 
-      list.insertMultiple(1, -1, 3);
-      CHECK.order(LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6), list);
+        list.insert(3, 100);
+        CHECK.order(LongArray.create(0, 1, 2, 100, 3, 4, 5, 6), list);
 
-      list.clear();
-      assertEquals(0, list.size());
-      CHECK.order(list);
+        list.insertMultiple(1, -1, 3);
+        CHECK.order(LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6), list);
 
-      list.add(0);
-      CHECK.order(list, 0);
+        list.clear();
+        assertEquals(0, list.size());
+        CHECK.order(list);
 
-      list.add(0);
-      checkCollection(list, 0, 0);
-      list.clear();
-      for (int i = 0; i < 100; i++) {
-        list.add(i);
-        checkCollection(list, ap(0, 1, i + 1));
+        list.add(0);
+        CHECK.order(list, 0);
+
+        list.add(0);
+        checkCollection(list, 0, 0);
+        list.clear();
+        for (int i = 0; i < 100; i++) {
+          list.add(i);
+          checkCollection(list, ap(0, 1, i + 1));
+        }
+        list.addAll(list);
+        checkCollection(list.subList(0, 100), ap(0, 1, 100));
+        checkCollection(list.subList(100, 200), ap(0, 1, 100));
+        list.clear();
       }
-      list.addAll(list);
-      checkCollection(list.subList(0, 100), ap(0, 1, 100));
-      checkCollection(list.subList(100, 200), ap(0, 1, 100));
+    }
+  }
+
+  public void testAddSorted() {
+    LongArray expected = LongArray.create(0, 10, 20, 30, 40);
+    LongArray values = new LongArray(expected.size() * 3);
+    for (int i = 0; i < expected.size(); i++) {
+      values.addAll(expected.get(i) - 1, expected.get(i), expected.get(i) + 1);
+    }
+    for (WritableLongList list:
+        createWritableLongListVariants(expected.toNativeArray())) {
+      for (int i = 0; i < values.size(); i++) {
+        long value = values.get(i);
+        switch (i % 3) {
+          case 0: {
+            int index = i / 3;
+            assertTrue(list.addSorted(value));
+            expected.insert(index, value);
+            CHECK.order(expected, list);
+            expected.removeAt(index);
+            list.removeAt(index);
+            break;
+          }
+          case 1: {
+            assertFalse(list.addSorted(value));
+            CHECK.order(expected, list);
+            break;
+          }
+          case 2: {
+            assertTrue(list.addSorted(value));
+            int index = (i + 1) / 3;
+            expected.insert(index, value);
+            CHECK.order(expected, list);
+            expected.removeAt(index);
+            list.removeAt(index);
+            break;
+          }
+        }
+      }
     }
   }
 
@@ -97,7 +144,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
 
   public void testRemove() {
     for (WritableLongList list:
-        createWritableLongListVariants(ap(0, 1, 10))) {
+        createWritableLongListVariants(ap(1, 1, 10))) {
       checkCollection(list, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
       list.remove(5);
       checkCollection(list, 1, 2, 3, 4, 6, 7, 8, 9, 10);
@@ -203,7 +250,6 @@ public abstract class WritableLongListChecker extends LongListChecker {
 
   public void testBoundary() {
     for (WritableLongList list: empty()) {
-      assertEquals(0, list.size());
       list.apply(0, 0, null);
       list.clear();
       try {
@@ -246,6 +292,20 @@ public abstract class WritableLongListChecker extends LongListChecker {
     }
   }
 
+  public void testInsertException() {
+    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
+      try {
+        list.insert(-1, 10);
+        fail();
+      } catch (IndexOutOfBoundsException ex) {}
+
+      try {
+        list.insert(15, 10);
+        fail();
+      } catch (IndexOutOfBoundsException ex) {}
+    }
+  }
+
   public void testRemoves() {
     for (WritableLongList list: empty()) {
       for (int i = 0; i < 10000; i++)
@@ -273,13 +333,53 @@ public abstract class WritableLongListChecker extends LongListChecker {
   }
 
   public void testIteratorRemove2() {
-    for (WritableLongList list: empty()) {
-      list.addAll(1, 1, 1, 2, 2, 3, 3, 3);
-      WritableLongListIterator i = list.iterator();
-      i.next().next().next().next();
-      assertEquals(2, i.value());
-      i.remove();
-      assertEquals(2, i.nextValue());
+    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
+      WritableLongListIterator it = list.iterator();
+      it.next().next().next().next();
+      assertEquals(3, it.value());
+      it.remove();
+      assertEquals(4, it.nextValue());
+    }
+  }
+
+  public void testIteratorRemove3() {
+    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
+      WritableLongListIterator it = list.iterator();
+      it.next().next();
+      it.remove();
+      assertEquals(2, it.nextValue());
+
+      it.move(7);
+      assertEquals(9, it.value());
+      it.remove();
+      CHECK.order(list, 0, 2, 3, 4, 5, 6, 7, 8);
+    }
+  }
+
+  public void testIteratorIndex() {
+    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
+      WritableLongListIterator it = list.iterator();
+      try {
+        it.index();
+        fail();
+      } catch (NoSuchElementException ex) {}
+
+      int index = 0;
+      while (it.hasNext()) {
+        it.next();
+        assertEquals(index++, it.index());
+      }
+      index--;
+      while (index != 0) {
+        assertEquals(index--, it.index());
+        it.move(-1);
+      }
+
+      it.remove();
+      try {
+        it.index();
+        fail();
+      } catch (IllegalStateException ex) {}
     }
   }
 
@@ -493,45 +593,29 @@ public abstract class WritableLongListChecker extends LongListChecker {
     }
   }
 
-  public void testSortByFirstThenBySecond() {
-    int arSize = 1000;
-    for (WritableLongList list:
-        createWritableLongListVariants(generateRandomLongArray(arSize, false, arSize).extractHostArray())) {
-
-      WritableLongList[] lists = new WritableLongList[2];
-      lists[0] = list;
-      lists[1] = createWritableLongListVariants(
-          generateRandomLongArray(arSize, false, arSize).extractHostArray()).get(0);
-
-      LongArray expected = new LongArray();
-      for (int i = 0; i < arSize; i++) {
-        expected.add(arSize * lists[0].get(i) + lists[1].get(i));
-      }
-      expected.sort();
-
-      lists[0].sortByFirstThenBySecond(lists[1]);
-      LongArray actual = new LongArray();
-      for (int i = 0; i < arSize; i++) {
-        actual.add(arSize * lists[0].get(i) + lists[1].get(i));
-      }
-      CHECK.order(expected, actual);
-    }
-  }
-
   public void testExpandException() {
     for (int size = 0; size < 5; size++) {
       for (WritableLongList list: createWritableLongListVariants(
           LongCollections.repeat(10, size).toNativeArray())) {
         try {
-          list.expand(list.size() + 1, 5);
+          list.expand(list.size() + 1, 0);
           fail();
         } catch (IndexOutOfBoundsException ex) {}
 
         try {
-          list.expand(-1, 3);
+          list.expand(-1, 0);
           fail();
-        } catch (IndexOutOfBoundsException ex) { }
+        } catch (IndexOutOfBoundsException ex) {}
 
+        try {
+          list.expand(0, -10);
+          fail();
+        } catch (IllegalArgumentException ex) {}
+
+        if (size > 0) {
+          list.expand(1, 0);
+          CHECK.order(LongCollections.repeat(10, size), list);
+        }
       }
     }
   }

@@ -30,7 +30,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     // [...]
     LongArray array = LongArray.copy(values);
     res.add(new LongListInsertingDecorator(array));
-    if (array.size() == 0) return res;
+    if (array.isEmpty()) return res;
 
     // [...]~
     array = LongArray.copy(array);
@@ -173,5 +173,26 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     for (int i = 0; i < expected.size(); i++) {
       assertEquals(it.get(-i), expIt.get(-i));
     }
+  }
+
+  public void testSimple() {
+    LongArray source = LongArray.create(ap(0, 10, 7));
+    LongListInsertingDecorator tst = new LongListInsertingDecorator(source, new IntLongMap());
+    tst.insert(5, 45);
+    tst.insert(3, 25);
+    tst.insert(4, 28);
+    LongArray expected = new LongArray(tst);
+//    System.out.println(tst);
+
+    LongListIterator it = tst.iterator();
+    LongListIterator expIt = expected.iterator();
+
+    it.next().next().next();
+    expIt.next().next().next();
+
+    assertEquals(expIt.value(), it.value());
+    it.move(-2);
+    expIt.move(-2);
+    assertEquals(expIt.value(), it.value());
   }
 }
