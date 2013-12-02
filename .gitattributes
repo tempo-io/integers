@@ -28,6 +28,7 @@ ant/build.xml -text
 dev/com/almworks/integers/AbstractIntIterator.java -text
 dev/com/almworks/integers/AbstractIntList.java -text
 dev/com/almworks/integers/AbstractIntListIndexIterator.java -text
+dev/com/almworks/integers/AbstractLongCollector.java -text
 dev/com/almworks/integers/AbstractLongIterator.java -text
 dev/com/almworks/integers/AbstractLongIteratorWithFlag.java -text
 dev/com/almworks/integers/AbstractLongList.java -text
@@ -61,7 +62,6 @@ dev/com/almworks/integers/LongArray.java -text
 dev/com/almworks/integers/LongArrayIterator.java -text
 dev/com/almworks/integers/LongCollections.java -text
 dev/com/almworks/integers/LongCollector.java -text
-dev/com/almworks/integers/LongCollectorAdapter.java -text
 dev/com/almworks/integers/LongIterable.java -text
 dev/com/almworks/integers/LongIterables.java -text
 dev/com/almworks/integers/LongIterator.java -text

@@ -7,6 +7,10 @@ ant.taskdef (  name : 'groovyc' , classname : 'org.codehaus.groovy.ant.Groovyc' 
 isDirty = ant.project.properties["dirty"] != null;
 dirtyString = isDirty ? "dirty " : "";
 
+// run "gant -Dcheck"
+isCheck = ant.project.properties["check"] != null;
+checkString = isDirty ? "check " : "";
+
 final String antProp(String it) {
     prop = ant.project.properties[it] as String
     if (prop == null) ant.fail("missing property: $it")
@@ -203,7 +207,7 @@ target(name: 'test') {
             fileset(dir: testsClassesDir, includes: "**/*Test.class")
             fileset(dir: testsClassesDir, includes: "**/*Tests.class")
         }
-        jvmarg(value: "-Dcom.almworks.integers.check=true")
+        jvmarg(value: "-Dcom.almworks.integers.check=" + (isCheck ? "true" : "false"))
     }
     almMessage "${dirtyString}tests succeeded"
 }

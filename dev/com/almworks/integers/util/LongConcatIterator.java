@@ -25,43 +25,26 @@ import java.util.Iterator;
 import java.util.List;
 
 public class LongConcatIterator extends FindingLongIterator implements LongIterator {
-  private LongIterator myCurIt = LongIterator.EMPTY;
-  private boolean myEnded = false;
-  private Iterator<LongIterable> itIt;
+  private final LongIterable[] iterables;
+  int curItNum = 0;
+  LongIterator curIt = LongIterator.EMPTY;
+  boolean myEnded = false;
 
-  public LongConcatIterator(@NotNull List<LongIterable> iterables) {
-    if (iterables.size() == 0) {
-      myEnded = true;
-    } else {
-      itIt = iterables.iterator();
-    }
-  }
-
-  public LongConcatIterator(@NotNull LongIterable ... iterables) {
-    this(Arrays.asList(iterables));
-  }
-
-  private boolean checkCurIterator() {
-    if (myCurIt.hasNext()) {
-      myCurrent = myCurIt.nextValue();
-      return true;
-    }
-    return false;
+  public LongConcatIterator(LongIterable ... iterables) {
+    this.iterables = iterables;
   }
 
   protected boolean findNext() {
-    if (checkCurIterator()) return true;
     if (myEnded) return false;
-    if (!myCurIt.hasNext()) {
-      while (itIt.hasNext() && !myCurIt.hasNext()) {
-        myCurIt = itIt.next().iterator();
-      }
+    while (!curIt.hasNext() && curItNum < iterables.length) {
+      curIt = iterables[curItNum++].iterator();
     }
-    if (checkCurIterator()) {
+
+    if (curIt.hasNext()) {
+      myCurrent = curIt.nextValue();
       return true;
-    } else {
-      myEnded = true;
-      return false;
     }
+    myEnded = true;
+    return false;
   }
 }

@@ -614,4 +614,33 @@ public class IntCollections {
       }
     };
   }
+
+  public static IntIterator range(final int start, final int stop, final int step) {
+    return new AbstractIntIterator() {
+      int cur = start - step;
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return cur + step < stop;
+      }
+
+      @Override
+      public int value() throws NoSuchElementException {
+        return cur;
+      }
+
+      @Override
+      public IntIterator next() {
+        cur += step;
+        return this;
+      }
+    };
+  }
+
+  public static IntIterator range(int start, int stop) {
+    return range(start, stop, 1);
+  }
+
+  public static IntIterator range(int stop) {
+    return range(0, stop, 1);
+  }
 }

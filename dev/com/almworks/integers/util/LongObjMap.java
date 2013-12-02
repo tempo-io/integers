@@ -65,7 +65,7 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   /**
    * Puts the element for the specified key.
    *
-   * @return if the key was already present in the map, returns the previously stored value. Otherwise, returns null.
+   * @return the previously stored value if the key was already present in the map, Otherwise, null.
    */
   @Nullable
   public E put(long key, @NonNls @Nullable E value) {
@@ -154,8 +154,8 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   /**
    * Returns a unique sorted {@link LongList} view of the keys contained in this map.
    * The collection is backed by the map, so changes to the map are
-   * reflected in the keySet. Unlike of {@link java.util.Map#keySet()},
-   * {@link com.almworks.integers.util.LongObjMap#keySet()} return read-only list.
+   * reflected in the keySet. Unlike {@link java.util.Map#keySet()},
+   * {@link com.almworks.integers.util.LongObjMap#keySet()} returns read-only list.
    *
    * @return LongList of the values contained in this map
    * */
@@ -208,7 +208,7 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
     }
 
     /**
-     * @see ListIterator#remove
+     * @see #remove
      */
     @Override
     public void remove() {

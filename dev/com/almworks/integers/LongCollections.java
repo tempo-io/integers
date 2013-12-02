@@ -27,12 +27,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
-import static com.almworks.integers.IntegersUtils.arrayCopy;
 
 public class LongCollections {
   public static long[] toNativeArray(LongIterable iterable) {
@@ -44,14 +42,7 @@ public class LongCollections {
       assert res.length == sized.size();
       return res;
     }
-    return toNativeArray(iterable.iterator());
-  }
-
-  public static long[] toNativeArray(LongIterator it) {
-    if (!it.hasNext()) return EMPTY_LONGS;
-    LongArray array = new LongArray();
-    array.addAll(it);
-    return array.toNativeArray();
+    return collectIterables(iterable).toNativeArray();
   }
 
   public static long[] toSortedNativeArray(LongIterable iterable) {
@@ -163,6 +154,7 @@ public class LongCollections {
     return binarySearch(val, array, 0, array.length);
   }
 
+  // todo optimize - check borders
   /**
    * Copied from Arrays.
    *
@@ -174,7 +166,7 @@ public class LongCollections {
     int high = to - 1;
 
     while (low <= high) {
-      int mid = (low + high) >> 1;
+      int mid = (low + high) >>> 1;
       long midVal = a[mid];
 
       if (midVal < val)
@@ -398,7 +390,7 @@ public class LongCollections {
    * @param indexes sorted {@code IntList}
    */
   public static void removeAllAtSorted(WritableLongList list, IntList indexes) {
-    if (!indexes.isSorted()) throw new IllegalArgumentException("Indexes are not sorted: " + indexes);
+    assert indexes.isSorted() : "Indexes are not sorted: " + indexes;
     int rangeStart = -1;
     int rangeFinish = -2;
     int diff = 0;
@@ -456,6 +448,9 @@ public class LongCollections {
    */
   public static LongTreeSet intersection(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
+    if (!(first instanceof LongSortedSet)) arrays[0].sort();
+    if (!(second instanceof LongSortedSet)) arrays[1].sort();
+
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].retainSorted(arrays[1 - dest]);
     return LongTreeSet.createFromSortedUnique(arrays[dest]);
@@ -510,8 +505,16 @@ public class LongCollections {
   public static LongList unionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? LongList.EMPTY : bSorted;
     if (bSorted == null || bSorted.isEmpty()) return aSorted;
-    LongUnionIteratorTwo union = new LongUnionIteratorTwo(aSorted.iterator(), bSorted.iterator());
-    return union.hasNext() ? collectIterables(aSorted.size() + bSorted.size(), union) : LongList.EMPTY;
+    LongArray array;
+    LongList list;
+    if (aSorted.size() < bSorted.size()) {
+      array = new LongArray(bSorted);
+      array.merge(aSorted);
+    } else {
+      array = new LongArray(aSorted);
+      array.merge(bSorted);
+    }
+    return array;
   }
 
   /**
@@ -571,8 +574,33 @@ public class LongCollections {
   }
 
   /**
+   * Sorts lists comparing corresponding pairs of the specified arrays.
+   * @param secondary ties in this array are broken via elements of this array. Must not be shorter than {@code this list}
+   * @throws IllegalArgumentException in case the second array is shorter than the first
+   * */
+  public static void sortPairs(final WritableLongList primary, final WritableLongList secondary) throws IllegalArgumentException {
+    if (primary.size() > secondary.size()) throw new IllegalArgumentException("This array is longer than sortAlso: " +
+        primary.size() + " > " + secondary.size());
+    IntegersUtils.quicksort(primary.size(), new IntFunction2() {
+          @Override
+          public int invoke(int i, int j) {
+            int comp = LongCollections.compare(primary.get(i), primary.get(j));
+            if (comp == 0) comp = LongCollections.compare(secondary.get(i), secondary.get(j));
+            return comp;
+          }
+        },
+        new IntProcedure2() {
+          @Override
+          public void invoke(int i, int j) {
+            primary.swap(i, j);
+            secondary.swap(i, j);
+          }
+        });
+  }
+
+  /**
    * @return array with elements from the {@code iterables}.
-   * @see LongCollections#collectIterables(int, LongIterable...)
+   * @see #collectIterables(int, LongIterable...)
    */
   public static LongArray collectIterables(LongIterable ... iterables) {
     return collectIterables(0, iterables);
@@ -597,61 +625,19 @@ public class LongCollections {
     return res;
   }
 
-  public static LongIterator concatIterables(final LongIterable ... iterables) {
-    if (iterables == null || iterables.length == 0) return LongIterator.EMPTY;
-
-    return new FindingLongIterator() {
-      int curItNum = 0;
-      LongIterator curIt = LongIterator.EMPTY;
-      @Override
-      protected boolean findNext() {
-        if (curIt.hasNext()) {
-          myCurrent = curIt.nextValue();
-          return true;
-        }
-
-        // todo remove code duplicate?
-        while (!curIt.hasNext() && curItNum < iterables.length) {
-          curIt = iterables[curItNum++].iterator();
-        }
-
-        if (curIt.hasNext()) {
-          myCurrent = curIt.nextValue();
-          return true;
-        }
-        return false;
-      }
-    };
-  }
-
   /**
-   * @param iterables array of sorted {@code LongIterable}
-   * @return union of iterables.
-   * */
-  public static LongIterator unionIterators(LongIterable ... iterables) {
-    switch (iterables.length) {
-      case 0: return LongIterator.EMPTY;
-      case 1: return iterables[0].iterator();
-      case 2: return LongUnionIteratorTwo.create(iterables[0], iterables[1]);
-      default: return new LongUnionIterator(iterables);
-    }
-  }
-
-  /**
-   * @param iterables array of sorted {@code LongIterable}
-   * @return intersection of iterables.
-   * */
-  public static LongIterator intersectionIterator(LongIterable ... iterables) {
-    return new LongIntersectionIterator(iterables);
-  }
-
+   * Appends to {@code sb} the string representation of {@code iterable}.
+   * String representation - elements from {@code iterable} separated by comma and wrapped in parentheses: "(a, b, c)".
+   * If {@code sb == null} creats new StringBuilder.
+   * @return {@code sb} with appended string representation of iterable
+   */
   @NotNull
-  public static StringBuilder append(@Nullable StringBuilder sb, @Nullable LongIterable i) {
+  public static StringBuilder append(@Nullable StringBuilder sb, @Nullable LongIterable iterable) {
     if (sb == null) sb = new StringBuilder();
-    if (i == null) {
+    if (iterable == null) {
       sb.append("null");
     } else {
-      LongIterator it = i.iterator();
+      LongIterator it = iterable.iterator();
       if (!it.hasNext()) {
         sb.append("()");
       } else {
@@ -669,42 +655,42 @@ public class LongCollections {
     return toBoundedString(iterable, 10);
   }
 
+  /**
+   * Returns the string representation of {@code iterable}, bounded by {@code 2 * lim} elements.
+   * If size of {@code iterable} is less than {@code 2 * lim}, the result string
+   * contains all elements from {@code iterable} separated by comma and wrapped in parentheses: "(a, b, c, d)".<br>
+   * Otherwise result contains size of {@code iterable}, the first {@code lim} elements of {@code iterable} and
+   * the last {@code lim} elements of {@code iterable}.
+   * Example: "[size] (a, b, c, ..., d, e, f)"
+   * if {@code lim == 3} and size of {@code iterable} is more than 6.
+   *
+   * @return the string representation of {@code iterable}, bounded by {@code 2 * lim} elements.
+   */
   public static String toBoundedString(LongIterable iterable, int lim) {
-    if (iterable instanceof LongList) {
-      LongList list = (LongList)iterable;
-      int size = list.size();
-      if (size > lim * 2) {
-        LongListIterator lastElemsIt = list.iterator();
-        lastElemsIt.move(size - lim);
-        return toShortString(size, lim, list.iterator(), lastElemsIt);
-      } else {
-        return append(null, list).toString();
-      }
-    }
     if (iterable instanceof LongSizedIterable) {
       LongSizedIterable sizedIterable = (LongSizedIterable)iterable;
       int size = sizedIterable.size();
       if (size > lim * 2) {
-        LongIterator it = sizedIterable.iterator();
-        LongArray head = new LongArray(lim);
-        head.addAllNotMore(it, lim);
-        for (int i = 0; i < size - lim * 2; i++) {
-          it.next();
+        LongIterator lastElemsIt = sizedIterable.iterator();
+        if (lastElemsIt instanceof LongListIterator) {
+          ((LongListIterator) lastElemsIt).move(size - lim);
+        } else {
+          for (int i = 0; i < size - lim; i++) {
+            lastElemsIt.next();
+          }
         }
-        return toShortString(size, lim, head.iterator(), it);
+        return toShortString(size, lim, iterable.iterator(), lastElemsIt);
       } else {
         return append(null, sizedIterable).toString();
       }
     }
-      return outputIterator(iterable.iterator(), lim);
+    return outputIterator(iterable.iterator(), lim);
   }
 
   private static String outputIterator(LongIterator it, int lim) {
-    int itSize = 0;
     LongArray headValues = new LongArray(lim);
-    for ( ;it.hasNext() && itSize < lim; itSize++) {
-      headValues.add(it.nextValue());
-    }
+    headValues.addAllNotMore(it, lim);
+    int itSize = headValues.size();
 
     CyclicLongQueue tailValues = new CyclicLongQueue(lim);
     for ( int lim2 = lim * 2; it.hasNext() && itSize < lim2; itSize++) {
@@ -712,10 +698,9 @@ public class LongCollections {
     }
 
     if (!it.hasNext()) {
-      headValues.addAll(tailValues);
-      return toBoundedString(headValues);
+      return append(null, LongIterators.concat(headValues, tailValues)).toString();
     } else {
-      // in iterator more than 20 elements
+      // there are more than 2 * lim elements in the iterator
       for ( ; it.hasNext(); itSize++) {
         tailValues.removeFirst();
         tailValues.add(it.nextValue());
@@ -736,33 +721,5 @@ public class LongCollections {
       sb.append(", ").append(tailIt.nextValue());
     }
     return sb.append(")").toString();
-  }
-
-  public static LongIterator range(final long start, final long stop, final long step) {
-    return new AbstractLongIteratorWithFlag() {
-      long cur = start;
-      @Override
-      protected long valueImpl() {
-        return cur;
-      }
-
-      @Override
-      protected void nextImpl() throws NoSuchElementException {
-        if (hasNext()) cur += step;
-      }
-
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return cur < stop;
-      }
-    };
-  }
-
-  public static LongIterator range(long start, long stop) {
-    return range(start, stop, 1);
-  }
-
-  public static LongIterator range(long stop) {
-    return range(0, stop, 1);
   }
 }

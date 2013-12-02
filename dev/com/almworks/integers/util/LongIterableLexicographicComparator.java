@@ -7,7 +7,7 @@ import com.almworks.integers.LongIterator;
 import java.util.Comparator;
 
 public class LongIterableLexicographicComparator implements Comparator<LongIterable> {
-  public static final LongIterableLexicographicComparator INT_ITERABLE_LEXICOGRAPHIC_COMPARATOR = new LongIterableLexicographicComparator();
+  public static final LongIterableLexicographicComparator LONG_ITERABLE_LEXICOGRAPHIC_COMPARATOR = new LongIterableLexicographicComparator();
 
   @Override
   public int compare(LongIterable l1, LongIterable l2) {

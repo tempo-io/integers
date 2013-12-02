@@ -29,8 +29,7 @@ import java.util.NoSuchElementException;
  * These are the iterators that cannot calculate {@link LongIterator#hasValue()}
  * based only on the state. Example: {@link IndexedLongIterator}.
  *
- * <p>Necessary to implement {@link AbstractLongIteratorWithFlag#nextImpl()}, {@link AbstractLongIteratorWithFlag#valueImpl()} and
- * {@link LongIterator#hasNext()}
+ * Instead of implementing {@code next()} and {@code value()}, you'll need to implement {@code nextImpl()} and {@code valueImpl()}, where:
  * <ul>
  * <li>{@link AbstractLongIteratorWithFlag#nextImpl()} is called before any call to
  * {@link AbstractLongIteratorWithFlag#valueImpl()} and should be used to either initialize the
@@ -58,13 +57,13 @@ public abstract class AbstractLongIteratorWithFlag extends AbstractLongIterator 
   }
 
   /**
+   * Called before any call to {@link AbstractLongIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
+   * */
+  protected abstract void nextImpl() throws NoSuchElementException;
+
+  /**
    * Called after any call to {@link AbstractLongIteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
   protected abstract long valueImpl();
-
-  /**
-   * Called before any call to {@link AbstractLongIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
-   * */
-  protected abstract void nextImpl() throws NoSuchElementException;
 }

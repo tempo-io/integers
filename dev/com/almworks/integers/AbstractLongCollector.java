@@ -19,7 +19,7 @@
 
 package com.almworks.integers;
 
-public abstract class LongCollectorAdapter implements LongCollector {
+public abstract class AbstractLongCollector implements LongCollector {
   public void addAll(LongList values) {
     addAll(values.iterator());
   }
