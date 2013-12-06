@@ -29,6 +29,8 @@ public final class IntegersUtils {
   public static final int[] EMPTY_INTS = {};
   public static final long[] EMPTY_LONGS = {};
   public static final short[] EMPTY_SHORTS = {};
+  public static final int MAX_INT = Integer.MAX_VALUE;
+  public static final long MAX_LONG = Long.MAX_VALUE;
 
   /**
    * Returns string's substring that starts after the last occurence of the separator. If separator is not encountered,
@@ -296,6 +298,35 @@ public final class IntegersUtils {
     v |= v >> 32;
     v++;
     return v;
+  }
+
+  /**
+   * MurmurHash3
+   * Hashes a 4-byte sequence (Java int).
+   */
+  public static int rehash(int k)
+  {
+    k ^= k >>> 16;
+    k *= 0x85ebca6b;
+    k ^= k >>> 13;
+    k *= 0xc2b2ae35;
+    k ^= k >>> 16;
+    return k & MAX_INT;
+  }
+
+  /**
+   * MurmurHash3
+   * Hashes an 8-byte sequence (Java long).
+   */
+  public static int rehash(long k)
+  {
+    k ^= k >>> 33;
+    k *= 0xff51afd7ed558ccdL;
+    k ^= k >>> 33;
+    k *= 0xc4ceb9fe1a85ec53L;
+    k ^= k >>> 33;
+
+    return (int)k & MAX_INT;
   }
 
   private IntegersUtils() {}

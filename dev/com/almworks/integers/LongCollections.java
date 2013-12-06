@@ -506,7 +506,6 @@ public class LongCollections {
     if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? LongList.EMPTY : bSorted;
     if (bSorted == null || bSorted.isEmpty()) return aSorted;
     LongArray array;
-    LongList list;
     if (aSorted.size() < bSorted.size()) {
       array = new LongArray(bSorted);
       array.merge(aSorted);
