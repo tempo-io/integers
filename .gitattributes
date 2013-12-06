@@ -34,6 +34,7 @@ dev/com/almworks/integers/AbstractLongIteratorWithFlag.java -text
 dev/com/almworks/integers/AbstractLongList.java -text
 dev/com/almworks/integers/AbstractLongListIndexIterator.java -text
 dev/com/almworks/integers/AbstractWritableIntList.java -text
+dev/com/almworks/integers/AbstractWritableIntLongMap.java -text
 dev/com/almworks/integers/AbstractWritableLongList.java -text
 dev/com/almworks/integers/AbstractWritableLongSet.java -text
 dev/com/almworks/integers/DynamicIntSet.java -text
@@ -55,6 +56,7 @@ dev/com/almworks/integers/IntIterator.java -text
 dev/com/almworks/integers/IntList.java -text
 dev/com/almworks/integers/IntListIterator.java -text
 dev/com/almworks/integers/IntLongMap.java -text
+dev/com/almworks/integers/IntLongMapI.java -text
 dev/com/almworks/integers/IntProgression.java -text
 dev/com/almworks/integers/ListIntMap.java -text
 dev/com/almworks/integers/ListLongMap.java -text
@@ -80,6 +82,7 @@ dev/com/almworks/integers/TwoWayIntMap.java -text
 dev/com/almworks/integers/TwoWayLongMap.java -text
 dev/com/almworks/integers/WritableIntList.java -text
 dev/com/almworks/integers/WritableIntListIterator.java -text
+dev/com/almworks/integers/WritableIntLongMap.java -text
 dev/com/almworks/integers/WritableLongList.java -text
 dev/com/almworks/integers/WritableLongListIterator.java -text
 dev/com/almworks/integers/WritableLongSet.java -text
@@ -142,6 +145,7 @@ dev/com/almworks/integers/util/ReadonlyIntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/SortedIntListIntersectionIterator.java -text
 dev/com/almworks/integers/util/SortedIntListMinusIterator.java -text
 dev/com/almworks/integers/util/WritableLongListRemovingDecorator.java -text
+dev/com/almworks/integers/wrappers/HPPCIntLongOpenHashMap.java -text
 gen/IntegerCollectionsCodegen.java -text
 gen/SkipImportsRegex.groovy -text
 gen/TypeDescriptor.java -text

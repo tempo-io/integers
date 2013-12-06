@@ -19,9 +19,12 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.util.FailFastIntLongIterator;
+import com.almworks.integers.util.IntegersDebug;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class IntLongMap {
+public class IntLongMap extends AbstractWritableIntLongMap {
   private final WritableIntList myKeys;
   private final WritableLongList myValues;
   @Nullable private ConsistencyViolatingMutator myMutator;
@@ -35,10 +38,6 @@ public class IntLongMap {
     this(new IntArray(), new LongArray());
   }
 
-  public boolean isEmpty() {
-    return size() == 0;
-  }
-
   public int size() {
     assert myKeys.size() == myValues.size();
     return myKeys.size();
@@ -50,6 +49,13 @@ public class IntLongMap {
     myValues.clear();
   }
 
+  @Override
+  public long get(int key) {
+    int idx = findKey(key);
+    // todo update default value
+    return (idx >= 0) ? getValueAt(idx) : 0;
+  }
+
   public int findKey(int key) {
     checkMutatorPresence();
     return findKey(key, 0);
@@ -58,6 +64,22 @@ public class IntLongMap {
   public long getValueAt(int index) {
     checkMutatorPresence();
     return myValues.get(index);
+  }
+
+  @Override
+  protected long putImpl(int key, long value) {
+    checkMutatorPresence();
+    int idx = findKey(key);
+    long oldValue = 0;
+    if (idx >= 0) {
+      oldValue = getValueAt(idx);
+      setAt(idx, key, value);
+    } else {
+      idx = -idx - 1;
+      insertAt(idx, key, value);
+    }
+    // todo update default value
+    return oldValue;
   }
 
   public void insertAt(int index, int key, long value) {
@@ -82,14 +104,14 @@ public class IntLongMap {
     int sz = size();
     if (to > sz) throw new IndexOutOfBoundsException(to + " " + this);
     if (from > 0) {
-      int b = getKey(from) + increment;
-      if (getKey(from- 1) >= b)
+      int b = getKeyAt(from) + increment;
+      if (getKeyAt(from - 1) >= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + myKeys.get(from - 1) + " " + b);
     }
     if (to < sz) {
-      int b = getKey(to - 1) + increment;
-      if (getKey(to) <= b)
-        throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
+      int b = getKeyAt(to - 1) + increment;
+      if (getKeyAt(to) <= b)
+        throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKeyAt(to) + " " + b);
     }
     for (WritableIntListIterator it = myKeys.iterator(from, to); it.hasNext();) it.set(0, it.nextValue() + increment);
   }
@@ -101,13 +123,27 @@ public class IntLongMap {
     myKeys.set(index, key);
   }
 
+  @Override
+  protected long removeImpl(int key) {
+    checkMutatorPresence();
+    int idx = findKey(key);
+    // todo update default value
+    if (idx < 0) {
+      return 0;
+    } else {
+      long oldValue = getValueAt(idx);
+      removeRange(idx, idx + 1);
+      return oldValue;
+    }
+  }
+
   public void removeRange(int from, int to) {
     checkMutatorPresence();
     myKeys.removeRange(from, to);
     myValues.removeRange(from, to);
   }
 
-  public int getKey(int index) {
+  public int getKeyAt(int index) {
     checkMutatorPresence();
     return myKeys.get(index);
   }
@@ -127,19 +163,26 @@ public class IntLongMap {
     myValues.set(index, value);
   }
 
-  public PairIntLongIterator iterator() {
-    checkMutatorPresence();
-    return iterator(0, size());
-  }
-
-  public PairIntLongIterator iterator(int from) {
-    checkMutatorPresence();
+  public IntLongIterator iterator(int from) {
     return iterator(from, size());
   }
 
-  public PairIntLongIterator iterator(int from, int to) {
+  public IntLongIterator iterator(int from, int to) {
+    return new FailFastIntLongIterator(iterator1(from, to)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
+  }
+
+  public IntLongIterator iteratorImpl() {
+    return null;
+  }
+
+  protected IntLongIterator iterator1(int from, int to) {
     checkMutatorPresence();
-    return new PairIntLongIterator(myKeys.iterator(from, to), myValues.iterator(from, to));
+    return IntLongIterators.pair(myKeys.iterator(from, to), myValues.iterator(from, to));
   }
 
   public boolean containsKey(int key) {
@@ -147,9 +190,19 @@ public class IntLongMap {
     return findKey(key) >= 0;
   }
 
+  protected IntListIterator keysIteratorImpl() {
+    checkMutatorPresence();
+    return keysIterator(0, size());
+  }
+
   public IntListIterator keysIterator(int from, int to) {
     checkMutatorPresence();
     return myKeys.iterator(from, to);
+  }
+
+  protected LongIterator valuesIteratorImpl() {
+    checkMutatorPresence();
+    return myValues.iterator(0, size());
   }
 
   public LongIterator valuesIterator(int from, int to) {
@@ -169,11 +222,11 @@ public class IntLongMap {
   private boolean checkInvariants() {
     if (myKeys.size() > 0) {
       if (!myKeys.isSorted()) return false;
-      if (myValues.get(0) == 0) return false;
+//      if (myValues.get(0) == 0) return false;
     }
     long currValue;
-    long lastValue = 0;
-    for (LongIterator ii : myValues.iterator()) {
+    long lastValue = myValues.get(0);
+    for (LongIterator ii : myValues.iterator(1)) {
       currValue = ii.value();
       if (currValue == lastValue) return false;
       lastValue = currValue;
@@ -232,7 +285,7 @@ public class IntLongMap {
     }
 
     public void commit() {
-      assert checkInvariants();
+      assert !IntegersDebug.CHECK || checkInvariants();
       IntLongMap.this.myMutator = null;
     }
   }
