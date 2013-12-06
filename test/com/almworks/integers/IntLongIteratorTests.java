@@ -20,16 +20,14 @@ import com.almworks.integers.func.LongFunction;
 
 import java.util.NoSuchElementException;
 
-public class PairIntLongIteratorTests extends IntegersFixture {
-  private IntIterator arr1;
-  private LongIterator arr2;
-  private PairIntLongIterator res;
+public class IntLongIteratorTests extends IntegersFixture {
+  private IntLongIterator res;
 
   public void setUp() throws Exception {
     super.setUp();
-    arr1 = IntArray.create(1, 2, 3, 4, 5).iterator();
-    arr2 = LongArray.create(5, 10, 15, 20, 25).iterator();
-    res = new PairIntLongIterator(arr1,arr2);
+    IntIterator arr1 = IntArray.create(1, 2, 3, 4, 5).iterator();
+    LongIterator arr2 = LongArray.create(5, 10, 15, 20, 25).iterator();
+    res = IntLongIterators.pair(arr1, arr2);
   }
 
   public void testNoSuchElementException(){
@@ -89,7 +87,7 @@ public class PairIntLongIteratorTests extends IntegersFixture {
       }
     });
 
-    res = new PairIntLongIterator(keys.iterator(), values.iterator());
+    res = IntLongIterators.pair(keys.iterator(), values.iterator());
     for (int i = 0; i < 1000; i++) {
       res.next();
       int v1 = res.left();
