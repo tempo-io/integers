@@ -16,13 +16,37 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongIterator;
-import junit.framework.TestCase;
+import com.almworks.integers.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.almworks.integers.LongCollections.collectIterables;
 
 public class LongConcatIteratorTests extends IntegersFixture {
   public LongIterator[] its;
+
+  public void testIteratorSpecification() {
+    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+      @Override
+      public List<LongIterator> get(final long... values) {
+        List<LongIterator> res = new ArrayList<LongIterator>();
+        res.add(new LongConcatIterator(new LongArrayIterator(values)));
+        res.add(new LongConcatIterator(LongIterator.EMPTY, new LongArrayIterator(values)));
+        res.add(new LongConcatIterator(new LongArrayIterator(values), LongIterator.EMPTY));
+        if (values.length < 2) return res;
+
+        LongArray array = new LongArray(values);
+        int size = values.length;
+        res.add(new LongConcatIterator(array.subList(0, size / 2), array.subList(size / 2, size)));
+        res.add(new LongConcatIterator(array.subList(0, size / 2), LongIterator.EMPTY, array.subList(size / 2, size)));
+        if (values.length < 3) return res;
+
+        int s31 = size / 3, s32 = s31 * 2;
+        res.add(new LongConcatIterator(array.subList(0, s31), array.subList(s31, s32), array.subList(s32, size)));
+        return res;
+      }
+    });
+  }
 
   public void inicIts() {
     its = new LongIterator[]{LongIterator.EMPTY,
@@ -68,6 +92,16 @@ public class LongConcatIteratorTests extends IntegersFixture {
         assertEquals(expected.get(i), actual.nextValue());
       }
       assertFalse(actual.hasNext());
+    }
+  }
+
+  public void testRandom() {
+    LongArray[] arrays = new LongArray[5];
+    for (int i = 0; i < 20; i++) {
+      for (int j = 0; j < arrays.length; j++) {
+        arrays[j] = generateRandomLongArray(30, false);
+      }
+      CHECK.order(collectIterables(300, arrays).iterator(), LongIterators.concat(arrays));
     }
   }
 }

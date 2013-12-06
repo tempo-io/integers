@@ -29,7 +29,7 @@ public class LongIntersectionIteratorTests extends IntegersFixture {
     List<LongArray> list = new ArrayList<LongArray>();
     list.add(LongArray.create(1, 2, 5, 10, 20));
     list.add(LongArray.create(1, 5, 21, 30, 40));
-    LongArray intersection = new LongArray(LongIntersectionIterator.create(list));
+    LongArray intersection = new LongArray(new LongIntersectionIterator(list));
     CHECK.order(intersection, 1, 5);
   }
 

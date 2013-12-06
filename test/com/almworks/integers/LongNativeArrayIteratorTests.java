@@ -19,28 +19,38 @@ package com.almworks.integers;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LongArrayIteratorTests extends LongListChecker {
-  private static LongArray arr;
-  private static WritableLongListIterator iter;
+public class LongNativeArrayIteratorTests extends IntegersFixture {
+//  private static LongArray arr;
+  private static LongListIterator iter;
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
-    List<LongList> res = new ArrayList<LongList>(3);
-    res.add(LongArray.copy(values));
-    LongArray ar = LongArray.copy(values);
-    ar.add(0);
-    ar.removeLast();
-    res.add(ar);
-    ar = new LongArray(values.length + values.length/2);
-    ar.addAll(values);
-    res.add(ar);
-    return res;
+  protected void setUp() throws Exception {
+    long[] nArray = {0, 1, 2, 3, 4, 5};
+    iter = new LongArrayIterator(nArray);
+    super.setUp();
   }
 
-  public void setUp() throws Exception {
-    super.setUp();
-    arr = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    iter = arr.iterator();
+  public void testIteratorSpecification() {
+    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+      @Override
+      public List<LongIterator> get(long... values) {
+        List<LongIterator> res = new ArrayList<LongIterator>();
+        res.add(new LongArrayIterator(values));
+        int length = values.length;
+        long[] values2 = LongCollections.ensureCapacity(values, length * 2);
+        for (int i = length; i < length * 2; i++) {
+          values2[i] = RAND.nextLong();
+        }
+        res.add(new LongArrayIterator(values2, 0, length));
+
+        LongArray arr = new LongArray(length * 2);
+        arr.addAll(generateRandomLongArray(length, false));
+        arr.addAll(values);
+        res.add(new LongArrayIterator(arr.extractHostArray(), length, length * 2));
+
+        return res;
+      }
+    });
   }
 
   public void testCreate() throws Exception {
@@ -69,15 +79,12 @@ public class LongArrayIteratorTests extends LongListChecker {
   }
 
   public void testGetSet() {
+    long[] nArray = {0, 1, 2, 3, 4, 5};
+    iter = new LongArrayIterator(nArray);
     iter.move(2);
     assertEquals(0, iter.get(-1));
     assertEquals(1, iter.get(0));
     assertEquals(2, iter.get(1));
-
-    for(int i = -1; i < 2; i++) {
-      iter.set(i, i - 1);
-    }
-    CHECK.order(arr, LongArray.create(-2, -1, 0, 3, 4, 5, 6, 7, 8, 9));
   }
 
   public void testIndex() {
@@ -85,39 +92,6 @@ public class LongArrayIteratorTests extends LongListChecker {
     assertEquals(1, iter.index());
     iter.move(4);
     assertEquals(5, iter.index());
-  }
-
-  public void testRemove() {
-    iter.move(2);
-    iter.remove();
-
-    try {
-      iter.move(1);
-      fail();
-    } catch (IllegalStateException ex) { }
-
-    iter.next();
-    CHECK.order(arr, LongArray.create(0, 2, 3, 4, 5, 6, 7, 8, 9));
-
-    iter.removeRange(0, 4);
-    CHECK.order(arr, LongArray.create(0, 6, 7, 8, 9));
-  }
-
-  public void checkToBoundedString(LongArray array) {
-    String expected = LongCollections.toBoundedString(array, 5);
-    String actual = LongCollections.toBoundedString(array.iterator(), 5);
-    assertEquals(actual, expected, actual);
-  }
-
-  public void testToBoundedString() {
-    LongArray array = new LongArray();
-    checkToBoundedString(array);
-    array.addAll(LongProgression.arithmetic(0, 10));
-    checkToBoundedString(array);
-    array.add(10);
-    checkToBoundedString(array);
-    array.addAll(LongProgression.arithmetic(11, 10));
-    checkToBoundedString(array);
   }
 
   public void testSimple() {

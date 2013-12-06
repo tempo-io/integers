@@ -4,20 +4,11 @@ import junit.framework.TestCase;
 
 import java.util.List;
 
+import static com.almworks.integers.IntegersFixture.ap;
+
 public class LongIteratorSpecificationChecker {
   public static interface IteratorGetter {
-    List<LongIterator> get(long ... values);
-  }
-
-  // todo extends from IntegersFixture or make IF#ap public static
-  protected static long[] ap(long start, int step, int count) {
-    long[] r = new long[count];
-    long cur = start;
-    for (int i = 0; i < r.length; i++) {
-      r[i] = cur;
-      cur += step;
-    }
-    return r;
+    List<? extends LongIterator> get(long ... values);
   }
 
   public static void check(IteratorGetter getter) {
@@ -32,6 +23,18 @@ public class LongIteratorSpecificationChecker {
 
     testValues(getter, ap(0, 1, 100));
     testValues(getter, IntegersFixture.generateRandomLongArray(100, false).extractHostArray());
+    testRemoveException(getter);
+  }
+
+  private static void testRemoveException(IteratorGetter getter) {
+    for(LongIterator it: getter.get(0, 1, 2)) {
+      if (!(it instanceof WritableLongListIterator))
+      try {
+        it.next();
+        it.remove();
+        TestCase.fail();
+      } catch (UnsupportedOperationException ex) {}
+    }
   }
 
   private static void testSimple(IteratorGetter getter) {

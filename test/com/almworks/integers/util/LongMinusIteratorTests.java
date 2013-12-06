@@ -15,6 +15,7 @@ public class LongMinusIteratorTests extends TestCase {
     testMinus(create(1, 1, 3, 3, 5, 5), create(1, 3, 5), create());
     testMinus(create(1, 1, 3, 3, 5, 5), create(1, 5), create(3, 3));
     testMinus(create(1, 3, 5), create(1, 1, 5, 5), create(3));
+    testMinus(create(1, 3, 5, 7, 9), create(1, 5, 9), create(3, 7));
   }
 
   private void testMinus(LongArray include, LongArray exclude, LongArray difference) {

@@ -27,8 +27,8 @@ public class FindingLongIteratorTests extends IntegersFixture {
   public void testIteratorSpecification() {
     LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
-      public List<LongIterator> get(final long... values) {
-        return Arrays.asList(new LongIterator[]{new FindingLongIterator() {
+      public List<? extends LongIterator> get(final long... values) {
+        return Arrays.asList(new FindingLongIterator() {
           LongIterator innerIt = LongArray.create(values).iterator();
 
           @Override
@@ -37,7 +37,7 @@ public class FindingLongIteratorTests extends IntegersFixture {
             myCurrent = innerIt.nextValue();
             return true;
           }
-        }});}
+        });}
     });
   }
 }
