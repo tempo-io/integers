@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.LongCollections.*;
+import static com.almworks.integers.LongIterators.arithmetic;
 
 public class LongCollectionsTests extends IntegersFixture {
   public static final CollectionsCompare COMPARE = new CollectionsCompare();
@@ -354,26 +355,42 @@ public class LongCollectionsTests extends IntegersFixture {
     return resultingIndices.iterator();
   }
 
+  public void checkToBoundedString(String expected, int lim, LongArray array, LongSet set) {
+    LongIterable[] iterables = {array, set, array.iterator(), set.iterator(),
+        LongIterators.unionIterator(array, array.subList(0, 1))};
+    for (LongIterable iterable: iterables) {
+      assertEquals(iterable.toString(), expected, LongCollections.toBoundedString(iterable, lim));
+    }
+  }
+
   public void testToBoundedString() {
     LongArray array = new LongArray();
     WritableLongSortedSet set = new LongTreeSet();
-    array.addAll(LongProgression.arithmetic(0, 10));
-    set.addAll(LongProgression.arithmetic(0, 10));
-    assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(array, 5));
-    assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(array.iterator(), 5));
-    assertEquals("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", LongCollections.toBoundedString(set, 5));
+    array.addAll(LongIterators.range(10));
+    set.addAll(LongIterators.range(10));
+    checkToBoundedString("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", 5, array, set);
 
     array.add(10);
     set.add(10);
-    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(array, 5));
-    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(array.iterator(), 5));
-    assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", LongCollections.toBoundedString(set, 5));
+    checkToBoundedString("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", 5, array, set);
 
-    array.addAll(LongProgression.arithmetic(11, 10));
-    set.addAll(LongProgression.arithmetic(11, 10));
-    assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array, 5));
-    assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(array.iterator(), 5));
-    assertEquals("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", LongCollections.toBoundedString(set, 5));
+    array.addAll(LongIterators.range(11, 21));
+    set.addAll(LongIterators.range(11, 21));
+    checkToBoundedString("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", 5, array, set);
+
+    array.addAll(LongIterators.range(21, 40));
+    set.addAll(LongIterators.range(21, 40));
+    StringBuilder expected = new StringBuilder().append("(0");
+    for (long i: range(1, 39)) {
+      expected.append(", ").append(i);
+    }
+    expected.append(')');
+    checkToBoundedString(expected.toString(), 20, array, set);
+
+    array = LongArray.create(0, 1, 2, 3, 4);
+    set.clear();
+    set.addAll(array);
+    checkToBoundedString("[5] (0, 1, ..., 3, 4)", 2, array, set);
   }
 
   // TODO add test union for unsortable hash set
@@ -415,16 +432,6 @@ public class LongCollectionsTests extends IntegersFixture {
         return LongCollections.complementSorted(arrays[0], arrays[1]).iterator();
       }
     }, new SetOperationsChecker.MinusGetter(), true, true);
-  }
-
-  public void testConcatIterables() {
-    LongArray[] arrays = new LongArray[5];
-    for (int i = 0; i < 20; i++) {
-      for (int j = 0; j < arrays.length; j++) {
-        arrays[j] = generateRandomLongArray(30, false);
-      }
-      CHECK.order(collectIterables(300, arrays).iterator(), concatIterables(arrays));
-    }
   }
 
 }

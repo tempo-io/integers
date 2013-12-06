@@ -2,6 +2,7 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.IntegersFixture;
 import com.almworks.integers.LongArray;
+import com.almworks.integers.LongCollections;
 
 import java.util.Arrays;
 
@@ -13,6 +14,10 @@ public class LongIterableLexicographicComparatorTests extends IntegersFixture {
       arrays[i] = new LongArray(ars[i]);
     }
     Arrays.sort(arrays, new LongIterableLexicographicComparator());
-    System.out.println(Arrays.toString(arrays));
+    StringBuilder sb = new StringBuilder();
+    for (LongArray array: arrays) {
+      LongCollections.append(sb, array);
+    }
+    assertEquals("(-1, 1, 2)(0)(0, 1)(0, 1, 2)(0, 1, 2, 3)(2, 4, 6)(5, 7, 9)(10)", sb.toString());
   }
 }

@@ -31,7 +31,6 @@ public class ParallelLongListTests extends TestCase {
   }
 
   public void testInsert() {
-//    AbstractLongList.SubList a = new AbstractLongList.SubList()
     myList.insert(0, 4, 5);
     checkStorage(4, 5);
     assertEquals(4, myList.get(0, 0));

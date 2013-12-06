@@ -17,7 +17,8 @@
 package com.almworks.integers;
 
 import com.almworks.integers.util.IntegersDebug;
-
+import static com.almworks.integers.IntegersFixture.RAND;
+import static com.almworks.integers.IntegersFixture.generateRandomLongArray;
 import static com.almworks.integers.LongArray.create;
 
 public class SetOperationsChecker {
@@ -76,13 +77,15 @@ public class SetOperationsChecker {
         mValues[i + 1] = max;
       }
     }
-    LongArray intersection = IntegersFixture.generateRandomLongArray(intersectionLength, isSortUnique);
+    LongArray intersection = generateRandomLongArray(intersectionLength, isSortUnique);
     LongArray[] arrays = new LongArray[arraysNumber];
     for (int i = 0; i < arraysNumber; i++) {
-      arrays[i] = IntegersFixture.generateRandomLongArray(IntegersFixture.RAND.nextInt(maxArrayLength), false, mValues[i * 2], mValues[i * 2 + 1]);
+      arrays[i] = generateRandomLongArray(RAND.nextInt(maxArrayLength), false, mValues[i * 2], mValues[i * 2 + 1]);
       arrays[i].addAll(intersection);
       if (isSortUnique) {
         arrays[i].sortUnique();
+      } else {
+        arrays[i].shuffle(RAND);
       }
     }
     return arrays;
@@ -91,7 +94,7 @@ public class SetOperationsChecker {
   private void checkNewSetCreator(LongArray... arrays) {
     CHECK.order(creator.get(arrays).iterator(), expected.get(arrays).iterator());
     if (arrays.length == 2) {
-      CHECK.order(creator.get(arrays[1], arrays[0]).iterator(), expected.get(arrays[1], arrays[0]).iterator());
+      CHECK.order(creator.get(arrays[1], arrays[0]).iterator(), expected.get(arrays).iterator());
     }
   }
 
@@ -105,15 +108,12 @@ public class SetOperationsChecker {
 
   private void testSetOperations() {
 
-    LongArray someValues = LongArray.create(MIN, -10, 1, 3, 5, 6, MAX);
+    LongArray someValues = LongArray.create(MIN, MIN + 1, -10, 1, 3, 5, 6, 10, MAX - 1, MAX);
     LongArray first, second;
-    for (int i = 0; i < (1 << someValues.size()); i++) {
-      for (int j = 0; j < (1 << someValues.size()); j++) {
+    for (int i = 0, maxI = 1 << someValues.size(); i < maxI; i++) {
+      for (int j = 0, maxJ = 1 << someValues.size(); j < maxJ; j++) {
         first = getSubList(someValues, i);
         second = getSubList(someValues, j);
-        if (i == 1 && j == 1) {
-          i += 0;
-        }
         IntegersDebug.println(i + " " + j);
         checkNewSetCreator(first, second);
       }
@@ -129,28 +129,44 @@ public class SetOperationsChecker {
       checkNewSetCreator(a(), a(1, 3, 5), a());
       checkNewSetCreator(a(0, 10, 20), a(1, 11, 20), a(2, 12, 20));
     }
+
     if (!sortUniqueStatus) {
       checkNewSetCreator(a(10, 5, 1), a(2, 4, 6, 4));
       checkNewSetCreator(a(5, 10, 15), a(10, 9, 8));
       checkNewSetCreator(a(1, 2, 3), a(3, 2, 1));
     }
 
-    testRandom(0, 2, 100, 1000000);
-    testRandom(100, 2, 200, 1000000);
-    testRandom(50, 2, 500, 10000000);
-    testRandom(250, 2, 500, 10000000);
-    testRandom(0, 2, 1000, 10000000);
-    testRandom(1000, 2, 1000, 10000000);
+    if (myTwoArrays) {
+      int[][] sizes = {{1, 100}, {10, 1000}, {100, 100}, {100, 90},
+          {100, 50}, {100, 110}, {100, 10000}, {10000, 10000}};
+      for (int attempt = 0; attempt < 10; attempt++) {
+        for (int[] size: sizes) {
+          checkNewSetCreator(
+              generateRandomLongArray(size[0], sortUniqueStatus),
+              generateRandomLongArray(size[1], sortUniqueStatus));
+        }
+      }
+    }
 
-    // empty intersection
-    testRandom(0, 2, 100, 0, 1000, 1100, 2000);
-    testRandom(0, 2, 1000, 0, MAX / 2, MAX / 2 + 1, MAX);
+    for (int attempt = 0; attempt < 10; attempt++) {
+      testRandom(0, 2, 100, 1000000);
+      testRandom(100, 2, 200, 1000000);
+      testRandom(50, 2, 500, 10000000);
+      testRandom(250, 2, 500, 10000000);
+      testRandom(0, 2, 1000, 10000000);
+      testRandom(1000, 2, 1000, 10000000);
+
+      // empty intersection
+      testRandom(0, 2, 100, 0, 1000, 1100, 2000);
+      testRandom(0, 2, 1000, 0, MAX / 2, MAX / 2 + 1, MAX);
+      first = generateRandomLongArray(1000, true);
+      LongList complement = LongCollections.complementSorted(generateRandomLongArray(1000, true), first);
+      checkNewSetCreator(first, new LongArray(complement));
+    }
     if (!myTwoArrays) {
       testRandom(0, 4, 10, 0, 100, 105, 200, 205, 300, 305, 400);
       testRandom(0, 3, 10, 0, 1000, 1005, 2000, 2005, 3000);
-    }
 
-    if (!myTwoArrays) {
       testRandom(10, 100, 200, 1000000);
       testRandom(10, 100, 200, 1000000);
       testRandom(1, 100, 200, 10000000);
@@ -197,7 +213,8 @@ public class SetOperationsChecker {
         }
         if (exist) expected.add(value);
       }
-      return expected.sortUnique();
+      expected.sortUnique();
+      return expected;
     }
   }
 

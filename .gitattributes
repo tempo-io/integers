@@ -217,7 +217,6 @@ test/com/almworks/integers/IndexedLongListIteratorTests.java -text
 test/com/almworks/integers/IntegersFixture.java -text
 test/com/almworks/integers/IntegersUtilsTests.java -text
 test/com/almworks/integers/ListLongMapTests.java -text
-test/com/almworks/integers/LongArrayMergePerformanceComparison.java -text
 test/com/almworks/integers/LongArrayTests.java -text
 test/com/almworks/integers/LongIteratorSingleTests.java -text
 test/com/almworks/integers/LongIteratorSpecificationChecker.java -text
@@ -251,12 +250,10 @@ test/com/almworks/integers/util/LongListRemovingDecoratorTests.java -text
 test/com/almworks/integers/util/LongMinusIteratorTests.java -text
 test/com/almworks/integers/util/LongObjMapTests.java -text
 test/com/almworks/integers/util/LongOpenHashSetTests.java -text
-test/com/almworks/integers/util/LongSetBuilderPerformanceComparison.java -text
 test/com/almworks/integers/util/LongSetBuilderTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTwoTests.java -text
 test/com/almworks/integers/util/WritableLongListRemovingDecoratorTests.java -text
-test/com/almworks/util/ArrayCopyTests.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text
 util/com/almworks/util/BadFormatException.java -text

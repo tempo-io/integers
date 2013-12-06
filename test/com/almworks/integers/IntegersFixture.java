@@ -70,14 +70,8 @@ public abstract class IntegersFixture extends TestCase {
     return from < to ? ap(from, 1, to - from + 1) : ap(from, -1, from - to + 1);
   }
 
-  protected long[] ap(long start, int step, int count) {
-    long[] r = new long[count];
-    long cur = start;
-    for (int i = 0; i < r.length; i++) {
-      r[i] = cur;
-      cur += step;
-    }
-    return r;
+  public static long[] ap(long start, int step, int count) {
+    return LongProgression.Arithmetic.fillArray(start, step, count);
   }
 
   protected void checkCollectionM(LongList collection, long[]... ints) {
@@ -94,11 +88,11 @@ public abstract class IntegersFixture extends TestCase {
     CHECK.order(collection.toNativeArray(), ints);
     assertEquals(collection.size(), ints.length);
     CHECK.order(collection.iterator(), ints);
-    LongIterator it;
+    LongListIterator it;
     for (int i = 0; i < ints.length; i++) {
       it = collection.iterator();
       if (i > 0) {
-        ((LongListIterator) it).move(i);
+        it.move(i);
       }
       CHECK.order(it, IntegersUtils.arrayCopy(ints, i, ints.length - i));
     }
@@ -248,41 +242,42 @@ public abstract class IntegersFixture extends TestCase {
   }
 
   /**
-   * @param minMaxValues the min and max values for arrays. There is 3 possible values for minMaxValues.length
+   * @param minMaxValues are the min and max values for arrays. There is 3 possible values for minMaxValues.length
    *                 <ul><li>0 - {@code min = 0, max = Integer.MAX_VALUE}
    *                     <li>1 - {@code min = 0, max = minMaxValues[0]}
    *                     <li>2 - {@code min = minMaxValues[0], max = minMaxValues[1]}
-   * @param maxLength the maximum length of returned array. If {@code isSortUnique = true} may be less.
+   * @param maxLength the maximum length of returned array. If {@code sortUnique = true}
+   *                  the actual length may be less than maxLength.
    * @return {@link LongArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static LongArray generateRandomLongArray(int maxLength, boolean isSortUnique, int... minMaxValues) {
+  public static LongArray generateRandomLongArray(int maxLength, boolean sortUnique, int... minMaxValues) {
     final LongArray res = new LongArray(maxLength);
     fillRandomArray(new IntCollectorAdapter() {
       public void add(int value) {
         res.add(value);
       }
     }, maxLength, minMaxValues);
-    if (isSortUnique) res.sortUnique();
+    if (sortUnique) res.sortUnique();
     return res;
   }
 
   /**
-   *
-   * @param maxLength the maximum length of returned array.
-   * @param minMaxValues the min and max values for arrays. There is 3 possible values for minMaxValues.length
+   * @param minMaxValues are the min and max values for arrays. There is 3 possible values for minMaxValues.length
    *                 <ul><li>0 - {@code min = 0, max = Integer.MAX_VALUE}
    *                     <li>1 - {@code min = 0, max = minMaxValues[0]}
-   *                     <li>2 - {@code min = minMaxValues[0], max = minMaxValues[1]}</ul>
+   *                     <li>2 - {@code min = minMaxValues[0], max = minMaxValues[1]}
+   * @param maxLength the maximum length of returned array. If {@code sortUnique = true}
+   *                  the actual length may be less than maxLength.
    * @return {@link IntArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static IntArray generateRandomIntArray(int maxLength, boolean isSortUnique, int... minMaxValues) {
+  public static IntArray generateRandomIntArray(int maxLength, boolean sortUnique, int... minMaxValues) {
     final IntArray res = new IntArray(maxLength);
     fillRandomArray(new IntCollectorAdapter() {
       public void add(int value) {
         res.add(value);
       }
     }, maxLength, minMaxValues);
-    if (isSortUnique) res.sortUnique();
+    if (sortUnique) res.sortUnique();
     return res;
   }
 

@@ -431,7 +431,6 @@ public class TwoWayLongMapTests extends IntegersFixture {
   public void testNonInjectiveFunctionException() {
     map.insertAll(new LongArray(arithmetic(0, 10)), apply(MULT, 10));
     map.transformVals(apply(ADD, 1));
-//    System.out.println(map.size());
     for (int i = 0; i < map.size(); ++i) assertEquals(i*10+1, map.get(i));
 
     try {
