@@ -53,6 +53,7 @@ dev/com/almworks/integers/IntIntMap.java -text
 dev/com/almworks/integers/IntIterable.java -text
 dev/com/almworks/integers/IntIterables.java -text
 dev/com/almworks/integers/IntIterator.java -text
+dev/com/almworks/integers/IntIterators.java -text
 dev/com/almworks/integers/IntList.java -text
 dev/com/almworks/integers/IntListIterator.java -text
 dev/com/almworks/integers/IntLongMap.java -text
@@ -115,6 +116,7 @@ dev/com/almworks/integers/util/AbstractLongListDecorator.java -text
 dev/com/almworks/integers/util/AbstractLongListRemovingDecorator.java -text
 dev/com/almworks/integers/util/DiffIndexedIntListDecorator.java -text
 dev/com/almworks/integers/util/DiffIndexedLongListDecorator.java -text
+dev/com/almworks/integers/util/FailFastIntIterator.java -text
 dev/com/almworks/integers/util/FailFastLongIterator.java -text
 dev/com/almworks/integers/util/FindingIntIterator.java -text
 dev/com/almworks/integers/util/FindingLongIterator.java -text

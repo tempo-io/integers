@@ -32,17 +32,12 @@ import java.util.List;
  */
 public class LongIntersectionIterator extends LongSetOperationsIterator {
 
-  public LongIntersectionIterator(List<LongIterator> iterators) {
-    super(iterators);
-  }
-
   public LongIntersectionIterator(LongIterable... iterables) {
     super(longIterablesToIterators(Arrays.asList(iterables)));
   }
 
-  @NotNull
-  public static LongIntersectionIterator create(List<? extends LongIterable> iterables) {
-    return new LongIntersectionIterator(longIterablesToIterators(iterables));
+  public LongIntersectionIterator(List<? extends LongIterable> iterables) {
+    super(longIterablesToIterators(iterables));
   }
 
   private boolean equalValues() {

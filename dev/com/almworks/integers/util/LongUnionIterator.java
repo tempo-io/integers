@@ -34,17 +34,12 @@ import java.util.List;
 public class LongUnionIterator extends LongSetOperationsIterator {
   private boolean myIsHeapBuilt = false;
 
-  public LongUnionIterator(List<LongIterator> iterators) {
-    super(iterators);
-  }
-
-  public LongUnionIterator(LongIterable... iterables) {
+  public LongUnionIterator(LongIterable ... iterables) {
     super(longIterablesToIterators(Arrays.asList(iterables)));
   }
 
-  @NotNull
-  public static LongUnionIterator create(List<? extends LongIterable> iterables) {
-    return new LongUnionIterator(longIterablesToIterators(iterables));
+  public LongUnionIterator(List<? extends LongIterable> iterables) {
+    super(longIterablesToIterators(iterables));
   }
 
   protected boolean findNext() {
@@ -63,15 +58,15 @@ public class LongUnionIterator extends LongSetOperationsIterator {
     if (IntegersDebug.PRINT) outputHeap();
     if (heapLength == 0) return false;
     assert heapLength > 0 : "heapLength < 0: " + heapLength;
-    myCurrent = getTopIterator().value();
-    while (myIts.get(myHeap[TOP]).value() == myCurrent && heapLength > 0) {
-      LongIterator topIterator = getTopIterator();
+    LongIterator topIterator = getTopIterator();
+    for (myCurrent = topIterator.value(); topIterator.value() == myCurrent; topIterator = getTopIterator()) {
       if (topIterator.hasNext()) {
         topIterator.next();
         assert myCurrent < topIterator.value() : myHeap[TOP] + " " + myCurrent + " " + topIterator.value();
       } else {
         IntCollections.swap(myHeap, TOP, heapLength);
         heapLength--;
+        if (heapLength == 0) break;
       }
       heapify(TOP);
     }

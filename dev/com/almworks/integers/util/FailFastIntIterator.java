@@ -16,19 +16,19 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.AbstractLongIterator;
-import com.almworks.integers.LongIterator;
+import com.almworks.integers.AbstractIntIterator;
+import com.almworks.integers.IntIterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class FailFastLongIterator extends AbstractLongIterator {
-  private final LongIterator myIterator;
+public abstract class FailFastIntIterator extends AbstractIntIterator {
+  private final IntIterator myIterator;
   private final int myModCountAtCreation = getCurrentModCount();
 
   protected abstract int getCurrentModCount();
 
-  public FailFastLongIterator(LongIterator it) {
+  public FailFastIntIterator(IntIterator it) {
     myIterator = it;
   }
 
@@ -37,18 +37,13 @@ public abstract class FailFastLongIterator extends AbstractLongIterator {
     return myIterator.hasNext();
   }
 
-  public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
+  public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
     myIterator.next();
     return this;
   }
 
-  public boolean hasValue() throws ConcurrentModificationException {
-    checkMod();
-    return myIterator.hasValue();
-  }
-
-  public long value() throws IllegalStateException {
+  public int value() throws IllegalStateException {
     checkMod();
     return myIterator.value();
   }

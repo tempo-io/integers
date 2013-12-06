@@ -1,5 +1,6 @@
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.util.*;
 
 import java.util.ConcurrentModificationException;
@@ -111,28 +112,39 @@ public class LongIterators {
 
       @Override
       public boolean hasNext() throws ConcurrentModificationException {
-        return myCount >= 0;
+        return myCount > 0;
       }
     };
   }
 
+  public static LongIterator arithmetic(final long initial, final int count) {
+    return arithmetic(initial, count, 1);
+  }
+
   /**
-   * @return a virtual sequence of numbers from {@code start} to {@code stop} by {@code step}.
+   * @param from starting index, inclusive
+   * @param to ending index, exclusive
+   * @return an iterator containing arithmetic progression.
    * @throws IllegalArgumentException if {@code step == 0}
    */
-  public static LongIterator range(final long start, final long stop, final long step) throws IllegalArgumentException {
+
+  /**
+   * {@link LongProgression#range(long, long, long)}
+   */
+  public static LongIterator range(final long from, final long to, final long step) throws IllegalArgumentException {
     if (step == 0) throw new IllegalArgumentException("step = 0");
-    int myCount = (int)((stop - 1 - start) / step);
+    int myCount = 1 + (int)((to - 1 - from) / step);
     if (myCount < 0) throw new IllegalArgumentException();
-    return arithmetic(start, myCount, step);
+    return arithmetic(from, myCount, step);
   }
 
-  public static LongIterator range(long start, long stop) {
-    return range(start, stop, 1);
+  // todo javadoc from range(from, to, step)
+  public static LongIterator range(long from, long to) {
+    return range(from, to, 1);
   }
 
-  public static LongIterator range(long stop) {
-    return range(0, stop, 1);
+  public static LongIterator range(long to) {
+    return range(0, to, 1);
   }
 
   public static LongIterator concat(final LongIterable... iterables) {
@@ -159,6 +171,15 @@ public class LongIterators {
    * */
   public static LongIterator intersectionIterator(LongIterable ... iterables) {
     return new LongIntersectionIterator(iterables);
+  }
+
+  public static LongIterator failFastIterator(LongIterator iterator, final IntFunction currentModCount) {
+    return new FailFastLongIterator(iterator) {
+      @Override
+      protected int getCurrentModCount() {
+        return currentModCount.invoke(0);
+      }
+    };
   }
 
 }

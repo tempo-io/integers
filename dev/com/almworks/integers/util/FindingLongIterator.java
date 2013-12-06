@@ -29,8 +29,8 @@ public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
   private boolean myIsValueStored = false;
 
   /**
-   * In this method in the {@code myCurrent} must be assigned next value, if it exist.
-   * @return true if this iterator has next value, otherwise - false
+   * In this method in {@code myCurrent} should be assigned the next value.
+   * @return true if the next value exists and was assigned to {@code myCurrent}, otherwise false
    * */
   protected abstract boolean findNext();
 
