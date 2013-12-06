@@ -54,7 +54,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
 
   public void add(long value) {
     if (myFinished) throw new IllegalStateException();
-    if (myTemp == null) {
+    if (myTemp.getCapacity() == 0) {
       myTemp = new LongArray(myTempLength);
     }
     if (myTemp.size() == myTempLength)
@@ -197,7 +197,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
     builder.append("LSB ").append(size()).append(" [");
     String sep = "";
     LongArray res = LongCollections.collectIterables(mySorted.size() + myTemp.size(), mySorted);
-    mergeTemp();
+    res.merge(myTemp);
     for  (LongIterator i : res.iterator()) {
       builder.append(sep).append(i.value());
       sep = ", ";

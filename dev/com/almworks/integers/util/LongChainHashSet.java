@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.BitSet;
 
+import static com.almworks.integers.IntegersUtils.rehash;
+
 public class LongChainHashSet extends AbstractWritableLongSet implements WritableLongSet {
   private int[] myHead;
   private int[] myNext;
@@ -20,6 +22,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   static final int DEFAULT_INITIAL_CAPACITY = 16;
   static final float DEFAULT_LOAD_FACTOR = 0.75f;
+  private int myMask;
 
   public LongChainHashSet(int initialCapacity, float loadFactor) {
     if (initialCapacity < 0)
@@ -30,12 +33,14 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
           loadFactor);
 
     myHeadNum = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
+    assert (myHeadNum & (myHeadNum - 1)) == 0 : myHeadNum;
 
     this.loadFactor = loadFactor;
-    threshold = (int)(this.myHeadNum * loadFactor);
+    threshold = (int)(myHeadNum * loadFactor);
     myHead = new int[this.myHeadNum];
     myKeys = new long[threshold];
     myNext = new int[threshold];
+    myMask = myHeadNum - 1;
   }
 
   public LongChainHashSet(int initialCapacity){
@@ -60,6 +65,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   private void resize(int newCapacity) {
     // check that newCapacity = 2^k
     assert (newCapacity & (newCapacity - 1)) == 0 && newCapacity > 0;
+    int mask = newCapacity - 1;
     int thresholdNew = (int)(newCapacity * loadFactor);
     int[] myHeadNew = new int[newCapacity + 1];
     int[] myNextNew = new int[thresholdNew + 1];
@@ -69,7 +75,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     long[] myKeysNew = buffer.extractHostArray();
 
     for (int i = 1; i <= mySize; i++) {
-      int h = index(hash(myKeysNew[i]), newCapacity);
+      int h = index(hash(myKeysNew[i]), mask);
       myNextNew[cnt] = myHeadNew[h];
       myHeadNew[h] = cnt++;
     }
@@ -79,6 +85,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     myHead = myHeadNew;
     threshold = thresholdNew;
     myHeadNum = newCapacity;
+    myMask = mask;
   }
 
   protected boolean include0(long value) {
@@ -91,7 +98,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   protected boolean include1(long value) {
     if (contains(value)) return false;
     mySize++;
-    int h = index(hash(value), myHeadNum);
+    int h = index(hash(value), myMask);
 
     int x;
     if (myRemoved.isEmpty()) {
@@ -125,7 +132,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   @Override
   protected boolean exclude0(long value) {
-    int h = index(hash(value), myHeadNum);
+    int h = index(hash(value), myMask);
     int i = myHead[h];
     if (i == 0) return false;
     if (myKeys[i] == value) {
@@ -158,13 +165,14 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   private int hash(long value) {
-    return ((int)(value ^ (value >>> 32))) + 1;
+    return rehash(value);
+//    return ((int)(value ^ (value >>> 32))) + 1;
   }
 
-  private int index(int hash, int length) {
+  private int index(int hash, int mask) {
     // length = 2^k
-    assert length > 0 && (length & (length - 1)) == 0;
-    return (hash > 0 ? hash : -hash) & (length - 1);
+    assert mask > 0 && (mask & (mask + 1)) == 0 : mask;
+    return (hash > 0 ? hash : -hash) & mask;
   }
 
   public int size() {
@@ -220,20 +228,10 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   public boolean contains(long value) {
-    int h = index(hash(value), myHeadNum);
+    int h = index(hash(value), myMask);
     for (int i = myHead[h]; i != 0; i = myNext[i])
       if (myKeys[i] == value) return true;
     return false;
   }
 
-  public LongChainHashSet retain(LongList values) {
-    LongArray res = new LongArray();
-    for (LongIterator it: values.iterator()) {
-      long value = it.value();
-      if (contains(value)) res.add(value);
-    }
-    clear();
-    addAll(res);
-    return this;
-  }
 }

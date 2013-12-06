@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.BitSet;
 
+import static com.almworks.integers.IntegersUtils.rehash;
+
 public class LongOpenHashSet extends AbstractWritableLongSet implements WritableLongSet {
   public final static int DEFAULT_CAPACITY = 16;
   public final static float DEFAULT_LOAD_FACTOR = 0.75f;
@@ -16,6 +18,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   private final float loadFactor;
   private int threshold;
   private int mySize = 0;
+  private int myMask;
 
   public LongOpenHashSet() {
     this(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR);
@@ -34,11 +37,13 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
             loadFactor);
 
     myKeysLength = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
+    assert (myKeysLength & (myKeysLength - 1)) == 0;
 
     this.loadFactor = loadFactor;
     threshold = (int)(myKeysLength * loadFactor);
 //    myHead = new int[this.myHeadNum];
     myKeys = new long[myKeysLength];
+    myMask = myKeysLength - 1;
     myAllocated = new BitSet(myKeysLength);
     //    myNext = new int[threshold];
   }
@@ -53,13 +58,14 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   private int hash(long value) {
-    return ((int)(value ^ (value >>> 32))) + 1;
+    return rehash(value);
+//    return ((int)(value ^ (value >>> 32))) + 1;
   }
 
-  private int index(int hash, int length) {
+  private int index(int hash, int mask) {
     // length = 2^k
-    assert length > 0 && (length & (length - 1)) == 0;
-    return (hash > 0 ? hash : -hash) & (length - 1);
+    assert mask > 0 && (mask & (mask + 1)) == 0 : mask;
+    return (hash > 0 ? hash : -hash) & mask;
   }
 
   private void resize(int newCapacity) {
@@ -72,9 +78,8 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
 
     for (LongIterator it: iterator()) {
       long value = it.value();
-      int slot = index(hash(value), newCapacity);
+      int slot = index(hash(value), mask);
       while (myAllocatedNew.get(slot)) {
-        // todo replace all ... & mask -> index ?
         slot = (slot + 1) & mask;
       }
       myKeysNew[slot] = value;
@@ -85,6 +90,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     myKeysLength = myKeys.length;
     myAllocated = myAllocatedNew;
     threshold = thresholdNew;
+    myMask = mask;
   }
 
   @Override
@@ -96,13 +102,11 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   protected boolean include1(long value) {
-    int mask = myKeys.length - 1;
-    int slot = index(hash(value), myKeysLength);
+    int slot = index(hash(value), myMask);
     while (myAllocated.get(slot)) {
       if (value == myKeys[slot]) return false;
-      slot = (slot + 1) & mask;
+      slot = (slot + 1) & myMask;
     }
-//    System.out.println("ururu!" + slot + " " + myKeysLength + " " + myAllocated.size());
     myKeys[slot] = value;
     myAllocated.set(slot, true);
     mySize++;
@@ -115,14 +119,13 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
    */
   protected void shiftConflictingKeys(int slotCurr) {
     // Copied nearly verbatim from fastutil's impl.
-    int mask = myKeys.length - 1;
     int slotPrev, slotOther;
     while (true) {
       slotPrev = slotCurr;
-      slotCurr = (slotCurr + 1) & mask;
+      slotCurr = (slotCurr + 1) & myMask;
 
       while (myAllocated.get(slotCurr)) {
-        slotOther = hash(myKeys[slotCurr]) & mask;
+        slotOther = hash(myKeys[slotCurr]) & myMask;
         if (slotPrev <= slotCurr) {
           // We are on the right of the original slot.
           if (slotPrev >= slotOther || slotOther > slotCurr) break;
@@ -131,7 +134,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
           // We have wrapped around.
           if (slotPrev >= slotOther && slotOther > slotCurr) break;
         }
-        slotCurr = (slotCurr + 1) & mask;
+        slotCurr = (slotCurr + 1) & myMask;
       }
 
       if (!myAllocated.get(slotCurr)) break;
@@ -146,9 +149,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   public boolean exclude0(long value) {
-    // todo exctract mask
-    int mask = myKeysLength - 1;
-    int slot = index(hash(value), myKeysLength);
+    int slot = index(hash(value), myMask);
 
     while (myAllocated.get(slot)) {
       if (value == myKeys[slot]) {
@@ -156,7 +157,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
         shiftConflictingKeys(slot);
         return true;
       }
-      slot = (slot + 1) & mask;
+      slot = (slot + 1) & myMask;
     }
     return false;
   }
@@ -164,27 +165,13 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   @Override
   public void clear() {
     mySize = 0;
-    // todo maybe remove this line
-    Arrays.fill(myKeys, 0);
     myAllocated.clear();
-  }
-
-  @Override
-  public LongOpenHashSet retain(LongList values) {
-    LongArray res = new LongArray();
-    for (LongIterator it: values.iterator()) {
-      long value = it.value();
-      if (contains(value)) res.add(value);
-    }
-    clear();
-    addAll(res);
-    return this;
   }
 
   @Override
   public boolean contains(long value) {
     int mask = myKeysLength - 1;
-    int slot = index(hash(value), myKeysLength);
+    int slot = index(hash(value), myMask);
     while (myAllocated.get(slot)) {
       if (value == myKeys[slot]) return true;
       slot = (slot + 1) & mask;

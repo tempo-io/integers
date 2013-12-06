@@ -12,8 +12,8 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   private static final int DEFAULT_CHUNKSIZE = 512;
 
   private LongArray myBaseList;
-  private final WritableLongSortedSet myAdded;// = new LongTreeSet();
-  private final WritableLongSet myRemoved;// = new LongChainHashSet(509, 512);
+  private final WritableLongSortedSet myAdded;
+  private final WritableLongSet myRemoved;
 
   // true if set wasn't modified after last coalesce()
   private boolean myCoalesced;
@@ -73,7 +73,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
    * May be slower than {@link LongAmortizedSet#remove(long)}
    */
   public boolean exclude(long value) {
-    return super.exclude(value);    //To change body of overridden methods use File | Settings | File Templates.
+    return super.exclude(value);
   }
 
   protected boolean exclude0(long value) {
@@ -84,11 +84,10 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
 // todo optimize removeAll
 
-  public LongAmortizedSet retain(LongList values) {
+  public void retain(LongList values) {
     modified();
     coalesce();
     myBaseList.retain(values);
-    return this;
   }
 
   private LongIterator sortedRemovedIterator() {
@@ -142,8 +141,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   @NotNull
   protected LongIterator iterator1() {
-    LongIterator baseIterator = myBaseList.iterator();
-    return new CoalescingIterator(baseIterator, myAdded.iterator());
+    return new CoalescingIterator(myBaseList.iterator(), myAdded.iterator());
   }
 
   /**
@@ -170,7 +168,14 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
     if (!myAdded.isEmpty()) return false;
     if (myBaseList.isEmpty()) return true;
     if (myRemoved.isEmpty()) return false;
-    return !iterator().hasNext();
+
+    for (int i = 0; i < myBaseList.size(); i++) {
+      if (!myRemoved.contains(myBaseList.get(i))) return false;
+    }
+    for (LongIterator it: myAdded.iterator()) {
+      if (!myRemoved.contains(it.value())) return false;
+    }
+    return true;
   }
 
   public void clear() {
@@ -192,10 +197,6 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
       }
       from = idx;
     }
-//    LongIterator removedIt = myRemoved.iterator();
-//    while (removedIt.hasNext()) {//removeIterator()) {
-//      if (myBaseList.binarySearch(removedIt.nextValue()) >= 0) size--;
-//    }
     for (LongIterator it : myRemoved) {
       if (myBaseList.binarySearch(it.value()) >= 0) size--;
     }

@@ -32,14 +32,15 @@ public interface WritableLongSet extends LongCollector, LongSet {
    * retain this set with values
    * @return this
    * */
-  WritableLongSet retain(LongList values);
+  void retain(LongList values);
 
   /**
    * Adds the specified element to this set if it is not already present.
    * If this set already contains the element, the call leaves the set
    * unchanged and returns {@code false}. Otherwise {@code true}.
    *
-   * @return {@code true} if size of set changed. Otherwise {@code false}.
+   * @return {@code false} if this set already contains the element.
+   * Otherwise {@code true}.
    * If return value is unused, better use {@link WritableLongSet#add(long)}
    * */
   boolean include(long value);
@@ -49,8 +50,8 @@ public interface WritableLongSet extends LongCollector, LongSet {
    * If this set didn't contain the element, the call leaves the set
    * unchanged and returns {@code false}. Otherwise {@code true}.
    *
-   * @return {@code true} if size of set has changed. Otherwise {@code false}.
-   * If return value is unused, better use {@link WritableLongSet#exclude(long)}
+   * @return {@code true} if this set contained {@code value}. Otherwise {@code false}.
+   * If return value is unused, better use {@link WritableLongSet#remove(long)}
    * */
   boolean exclude(long value);
 }

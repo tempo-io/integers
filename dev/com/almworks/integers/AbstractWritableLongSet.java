@@ -1,5 +1,6 @@
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.util.FailFastLongIterator;
 import org.jetbrains.annotations.NotNull;
 
@@ -106,6 +107,17 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
       if (!contains(it.nextValue())) return false;
     }
     return true;
+  }
+
+  @Override
+  public void retain(LongList values) {
+    LongArray res = new LongArray();
+    for (LongIterator it: values.iterator()) {
+      long value = it.value();
+      if (contains(value)) res.add(value);
+    }
+    clear();
+    addAll(res);
   }
 
   @Override

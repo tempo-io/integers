@@ -57,17 +57,15 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   private static final int SHRINK_MIN_LENGTH = 8; // for testing try 4
   // used in fromSortedLongIterable(). A new myKeys array is created in this method, and its size is
   // the size of the given LongIterable multiplied by this constant (additional space for new elements to be added later).
-  private static final int EXPAND_FACTOR = 2;
 
-  int minSize = -1;
-  int maxSize = -1;
-  int countedHeight = -1;
+  int myMaxSize = -1;
+  int myCountedHeight = -1;
 
   private int[] myStackCache = IntegersUtils.EMPTY_INTS;
 
   /**
    * This enum is used in {@link LongTreeSet#compactify(LongTreeSet.ColoringType)} and
-   * {@link LongTreeSet#createFromSortedUnique(com.almworks.integers.util.LongSizedIterable)}
+   * {@link LongTreeSet#initFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
    * methods to determine the way the new tree will be colored.
    */
   public enum ColoringType {
@@ -213,7 +211,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     ps[1] = 0;
     // Parents stack top + 1
     int psi = 2;
-    // actually, k is always overwritten if it is used (psi > 0), but compiler does not know that
+    // actually, k is always overwritten if it is used (psi > 2), but compiler does not know that
     long k = 0;
     while (x != 0) {
       k = myKeys[x];
@@ -351,7 +349,6 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
   /**
    * @param n difference between future size and actual size
-   * @return
    */
   private int[] fetchStackCache(int n) {
     // 2 is for the add(): sometimes we need to know the grand-grand-father
@@ -364,17 +361,16 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
   /** Estimate tree height: it can be shown that it's <= 2*log_2(N + 1) (not counting the root) */
   private int height(int n) {
-    if (minSize <= n && n < maxSize) return countedHeight;
-    maxSize = 1;
+    if (n < myMaxSize) return myCountedHeight;
+    myMaxSize = 1;
 
     int lg2 = 0;
-    while (maxSize <= n) {
+    while (myMaxSize <= n) {
       lg2++;
-      maxSize <<= 1;
+      myMaxSize <<= 1;
     }
-    minSize = maxSize >> 1;
-    countedHeight = lg2 << 1;
-    return countedHeight;
+    myCountedHeight = lg2 << 1;
+    return myCountedHeight;
   }
 
   /**
@@ -407,7 +403,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
    */
   void compactify(ColoringType coloringType) {
     modified();
-    createFromSortedUnique0(this, size(), coloringType);
+    initFromSortedUnique(this, size(), coloringType);
     assert checkRedsAmount(coloringType);
   }
 
@@ -422,11 +418,11 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   public static LongTreeSet createFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
     if (capacity < 0) throw new IllegalArgumentException();
     LongTreeSet res = new LongTreeSet();
-    res.createFromSortedUnique0(src, capacity, coloringType);
+    res.initFromSortedUnique(src, capacity, coloringType);
     return res;
   }
 
-  private void createFromSortedUnique0(LongIterable src, int capacity, ColoringType coloringType) {
+  private void initFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
     long[] newKeys;
     if (capacity == 0 && !src.iterator().hasNext())
       newKeys = EMPTY_KEYS;
@@ -435,24 +431,19 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
       assert buf.isUniqueSorted();
       newKeys = buf.extractHostArray();
     }
-    createFromPreparedArray(newKeys, capacity, coloringType);
-    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("fromSortedLongIterable");
+    initFromPreparedArray(newKeys, capacity, coloringType);
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("initFromSortedUnique");
   }
 
   /**
-   * @return {@code LongTreeSet} with capacity equals to {@code src.size()}.
-   * To create {@code LongTreeSet} with another capacity use
+   * To create {@code LongTreeSet} with the specified capacity use
    * {@link com.almworks.integers.LongTreeSet#createFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
+   * @return {@code LongTreeSet} with elements from {@code src}.
+   * If {@code src} inherited from {@code LongSizedIterable} capacity of new set equals to {@code src.size()}.
    */
-  public static LongTreeSet createFromSortedUnique(LongSizedIterable src) {
-    LongTreeSet res = new LongTreeSet();
-    res.createFromSortedUnique0(src, src.size(), ColoringType.BALANCED);
-    return res;
-  }
-
   public static LongTreeSet createFromSortedUnique(LongIterable src) {
     LongTreeSet res = new LongTreeSet();
-    res.createFromSortedUnique0(src, 0, ColoringType.BALANCED);
+    res.initFromSortedUnique(src, (src instanceof LongSizedIterable) ? ((LongSizedIterable) src).size() : 0, ColoringType.BALANCED);
     return res;
   }
 
@@ -492,7 +483,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
    * k = floor(log_2(n)); d = n - (2^k - 1); [amount of levels] = - floor(4/3*log_2(d/(2^k) - 1/2))
    * And then just color these amount of lower levels.
    */
-  private void createFromPreparedArray(long[] newKeys, int usedSize, ColoringType coloringType) {
+  private void initFromPreparedArray(long[] newKeys, int usedSize, ColoringType coloringType) {
     myBlack = new BitSet(usedSize);
     myRemoved = new BitSet(usedSize);
 
@@ -512,10 +503,11 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
     // Otherwise they belong entirely to the last level and are red.
     boolean lastPairsAreBlack;
-    if (top != usedSize + 1)
-      lastPairsAreBlack = (usedSize < 3*top/4);
-    else
+    if (top != usedSize + 1) {
+      lastPairsAreBlack = (usedSize < 3 * top / 4);
+    } else {
       lastPairsAreBlack = (coloringType == ColoringType.TO_ADD) || (levels + redLevelsDensity - 2) % redLevelsDensity != 0;
+    }
     // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
     int startingCounter = (coloringType == ColoringType.TO_ADD) ? 0 : 2;
     myRoot = rearrangeStep(1, usedSize, startingCounter, redLevelsDensity, lastPairsAreBlack);
@@ -585,7 +577,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     return ret;
   }
 
-  public LongTreeSet retain(LongList values) {
+  public void retain(LongList values) {
     LongArray res = new LongArray();
     for (LongIterator it: values.iterator()) {
       long value = it.value();
@@ -593,20 +585,18 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     }
     clear();
     res.sortUnique();
-    createFromSortedUnique0(res, res.size(), ColoringType.BALANCED);
-    return this;
+    initFromSortedUnique(res, res.size(), ColoringType.BALANCED);
   }
 
   /**
    * Retains this set with the specified set
    * */
-  public LongTreeSet retain(LongSortedSet set) {
+  public void retain(LongSortedSet set) {
     LongArray array = toArray();
     array.retainSorted(set.toArray());
     clear();
-    createFromSortedUnique0(array, array.size(), ColoringType.BALANCED);
+    initFromSortedUnique(array, array.size(), ColoringType.BALANCED);
     createFromSortedUnique(array);
-    return this;
   }
 
   private void maybeShrink() {
@@ -988,12 +978,11 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
     public LURIterator(long key) {
       this();
-      if (LongTreeSet.this.size() == 0) return;
-      x = myRoot;
+      if (myRoot == 0) return;
+
       // Parents stack top + 1
       psi = 0;
-      // actually, curKey is always overwritten if it is used (psi > 0), but compiler does not know that
-      long curKey = 0;
+      long curKey;
       while (x != 0) {
         curKey = myKeys[x];
         if (key <= curKey) {
@@ -1002,14 +991,6 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
         } else {
           x = myRight[x];
         }
-      }
-      if (key <= curKey) {
-        while (psi >= 2 && myLeft[ps[psi - 2]] == ps[psi - 1]) {
-          psi--;
-        }
-        psi--;
-        assert psi >= 0 : psi + Arrays.toString(ps) + LongTreeSet.this.toString() + key;
-        x = ps[psi];
       }
     }
 
@@ -1020,8 +1001,9 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (!hasNext()) throw new NoSuchElementException();
       myIterated = true;
-      if (x == 0) x = ps[--psi];
-      else {
+      if (x == 0) {
+        x = ps[--psi];
+      }  else {
         int l = myLeft[x];
         while (l != 0) {
           ps[psi++] = x;
