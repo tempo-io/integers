@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.almworks.integers.LongIterators.concat;
+import static com.almworks.integers.LongIterators.repeat;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -323,5 +324,14 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
     expected.insertMultiple(3, 100, 5);
 
     CHECK.order(expected, array);
+  }
+
+  public void testIteratorGet() {
+    array.addAll(LongIterators.range(0, 1030));
+    LongListIterator it = array.iterator();
+    it.move(1024);
+    for (int i = -10, cur = 1013; i < 5; i++) {
+      assertEquals(it.get(i), cur++);
+    }
   }
 }

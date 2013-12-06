@@ -16,9 +16,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.LongFunction;
-import com.almworks.integers.func.LongFunctions;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +77,6 @@ public class LongArrayTests extends WritableLongListChecker {
   }
 
   public void testExpand() {
-    // todo add more cases
     array = new LongArray();
     array = LongArray.create(0, 1, 2, 3);
     array.expand(1, 4);
@@ -112,17 +108,35 @@ public class LongArrayTests extends WritableLongListChecker {
     } catch (IllegalArgumentException ex) { }
   }
 
-  public void testRetain() {
-    LongArray arr = LongArray.create(2, 3, 5, 6, 8, 9, 10, 13, 3, 4, 5, 3);
-    LongList values = LongArray.create(1, 4, 5, 6, 7, 8, 10, 15);
-    LongArray expected = LongArray.create(5, 6, 8, 10, 4, 5);
-    arr.retain(values);
-    CHECK.order(expected, arr);
+  public void checkRetain(LongList list, LongList values, boolean isSorted) {
+    LongArray array = new LongArray(list);
+    LongArray expected = new LongArray(array.size());
+    for (int i = 0; i < array.size(); i++) {
+      long value = array.get(i);
+      if ((isSorted && values.binarySearch(value) >= 0) ||
+          (!isSorted && values.contains(value))) {
+        expected.add(value);
+      }
+    }
+    if (isSorted) {
+      array.retainSorted(values);
+      CHECK.order(expected, array);
+    } else {
+      array.retain(values);
+      CHECK.order(expected, array);
+    }
+  }
 
-    arr = new LongArray(LongProgression.arithmetic(0, 20, 1));
-    arr.retainSorted(new LongArray(LongProgression.arithmetic(1, 15, 2)));
-    CHECK.order(LongProgression.arithmetic(1, 10, 2), arr);
+  public void testRetainSimple() {
+    checkRetain(LongArray.create(2, 3, 5, 6, 8, 9, 10, 13, 3, 4, 5, 3),
+        LongArray.create(1, 4, 5, 6, 7, 8, 10, 15), false);
+    checkRetain(LongArray.create(0, 1, 2, 3, 5, 3, 2, 1, -10), LongArray.create(0, 2, -10), false);
 
+    checkRetain(LongProgression.arithmetic(0, 20, 1), LongProgression.arithmetic(1, 15, 2), true);
+    checkRetain(LongArray.create(0, 1, 2, 3, 10), LongArray.create(0, 2, 10), true);
+  }
+
+  public void testRetainComplex() {
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
@@ -143,6 +157,18 @@ public class LongArrayTests extends WritableLongListChecker {
     }, new SetOperationsChecker.IntersectionGetter(true), true, true);
   }
 
+  public void testRetainWithDuplicates() {
+    int arraySize = 100, valuesSize = 10;
+    for (int attempt = 0; attempt < 20; attempt++) {
+      LongArray array = generateRandomLongArray(arraySize, false, arraySize);
+      array.sort();
+      LongArray values = generateRandomLongArray(valuesSize, false, arraySize / 2);
+      checkRetain(array, values, false);
+      values.sort();
+      checkRetain(array, values, true);
+    }
+  }
+
   public void testFromCollection() {
     List<Long> l = new ArrayList<Long>();
     l.add(2L);
@@ -154,7 +180,7 @@ public class LongArrayTests extends WritableLongListChecker {
     CHECK.order(il.toNativeArray(), 2, 3, 9);
   }
 
-  public void testUnion() {
+  public void testMerge() {
     SetOperationsChecker.SetCreator unionGetter = new SetOperationsChecker.UnionGetter();
     // is likely to be launched branch with realloc
     setOperations.check(new SetOperationsChecker.SetCreator() {
@@ -194,6 +220,15 @@ public class LongArrayTests extends WritableLongListChecker {
         LongArray copy = LongArray.copy(arrays[0]);
         copy.ensureCapacity(arrays[0].size() + arrays[1].size());
         copy.mergeWithSmall(arrays[1]);
+        return copy;
+      }
+    }, unionGetter, true, true);
+
+    setOperations.check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterable get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.merge(arrays[1]);
         return copy;
       }
     }, unionGetter, true, true);

@@ -118,7 +118,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
 
   public int getNewIndex(int baseIndex) {
     int idx = insertedBefore(baseIndex);
-    for (IntListIterator ii = myInserted.keysIterator(idx, myInserted.size()); ii.hasNext(); idx++) {
+    for (IntIterator ii = myInserted.keysIterator(idx, myInserted.size()); ii.hasNext(); idx++) {
       if (ii.nextValue() - idx > baseIndex)
         break;
     }
