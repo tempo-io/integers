@@ -51,7 +51,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   // todo write setAll
 
-  // todo javadoc, values.size() == counts.size()
+  // todo javadoc, values.size() <= counts.size()
   public static SameValuesLongList create(LongSizedIterable values, IntIterable counts) {
     IntArray mapKeys = new IntArray(values.size());
     LongArray mapValues = new LongArray(values.size());

@@ -398,7 +398,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * Removes {@code value} from this sorted list, if this list contains the {@code value}.
-   * @return true if this array was modified otherwise false
+   * @return {@code true} if this set contained {@code value}. Otherwise {@code false}.
    */
   public boolean removeSorted(long value) {
     assert isSorted();
@@ -443,22 +443,23 @@ public final class LongArray extends AbstractWritableLongList {
   // todo add javadoc
   // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0,2, -1]
   public int getInsertionPoints(LongSizedIterable src, int[][] insertionPoints) {
-    if (insertionPoints[0] == null || insertionPoints[0].length < src.size()) {
-      insertionPoints[0] = new int[src.size()];
+    final int srcSize = src.size(), size = size();
+    if (insertionPoints[0] == null || insertionPoints[0].length < srcSize) {
+      insertionPoints[0] = new int[srcSize];
     }
     int[] insertionPoints0 = insertionPoints[0];
-    Arrays.fill(insertionPoints0, 0, src.size(), -1);
+    Arrays.fill(insertionPoints0, 0, srcSize, -1);
     int insertCount = 0;
     int destIndex = 0;
     long last = 0;
     LongIterator it = src.iterator();
-    for (int i = 0, n = src.size(); i < n; i++) {
+    for (int i = 0; i < srcSize; i++) {
       long v = it.nextValue();
       if (i > 0 && v == last)
         continue;
       last = v;
-      if (destIndex < size()) {
-        int k = LongCollections.binarySearch(v, myArray, destIndex, size());
+      if (destIndex < size) {
+        int k = LongCollections.binarySearch(v, myArray, destIndex, size);
         if (k >= 0) {
           // found
           destIndex = k;
@@ -474,8 +475,6 @@ public final class LongArray extends AbstractWritableLongList {
       insertionPoints0[i] = destIndex;
       insertCount++;
     }
-//    if (output) System.out.println(Arrays.toString(insertionPoints[0]));
-//    bh.consume(insertionPoints);
     return insertCount;
   }
 
@@ -483,19 +482,23 @@ public final class LongArray extends AbstractWritableLongList {
    * Merges the specified sorted unique list and this sorted unique array.
    * Depending on {@code size()} and {@code src.size()} uses
    * {@link LongArray#mergeWithSmall(LongList)} or {@link LongArray#mergeWithSameLength(LongList)}.
+   * <p>If this array is smaller than the specified list,
+   * it will copy the specified list and merge it with existing contents using {@link LongArray#mergeWithSmall(LongList)}.
    * */
   public void merge(LongList src) {
     if (src.isEmpty()) return;
-    int k = size() / (src.size() + 1);
+    final int srcSize = src.size(), size = size();
+    float k = 1f * size / (srcSize + 1);
     if (k < 10) {
-      k = src.size() / (size() + 1);
+      k = 1f * srcSize / (size + 1);
       if (k < 10) {
         mergeWithSameLength(src);
       } else {
-        LongArray myValues = copy(this);
-        clear();
-        addAll(src);
-        mergeWithSmall(myValues);
+        long[] small = myArray;
+        myArray = LongCollections.ensureCapacity(EMPTY_LONGS, size + srcSize);
+        src.toNativeArray(0, myArray, 0, srcSize);
+        updateSize(srcSize);
+        mergeWithSmall(new LongArray(small, size));
       }
     } else {
       mergeWithSmall(src);
@@ -504,17 +507,15 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * <p>Merges the specified sorted list and this sorted array into this array. If src or this array are not sorted, result is undefined.
-   * If there {@code getCapacity() < src.size() + size()}, will do reallocation.
+   * If {@code getCapacity() < src.size() + size()}, will do reallocation.
    * <p>Complexity: {@code O(eps(N, T, N/T) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
    * {@code eps} depends on ratio of {@code N/T} and mixing of {@code src} and this array.
    * In the general case, if N/T > 4, then eps < 0.5.
    * <p>Prefer to use this method over {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
-   * if {@code src.size()} is much smaller than {@code size()}. If they are close
+   * If {@code src.size()} is much smaller than {@code size()}. If they are close
    * use {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
    *
-   *
    * @param  src sorted list.
-   * @return this.
    * @see #merge(LongList)
    * */
   public void mergeWithSmall(LongList src) {
@@ -529,20 +530,21 @@ public final class LongArray extends AbstractWritableLongList {
    */
   public void mergeWithSmall(LongList src, int[][] insertionPoints) {
     if (src.isEmpty()) return;
-    if (size() + src.size() > myArray.length) {
+    final int oldSize = size(), srcSize = src.size();
+    if (oldSize + srcSize > myArray.length) {
       // merge with reallocation
       int oldLength = myArray.length;
-      long[] newDest = new long[Math.max(size() + src.size(), oldLength * 2)];
+      long[] newDest = new long[Math.max(oldSize + srcSize, oldLength * 2)];
       long last = 0;
       int newDestSize = 0;
       int destIndex = 0;
-      for (int i = 0; i < src.size(); i++) {
+      for (int i = 0; i < srcSize; i++) {
         long v = src.get(i);
         if (i > 0 && v == last)
           continue;
         last = v;
-        if (destIndex < size()) {
-          int k = LongCollections.binarySearch(v, myArray, destIndex, size());
+        if (destIndex < oldSize) {
+          int k = LongCollections.binarySearch(v, myArray, destIndex, oldSize);
           if (k >= 0) {
             // found
             continue;
@@ -559,8 +561,8 @@ public final class LongArray extends AbstractWritableLongList {
         }
         newDest[newDestSize++] = v;
       }
-      if (destIndex < size()) {
-        int chunkSize = size() - destIndex;
+      if (destIndex < oldSize) {
+        int chunkSize = oldSize - destIndex;
         System.arraycopy(myArray, destIndex, newDest, newDestSize, chunkSize);
         newDestSize += chunkSize;
       }
@@ -572,9 +574,9 @@ public final class LongArray extends AbstractWritableLongList {
       if (insertionPoints == null) insertionPoints = new int[][]{null};
       int insertCount = getInsertionPoints(src, insertionPoints);
       int[] insertionPoints0 = insertionPoints[0];
-      int destIndex = size();
-      updateSize(size() + insertCount);
-      int i = src.size() - 1;
+      int destIndex = oldSize;
+      updateSize(oldSize + insertCount);
+      int i = srcSize - 1;
       while (insertCount > 0) {
         // get next to insert
         while (i >= 0 && insertionPoints0[i] == -1)
@@ -593,15 +595,13 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Merge the specified sorted unique list and sorted this array. If there {@code getCapacity() < src.size() + size()}, will do reallocation.<br>
-   * Complexity: {@code O(N + T)}, where where {@code N = size()} and {@code T = src.size()}.<br>
+   * Merge the specified sorted unique list and sorted this array. If {@code getCapacity() < src.size() + size()}, will do reallocation.<br>
+   * Complexity: {@code O(N + T)}, where {@code N = size()} and {@code T = src.size()}.<br>
    * Prefer to use if the {@code size()} and {@code src.size()} are comparable.
    * If the {@code src.size()} is much smaller than {@code size()},
    * it's better to use {@link com.almworks.integers.LongArray#mergeWithSmall(LongList)}
    *
    * @param  src sorted list of numbers (set)
-   *
-   * @return this
    * */
   public void mergeWithSameLength(LongList src) {
     int srcSize = src.size();
@@ -618,17 +618,18 @@ public final class LongArray extends AbstractWritableLongList {
     // in place
     // 1. find offset (scan for duplicates)
     // 2. merge starting from the end
-    if (size() > 0 && srcSize > 0 && myArray[0] > src.get(srcSize - 1)) {
-      System.arraycopy(myArray, 0, myArray, srcSize, size());
+    int size = size();
+    if (size > 0 && srcSize > 0 && myArray[0] > src.get(srcSize - 1)) {
+      System.arraycopy(myArray, 0, myArray, srcSize, size);
       src.toNativeArray(0, myArray, 0, srcSize);
       updateSize(totalLength);
-    } else if (size() > 0 && srcSize > 0 && myArray[size() - 1] < src.get(0)) {
-      src.toNativeArray(0, myArray, size(), srcSize);
+    } else if (size > 0 && srcSize > 0 && myArray[size - 1] < src.get(0)) {
+      src.toNativeArray(0, myArray, size, srcSize);
       updateSize(totalLength);
     } else {
       int insertCount = 0;
       int pi = 0, pj = 0;
-      while (pi < size() && pj < srcSize) {
+      while (pi < size && pj < srcSize) {
         long vi = myArray[pi];
         long vj = src.get(pj);
         if (vi < vj) {
@@ -643,9 +644,9 @@ public final class LongArray extends AbstractWritableLongList {
         }
       }
       insertCount += (srcSize - pj);
-      pi = size() - 1;
+      pi = size - 1;
       pj = srcSize - 1;
-      int i = size() + insertCount;
+      int i = size + insertCount;
       while (pi >= 0 && pj >= 0) {
         assert i > pi : i + " " + pi;
         long vi = myArray[pi];
@@ -664,14 +665,14 @@ public final class LongArray extends AbstractWritableLongList {
         }
       }
       if (pj >= 0) {
-        int size = pj + 1;
-        src.toNativeArray(0, myArray, 0, size);
-        i -= size;
+        int length = pj + 1;
+        src.toNativeArray(0, myArray, 0, length);
+        i -= length;
       } else if (pi >= 0) {
         i -= pi + 1;
       }
       assert i == 0 : i;
-      updateSize(size() + insertCount);
+      updateSize(size + insertCount);
     }
   }
 
@@ -680,17 +681,18 @@ public final class LongArray extends AbstractWritableLongList {
     long[] newArray = new long[newSize];
     int pi = 0, pj = 0;
     int i = 0;
-    if (size() > 0 && srcSize > 0) {
+    int size = size();
+    if (size > 0 && srcSize > 0) {
       // boundary conditions: quickly merge disjoint sets
       if (myArray[0] > src.get(srcSize - 1)) {
         src.toNativeArray(0, newArray, 0, srcSize);
         i = pj = srcSize;
-      } else if (myArray[size() - 1] < src.get(0)) {
-        System.arraycopy(myArray, 0, newArray, 0, size());
-        i = pi = size();
+      } else if (myArray[size - 1] < src.get(0)) {
+        System.arraycopy(myArray, 0, newArray, 0, size);
+        i = pi = size;
       }
     }
-    while (pi < size() && pj < srcSize) {
+    while (pi < size && pj < srcSize) {
       long vi = myArray[pi];
       long vj = src.get(pj);
       if (vi < vj) {
@@ -706,14 +708,14 @@ public final class LongArray extends AbstractWritableLongList {
         pj++;
       }
     }
-    if (pi < size()) {
-      int size = size() - pi;
-      System.arraycopy(myArray, pi, newArray, i, size);
-      i += size;
+    if (pi < size) {
+      int length = size - pi;
+      System.arraycopy(myArray, pi, newArray, i, length);
+      i += length;
     } else if (pj < srcSize) {
-      int size = srcSize - pj;
-      src.toNativeArray(pj, newArray, i, size);
-      i += size;
+      int length = srcSize - pj;
+      src.toNativeArray(pj, newArray, i, length);
+      i += length;
     }
     myArray = newArray;
     updateSize(i);

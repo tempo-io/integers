@@ -23,12 +23,31 @@ import org.jetbrains.annotations.NotNull;
 import java.util.NoSuchElementException;
 
 public abstract class LongProgression extends AbstractLongList {
+  /**
+   * @param initial
+   * @param count
+   * @param step
+   * @return list containing arithmetic progression.
+   */
   public static LongProgression arithmetic(long initial, int count, long step) {
     return new Arithmetic(initial, count, step);
   }
 
   public static LongProgression arithmetic(long initial, int count) {
     return new Arithmetic(initial, count, 1);
+  }
+
+  /**
+   * @param from starting index, inclusive
+   * @param to ending index, exclusive
+   * @return list containing arithmetic progression.
+   * @throws IllegalArgumentException if {@code step == 0}
+   */
+  public static LongProgression range(final long from, final long to, final long step) throws IllegalArgumentException {
+    if (step == 0) throw new IllegalArgumentException("step = 0");
+    int myCount = (int)((to - 1 - from) / step);
+    if (myCount < 0) throw new IllegalArgumentException();
+    return LongProgression.arithmetic(from, myCount, step);
   }
 
   public static class Arithmetic extends LongProgression {

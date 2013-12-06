@@ -146,8 +146,6 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  // todo replace [writeLong(myLeftOffset + index, value)] -> set(..)
-
   @NotNull
   public WritableLongListIterator iterator(int from, int to) {
     if (from >= to) {
@@ -183,10 +181,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     if (count == 1) {
       set(index, value);
     } else {
-      for (WritableLongListIterator ii = iterator(index, index + count); ii.hasNext();) {
-        ii.next();
-        ii.set(0, value);
-      }
+      setRange(index, index + count, value);
     }
     assert !IntegersDebug.CHECK || checkInvariants();
   }
@@ -905,11 +900,13 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     public void set(int offset, long value) throws NoSuchElementException, IndexOutOfBoundsException {
       assert !IntegersDebug.CHECK || checkIterator();
       checkMod();
-      if (myNext < 0)
+      if (myNext < 0) {
         throw new IllegalStateException();
+      }
       int idx = myNext - 1 + offset;
-      if (idx < myFrom || idx >= myTo)
+      if (idx < myFrom || idx >= myTo) {
         throw new NoSuchElementException(offset + " " + this);
+      }
       int off = myOffset - 1 + offset;
       int si = mySegmentIndex;
       LongSegment seg;
@@ -922,7 +919,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         off &= mySegmentMask;
         seg = mySegments.segments[si];
       } else {
-        seg = mySegment == null ? mySegments.segments[si] : mySegment;
+        if (mySegment == null) {
+          seg = mySegments.segments[si];
+        } else {
+          seg = mySegment;
+        }
+//        seg = mySegment == null ? mySegments.segments[si] : mySegment;
       }
       seg.data[off] = value;
       assert !IntegersDebug.CHECK || checkIterator();

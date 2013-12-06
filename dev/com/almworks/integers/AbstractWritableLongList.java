@@ -115,6 +115,7 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
     return value;
   }
 
+  // todo more effective - we do extra copies
   public boolean removeAll(long value) {
     boolean modified = false;
     for (WritableLongListIterator ii : write()) {
@@ -304,7 +305,10 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
 
   public void insertMultiple(int index, long value, int count) {
     if (count < 0) throw new IllegalArgumentException();
+    if (index < 0 || index > size())
+      throw new IndexOutOfBoundsException(index + " " + this);
     if (count == 0) return;
+
     expand(index, count);
     setRange(index, index + count, value);
   }
