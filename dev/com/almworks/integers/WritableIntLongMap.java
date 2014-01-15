@@ -1,6 +1,12 @@
 package com.almworks.integers;
 
+import com.almworks.integers.util.IntSizedIterable;
+import com.almworks.integers.util.LongSizedIterable;
+
 public interface WritableIntLongMap extends IntLongMapI {
+
+  public static final long DEFAULT_VALUE = 0;
+
   /**
    * Removes all this map's entries.
    */
@@ -30,6 +36,12 @@ public interface WritableIntLongMap extends IntLongMapI {
    * Removes the entry for the specified key.
    * @return {@code true} if size of map changed. Otherwise {@code false}.
    */
+
+  /**
+   * Remove all values at the given key.
+   * The default value for the key type is returned if the value does not exist in the map.
+   * @return old value for the specified key if this map contained the key. Otherwise return default value.
+   */
   long remove(int key);
 
   /**
@@ -38,11 +50,42 @@ public interface WritableIntLongMap extends IntLongMapI {
    */
   boolean remove(int key, long value);
 
+  /**
+   * Puts all keys from the specified iterable to this map, replacing the values
+   * of existing keys, if such keys are present.
+   * @see #putAll(com.almworks.integers.util.IntSizedIterable, com.almworks.integers.util.LongSizedIterable)
+   */
   void putAll(IntLongIterable entries);
 
-  void putAll(IntIterable keys, LongIterable values);
+  /**
+   * @throws IllegalArgumentException if {@code keys.size() != values.size()}
+   * @see #putAll(int[], long[])
+   */
+  void putAll(IntSizedIterable keys, LongSizedIterable values);
 
+  /**
+   * Puts all keys from {@code keys} and {@code values} to this map,
+   * replacing the values of existing keys, if such keys are present.
+   * @throws IllegalArgumentException if {@code keys.length != values.length}
+   */
   void putAll(int[] keys, long[] values);
+
+  /**
+   * Puts all {@code keys} in the map, taking as many {@code values} as needed;
+   * when no values are available, uses {@link #DEFAULT_VALUE}.
+   *
+   * (1, 2, 3, 4), null -> ([1, 0], [2, 0], [3, 0], [4, 0])
+   * (1, 2, 3, 4), () -> ([1, 0], [2, 0], [3, 0], [4, 0])
+   * (1, 2, 3, 4), (1, 2) -> ([1, 1], [2, 2], [3, 0], [4, 0])
+   * (1, 2, 3, 4), (1, 2, 3, 4) -> ([1, 1], [2, 2], [3, 3], [4, 4])
+   * (1, 2, 3, 4), (1, 2, 3, 4, 6, 7, 8) -> ([1, 1], [2, 2], [3, 3], [4, 4])
+   */
+  void putAllKeys(IntIterable keys, LongIterable values);
+
+  /**
+   * @see #putAllKeys(IntIterable, LongIterable)
+   */
+  void putAllKeys(int[] keys, long ... values);
 
   void removeAll(int... keys);
 

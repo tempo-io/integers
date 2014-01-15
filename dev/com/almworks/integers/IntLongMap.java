@@ -30,6 +30,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   @Nullable private ConsistencyViolatingMutator myMutator;
 
   public IntLongMap(WritableIntList keys, WritableLongList values) {
+    assert keys.size() == values.size();
     myKeys = keys;
     myValues = values;
   }
@@ -53,7 +54,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   public long get(int key) {
     int idx = findKey(key);
     // todo update default value
-    return (idx >= 0) ? getValueAt(idx) : 0;
+    return Math.max((idx >= 0) ? getValueAt(idx) - 1 : 0, 0);
   }
 
   public int findKey(int key) {
@@ -86,7 +87,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     checkMutatorPresence();
     assert index >= 0 && index <= size() : index + " " + this;
     assert
-      index == 0 || myKeys.get(index - 1) < key : index + " " + key + " " + myKeys.get(index - 1);
+        index == 0 || myKeys.get(index - 1) < key : index + " " + key + " " + myKeys.get(index - 1);
     assert index == size() || myKeys.get(index) > key : index + " " + key + " " + myKeys.get(index);
     doInsert(index, key, value);
   }
@@ -168,21 +169,12 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   }
 
   public IntLongIterator iterator(int from, int to) {
-    return new FailFastIntLongIterator(iterator1(from, to)) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  public IntLongIterator iteratorImpl() {
-    return null;
-  }
-
-  protected IntLongIterator iterator1(int from, int to) {
     checkMutatorPresence();
     return IntLongIterators.pair(myKeys.iterator(from, to), myValues.iterator(from, to));
+  }
+
+  public IntLongIterator iterator() {
+    return failFast(iterator(0));
   }
 
   public boolean containsKey(int key) {
@@ -190,9 +182,8 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     return findKey(key) >= 0;
   }
 
-  protected IntListIterator keysIteratorImpl() {
-    checkMutatorPresence();
-    return keysIterator(0, size());
+  public IntListIterator keysIterator(int from) {
+    return keysIterator(from, size());
   }
 
   public IntListIterator keysIterator(int from, int to) {
@@ -200,9 +191,12 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     return myKeys.iterator(from, to);
   }
 
-  protected LongIterator valuesIteratorImpl() {
-    checkMutatorPresence();
-    return myValues.iterator(0, size());
+  public IntIterator keysIterator() {
+    return failFast(keysIterator(0));
+  }
+
+  public LongIterator valuesIterator(int from) {
+    return valuesIterator(from, size());
   }
 
   public LongIterator valuesIterator(int from, int to) {
@@ -210,26 +204,31 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     return myValues.iterator(from, to);
   }
 
+  public LongIterator valuesIterator() {
+    return failFast(valuesIterator(0));
+  }
+
   private void checkIndex(int index) {
     if (index < 0 || index >= size()) throw new IndexOutOfBoundsException(index + " " + this);
   }
 
   private void checkSetKeyAt(int index, int key) {
-    if (index > 0 && myKeys.get(index - 1) >= key) throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index - 1) + " " + this);
-    if (index + 1 < size() && myKeys.get(index + 1) <= key) throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index + 1) + " " + this);
+    if (index > 0 && myKeys.get(index - 1) >= key) {
+      throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index - 1) + " " + this);
+    }
+    if (index + 1 < size() && myKeys.get(index + 1) <= key) {
+      throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index + 1) + " " + this);
+    }
   }
 
   private boolean checkInvariants() {
-    if (myKeys.size() > 0) {
-      if (!myKeys.isSorted()) return false;
-//      if (myValues.get(0) == 0) return false;
-    }
-    long currValue;
+    if (!myKeys.isSorted()) return false;
+    long curValue;
     long lastValue = myValues.get(0);
     for (LongIterator ii : myValues.iterator(1)) {
-      currValue = ii.value();
-      if (currValue == lastValue) return false;
-      lastValue = currValue;
+      curValue = ii.value();
+      if (curValue == lastValue) return false;
+      lastValue = curValue;
     }
     return myKeys.size() == myValues.size();
   }

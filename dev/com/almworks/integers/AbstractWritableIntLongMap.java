@@ -1,8 +1,8 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.FailFastIntIterator;
-import com.almworks.integers.util.FailFastIntLongIterator;
-import com.almworks.integers.util.FailFastLongIterator;
+import com.almworks.integers.util.*;
+
+import static com.almworks.integers.IntLongIterators.*;
 
 public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
   protected int myModCount = 0;
@@ -11,15 +11,11 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
 
   abstract public int size();
 
-  abstract protected IntLongIterator iteratorImpl();
+  abstract public IntLongIterator iterator();
 
-  abstract protected IntIterator keysIteratorImpl();
+  abstract public IntIterator keysIterator();
 
-  abstract protected LongIterator valuesIteratorImpl();
-
-  public boolean isEmpty() {
-    return size() == 0;
-  }
+  abstract public LongIterator valuesIterator();
 
   abstract public long get(int key);
 
@@ -34,6 +30,10 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
    * remove element without invocation of {@code AbstractWritableIntLongMap#modified()}
    */
   abstract protected long removeImpl(int key);
+
+  public boolean isEmpty() {
+    return size() == 0;
+  }
 
   protected final IntLongIterator failFast(IntLongIterator iter) {
     return new FailFastIntLongIterator(iter) {
@@ -62,38 +62,10 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     };
   }
 
-  public IntLongIterator iterator() {
-    return new FailFastIntLongIterator(iteratorImpl()) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  public IntIterator keysIterator() {
-    return new FailFastIntIterator(keysIteratorImpl()) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  public LongIterator valuesIterator() {
-    return new FailFastLongIterator(valuesIteratorImpl()) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-
   @Override
   public boolean containsKeys(IntIterable iterable) {
     for (IntIterator it: iterable.iterator()) {
-      if (!containsKey(it.nextValue())) return false;
+      if (!containsKey(it.value())) return false;
     }
     return true;
   }
@@ -132,9 +104,12 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     return true;
   }
 
-  public void putAll(IntIterable keys, LongIterable values) {
+  public void putAll(IntSizedIterable keys, LongSizedIterable values) {
     modified();
-    putAll(IntLongIterators.pair(keys.iterator(), values.iterator()));
+    if (keys.size() != values.size()) {
+      throw new IllegalArgumentException();
+    }
+    putAll(pair(keys, values));
   }
 
   public void putAll(IntLongIterable entries) {
@@ -150,8 +125,28 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     if (keys.length != values.length) {
       throw new IllegalArgumentException();
     }
-    for (int i = 0; i < keys.length; i++) {
+    putAllKeys(keys, values);
+  }
+
+  @Override
+  public void putAllKeys(IntIterable keys, LongIterable values) {
+    modified();
+    IntIterator keysIt = keys.iterator();
+    LongIterator valuesIt = values.iterator();
+
+    putAll(pair(keysIt, valuesIt));
+    putAll(pair(keysIt, LongIterators.repeat(DEFAULT_VALUE)));
+  }
+
+  @Override
+  public void putAllKeys(int[] keys, long[] values) {
+    modified();
+    int size = Math.min(keys.length, values.length);
+    for (int i = 0; i < size; i++) {
       putImpl(keys[i], values[i]);
+    }
+    for (int i = size; i < keys.length; i++) {
+      putImpl(keys[i], DEFAULT_VALUE);
     }
   }
 
