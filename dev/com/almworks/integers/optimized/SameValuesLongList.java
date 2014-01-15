@@ -22,7 +22,6 @@ package com.almworks.integers.optimized;
 import com.almworks.integers.*;
 import com.almworks.integers.util.IntegersDebug;
 import org.jetbrains.annotations.NotNull;
-import org.testng.internal.annotations.IAfterClass;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
