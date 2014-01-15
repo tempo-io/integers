@@ -25,7 +25,26 @@ public interface LongSet extends LongSizedIterable {
   boolean isEmpty();
 
   /**
-   * @return an array containing all the elements in this set
+   * @return an array containing all the elements in this set.
+   * The array contains no duplicates.
+   * @see #toNativeArray(long[])
    * */
   LongArray toArray();
+
+   /**
+   * Writes values from this set (without duplicates) to dest.
+   * @param dest {@code long[]} array. It's {@code dest.length} should be greater than
+   * {@link #size()}{@code + destPos}
+   * @param destPos starting position in the destination data.
+   * @return dest
+   * @exception  IndexOutOfBoundsException  if copying would cause
+   *               access of data outside array bounds.
+   */
+  long[] toNativeArray(long[] dest, int destPos);
+
+  /**
+   * Writes values from this set to {@code dest}.
+   * @see {@link #toNativeArray(long[], int)}
+   */
+  long[] toNativeArray(long[] dest);
 }

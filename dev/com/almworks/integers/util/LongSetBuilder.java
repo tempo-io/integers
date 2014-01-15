@@ -22,7 +22,7 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
-public final class LongSetBuilder implements Cloneable, LongCollector, LongSortedSet {
+public final class LongSetBuilder extends AbstractLongSet implements Cloneable, LongCollector, LongSortedSet {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;
 
   private final int myTempLength;
@@ -117,20 +117,21 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
   }
 
   /**
-   * @return a list of numbers, which should be used before any further mutation of the builder.
-   *
    * This method does not finalize the builder.
+   * @return sorted list of set elements, which should be used before any further mutation of the builder.
    */
   public LongList toList() {
     mergeTemp();
-    if (mySorted.isEmpty())
+    if (mySorted.isEmpty()) {
       return LongList.EMPTY;
+    }
     return mySorted;
   }
 
   @Override
-  public LongArray toArray() {
-    return LongArray.copy(toList());
+  public void toNativeArrayImpl(long[] dest, int destPos) {
+    mergeTemp();
+    mySorted.toNativeArray(0, dest, destPos, size());
   }
 
   public LongSetBuilder clone() {
@@ -152,7 +153,6 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
     return mySorted.isEmpty() && myTemp.isEmpty();
   }
 
-
   public void clear(boolean reuseArrays) {
     mySorted.clear();
     myTemp.clear();
@@ -173,16 +173,7 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
 
   public boolean contains(long value) {
     return mySorted.binarySearch(value) >= 0 ||
-        myTemp.indexOf(value) != -1;
-  }
-
-  @Override
-  public boolean containsAll(LongIterable iterable) {
-    if (iterable == this) return true;
-    for (LongIterator iterator : iterable.iterator()) {
-      if (!contains(iterator.value())) return false;
-    }
-    return true;
+        myTemp.contains(value);
   }
 
   public String toDebugString() {
@@ -191,23 +182,6 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
     builder.append("mySorted: ").append(LongCollections.toBoundedString(mySorted)).append('\n');
     builder.append("myTemp: ").append(LongCollections.toBoundedString(myTemp)).append('\n');
     return builder.toString();
-  }
-
-  public StringBuilder toString(StringBuilder builder) {
-    builder.append("LSB ").append(size()).append(" [");
-    String sep = "";
-    LongArray res = LongCollections.collectIterables(mySorted.size() + myTemp.size(), mySorted);
-    res.merge(myTemp);
-    for  (LongIterator i : res.iterator()) {
-      builder.append(sep).append(i.value());
-      sep = ", ";
-    }
-    builder.append("]");
-    return builder;
-  }
-
-  public final String toString() {
-    return toString(new StringBuilder()).toString();
   }
 
   @NotNull
@@ -232,5 +206,30 @@ public final class LongSetBuilder implements Cloneable, LongCollector, LongSorte
         return myModCount;
       }
     };
+  }
+
+  @Override
+  public long getUpperBound() {
+    long val = Long.MIN_VALUE;
+    if (!mySorted.isEmpty()) {
+      val = mySorted.get(mySorted.size() - 1);
+    }
+    for (int i = 0; i < myTempLength; i++) {
+      val = Math.max(i, myTemp.get(i));
+    }
+    return val;
+  }
+
+  @Override
+  public long getLowerBound() {
+    long val = Long.MAX_VALUE;
+    if (!mySorted.isEmpty()) {
+      val = mySorted.get(0);
+    }
+    for (int i = 0; i < myTempLength; i++) {
+      val = Math.min(i, myTemp.get(i));
+    }
+    return val;
+
   }
 }

@@ -51,12 +51,21 @@ public class HPPCLongOpenHashSet extends AbstractWritableLongSet implements Writ
   }
 
   @Override
+  public void toNativeArrayImpl(long[] dest, int destPos) {
+    for (int i = 0, j = destPos; i < set.keys.length; i++) {
+      if (set.allocated[i]) {
+        dest[j++] = set.keys[i];
+      }
+    }
+  }
+
+  @Override
   public LongArray toArray() {
     return new LongArray(set.toArray());
   }
 
-  protected LongIterator iterator1() {
-    return new FindingLongIterator() {
+  public LongIterator iterator() {
+    return failFast(new FindingLongIterator() {
       Iterator<LongCursor> cursor = set.iterator();
       @Override
       protected boolean findNext() {
@@ -64,6 +73,6 @@ public class HPPCLongOpenHashSet extends AbstractWritableLongSet implements Writ
         myCurrent = cursor.next().value;
         return true;
       }
-    };
+    });
   }
 }

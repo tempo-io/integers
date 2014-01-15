@@ -14,7 +14,7 @@ public interface WritableLongSet extends LongCollector, LongSet {
   void remove(long value);
 
   /**
-   * Removes from this set all elements that are contained in the {@code values}
+   * Removes from this set all elements that are contained in {@code values}
    */
   void removeAll(long ... values);
 
@@ -29,8 +29,9 @@ public interface WritableLongSet extends LongCollector, LongSet {
   void removeAll(LongIterator iterator);
 
   /**
-   * retain this set with values
-   * @return this
+   * Removes from this set all of its elements that are not contained in the specified list.
+   * @see #removeAll(LongList)
+   * @see #containsAll(LongIterable)
    * */
   void retain(LongList values);
 

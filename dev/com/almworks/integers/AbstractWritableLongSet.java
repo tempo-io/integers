@@ -4,7 +4,7 @@ import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.util.FailFastLongIterator;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AbstractWritableLongSet implements WritableLongSet {
+public abstract class AbstractWritableLongSet extends AbstractLongSet implements WritableLongSet {
   protected int myModCount = 0;
 
   /**
@@ -17,7 +17,17 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
    */
   protected abstract boolean exclude0(long value);
 
-  protected abstract LongIterator iterator1();
+  protected abstract void toNativeArrayImpl(long[] dest, int destPos);
+
+  public abstract LongIterator iterator();
+
+  protected void add0(long value) {
+    include0(value);
+  }
+
+  protected void remove0(long value) {
+    exclude0(value);
+  }
 
   protected void modified() {
     myModCount++;
@@ -40,17 +50,9 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
     add0(value);
   }
 
-  protected void add0(long value) {
-    include0(value);
-  }
-
   public void remove(long value) {
     modified();
     remove0(value);
-  }
-
-  protected void remove0(long value) {
-    exclude0(value);
   }
 
   @Override
@@ -101,15 +103,6 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
   }
 
   @Override
-  public boolean containsAll(LongIterable iterable) {
-    if (iterable == this) return true;
-    for (LongIterator it: iterable.iterator()) {
-      if (!contains(it.nextValue())) return false;
-    }
-    return true;
-  }
-
-  @Override
   public void retain(LongList values) {
     LongArray res = new LongArray();
     for (LongIterator it: values.iterator()) {
@@ -120,42 +113,12 @@ public abstract class AbstractWritableLongSet implements WritableLongSet {
     addAll(res);
   }
 
-  @Override
-  public boolean isEmpty() {
-    return size() == 0;
-  }
-
-  @NotNull
-  @Override
-  public LongIterator iterator() {
-    return new FailFastLongIterator(iterator1()) {
+  protected final LongIterator failFast(LongIterator iter) {
+    return new FailFastLongIterator(iter) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
       }
     };
-  }
-
-  public StringBuilder toString(StringBuilder builder) {
-    String name = getClass().getSimpleName();
-    // LongAmortizedSet -> LAS, LongTreeSet -> LTS
-    for (int i = 0; i < name.length(); i++) {
-      char c = name.charAt(i);
-      if ('A' <= c && c <= 'Z') {
-        builder.append(c);
-      }
-    }
-    builder.append(" ").append(size()).append(" [");
-    String sep = "";
-    for  (LongIterator ii : this) {
-      builder.append(sep).append(ii.value());
-      sep = ", ";
-    }
-    builder.append("]");
-    return builder;
-  }
-
-  public final String toString() {
-    return toString(new StringBuilder()).toString();
   }
 }

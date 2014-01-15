@@ -1,24 +1,21 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.BitSet;
 
-import static com.almworks.integers.IntegersUtils.rehash;
-
 public class LongChainHashSet extends AbstractWritableLongSet implements WritableLongSet {
   private int[] myHead;
   private int[] myNext;
-  // todo myKeys LongArray
   private long[] myKeys;
+
   private int myHeadNum;
   private int cnt = 1;
-  private float loadFactor;
   private int threshold;
   private int mySize = 0;
-  private BitSet myRemoved = new BitSet();
+  private final float loadFactor;
+  private final BitSet myRemoved = new BitSet();
 
   static final int DEFAULT_INITIAL_CAPACITY = 16;
   static final float DEFAULT_LOAD_FACTOR = 0.75f;
@@ -57,29 +54,30 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     return new LongChainHashSet(initialCapacity, loadFactor);
   }
 
-  public static LongChainHashSet createWithCapacity(int initialCapacity) {
+  public static LongChainHashSet createForAdd(int initialCapacity) {
     return createForAdd(initialCapacity, DEFAULT_LOAD_FACTOR);
   }
-
 
   private void resize(int newCapacity) {
     // check that newCapacity = 2^k
     assert (newCapacity & (newCapacity - 1)) == 0 && newCapacity > 0;
+    assert cnt == size() + 1 + myRemoved.cardinality();
+
     int mask = newCapacity - 1;
     int thresholdNew = (int)(newCapacity * loadFactor);
     int[] myHeadNew = new int[newCapacity + 1];
     int[] myNextNew = new int[thresholdNew + 1];
 
-    cnt = 1;
-    LongArray buffer = LongCollections.collectIterables(thresholdNew + 1, new LongIterator.Single(0), toArray());
-    long[] myKeysNew = buffer.extractHostArray();
+    long[] myKeysNew = new long[thresholdNew + 1];
+    myKeysNew[0] = 0;
+    toNativeArray(myKeysNew, 1);
 
     for (int i = 1; i <= mySize; i++) {
       int h = index(hash(myKeysNew[i]), mask);
-      myNextNew[cnt] = myHeadNew[h];
-      myHeadNew[h] = cnt++;
+      myNextNew[i] = myHeadNew[h];
+      myHeadNew[h] = i;
     }
-
+    cnt = mySize + 1;
     myNext = myNextNew;
     myKeys = myKeysNew;
     myHead = myHeadNew;
@@ -95,32 +93,42 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     return include1(value);
   }
 
-  protected boolean include1(long value) {
-    if (contains(value)) return false;
+  private int createNode(long value) {
     mySize++;
-    int h = index(hash(value), myMask);
-
-    int x;
+    int res;
     if (myRemoved.isEmpty()) {
-      x = cnt++;
+      assert cnt < threshold;
+      res = cnt++;
     } else {
-      x = myRemoved.nextSetBit(0);
-      myRemoved.clear(x);
+      res = myRemoved.nextSetBit(0);
+      myRemoved.clear(res);
     }
-//    if (myNext.length == 49) {
-//      System.out.println(myNext.length + " " + myKeys.length + " " + x);
-//    }
-    myNext[x] = myHead[h];
-    myKeys[x] = value;
-    myHead[h] = x;
+    myKeys[res] = value;
+    myNext[res] = 0;
+    return res;
+  }
+
+  protected boolean include1(long value) {
+    int h = index(hash(value), myMask);
+    int prev = myHead[h];
+    if (prev == 0) {
+      myHead[h] = createNode(value);
+      return true;
+    }
+    for (int cur = prev; cur != 0; cur = myNext[cur]) {
+      if (myKeys[cur] == value) {
+        return false;
+      }
+      prev = cur;
+    }
+    myNext[prev] = createNode(value);
     return true;
   }
 
   @Override
   public void addAll(LongList values) {
     modified();
-    int valuesSize = values.size();
-    int newSize = size() + valuesSize;
+    int newSize = size() + values.size();
     if (newSize >= threshold) {
       int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / loadFactor) + 1);
       resize(newCap);
@@ -164,23 +172,23 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     mySize--;
   }
 
-  private int hash(long value) {
-    return rehash(value);
+  protected int hash(long value) {
+    return IntegersUtils.hash(value);
 //    return ((int)(value ^ (value >>> 32))) + 1;
   }
 
   private int index(int hash, int mask) {
     // length = 2^k
-    assert mask > 0 && (mask & (mask + 1)) == 0 : mask;
-    return (hash > 0 ? hash : -hash) & mask;
+    // "hash & mask" equal to "hash % length"
+    return hash & mask;
   }
 
   public int size() {
     return mySize;
   }
 
-  protected LongIterator iterator1() {
-    return new FindingLongIterator() {
+  public LongIterator iterator() {
+    return failFast(new FindingLongIterator() {
       private int curHead = 0;
       private int curIndex = 0;
 
@@ -194,7 +202,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
         curIndex = myNext[curIndex];
         return true;
       }
-    };
+    });
   }
 
   public void clear() {
@@ -202,29 +210,25 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     cnt = 1;
     mySize = 0;
     Arrays.fill(myHead, 0);
-    Arrays.fill(myNext, 0);
-    Arrays.fill(myKeys, 0);
     myRemoved.clear();
   }
 
   @Override
-  public LongArray toArray() {
+  public void toNativeArrayImpl(long[] dest, int destPos) {
     // todo add 2 variants: below and new LongArray(iterator()) if myRemoved.cardinality() > size() / 10
-    long[] res = new long[size()];
-    LongArray myKeysArray = new LongArray(myKeys, size());
     int from = 1, to = myRemoved.nextSetBit(from);
-    int index = 0;
+    int index = destPos;
+    int len;
     while (to != -1) {
-      int len = to - from;
+      len = to - from;
       if (len != 0){
-        myKeysArray.toNativeArray(from, res, index, len);
+        System.arraycopy(myKeys, from, dest, index, len);
         index += len;
       }
       from = to + 1;
       to = myRemoved.nextSetBit(from);
     }
-    myKeysArray.toNativeArray(from, res, index, res.length - index);
-    return new LongArray(res);
+    System.arraycopy(myKeys, from, dest, index, cnt - from);
   }
 
   public boolean contains(long value) {

@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.util.*;
 
+import static com.almworks.integers.IntIterators.range;
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 
@@ -102,6 +103,32 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     myKeys[0] = NIL_DUMMY_KEY;
   }
 
+  /**
+   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
+   *                     if the last one is unfilled.
+   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
+   *   <br>BALANCED colors every 4th non-last level red;
+   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+   * @return new {@code LongTreeSet} with elements from {@code src} with the specified capacity and coloring type.
+   */
+  public static LongTreeSet createFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
+    if (capacity < 0) throw new IllegalArgumentException();
+    LongTreeSet res = new LongTreeSet();
+    res.initFromSortedUnique(src, capacity, coloringType);
+    return res;
+  }
+
+  /**
+   * To create {@code LongTreeSet} with the specified capacity use
+   * {@link com.almworks.integers.LongTreeSet#createFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
+   * @return {@code LongTreeSet} with elements from {@code src}.
+   * If {@code src} inherited from {@code LongSizedIterable} capacity of new set equals to {@code src.size()}.
+   */
+  public static LongTreeSet createFromSortedUnique(LongIterable src) {
+    return createFromSortedUnique(src,
+        LongCollections.sizeOfIterable(src, 0), ColoringType.BALANCED);
+  }
+
   private void init() {
     myKeys = EMPTY_KEYS;
     myLeft = EMPTY_INDEXES;
@@ -120,12 +147,10 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("clear");
   }
 
-  /** @return {@link Long#MIN_VALUE} in case the set is empty */
   public long getUpperBound() {
     return myKeys[traverseToEnd(myRight)];
   }
 
-  /** @return {@link Long#MAX_VALUE} in case the set is empty */
   public long getLowerBound() {
     if (isEmpty()) return Long.MAX_VALUE;
     return myKeys[traverseToEnd(myLeft)];
@@ -207,6 +232,9 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
   private boolean include0(long key, int[] ps) {
     int x = myRoot;
+    // we need these zeros for the balancing,
+    // where we need to know the parent and the grandparent of the node being balanced;
+    // since we start from the root, its parent and grandparent are zeros
     ps[0] = 0;
     ps[1] = 0;
     // Parents stack top + 1
@@ -223,7 +251,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
     // x is RED already (myBlack.get(x) == false), so no modifications to myBlack
     // Insert into the tree
-    if (ps[psi - 1] == 0) myRoot = x;
+    if (psi == 2) myRoot = x;
     else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
     balanceAfterAdd(x, ps, psi, key);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("add key:" + key);
@@ -239,8 +267,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
       myRemoved.clear(x);
     }
     myKeys[x] = key;
-    myLeft[x] = 0;
-    myRight[x] = 0;
+    myLeft[x] = myRight[x] = 0;
     myBlack.clear(x);
     return x;
   }
@@ -351,7 +378,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
    * @param n difference between future size and actual size
    */
   private int[] fetchStackCache(int n) {
-    // 2 is for the add(): sometimes we need to know the grand-grand-father
+    // 2 is for the add(): sometimes we need to know the grandparent
     int fh = height(size() + n) + 2;
     if (myStackCache.length < fh) {
       myStackCache = new int[fh];
@@ -407,81 +434,65 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     assert checkRedsAmount(coloringType);
   }
 
-  /**
-   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
-   *                     if the last one is unfilled.
-   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red;
-   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
-   * @return new {@code LongTreeSet} with elements from {@code src} with the specified capacity and coloring type.
-   */
-  public static LongTreeSet createFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
-    if (capacity < 0) throw new IllegalArgumentException();
-    LongTreeSet res = new LongTreeSet();
-    res.initFromSortedUnique(src, capacity, coloringType);
-    return res;
-  }
-
   private void initFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
-    long[] newKeys;
-    if (capacity == 0 && !src.iterator().hasNext())
-      newKeys = EMPTY_KEYS;
-    else {
-      LongArray buf = LongCollections.collectIterables(capacity + 1, new LongIterator.Single(NIL_DUMMY_KEY), src);
-      assert buf.isUniqueSorted();
-      newKeys = buf.extractHostArray();
-    }
-    initFromPreparedArray(newKeys, capacity, coloringType);
+    LongArray buf = LongCollections.collectIterables(capacity + 1, new LongIterator.Single(NIL_DUMMY_KEY), src);
+    int size = buf.size() - 1;
+    long[] newKeys = buf.extractHostArray();
+    assert LongCollections.isSortedUnique(false, newKeys, 1, size) == 0;
+    initFromPreparedArray(newKeys, size, coloringType);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("initFromSortedUnique");
   }
 
-  /**
-   * To create {@code LongTreeSet} with the specified capacity use
-   * {@link com.almworks.integers.LongTreeSet#createFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
-   * @return {@code LongTreeSet} with elements from {@code src}.
-   * If {@code src} inherited from {@code LongSizedIterable} capacity of new set equals to {@code src.size()}.
-   */
-  public static LongTreeSet createFromSortedUnique(LongIterable src) {
-    LongTreeSet res = new LongTreeSet();
-    res.initFromSortedUnique(src, (src instanceof LongSizedIterable) ? ((LongSizedIterable) src).size() : 0, ColoringType.BALANCED);
-    return res;
-  }
-
+  //   An idea of another BALANCED coloring that is a good tradeoff between TO_ADD and TO_REMOVE.
+  // We don't do rotations in add() if the parent is black;
+  // we don't do rotations in remove() if the removed node is red.
+  //
+  // Obviously, the probability of both events depends on the ratio of red nodes to all nodes,
+  // and in first case it should be minimal (TO_ADD gives 0),
+  // whereas in the second case in should be maximal (TO_REMOVE gives 2/3 + Θ(1/N));
+  //
+  // also, if we do inverse operations (remove() in the first case, add() in the second),
+  // it's quite clear that the probability of rotations will reach the maximum with these colorings,
+  // so as we take a somewhat-in-between ratio, this probability goes down.
+  //
+  // The consequence is that a good BALANCED setting will be the one that colors roughly half of the nodes red.
+  //
+  // Let's consider the full tree case first.
+  // It's obvious that if we color the last level red, the ratio will be 1/2 + Θ(1/N).
+  //
+  // Now, if the last level is not fully packed, let's do it this way:
+  // If more than 7/8 of the last level is filled, then we color just the last level.
+  // The ratio in this case has lower bound 7/16 or ~44%.
+  // Otherwise, color the level two levels higher (it contains 1/4 of what the last level would contain, if it had been fully packed.)
+  // If it's not enough, add level four levels higher, and so on.
+  // So we check if the number of nodes on the last level, d, falls into these segments:
+  //
+  // | if d > 7/8 = 1/2 + 3/4*1/2      | color 1 level (the last one) | ratio: 44..50% |
+  // | otherwise, if d > 1/2 + 3/4*1/4 | 2 levels                     | ratio: 47..56% |
+  // | otherwise, if d > 1/2 + 3/4*1/8 | 3 levels                     | ratio: 48..53% |
+  // ...
+  // We can just use a simple formula to get the amount of levels, starting from the last one, that need to be colored red:
+  // k = floor(log_2(n)); d = n - (2^k - 1); [amount of levels] = - floor(4/3*log_2(d/(2^k) - 1/2))
+  // And then just color these amount of lower levels.
   /**
    * @param newKeys array which will become the new myKeys
    * @param usedSize a number of actual elements in newKeys
+   * @param coloringType a type of coloring new tree
    *
-   *   An idea of another BALANCED coloring that is a good tradeoff between TO_ADD and TO_REMOVE.
-   * We don't do rotations in add() if the parent is black;
-   * we don't do rotations in remove() if the removed node is red.
-   *
-   * Obviously, the probability of both events depends on the ratio of red nodes to all nodes,
-   * and in first case it should be minimal (TO_ADD gives 0),
-   * whereas in the second case in should be maximal (TO_REMOVE gives 2/3 + Θ(1/N));
-   *
-   * also, if we do inverse operations (remove() in the first case, add() in the second),
-   * it's quite clear that the probability of rotations will reach the maximum with these colorings,
-   * so as we take a somewhat-in-between ratio, this probability goes down.
-   *
-   * The consequence is that a good BALANCED setting will be the one that colors roughly half of the nodes red.
-   *
-   * Let's consider the full tree case first.
-   * It's obvious that if we color the last level red, the ratio will be 1/2 + Θ(1/N).
-   *
-   * Now, if the last level is not fully packed, let's do it this way:
-   * If more than 7/8 of the last level is filled, then we color just the last level.
-   * The ratio in this case has lower bound 7/16 or ~44%.
-   * Otherwise, color the level two levels higher (it contains 1/4 of what the last level would contain, if it had been fully packed.)
-   * If it's not enough, add level four levels higher, and so on.
-   * So we check if the number of nodes on the last level, d, falls into these segments:
-   *
-   * | if d > 7/8 = 1/2 + 3/4*1/2      | color 1 level (the last one) | ratio: 44..50% |
-   * | otherwise, if d > 1/2 + 3/4*1/4 | 2 levels                     | ratio: 47..56% |
-   * | otherwise, if d > 1/2 + 3/4*1/8 | 3 levels                     | ratio: 48..53% |
-   * ...
-   * We can just use a simple formula to get the amount of levels, starting from the last one, that need to be colored red:
-   * k = floor(log_2(n)); d = n - (2^k - 1); [amount of levels] = - floor(4/3*log_2(d/(2^k) - 1/2))
-   * And then just color these amount of lower levels.
+   * <br>For ADD, we want to maximize the amount of black nodes. We can color all levels except the last if it not completely filled.
+   * <br>For REMOVED, we want to maximize the amount of red nodes. An easy way to do this is to color the whole levels,
+   * making each second level red. (We don't implement the more optimal but harder approach.) We start with the
+   * last level, which we color red, and go bottom-up, which is the optimal way if we color each second level red;
+   * let's see why.
+   * If the tree is not full (N != 2^K - 1), we must color the last level red to keep black heights equal on all
+   * paths.
+   * Otherwise, let us assume that level numbering starts with 0, which is the black root. So, the last level
+   * will have number K-1. There are two cases.
+   * K is odd: if we color red each second level starting from the last one, the first colored level will have
+   * number 2, and we'll have 2^2 + 2^4 + ... + 2^{K - 1} red nodes (2/3 of the whole tree); if we did otherwise
+   * (color from level 1), we'd have 2^1 + 2^3 + ... + 2^{K - 2} red nodes, which is 2 times less.
+   * K is even: color levels from the last level up to the level number 1, it is better than coloring from level
+   * number 2: 2^1 + 2^3 + ... + 2^{K - 1} > 2^2 + ... + 2^{K - 2}.
    */
   private void initFromPreparedArray(long[] newKeys, int usedSize, ColoringType coloringType) {
     myBlack = new BitSet(usedSize);
@@ -495,64 +506,42 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     myLeft = new int[myKeys.length];
     myRight = new int[myKeys.length];
 
-    int levels = log(2, usedSize);
-    int top = 1 << levels;
-    int redLevelsDensity = coloringType.redLevelsDensity();
-    // Definition: last pair is any pair of nodes which belong to one parent and don't have children.
-    // If the last level contains only left children, then, due to the way the last level is filled,
-    // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
-    // Otherwise they belong entirely to the last level and are red.
-    boolean lastPairsAreBlack;
-    if (top != usedSize + 1) {
-      lastPairsAreBlack = (usedSize < 3 * top / 4);
+    int levels = log(2, usedSize), step = coloringType.redLevelsDensity();
+    boolean[] levelsColoring = new boolean[levels];
+
+    // coloring of levels: (1 - black, 0 - red)
+    // TO_ADD:      1...1111110 (or 1...1111111 if last level completely filled)
+    // TO_REMOVE:   1...0101010
+    // TO_BALANCED: 1...0111011101110
+    Arrays.fill(levelsColoring, true);
+    if (coloringType == ColoringType.TO_ADD) {
+      // if last level completely filled (usedSize = 2^k - 1) and cT = TO_ADD color is black otherwise red
+      levelsColoring[levels - 1] = (usedSize & (usedSize + 1)) == 0;
     } else {
-      lastPairsAreBlack = (coloringType == ColoringType.TO_ADD) || (levels + redLevelsDensity - 2) % redLevelsDensity != 0;
+      for (IntIterator it: range(levels - 1, 0, -step)) {
+        levelsColoring[it.value()] = false;
+      }
     }
-    // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
-    int startingCounter = (coloringType == ColoringType.TO_ADD) ? 0 : 2;
-    myRoot = rearrangeStep(1, usedSize, startingCounter, redLevelsDensity, lastPairsAreBlack);
+    myRoot = rearrangeStep(1, usedSize, 0, levelsColoring);
   }
 
-  private int rearrangeStep(int offset, int length, int colorCounter, int maxCounter, boolean lpab) {
-    int halfLength = length/2;
+  private int rearrangeStep(int offset, int length, int curLevel, boolean[] levelsColoring) {
+    if (length == 0) return 0;
+    int halfLength = length / 2;
     int index = offset + halfLength;
-    if (length == 1)
-      myBlack.set(index, lpab);
-    else if (length == 2) {
-      myBlack.set(index);
-      myLeft[index] = offset;
-    } else {
-      // calculating the node color
-      boolean isBlack = true;
-      if (colorCounter == 1) {
-        isBlack = false;
-        colorCounter = maxCounter;
-      } else if (colorCounter > 1) {
-        colorCounter--;
-      }
+    myBlack.set(index, levelsColoring[curLevel]);
 
-      if (length == 3 && !lpab)
-        myBlack.set(index);
-      else
-        myBlack.set(index, isBlack);
-      myLeft[index] = rearrangeStep(offset, halfLength, colorCounter, maxCounter, lpab);
-      myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, colorCounter, maxCounter, lpab);
-    }
+    myLeft[index] = rearrangeStep(offset, halfLength, curLevel + 1, levelsColoring);
+    myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, curLevel + 1, levelsColoring);
     return index;
   }
 
-  @NotNull
-  protected LongIterator iterator1() {
-    return new IndexedLongIterator(new LongArray(myKeys), new LURIterator());
+  public LongIterator iterator() {
+    return failFast(new IndexedLongIterator(new LongArray(myKeys), new LURIterator()));
   }
 
   public LongIterator tailIterator(long fromElement) {
-    return new FailFastLongIterator(new IndexedLongIterator(new LongArray(myKeys), new LURIterator(fromElement))) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
+    return failFast(new IndexedLongIterator(new LongArray(myKeys), new LURIterator(fromElement)));
   }
 
   @Override
@@ -596,7 +585,6 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     array.retainSorted(set.toArray());
     clear();
     initFromSortedUnique(array, array.size(), ColoringType.BALANCED);
-    createFromSortedUnique(array);
   }
 
   private void maybeShrink() {
@@ -721,13 +709,12 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     return myKeys[x] == NIL_DUMMY_KEY ? "NIL" : String.valueOf(myKeys[x]);
   }
 
-  public LongArray toArray() {
-    long[] arr = new long[size()];
-    int i = 0;
+  @Override
+  public void toNativeArrayImpl(long[] dest, int destPos) {
+    int i = destPos;
     for (IntIterator it : new LURIterator()) {
-      arr[i++] = myKeys[it.value()];
+      dest[i++] = myKeys[it.value()];
     }
-    return new LongArray(arr);
   }
 
   public String toDebugString() {
@@ -925,8 +912,25 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     });
   }
 
+//  int levels = log(2, usedSize), step = coloringType.redLevelsDensity();
+//  boolean[] levelsColoring = new boolean[levels];
+//
+//  // coloring of levels: (1 - black, 0 - red)
+//  // TO_ADD:      1...1111110 (or 1...1111111 if last level completely filled)
+//  // TO_REMOVE:   1...0101010
+//  // TO_BALANCED: 1...0111011101110
+//  Arrays.fill(levelsColoring, true);
+//  if (coloringType == ColoringType.TO_ADD) {
+//    // if last level completely filled (usedSize = 2^k - 1) and cT = TO_ADD color is black otherwise red
+//    levelsColoring[levels - 1] = (usedSize & (usedSize + 1)) == 0;
+//  } else {
+//    for (IntIterator it: range(levels - 1, 0, -step)) {
+//      levelsColoring[it.value()] = false;
+//    }
+//  }
+
   /**
-   Calculates the expected amount of red nodes in a tree of a size sz after it is compactified with coloringType.
+   * Calculates the expected amount of red nodes in a tree of a size sz after it is compactified with coloringType.
    */
   static int redsExpected(int sz, ColoringType coloringType) {
     int result = 0;
@@ -955,7 +959,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
     int sz = size();
     int expected = redsExpected(sz, coloringType);
     int actual = sz - myBlack.cardinality() + 1;
-    assert expected == actual : sz + " " + actual + " " + expected;
+//    assert expected == actual : sz + " " + actual + " " + expected;
     return true;
   }
 

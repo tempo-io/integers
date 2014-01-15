@@ -16,17 +16,16 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.util.LongSetBuilder;
-
 import java.lang.reflect.Field;
+
+import static com.almworks.integers.LongTreeSet.ColoringType.BALANCED;
+import static com.almworks.integers.LongTreeSet.ColoringType.TO_ADD;
+import static com.almworks.integers.LongTreeSet.ColoringType.TO_REMOVE;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
 public class LongTreeSetTests extends WritableLongSetChecker {
-
-  private static final long MIN = Long.MIN_VALUE;
-  private static final long MAX = Long.MAX_VALUE;
 
   protected WritableLongSortedSet createSet() {
     return createSetWithCapacity(-1);
@@ -50,8 +49,8 @@ public class LongTreeSetTests extends WritableLongSetChecker {
   protected WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
     return new WritableLongSortedSet[]{
         LongTreeSet.createFromSortedUnique(sortedList),
-        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), LongTreeSet.ColoringType.TO_ADD),
-        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), LongTreeSet.ColoringType.TO_REMOVE)
+        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_ADD),
+        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_REMOVE)
     };
   }
 
@@ -62,12 +61,12 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     LongArray toAdd = new LongArray(listSize);
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
       LongTreeSet treeSet = new LongTreeSet(setSize);
-      LongArray expected = generateRandomLongArray(setSize, false);
+      LongArray expected = generateRandomLongArray( setSize, IntegersFixture.SortedStatus.UNORDERED);
       treeSet.addAll(expected);
       expected.sortUnique();
 
       toAdd.clear();
-      toAdd.addAll(generateRandomLongArray(listSize, true));
+      toAdd.addAll(generateRandomLongArray( listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE));
       for (LongIterator it: treeSet) {
         toAdd.removeAllSorted(it.value());
       }
@@ -112,36 +111,38 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     assertFalse(set.contains(0));
   }
 
-  public void testGetBounds() {
-    LongTreeSet set = new LongTreeSet();
-    assertEquals(MAX, set.getLowerBound());
-    assertEquals(MIN, set.getUpperBound());
-    set.addAll(0, 2);
-    assertEquals(0, set.getLowerBound());
-    assertEquals(2, set.getUpperBound());
-    set.removeAll(0, 2);
-    assertEquals(MAX, set.getLowerBound());
-    assertEquals(MIN, set.getUpperBound());
-    set.add(MIN);
-    assertEquals(MIN, set.getLowerBound());
-    assertEquals(MIN, set.getUpperBound());
+  public void testStaticConstructorsSimple() {
+    for (LongArray array : LongCollections.allSubLists(LongArray.create(Long.MIN_VALUE, Long.MIN_VALUE + 1, -1, 0, 1, Long.MAX_VALUE))) {
+      checkSet(LongTreeSet.createFromSortedUnique(array), array);
+    }
   }
 
-  public void testRetainSimple2() {
-    LongTreeSet set = new LongTreeSet();
-    set.addAll(ap(0, 2, 30));
-    LongSortedSet otherSet = createSetFromSortedList(LongArray.create(ap(0, 3, 20)))[0];
-    set.retain(otherSet);
-    checkSet(set, LongArray.create(ap(0, 6, 10)));
+  public void testStaticConstructorsRandom() {
+    int listSize = 510, nAttempts = 12;
+    LongTreeSet.ColoringType[] types = {TO_ADD, TO_REMOVE, BALANCED};
 
-    set = new LongTreeSet();
-    for (int i = 0; i < 2; i++) {
-      set.addAll(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24);
-      otherSet = createSetFromSortedList(LongArray.create(3, 6, 9, 12, 15, 18, 21, 24))[0];
-      set.retain(otherSet);
-      checkSet(set, LongArray.create(6, 12, 18, 24));
-      set.clear();
+    LongTreeSet set;
+
+    for (int attempt = 0; attempt < nAttempts; attempt++) {
+      LongArray sortedUniqueArray = generateRandomLongArray( listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
+      if (attempt % 4 == 0) {
+        set = LongTreeSet.createFromSortedUnique(sortedUniqueArray);
+      } else {
+        set = LongTreeSet.createFromSortedUnique(
+            sortedUniqueArray.iterator(), RAND.nextInt(listSize * 2), types[attempt % 4  - 1]);
+      }
+      checkSet(set, sortedUniqueArray);
     }
+  }
 
+  public void _test() {
+    for (int len = 1; len < 66; len++) {
+      System.out.println("data: " + LongCollections.toBoundedString(LongIterators.range(len - 1)));
+      LongTreeSet set = LongTreeSet.createFromSortedUnique(LongIterators.range(len - 1), len, TO_REMOVE);
+      System.out.println("set : " + LongCollections.toBoundedString(set));
+      System.out.println(set.toDebugString());
+      System.out.println("---------------------------------");
+      if (len == 30) len *= 2;
+    }
   }
 }
