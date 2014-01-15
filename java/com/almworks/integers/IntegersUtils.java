@@ -304,29 +304,27 @@ public final class IntegersUtils {
    * MurmurHash3
    * Hashes a 4-byte sequence (Java int).
    */
-  public static int rehash(int k)
-  {
+  public static int hash(int k) {
     k ^= k >>> 16;
     k *= 0x85ebca6b;
     k ^= k >>> 13;
     k *= 0xc2b2ae35;
     k ^= k >>> 16;
-    return k & MAX_INT;
+    return k;
   }
 
   /**
    * MurmurHash3
    * Hashes an 8-byte sequence (Java long).
    */
-  public static int rehash(long k)
-  {
+  public static int hash(long k) {
     k ^= k >>> 33;
     k *= 0xff51afd7ed558ccdL;
     k ^= k >>> 33;
     k *= 0xc4ceb9fe1a85ec53L;
     k ^= k >>> 33;
 
-    return (int)k & MAX_INT;
+    return (int)k;
   }
 
   private IntegersUtils() {}

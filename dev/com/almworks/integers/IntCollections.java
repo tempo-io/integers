@@ -27,6 +27,19 @@ import java.util.*;
 import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public class IntCollections {
+  public static IntArray collectLists(IntList ... lists) {
+    int capacity = 0;
+    for (IntList list : lists) {
+      capacity += list.size();
+    }
+
+    IntArray res = new IntArray(capacity);
+    for (IntList list : lists) {
+      res.addAll(list);
+    }
+    return res;
+  }
+
   public static int[] toNativeArray(IntIterable iterable) {
     if (iterable instanceof IntList) return ((IntList) iterable).toNativeArray();
     return toNativeArray(iterable.iterator());

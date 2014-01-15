@@ -26,9 +26,7 @@ import com.almworks.integers.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
@@ -81,18 +79,17 @@ public class LongCollections {
     int res = isSortedUnique(true, values, 0, values.length);
     if (res == 0) return new LongArray(values);
     if (res < 0) {
-      long[] copy = new long[-res];
-      int i = 1;
-      long prev = values[0];
+      long prev, copy[] = new long[values.length + res];
+      int i = 0;
+      copy[0] = prev = values[0];
       for (int j = 1; j < values.length; j++) {
         long value = values[j];
         if (value > prev) {
-          copy[i] = value;
           i++;
-          prev = value;
+          copy[i] = prev = value;
         }
       }
-      assert i == copy.length;
+      assert i + 1 == copy.length : i + " " + copy.length + " " + res;
       return new LongArray(copy);
     }
     LongArray copy = LongArray.copy(values);
@@ -272,15 +269,16 @@ public class LongCollections {
   }
 
   /**
-   * Returns the index of the first occurrence of the {@code value}
+   * Returns the index of the first occurrence of {@code value}
    * in the specified array on the specified interval, or -1 if this array does not contain the element.
    * @param from starting index, inclusive
    * @param to ending index, exclusive
    * */
   public static int indexOf(long[] array, int from, int to, long value) {
     for (int i = from; i < to; i++) {
-      if (array[i] == value)
+      if (array[i] == value) {
         return i;
+      }
     }
     return -1;
   }
@@ -354,7 +352,7 @@ public class LongCollections {
    * @param b sorted {@code LongList}
    * @return union of {@code a} and {@code b} without elements that are contained both in {@code a} and {@code b}
    */
-  public static LongList diffSortedLists(LongList a, LongList b) {
+  public static LongList diffSortedUniqueLists(LongList a, LongList b) {
     int ia = 0;
     int sza = a.size();
     int ib = 0;
@@ -432,20 +430,72 @@ public class LongCollections {
   }
 
   /**
-   * @return union of the two sets
+   * @return the set - union of the specified sets
    */
-  public static LongTreeSet union(LongSet first, LongSet second) {
-    LongArray[] arrays = {first.toArray(), second.toArray()};
-    if (!(first instanceof LongSortedSet)) arrays[0].sortUnique();
-    if (!(second instanceof LongSortedSet)) arrays[1].sortUnique();
-    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
-    arrays[dest].merge(arrays[1 - dest]);
-    return LongTreeSet.createFromSortedUnique(arrays[dest]);
+  public static WritableLongSet union(LongSet first, LongSet second) {
+    WritableLongSet set = LongOpenHashSet.createForAdd(first.size() + second.size());
+    set.addAll(first.iterator());
+    set.addAll(second.iterator());
+    return set;
   }
 
   /**
-   * @return intersection of the two sets
+   * @return the sorted set - union of the specified sets
    */
+  public static WritableLongSortedSet unionSorted(LongSet first, LongSet second) {
+    boolean firstSorted = (first instanceof LongSortedSet),
+        secondSorted = (second instanceof LongSortedSet);
+    if (firstSorted) {
+      LongArray buf;
+      if (secondSorted) {
+        buf = new LongArray(first.size() + second.size());
+        buf.addAll(new LongUnionIterator(first, second));
+      } else {
+        // second unsorted and probably hash
+        buf = second.toArray();
+        for (LongIterator it : first) {
+          if (!second.contains(it.value())) {
+            buf.add(it.value());
+          }
+        }
+        buf.sortUnique();
+      }
+      return LongAmortizedSet.createFromSortedUniqueArray(buf);
+    }
+    if (secondSorted) {
+      // first unsorted and probably hash
+      LongArray buf = first.toArray();
+      for (LongIterator it : second) {
+        if (!first.contains(it.value())) {
+          buf.add(it.value());
+        }
+      }
+      buf.sortUnique();
+      return LongAmortizedSet.createFromSortedUniqueArray(buf);
+    }
+    LongArray buf;
+    if (first.size() > second.size()) {
+      buf = first.toArray();
+      for (LongIterator it : second) {
+        if (!first.contains(it.value())) {
+          buf.add(it.value());
+        }
+      }
+    } else {
+      buf = second.toArray();
+      for (LongIterator it : first) {
+        if (!second.contains(it.value())) {
+          buf.add(it.value());
+        }
+      }
+    }
+    buf.sortUnique();
+    return LongAmortizedSet.createFromSortedUniqueArray(buf);
+  }
+
+  /**
+     * @return intersection of the two sets
+     */
   public static LongTreeSet intersection(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     if (!(first instanceof LongSortedSet)) arrays[0].sort();
@@ -459,30 +509,35 @@ public class LongCollections {
   /**
    * @return union of the specified lists
    */
-  public static LongList union(LongList... lists) {
-    if (lists == null) return null;
-    LongList union = null;
-    LongSetBuilder builder = null;
+  public static LongList collectToSortedUnique(LongList... lists) {
+    int sumSize = 0, count = 0, curIdx = -1;
+    int idx = 0;
     for (LongList list : lists) {
-      if (list != null && !list.isEmpty()) {
-        if (union == null) {
-          union = list;
-        } else {
-          if (builder == null) {
-            builder = new LongSetBuilder();
-            builder.addAll(union);
-          }
-          builder.addAll(list);
-        }
+      if (list != null && list.size() != 0) {
+        sumSize += list.size();
+        count++;
+        curIdx = idx;
+      }
+      idx++;
+    }
+    if (count == 0) {
+      return LongList.EMPTY;
+    }
+    if (count == 1) {
+      return lists[curIdx];
+    }
+    LongArray res = new LongArray(sumSize);
+    for (LongList list : lists) {
+      if (list != null) {
+        res.addAll(list);
       }
     }
-    if (builder != null) union = builder.commitToArray();
-    if (union == null) union = LongList.EMPTY;
-    return union;
+    res.sortUnique();
+    return res;
   }
 
   /**
-   * @param includeSorted sorted {@code LongList}
+   * @param includeSorted sorted unique {@code LongList}
    * @param excludeSorted sorted {@code LongList}
    * @return LongList that contains elements from {@code includeSorted}
    * with the exception of those elements that are contained in {@code excludeSorted}.
@@ -495,14 +550,14 @@ public class LongCollections {
     return complement.hasNext() ? collectIterables(includeSorted.size(), complement) : LongList.EMPTY;
   }
 
-
   /**
    * @return union of the specified lists
-   * @param aSorted sorted {@code LongList}
-   * @param bSorted sorted {@code LongList}
+   * @param aSorted sorted unique {@code LongList}
+   * @param bSorted sorted unique {@code LongList}
+   * @return union of the specified lists
    */
   @NotNull
-  public static LongList unionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
+  public static LongList unionSortedUnique(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? LongList.EMPTY : bSorted;
     if (bSorted == null || bSorted.isEmpty()) return aSorted;
     LongArray array;
@@ -518,18 +573,18 @@ public class LongCollections {
 
   /**
    * @return intersection of the specified lists
-   * @param aSorted sorted {@code LongList}
-   * @param bSorted sorted {@code LongList}
+   * @param aSorted sorted unique {@code LongList}
+   * @param bSorted sorted unique {@code LongList}
    */
   @NotNull
-  public static LongList intersectionSorted(@Nullable LongList aSorted, @Nullable LongList bSorted) {
+  public static LongList intersectionSortedUnique(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return LongList.EMPTY;
     LongIterator intersection = new LongIntersectionIterator(aSorted.iterator(), bSorted.iterator());
     return intersection.hasNext() ? collectIterables(Math.max(aSorted.size(), bSorted.size()), intersection) : LongList.EMPTY;
   }
 
   /**
-   * @return true if intersection of the specified lists is not empty otherwise false
+   * @return true if intersection of the specified lists is not empty, otherwise false
    * @param aSorted sorted {@code LongList}
    * @param bSorted sorted {@code LongList}
    */
@@ -540,7 +595,7 @@ public class LongCollections {
   }
 
   /**
-   * @return true if union of the specified lists is not empty otherwise false
+   * @return true if union of the specified lists is not empty, otherwise false
    * @param aSorted sorted {@code LongList}
    * @param bSorted sorted {@code LongList}
    */
@@ -549,7 +604,7 @@ public class LongCollections {
   }
 
   /**
-   * @return true if complement of the specified lists is not empty otherwise false
+   * @return true if complement of the specified lists is not empty, otherwise false
    * @param includeSorted sorted {@code LongList}
    * @param excludeSorted sorted {@code LongList}
    */
@@ -574,8 +629,8 @@ public class LongCollections {
 
   /**
    * Sorts lists comparing corresponding pairs of the specified arrays.
-   * @param secondary ties in this array are broken via elements of this array. Must not be shorter than {@code this list}
-   * @throws IllegalArgumentException in case the second array is shorter than the first
+   * @param secondary ties with {@code primary}. Must not be shorter than {@code primary}
+   * @throws IllegalArgumentException in case {@code secondary} is shorter than the {@code primary}
    * */
   public static void sortPairs(final WritableLongList primary, final WritableLongList secondary) throws IllegalArgumentException {
     if (primary.size() > secondary.size()) throw new IllegalArgumentException("This array is longer than sortAlso: " +
@@ -598,16 +653,27 @@ public class LongCollections {
   }
 
   /**
-   * @return array with elements from the {@code iterables}.
+   * @return array with elements from {@code iterables}.
    * @see #collectIterables(int, LongIterable...)
    */
   public static LongArray collectIterables(LongIterable ... iterables) {
     return collectIterables(0, iterables);
   }
 
+  public static LongArray collectLists(LongList ... lists) {
+    return new LongArray(new LongListConcatenation(lists));
+  }
+
+  /**
+   * @see #collectLists(LongList...)
+   */
+  public static LongList concatLists(LongList ... lists) {
+    return new LongListConcatenation(lists);
+  }
+
   /**
    * @param capacity initial capacity for array
-   * @return array with elements from the {@code iterables}.
+   * @return array with elements from {@code iterables}.
    */
   public static LongArray collectIterables(int capacity, LongIterable ... iterables) {
     LongArray res = new LongArray(capacity);
@@ -615,6 +681,7 @@ public class LongCollections {
       if (iterable instanceof LongList) {
         res.addAll((LongList) iterable);
       } else {
+
         if (iterable instanceof LongSizedIterable) {
           res.ensureCapacity(res.size() + ((LongSizedIterable) iterable).size());
         }
@@ -720,5 +787,48 @@ public class LongCollections {
       sb.append(", ").append(tailIt.nextValue());
     }
     return sb.append(")").toString();
+  }
+
+  public static Iterable<LongArray> allSubLists(final LongList list) {
+    return new Iterable<LongArray>() {
+
+      @Override
+      public Iterator<LongArray> iterator() {
+        return new Iterator<LongArray>() {
+          int mask = 0;
+          int size = 1 << list.size();
+
+          @Override
+          public boolean hasNext() {
+            return mask < size;
+          }
+
+          @Override
+          public LongArray next() {
+            return getSubList(list, mask++);
+          }
+
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
+        };
+      }
+    };
+  }
+
+  private static LongArray getSubList(LongList values, int mask) {
+    assert (mask + 1) <= (1 << values.size()) : mask + " " + (1 << values.size());
+    LongArray res = new LongArray();
+    for (int i = 0, n = values.size(); i < n; i++) {
+      if ((mask & (1 << i)) != 0) {
+        res.add(values.get(i));
+      }
+    }
+    return res;
+  }
+
+  public static int sizeOfIterable(LongIterable iterable, int defaultSize) {
+    return (iterable instanceof LongSizedIterable) ? ((LongSizedIterable) iterable).size() : defaultSize;
   }
 }
