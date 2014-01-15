@@ -19,6 +19,7 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.util.IntSizedIterable;
 import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -101,7 +102,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * @return LongArray containing elements from the {@code iterable}
+   * @return LongArray containing elements from {@code iterable}
    */
   public static LongArray copy(@Nullable LongIterable iterable) {
     if (iterable == null) return new LongArray();
@@ -154,7 +155,7 @@ public final class LongArray extends AbstractWritableLongList {
   /**
    * Increases the capacity of this <tt>LongArray</tt> instance, if
    * necessary, to ensure that it can hold at least the number of elements
-   * specified by the {@code expectedCapacity} argument.
+   * specified by {@code expectedCapacity} argument.
    * @param expectedCapacity the desired minimum capacity
    */
   public void ensureCapacity(int expectedCapacity) {
@@ -278,10 +279,19 @@ public final class LongArray extends AbstractWritableLongList {
     updateSize(newSize);
   }
 
+  public void addAll(LongSet set) {
+    int added = set.size();
+    int sz = size();
+    int newSize = sz + added;
+    ensureCapacity(newSize);
+    set.toNativeArray(myArray, sz);
+    updateSize(newSize);
+  }
+
   @Override
-  protected boolean isSorted(boolean isUnique) {
-    int r = LongCollections.isSortedUnique(!isUnique, myArray, 0, size());
-    return r == 0 || (r < 0 && !isUnique);
+  protected boolean isSorted(boolean checkUnique) {
+    int r = LongCollections.isSortedUnique(!checkUnique, myArray, 0, size());
+    return r == 0 || (r < 0 && !checkUnique);
   }
 
   /**
@@ -307,7 +317,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * removes from this array all of its elements that are not contained in the {@code values}
+   * removes from this array all of its elements that are not contained in {@code values}
    * <p>Complexity: {@code O((M + N) * log(M))}, where N - {@code size()}, M - {@code values.size()}
    */
   public void retain(LongList values) {
@@ -315,7 +325,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * removes from this array all of its elements that are not contained in the {@code values}
+   * removes from this array all of its elements that are not contained in {@code values}
    * <p>Complexity: {@code O(N * log(M)}, where N - {@code size()}, M - {@code values.size()}
    * @param values sorted {@code LongList}
    * */
@@ -397,7 +407,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Removes {@code value} from this sorted list, if this list contains the {@code value}.
+   * Removes {@code value} from this sorted list, if this list contains {@code value}.
    * @return {@code true} if this set contained {@code value}. Otherwise {@code false}.
    */
   public boolean removeSorted(long value) {
@@ -410,23 +420,24 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * Removes from the specified list all elements whose index is contained in the specified {@code IntList indexes}
-   * @param indices sorted {@code IntList}
+   * @param indices sorted {@code IntIterator}
    * @see com.almworks.integers.LongCollections#removeAllAtSorted(WritableLongList, IntList)
    */
-  public void removeAllAtSorted(IntList indices) {
-    IntIterator it = indices.iterator();
-    if (!it.hasNext()) return;
-    int index = it.nextValue(), to, len;
+  public void removeAllAtSorted(IntIterator indices) {
+    if (!indices.hasNext()) return;
+    int index = indices.nextValue(), to, len;
+    int indicesSize = 1;
     int from = index + 1;
-    while (it.hasNext()) {
-      to = it.nextValue();
+    while (indices.hasNext()) {
+      to = indices.nextValue();
+      indicesSize++;
       len = to - from;
       System.arraycopy(myArray, from, myArray, index, len);
       index += len;
       from = to + 1;
     }
     System.arraycopy(myArray, from, myArray, index, size() - from);
-    updateSize(size() - indices.size());
+    updateSize(size() - indicesSize);
   }
 
   /**
@@ -441,13 +452,13 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   // todo add javadoc
-  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0,2, -1]
-  public int getInsertionPoints(LongSizedIterable src, int[][] insertionPoints) {
+  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [-1, -1, 4, -1]
+  public int getInsertionPoints(LongSizedIterable src, int[][] points) {
     final int srcSize = src.size(), size = size();
-    if (insertionPoints[0] == null || insertionPoints[0].length < srcSize) {
-      insertionPoints[0] = new int[srcSize];
+    if (points[0] == null || points[0].length < srcSize) {
+      points[0] = new int[srcSize];
     }
-    int[] insertionPoints0 = insertionPoints[0];
+    int[] insertionPoints0 = points[0];
     Arrays.fill(insertionPoints0, 0, srcSize, -1);
     int insertCount = 0;
     int destIndex = 0;
@@ -471,6 +482,39 @@ public final class LongArray extends AbstractWritableLongList {
           continue;
         }
         destIndex = insertion;
+      }
+      insertionPoints0[i] = destIndex;
+      insertCount++;
+    }
+    return insertCount;
+  }
+
+  // todo add javadoc
+  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0, 2, -1, 4]
+  public int getRemovePoints(LongSizedIterable src, int[][] points) {
+    final int srcSize = src.size(), size = size();
+    if (points[0] == null || points[0].length < srcSize) {
+      points[0] = new int[srcSize];
+    }
+    int[] insertionPoints0 = points[0];
+    Arrays.fill(insertionPoints0, 0, srcSize, -1);
+    int insertCount = 0;
+    int destIndex = 0;
+    long last = 0;
+    LongIterator it = src.iterator();
+    for (int i = 0; i < srcSize; i++) {
+      long v = it.nextValue();
+      if (i > 0 && v == last)
+        continue;
+      last = v;
+      if (destIndex < size) {
+        int k = LongCollections.binarySearch(v, myArray, destIndex, size);
+        if (k < 0) {
+          // not found
+          destIndex = -k - 1;
+          continue;
+        }
+        destIndex = k;
       }
       insertionPoints0[i] = destIndex;
       insertCount++;
@@ -506,11 +550,14 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * <p>Merges the specified sorted list and this sorted array into this array. If src or this array are not sorted, result is undefined.
+   * <p>Merges the specified sorted list and this sorted array into this array.
+   * If src or this array are not sorted, result is undefined.
    * If {@code getCapacity() < src.size() + size()}, will do reallocation.
-   * <p>Complexity: {@code O(eps(N, T, N/T) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
-   * {@code eps} depends on ratio of {@code N/T} and mixing of {@code src} and this array.
-   * In the general case, if N/T > 4, then eps < 0.5.
+   * <p>Complexity: {@code O(eps(N/T, this, src) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
+   * {@code eps} grows as {@code N/T} grows.
+   * {@code eps} also depends on how evenly {@code src} values are distributed in this array: it is higher when
+   * they are uniformly distributed.
+   * In the general case, if N/T > 4, then on average eps < 0.5.
    * <p>Prefer to use this method over {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
    * If {@code src.size()} is much smaller than {@code size()}. If they are close
    * use {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
@@ -597,8 +644,8 @@ public final class LongArray extends AbstractWritableLongList {
   /**
    * Merge the specified sorted unique list and sorted this array. If {@code getCapacity() < src.size() + size()}, will do reallocation.<br>
    * Complexity: {@code O(N + T)}, where {@code N = size()} and {@code T = src.size()}.<br>
-   * Prefer to use if the {@code size()} and {@code src.size()} are comparable.
-   * If the {@code src.size()} is much smaller than {@code size()},
+   * Prefer to use if {@code size()} and {@code src.size()} are comparable.
+   * If {@code src.size()} is much smaller than {@code size()},
    * it's better to use {@link com.almworks.integers.LongArray#mergeWithSmall(LongList)}
    *
    * @param  src sorted list of numbers (set)

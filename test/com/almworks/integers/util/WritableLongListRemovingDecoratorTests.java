@@ -86,10 +86,10 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker {
     int arrLength = 100;
     int indexesLength = 50;
     int maxValue = 1000;
-    LongList base = generateRandomLongArray(arrLength, false, maxValue);
+    LongList base = generateRandomLongArray( arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
 
     for (int test = 0; test < 20; test++) {
-      IntArray indexes = generateRandomIntArray(indexesLength, true, arrLength);
+      IntArray indexes = generateRandomIntArray(indexesLength, SortedStatus.SORTED_UNIQUE, arrLength);
       LongArray expected = LongArray.copy(base);
       for (int i = indexes.size() - 1; i >= 0; i--) {
         int val = indexes.get(i);
@@ -97,33 +97,6 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker {
       }
       WritableLongListRemovingDecorator arr = WritableLongListRemovingDecorator.createFromSorted(base, indexes);
       CHECK.order(arr.iterator(), expected.iterator());
-    }
-  }
-
-  public void testIterator() {
-    LongArray source = LongArray.create(10,13,15,14,11,12,16,17,18),
-        expected = LongArray.create(10, 15, 14, 12, 16, 18),
-        result = new LongArray();
-    LongListRemovingDecorator tst2 =
-        LongListRemovingDecorator.createFromPrepared(source, IntArray.create(1, 3, 5));
-    for (LongIterator i : tst2) {
-      result.add(i.value());
-    }
-    assertEquals(expected, result);
-  }
-
-  public void testIteratorGet() {
-    LongArray source = LongArray.create(10,13,15,14,11,12,16,17,18),
-        expected = LongArray.create(10, 15, 14, 12, 16, 18);
-    LongListRemovingDecorator tst2 =
-        LongListRemovingDecorator.createFromPrepared(source, IntArray.create(1, 3, 5));
-    LongListIterator it = tst2.iterator(), expIt = expected.iterator();
-    while(it.hasNext()) {
-      assertEquals(it.nextValue(), expIt.nextValue());
-    }
-    assertEquals(it.hasNext(), expIt.hasNext());
-    for (int i = 0; i < expected.size(); i++) {
-      assertEquals(it.get(-i), expIt.get(-i));
     }
   }
 

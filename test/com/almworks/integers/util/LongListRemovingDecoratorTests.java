@@ -91,11 +91,11 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     int indexesLength = 50;
     int maxValue = 1000;
 
-    LongArray base = generateRandomLongArray(arrLength, false, maxValue);
+    LongArray base = generateRandomLongArray( arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
     for (int test = 0; test < 20; test++) {
-      IntArray indexes = generateRandomIntArray(indexesLength, true, arrLength);
+      IntArray indexes = generateRandomIntArray(indexesLength, SortedStatus.SORTED_UNIQUE, arrLength);
       LongArray expected = LongArray.copy(base);
-      expected.removeAllAtSorted(indexes);
+      expected.removeAllAtSorted(indexes.iterator());
 
       LongListRemovingDecorator.prepareSortedIndices(indexes);
       LongListRemovingDecorator arr = LongListRemovingDecorator.createFromPrepared(base, indexes);

@@ -45,9 +45,9 @@ public class CyclicLongQueue extends AbstractLongList {
 
   /**
    * Retrieves, but does not remove, the head of this queue,
-   * or returns <tt>null</tt> if this queue is empty.
    *
-   * @return the head of this queue, or <tt>null</tt> if this queue is empty
+   * @return the head of this queue
+   * @throws NoSuchElementException if this queue is empty
    */
   public long peek() {
     if (isEmpty()) throw new NoSuchElementException();
@@ -178,6 +178,7 @@ public class CyclicLongQueue extends AbstractLongList {
    */
   @NotNull
   public PinnedIterator pinnedIterator() {
+    if (isEmpty()) throw new NoSuchElementException("queue is empty");
     return pinnedIterator(-1);
   }
 

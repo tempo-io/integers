@@ -53,6 +53,9 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
     return myInserted.findKey(index);
   }
 
+  /**
+   * @return count of elements inserted before {@code index} inclusively
+   */
   private int insertedBefore(int index) {
     int res = findInsertion(index);
     return (res >= 0) ? res : -res - 1;
@@ -133,16 +136,23 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
 
     private LocalIterator(int from, int to) {
       super(from, to);
-      int idx = insertedBefore(from);
-      myBaseIterator = base().iterator(from - idx);
-      updateMyInsertedIterator(idx);
+      sync();
     }
 
-    /**
-     * set the position of the myInsertedIterator to the {@code idx}
-     */
-    private void updateMyInsertedIterator(int idx) {
-      myInsertedIterator = myInserted.iterator(idx);
+    private void sync() {
+      int curIndex = getNextIndex() - 1;
+      myBaseIterator = base().iterator();
+      int insertIdx = 0;
+      if (curIndex != -1) {
+        insertIdx = insertedBefore(curIndex);
+        if (curIndex != insertIdx) {
+          myBaseIterator.move(curIndex - insertIdx);
+        }
+        if (myBaseIterator.hasNext()) {
+          myBaseIterator.next();
+        }
+      }
+      myInsertedIterator = myInserted.iterator(insertIdx);
       advanceToNextInsert();
     }
 
@@ -176,9 +186,10 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
     }
 
     public long value() throws NoSuchElementException {
-      if (!hasValue())
+      if (!hasValue()) {
         throw new NoSuchElementException();
-      if (myCurInsert >= 0 && myCurInsert == getNextIndex() - 1) {
+      }
+      if (myCurInsert == index()) {
         // if current index on inserted value
         return myInsertedIterator.right();
       } else {
@@ -187,12 +198,8 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
-      int idx0 = insertedBefore(getNextIndex() - 1);
       super.move(count);
-      int idx = insertedBefore(getNextIndex() - 1);
-      // (idx0 - idx1) - count of insertions between old getNextIndex() and new getNextIndex()
-      myBaseIterator.move(count + idx0 - idx);
-      updateMyInsertedIterator(idx);
+      sync();
     }
 
     protected long absget(int index) {

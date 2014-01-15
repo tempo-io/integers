@@ -17,7 +17,6 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     SameValuesLongList array = new SameValuesLongList();
     array.addAll(values);
     res.add(array);
-
     array = new SameValuesLongList();
     array.addAll(LongCollections.repeat(0, 10));
     array.addAll(values);
@@ -145,14 +144,14 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
 
   public void testSetAll() {
     for (int i = 0; i < 10; i++) {
-      LongArray array = generateRandomLongArray(1000, false, 500);
+      LongArray array = generateRandomLongArray( 1000, IntegersFixture.SortedStatus.UNORDERED, 500);
       array.sort();
       list.addAll(array);
       int index = RAND.nextInt(list.size());
       int len = list.size() - index;
       LongList insertArray;
-      if (len != 0) {
-        insertArray = generateRandomLongArray(len, false, len / 2);
+      if (len > 1) {
+        insertArray = generateRandomLongArray( len, IntegersFixture.SortedStatus.UNORDERED, len / 2);
       } else {
         insertArray = LongList.EMPTY;
       }
@@ -239,8 +238,8 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     CHECK.order(expected, actual);
 
     for (int i = 0; i < 12; i++) {
-      values = generateRandomLongArray(100, false);
-      counts = generateRandomIntArray(100, false, 4);
+      values = generateRandomLongArray( 100, IntegersFixture.SortedStatus.UNORDERED);
+      counts = generateRandomIntArray(100, SortedStatus.UNORDERED, 4);
       if (i == 11) {
         values.add(RAND.nextLong());
         counts.add(0);
@@ -255,8 +254,8 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
       CHECK.order(expected, actual);
     }
 
-    expected = generateRandomLongArray(100, false);
-//    CHECK.order(expected, SameValuesLongList.create(expected));
+    expected = generateRandomLongArray( 100, IntegersFixture.SortedStatus.UNORDERED);
+    CHECK.order(expected, SameValuesLongList.create(expected));
   }
 
   public void testRemoveFromBeginning() {
@@ -293,6 +292,12 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     m.commit();
     assertEquals(5, map.getKeyAt(0));
     assertEquals(10, map.getValueAt(0));
+  }
+
+  public void test() {
+    list.addAll(1, 2, 3, 4, 5);
+    list.set(2, 10);
+    System.out.println(list);
   }
 
 }

@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class AbstractWritableLongList extends AbstractLongList implements WritableLongList {
+  public abstract class AbstractWritableLongList extends AbstractLongList implements WritableLongList {
   private transient int myModCount;
   private int mySize;
 
@@ -328,7 +328,7 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
   }
 
   /** Updates the value in this list at the specified index; if list is currently shorter, it is first appended
-   * with {@code defaultValue} up to the {@code idx}.
+   * with {@code defaultValue} up to {@code idx}.
    * @param update the update function to apply. See {@link com.almworks.integers.func.LongFunctions}
    * @return the updated value
    * */

@@ -31,8 +31,6 @@ import java.util.NoSuchElementException;
  * This list is memory-optimized to contain values where each value is
  * likely to be the same as the previous one. Values are stored as
  * a map index_where_value_starts=>value.
- * <p/>
- * Starting value is 0, that is, if map is empty, all values are 0.
  */
 public class SameValuesLongList extends AbstractWritableLongList {
   /**
@@ -45,11 +43,13 @@ public class SameValuesLongList extends AbstractWritableLongList {
   }
 
   public SameValuesLongList(IntLongMap hostMap) {
-    assert hostMap.isEmpty() : hostMap;
+    if (!hostMap.isEmpty()) {
+      throw new IllegalArgumentException("hostMap must be empty");
+    }
     myMap = hostMap;
   }
 
-  // todo write setAll
+  // todo write set, setAll
 
   // todo javadoc, values.size() <= counts.size()
   public static SameValuesLongList create(LongSizedIterable values, IntIterable counts) {
@@ -71,9 +71,10 @@ public class SameValuesLongList extends AbstractWritableLongList {
       }
     }
     SameValuesLongList list = new SameValuesLongList();
-    list.updateSize(mapKeys.removeLast());
+    int newSize = mapKeys.removeLast();
+    list.updateSize(newSize);
     list.myMap = new IntLongMap(mapKeys, mapValues);
-    list.checkInvariants();
+    assert !IntegersDebug.CHECK || list.checkInvariants();
     return list;
   }
 

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.almworks.integers.LongIterators.concat;
-import static com.almworks.integers.LongIterators.repeat;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -56,8 +55,8 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
 
   public void testBigArrays() {
     for (int i = 0; i < 10; i++) {
-      long[] ar = generateRandomLongArray(checkedSize, false).extractHostArray();
-      _testCHECK(ar);
+      long[] ar = generateRandomLongArray( checkedSize, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
+      checkValues(ar);
       _testGetMethods(ar);
     }
   }

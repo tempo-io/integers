@@ -4,6 +4,7 @@ import com.almworks.integers.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class CyclicLongQueueTests extends LongListChecker {
   private CyclicLongQueue myArray = new CyclicLongQueue(5);
@@ -22,7 +23,7 @@ public class CyclicLongQueueTests extends LongListChecker {
     res.add(queue);
 
     int count = values.length / 2;
-    LongArray randomArray = generateRandomLongArray(count, false);
+    LongArray randomArray = generateRandomLongArray( count, IntegersFixture.SortedStatus.UNORDERED);
 
     queue = new CyclicLongQueue(values.length);
     queue.addAll(randomArray);
@@ -113,6 +114,11 @@ public class CyclicLongQueueTests extends LongListChecker {
   }
 
   public void testPinnedIterator() {
+    try {
+      CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
+      fail();
+    } catch (NoSuchElementException _) {}
+
     myArray.addAll(10, 11, 12, 13);
     CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
 
@@ -164,10 +170,18 @@ public class CyclicLongQueueTests extends LongListChecker {
     assertEquals(16, it.nextValue());
   }
 
+  public void testPinnedIteratorExceptions() {
+    try {
+      myArray.pinnedIterator();
+      fail();
+    } catch (NoSuchElementException _) {
+      // ok
+    }
+  }
+
   public void testAttachDetach() {
-    CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
-    assertFalse(it.hasNext());
     myArray.add(10);
+    CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
     try {
       myArray.removeFirst();
       fail("should have thrown ISE, state: " + myArray);
@@ -207,6 +221,7 @@ public class CyclicLongQueueTests extends LongListChecker {
 
   public void testCheckToStringWithPiterators() {
     CyclicLongQueue clq = new CyclicLongQueue();
+    assertEquals("()", clq.toStringWithPiterators());
 
     clq.addAll(10, 11, 12, 13, 14);
     assertEquals("(10, 11, 12, 13, 14)", clq.toStringWithPiterators());
@@ -238,7 +253,7 @@ public class CyclicLongQueueTests extends LongListChecker {
     clq = new CyclicLongQueue(11);
     clq.addAll(ap(0, 1, 11));
     assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", clq.toStringWithPiterators());
-    CyclicLongQueue.PinnedIterator it = clq.pinnedIterator(5);
+    clq.pinnedIterator(5);
     assertEquals("[11] (0, 1, 2, 3, 4, 5*, 6, 7, 8, 9, 10)", clq.toStringWithPiterators());
 
     clq.removeFirst(5);

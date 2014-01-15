@@ -184,7 +184,7 @@ public abstract class AbstractLongList implements LongList {
   }
 
   /**
-   * @return true if this list sorted unique otherwise false
+   * @return true if this list sorted unique, otherwise false
    */
   @Override
   public boolean isUniqueSorted() {
@@ -192,7 +192,7 @@ public abstract class AbstractLongList implements LongList {
   }
 
   /**
-   * @return true if this list sorted otherwise false
+   * @return true if this list sorted, otherwise false
    */
   @Override
   public boolean isSorted() {

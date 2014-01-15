@@ -17,11 +17,14 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class LongArrayTests extends WritableLongListChecker {
   private LongArray array = new LongArray();
   private SetOperationsChecker setOperations = new SetOperationsChecker();
+  SetOperationsChecker.SetCreator unionGetter = new SetOperationsChecker.UnionGetter();
+
 
   protected void tearDown() throws Exception {
     array.clear();
@@ -41,7 +44,7 @@ public class LongArrayTests extends WritableLongListChecker {
 
     arr = new LongArray(values.length * 2);
     arr.addAll(values);
-    arr.addAll(generateRandomLongArray(values.length, false));
+    arr.addAll(generateRandomLongArray(values.length, IntegersFixture.SortedStatus.UNORDERED));
     arr.removeRange(values.length, values.length * 2);
     res.add(arr);
 
@@ -128,6 +131,8 @@ public class LongArrayTests extends WritableLongListChecker {
   }
 
   public void testRetainSimple() {
+    checkRetain(LongArray.create(Long.MIN_VALUE), LongArray.create(Long.MIN_VALUE + 1), false);
+    checkRetain(LongArray.create(Long.MIN_VALUE), LongArray.create(Long.MIN_VALUE + 1), true);
     checkRetain(LongArray.create(2, 3, 5, 6, 8, 9, 10, 13, 3, 4, 5, 3),
         LongArray.create(1, 4, 5, 6, 7, 8, 10, 15), false);
     checkRetain(LongArray.create(0, 1, 2, 3, 5, 3, 2, 1, -10), LongArray.create(0, 2, -10), false);
@@ -160,9 +165,9 @@ public class LongArrayTests extends WritableLongListChecker {
   public void testRetainWithDuplicates() {
     int arraySize = 100, valuesSize = 10;
     for (int attempt = 0; attempt < 20; attempt++) {
-      LongArray array = generateRandomLongArray(arraySize, false, arraySize);
+      LongArray array = generateRandomLongArray( arraySize, IntegersFixture.SortedStatus.UNORDERED, arraySize);
       array.sort();
-      LongArray values = generateRandomLongArray(valuesSize, false, arraySize / 2);
+      LongArray values = generateRandomLongArray( valuesSize, IntegersFixture.SortedStatus.UNORDERED, arraySize / 2);
       checkRetain(array, values, false);
       values.sort();
       checkRetain(array, values, true);
@@ -180,50 +185,53 @@ public class LongArrayTests extends WritableLongListChecker {
     CHECK.order(il.toNativeArray(), 2, 3, 9);
   }
 
+  public void testMergeWithSameLength() {
+    // is likely to be launched branch with realloc
+    setOperations.check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterable get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.mergeWithSameLength(arrays[1]);
+        return copy;
+      }
+    }, unionGetter, true, true);
+
+    // guaranteed launch branch with replace
+    setOperations.check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterable get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
+        copy.mergeWithSameLength(arrays[1]);
+        return copy;
+      }
+    }, unionGetter, true, true);
+  }
+
+  public void testMergeWithSmall() {
+    // is likely to be launched branch with realloc
+    setOperations.check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterable get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.mergeWithSmall(arrays[1]);
+        return copy;
+      }
+    }, unionGetter, true, true);
+
+    // guaranteed launch branch with replace
+    setOperations.check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterable get(LongArray... arrays) {
+        LongArray copy = LongArray.copy(arrays[0]);
+        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
+        copy.mergeWithSmall(arrays[1]);
+        return copy;
+      }
+    }, unionGetter, true, true);
+  }
+
   public void testMerge() {
-    SetOperationsChecker.SetCreator unionGetter = new SetOperationsChecker.UnionGetter();
-    // is likely to be launched branch with realloc
-    setOperations.check(new SetOperationsChecker.SetCreator() {
-      @Override
-      public LongIterable get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        copy.mergeWithSameLength(arrays[1]);
-        return copy;
-      }
-    }, unionGetter, true, true);
-
-    // guaranteed launch branch with replace
-    setOperations.check(new SetOperationsChecker.SetCreator() {
-      @Override
-      public LongIterable get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        copy.mergeWithSameLength(arrays[1]);
-        return copy;
-      }
-    }, unionGetter, true, true);
-
-    // is likely to be launched branch with realloc
-    setOperations.check(new SetOperationsChecker.SetCreator() {
-      @Override
-      public LongIterable get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        copy.mergeWithSmall(arrays[1]);
-        return copy;
-      }
-    }, unionGetter, true, true);
-
-    // guaranteed launch branch with replace
-    setOperations.check(new SetOperationsChecker.SetCreator() {
-      @Override
-      public LongIterable get(LongArray... arrays) {
-        LongArray copy = LongArray.copy(arrays[0]);
-        copy.ensureCapacity(arrays[0].size() + arrays[1].size());
-        copy.mergeWithSmall(arrays[1]);
-        return copy;
-      }
-    }, unionGetter, true, true);
-
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
@@ -234,13 +242,13 @@ public class LongArrayTests extends WritableLongListChecker {
     }, unionGetter, true, true);
   }
 
-  public void testRemoveSortedIndexesFromSorted() {
+  public void testRemoveAllAtSorted() {
     int arSize = 100;
     int indexesSize = 10;
     int attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
-      array = generateRandomLongArray(arSize, false);
-      IntArray indexes = generateRandomIntArray(indexesSize, true, array.size());
+      array = generateRandomLongArray( arSize, IntegersFixture.SortedStatus.UNORDERED);
+      IntArray indexes = generateRandomIntArray(indexesSize, SortedStatus.SORTED_UNIQUE, array.size());
       if (attempt % 2 == 0) {
         indexes.add(indexes.get(indexes.size() / 2) + 1);
         indexes.sortUnique();
@@ -249,7 +257,7 @@ public class LongArrayTests extends WritableLongListChecker {
       for (int i = indexes.size() - 1; i >= 0; i--) {
         expected.removeAt(indexes.get(i));
       }
-      array.removeAllAtSorted(indexes);
+      array.removeAllAtSorted(indexes.iterator());
       CHECK.order(array, expected);
     }
   }
@@ -267,5 +275,17 @@ public class LongArrayTests extends WritableLongListChecker {
         assertEquals(values[i], actual.get(i));
       }
     }
+  }
+
+  public void test() {
+    array = LongArray.create(0,2,4,7,9,10);
+    LongList src = LongArray.create(0,4,8,9);// --> [0,2, -1]
+    int[][] points = {null};
+    System.out.println(array.getInsertionPoints(src, points));
+    System.out.println(Arrays.deepToString(points));
+
+    System.out.println();
+    System.out.println(array.getRemovePoints(src, points));
+    System.out.println(Arrays.deepToString(points));
   }
 }

@@ -21,6 +21,8 @@ import com.almworks.integers.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.almworks.integers.LongProgression.Arithmetic.fillArray;
+
 public class LongListInsertingDecoratorTests extends LongListChecker {
 
   @Override
@@ -125,8 +127,9 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     dec = new LongListInsertingDecorator(myArray);
     dec.insert(0, 0);
     x = 0;
-    for (LongIterator i : dec) assertEquals(x++, i.value());
-
+    for (LongIterator i: dec) {
+      assertEquals(x++, i.value());
+    }
   }
 
   public void testIsEmpty() {
@@ -141,40 +144,6 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     assertFalse(res.isEmpty());
   }
 
-  public void testIterator() {
-    LongArray source = LongArray.create(8, 9),
-        expected = LongArray.create(8,9,10,13,15),
-        result = new LongArray();
-
-    LongListInsertingDecorator tst = new LongListInsertingDecorator(source);
-    tst.insert(2,10);
-    tst.insert(3,13);
-    tst.insert(4,15);
-    for (LongIterator i : tst) {
-      result.add(i.value());
-    }
-    assertEquals(expected, result);
-
-    source.clear();
-    expected.clear();
-  }
-
-  public void testIteratorGet() {
-    LongArray source = LongArray.create(0, 20, 40, 60),
-        expected = LongArray.create(0, 10, 20, 30, 40, 50, 60),
-        result = new LongArray();
-    LongListInsertingDecorator tst2 =
-        new LongListInsertingDecorator(source, new IntLongMap(IntArray.create(1, 3, 5), LongArray.create(10, 30, 50)));
-    LongListIterator it = tst2.iterator(), expIt = expected.iterator();
-    while(it.hasNext()) {
-      assertEquals(it.nextValue(), expIt.nextValue());
-    }
-    assertEquals(it.hasNext(), expIt.hasNext());
-    for (int i = 0; i < expected.size(); i++) {
-      assertEquals(it.get(-i), expIt.get(-i));
-    }
-  }
-
   public void testSimple() {
     LongArray source = LongArray.create(ap(0, 10, 7));
     LongListInsertingDecorator tst = new LongListInsertingDecorator(source, new IntLongMap());
@@ -187,8 +156,10 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     LongListIterator it = tst.iterator();
     LongListIterator expIt = expected.iterator();
 
-    it.next().next().next();
-    expIt.next().next().next();
+    for (int i = 0; i < 3; i++) {
+      it.next();
+      expIt.next();
+    }
 
     assertEquals(expIt.value(), it.value());
     it.move(-2);

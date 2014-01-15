@@ -63,7 +63,7 @@ public class LongListConcatenationTests extends LongListChecker {
     CHECK.order(LongArray.create(), concat);
   }
 
-  public void testGet() {
+  public void testGet2() {
     LongList[] arrays = {LongArray.create(0, 1, 2), LongArray.create(3, 4), LongArray.create(5)};
     LongListConcatenation res = new LongListConcatenation(arrays);
 

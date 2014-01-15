@@ -20,19 +20,15 @@
 package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.*;
+
+import com.almworks.integers.util.IntSizedIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public interface IntList extends IntIterable {
+public interface IntList extends IntSizedIterable {
   IntList EMPTY = new IntArray(EMPTY_INTS);
-
-  /**
-   * Size of the collection. May not be efficient (up to O(N)).
-   * @return the number of values in the collection
-   */
-  int size();
 
   /**
    * Checks whether collection is empty. Must be efficient.

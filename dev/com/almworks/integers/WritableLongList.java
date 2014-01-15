@@ -45,31 +45,31 @@ public interface WritableLongList extends LongList, LongCollector {
 
   /**
    * Removes the first occurrence of the specified element from this list, if it is present.
-   * @return true if this list was modified otherwise false
+   * @return true if this list was modified, otherwise false
    */
   public boolean remove(long value);
 
   /**
-   * This method remove from this list all values that are equals to {@code value}
-   * @return true if this list was modified otherwise false
+   * This method removes from this list all values that are equals to {@code value}
+   * @return true if this list was modified, otherwise false
    */
   boolean removeAll(long value);
 
   /**
-   * Removes all appearances of {@code value} from this sorted list, if this list contains the {@code value}.
-   * @return true if this array was modified otherwise false
+   * Removes all appearances of {@code value} from this sorted list, if this list contains {@code value}.
+   * @return true if this array was modified, otherwise false
    */
   public boolean removeAllSorted(long value);
 
   /**
    * Removes all values contained in collection.
-   * @return true if this list was modified otherwise false
+   * @return true if this list was modified, otherwise false
    */
   public boolean removeAll(LongList collection);
 
   /**
    * Removes all values contained in the specified array.
-   * @return true if this list was modified otherwise false
+   * @return true if this list was modified, otherwise false
    */
   public boolean removeAll(long... values);
 
@@ -95,7 +95,7 @@ public interface WritableLongList extends LongList, LongCollector {
 
   /**
    * Inserts {@code value} in this sorted list, if this list doesn't contain {@code value}, keeping sorted order.
-   * @return true if this list was modified otherwise false
+   * @return true if this list was modified, otherwise false
    */
   boolean addSorted(long value);
 
