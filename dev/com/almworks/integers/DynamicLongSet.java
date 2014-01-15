@@ -65,6 +65,10 @@ public class DynamicLongSet implements WritableSortedLongSet {
 
   private int[] myStackCache = IntegersUtils.EMPTY_INTS;
 
+  // Tsss! We use it only for test generation.
+  private int[] myParent;
+
+
   /**
    * This enum is used in {@link DynamicLongSet#compactify(com.almworks.integers.DynamicLongSet.ColoringType)} and
    * {@link DynamicLongSet#fromSortedList(LongList, com.almworks.integers.DynamicLongSet.ColoringType)}
@@ -101,6 +105,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     myKeys = new long[initialCapacity];
     myLeft = new int[initialCapacity];
     myRight = new int[initialCapacity];
+    myParent = new int[initialCapacity];
     myKeys[0] = NIL_DUMMY_KEY;
   }
 
@@ -108,6 +113,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     myKeys = EMPTY_KEYS;
     myLeft = EMPTY_INDEXES;
     myRight = EMPTY_INDEXES;
+    myParent = EMPTY_INDEXES;
     myBlack.set(0);
     myRoot = 0;
     myFront = 1;
@@ -239,10 +245,17 @@ public class DynamicLongSet implements WritableSortedLongSet {
     // x is RED already (myBlack.get(x) == false), so no modifications to myBlack
     // Insert into the tree
     if (ps[psi - 1] == 0) myRoot = x;
-    else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
+    else {
+      (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
+      setParent(x, ps[psi - 1]);
+    }
     balanceAfterAdd(x, ps, psi, key);
     assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("add key:" + key);
     return true;
+  }
+
+  private void setParent(int x, int p) {
+    if (x != 0) myParent[x] = p;
   }
 
   private int createNode(long key) {
@@ -309,7 +322,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
   }
 
   private boolean checkChildParent(int child, int parent, long debugKey) {
-    assert myLeft[parent] == child || myRight[parent] == child : debugMegaPrint("add " + debugKey + "\nproblem with child " + child, parent);
+    assert (myLeft[parent] == child || myRight[parent] == child) && myParent[child] == parent : debugMegaPrint("add " + debugKey + "\nproblem with child " + child, parent);
     return true;
   }
 
@@ -320,13 +333,16 @@ public class DynamicLongSet implements WritableSortedLongSet {
   private void rotate(int x, int p, int[] mainBranch, int[] otherBranch) {
     int y = otherBranch[x];
     otherBranch[x] = mainBranch[y];
+    setParent(mainBranch[y], x);
     if (p == 0) myRoot = y;
     else {
       if (x == myLeft[p]) myLeft[p] = y;
       else if (x == myRight[p]) myRight[p] = y;
       else assert false : "tree structure broken " + x + '\n' + dumpArrays(p);
+      setParent(y, p);
     }
     mainBranch[y] = x;
+    setParent(x, y);
   }
 
   /** @return array for holding the stack for tree traversal */
@@ -341,6 +357,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     myKeys = LongCollections.ensureCapacity(myKeys, futureSize);
     myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
     myRight = IntCollections.ensureCapacity(myRight, futureSize);
+    myParent = IntCollections.ensureCapacity(myParent, futureSize);
     if (IntegersDebug.PRINT) IntegersDebug.format("%20s %4d -> %4d  %H  %s\n", "grow", oldSz, myKeys.length, this, last4MethodNames());
   }
 
@@ -478,6 +495,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
       return;
     myLeft = new int[myKeys.length];
     myRight = new int[myKeys.length];
+    myParent = new int[myKeys.length];
 
     int levels = log(2, usedSize);
     int top = 1 << levels;
@@ -504,6 +522,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     else if (length == 2) {
       myBlack.set(index);
       myLeft[index] = offset;
+      setParent(offset, index);
     } else {
       // calculating the node color
       boolean isBlack = true;
@@ -520,6 +539,8 @@ public class DynamicLongSet implements WritableSortedLongSet {
         myBlack.set(index, isBlack);
       myLeft[index] = rearrangeStep(offset, halfLength, colorCounter, maxCounter, lpab);
       myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, colorCounter, maxCounter, lpab);
+      setParent(myLeft[index], index);
+      setParent(myRight[index], index);
     }
     return index;
   }
@@ -666,6 +687,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
       if (myLeft[parentOfY] == y)
         myLeft[parentOfY] = x;
       else myRight[parentOfY] = x;
+      setParent(x, parentOfY);
     }
 
     if (myBlack.get(y)) {
@@ -681,6 +703,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     myKeys[y] = 0;
     myLeft[y] = 0;
     myRight[y] = 0;
+    myParent[y] = 0;
     myBlack.clear(y);
     if (y == myFront - 1) {
       myFront--;
@@ -904,6 +927,16 @@ public class DynamicLongSet implements WritableSortedLongSet {
       assert xor.nextClearBit(1) == myFront : myFront + " " + xor.nextClearBit(1) + '\n' + xor + '\n' + myRemoved + '\n' + unremoved + '\n' + debugMegaPrint(whatWasDoing, 0);
     }
 
+    // BONUS: check parents
+    for (IntIterator node : nodeLurIterator()) {
+      int x = node.value();
+      int l = myLeft[x];
+      if (l > 0) assert myParent[l] == x : x + " " + l + " " + myParent[l] + "\n" + debugMegaPrint(whatWasDoing, x);
+      int r = myRight[x];
+      if (r > 0) assert myParent[r] == x : x + " " + r + " " + myParent[r] + "\n" + debugMegaPrint(whatWasDoing, x);
+    }
+
+
     return true;
   }
 
@@ -915,18 +948,20 @@ public class DynamicLongSet implements WritableSortedLongSet {
 
   final StringBuilder dumpArrays(int problematicNode) {
     StringBuilder sb = new StringBuilder();
+    sb.append("root: ").append(myRoot).append("\n");
     if (problematicNode > 0) sb = debugPrintNode(problematicNode, sb);
     int idWidth = max(log(10, myFront), 4);
     long longestKey = max(abs(getUpperBound()), abs(getLowerBound()));
     int keyWidth = max(log(10, longestKey), 3);
-    sb.append(String.format("%" + idWidth + "s | %" + keyWidth + "s | %" + idWidth + "s | %" + idWidth + "s\n", "id", "key", "left", "right"));
+    sb.append(String.format("%" + idWidth + "s | %" + keyWidth + "s | %" + idWidth + "s | %" + idWidth + "s | %" + idWidth + "s\n", "id", "key", "left", "right", "parent"));
     String idFormat = "%" + idWidth + "d";
     String keyFormat = "%" + keyWidth + "d";
-    for (int i = 1; i < size(); ++i) {
+    for (int i = 1; i <= size(); ++i) {
       sb.append(String.format(idFormat, i)).append(" | ")
           .append(String.format(keyFormat, myKeys[i])).append(" | ")
           .append(String.format(idFormat, myLeft[i])).append(" | ")
-          .append(String.format(idFormat, myRight[i]))
+          .append(String.format(idFormat, myRight[i])).append(" | ")
+          .append(String.format(idFormat, myParent[i]))
           .append("\n");
     }
     return sb;
@@ -938,7 +973,8 @@ public class DynamicLongSet implements WritableSortedLongSet {
         .append("\nkey   ").append(myKeys[node])
         .append("\nleft  ").append(myLeft[node])
         .append("\nright ").append(myRight[node])
-        .append("\ncolor ").append(myBlack.get(node) ? "BLACK\n" : "RED\n");
+        .append("\ncolor ").append(myBlack.get(node) ? "BLACK\n" : "RED\n")
+        .append("\nparent").append(myParent[node]).append("\n");
   }
 
   final void debugPrintTreeStructure(final PrintStream out) {
@@ -1060,5 +1096,68 @@ public class DynamicLongSet implements WritableSortedLongSet {
       if (!hasValue()) throw new NoSuchElementException();
       return myValue;
     }
+  }
+
+  /********************************************************************************************************************/
+  /** MODIFICATIONS FOLLOW             */
+
+  public DynamicLongSet clone() {
+    try {
+      DynamicLongSet set = (DynamicLongSet) super.clone();
+      set.myFront = myFront;
+      set.myRoot = myRoot;
+      set.myBlack.or(myBlack);
+      set.myRemoved.or(myRemoved);
+      System.arraycopy(myKeys, 0, set.myKeys, 0, myKeys.length);
+      System.arraycopy(myLeft, 0, set.myLeft, 0, myLeft.length);
+      System.arraycopy(myRight, 0, set.myRight, 0, myRight.length);
+      set.minSize = minSize;
+      set.maxSize = maxSize;
+      set.countedHeight = countedHeight;
+      return set;
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  int left(int node) {
+    return myLeft[node];
+  }
+
+  int right(int node) {
+    return myRight[node];
+  }
+
+  int key(int node) {
+    return myRight[node];
+  }
+
+  boolean black(int node) {
+    return myBlack.get(node);
+  }
+
+  IntIterator nodeLurIterator() {
+    return new LURIterator();
+  }
+
+  IntIterator nodeLurIterator(int node) {
+    if (!contains(myKeys[node])) throw new IllegalStateException(String.valueOf(node));
+    return new LURIterator(myKeys[node]);
+  }
+
+  boolean leftChildOfParent(int node) {
+    if (node == myRoot || node == 0) return true;
+    boolean l = myLeft[myParent[node]] == node;
+    boolean r = myRight[myParent[node]] == node;
+    assert l ^ r : node + " " + l + " " + r;
+    return l;
+  }
+
+  int parent(int node) {
+    return myParent[node];
+  }
+
+  int uncle(int node) {
+    return (leftChildOfParent(node) ? myLeft : myRight)[myParent[myParent[node]]];
   }
 }

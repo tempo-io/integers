@@ -132,4 +132,12 @@ public class DynamicLongSetTests extends WritableLongSetChecker {
     assertEquals(MIN, set.getLowerBound());
     assertEquals(MIN, set.getUpperBound());
   }
+
+  public void testXxx() {
+    DynamicLongSet set = new DynamicLongSet();
+    set.addAll(1, 2, 3, 4, 5, 6, 7);
+    for (IntIterator nodeIt: set.nodeLurIterator()) {
+      assertEquals(nodeIt.value(), set.nodeLurIterator(nodeIt.value()).nextValue());
+    }
+  }
 }

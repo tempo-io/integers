@@ -207,6 +207,7 @@ test/com/almworks/integers/IndexedLongIteratorTests.java -text
 test/com/almworks/integers/IndexedLongListIteratorTests.java -text
 test/com/almworks/integers/IntegersFixture.java -text
 test/com/almworks/integers/IntegersUtilsTests.java -text
+test/com/almworks/integers/LTSCasesGenTests.java -text
 test/com/almworks/integers/ListLongMapTests.java -text
 test/com/almworks/integers/LongArrayIteratorTests.java -text
 test/com/almworks/integers/LongArrayMergePerformanceComparison.java -text
