@@ -15,6 +15,42 @@ public abstract class IntegersFixture extends TestCase {
   public static final String SEED = "com.almworks.integers.seed";
   public static final Random RAND = createRandom();
 
+  public enum SortedStatus {
+    UNORDERED {
+      @Override
+      public void action(LongArray array) {
+      }
+
+      @Override
+      public void action(IntArray array) {
+      }
+    },
+    SORTED {
+      @Override
+      public void action(LongArray array) {
+        array.sort();
+      }
+
+      @Override
+      public void action(IntArray array) {
+        array.sort();
+      }
+    },
+    SORTED_UNIQUE {
+      @Override
+      public void action(LongArray array) {
+        array.sortUnique();
+      }
+
+      @Override
+      public void action(IntArray array) {
+        array.sortUnique();
+      }
+    };
+    public abstract void action(LongArray array);
+    public abstract void action(IntArray array);
+  }
+
   /**
    * Add {@code -Dcom.almworks.integers.seed=12312423455}
    * to system properties to reproduce the test
@@ -57,6 +93,22 @@ public abstract class IntegersFixture extends TestCase {
     CHECK.order(collection.iterator(), expected);
   }
 
+  public static void checkSet(WritableLongSet set, LongList sortedExpected) {
+    assertEquals(sortedExpected.size(), set.size());
+    if (set instanceof LongSortedSet) {
+      CHECK.order(sortedExpected, set.toArray());
+      CHECK.order(sortedExpected.iterator(), set.iterator());
+    } else {
+      LongArray buffer = set.toArray();
+      buffer.sortUnique();
+      CHECK.order(sortedExpected, buffer);
+
+      buffer = LongCollections.collectIterables(set.size(), set.iterator());
+      buffer.sortUnique();
+      CHECK.order(sortedExpected, buffer);
+    }
+  }
+
   protected void checkList(LongList collection, long[]... v) {
     LongArray r = new LongArray();
     for (long[] ints : v) {
@@ -66,7 +118,7 @@ public abstract class IntegersFixture extends TestCase {
     CHECK.order(collection.iterator(), expected);
   }
 
-  protected long[] range(int from, int to) {
+  protected long[] interval(int from, int to) {
     return from < to ? ap(from, 1, to - from + 1) : ap(from, -1, from - to + 1);
   }
 
@@ -234,7 +286,7 @@ public abstract class IntegersFixture extends TestCase {
       }
     }
     int diff = maxValue - minValue;
-    if (diff <= 0) throw new IllegalArgumentException();
+    if (diff <= 0) throw new IllegalArgumentException(minValue + " " + maxValue);
 
     for (int i = 0; i < arrayLength; i++) {
       collector.add(minValue + RAND.nextInt(diff));
@@ -250,14 +302,14 @@ public abstract class IntegersFixture extends TestCase {
    *                  the actual length may be less than maxLength.
    * @return {@link LongArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static LongArray generateRandomLongArray(int maxLength, boolean sortUnique, int... minMaxValues) {
+  public static LongArray generateRandomLongArray(int maxLength, SortedStatus status, int... minMaxValues) {
     final LongArray res = new LongArray(maxLength);
     fillRandomArray(new IntCollectorAdapter() {
       public void add(int value) {
         res.add(value);
       }
     }, maxLength, minMaxValues);
-    if (sortUnique) res.sortUnique();
+    status.action(res);
     return res;
   }
 
@@ -270,14 +322,14 @@ public abstract class IntegersFixture extends TestCase {
    *                  the actual length may be less than maxLength.
    * @return {@link IntArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static IntArray generateRandomIntArray(int maxLength, boolean sortUnique, int... minMaxValues) {
+  public static IntArray generateRandomIntArray(int maxLength, SortedStatus status, int... minMaxValues) {
     final IntArray res = new IntArray(maxLength);
     fillRandomArray(new IntCollectorAdapter() {
       public void add(int value) {
         res.add(value);
       }
     }, maxLength, minMaxValues);
-    if (sortUnique) res.sortUnique();
+    status.action(res);
     return res;
   }
 
@@ -301,7 +353,7 @@ public abstract class IntegersFixture extends TestCase {
     };
   }
 
-  static void setFinalStatic(Object obj, String name, int newValue) throws Exception {
+  public static void setFinalStatic(Object obj, String name, int newValue) throws Exception {
     Field field = obj.getClass().getDeclaredField(name);
     field.setAccessible(true);
 

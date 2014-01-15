@@ -21,9 +21,7 @@ import com.almworks.integers.optimized.SameValuesLongList;
 import com.almworks.integers.optimized.SegmentedLongArray;
 import com.almworks.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.almworks.integers.LongCollections.*;
 import static com.almworks.integers.LongIterators.arithmetic;
@@ -146,15 +144,15 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testDiffSortedLists() throws Exception {
-    CHECK.order(diffSortedLists(LongList.EMPTY, LongList.EMPTY));
-    CHECK.order(diffSortedLists(LongArray.create(0, 3, 4, 7), LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
+    CHECK.order(diffSortedUniqueLists(LongList.EMPTY, LongList.EMPTY));
+    CHECK.order(diffSortedUniqueLists(LongArray.create(0, 3, 4, 7), LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
 
     LongArray diff = new LongArray();
     LongArray a = new LongArray();
     LongArray b = new LongArray();
     for (int i = 0; i < 10; ++i) {
       initLists(a, b, diff);
-      CHECK.order(diffSortedLists(a, b), diff);
+      CHECK.order(diffSortedUniqueLists(a, b), diff);
     }
   }
 
@@ -237,25 +235,36 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testIsSorted() {
+    assertTrue(LongCollections.isSorted(new long[]{}));
     assertTrue(LongCollections.isSorted(new long[]{Integer.MIN_VALUE, 1, 4, 5, 10, 20, 21, Integer.MAX_VALUE}));
     assertFalse(LongCollections.isSorted(new long[]{1, 4, 5, 20, 19}));
-
     assertTrue(LongCollections.isSorted(new long[]{1, 4, 5, 20, 19, 15}, 1, 3));
     assertFalse(LongCollections.isSorted(new long[]{1, 4, 3, 20, 19, 15}, 1, 3));
-
+//  }
+//
+//  public void testIsSortedUnique() {
+    assertEquals(0, LongCollections.isSortedUnique(true, new long[]{}, 0, 0));
+    assertEquals(0, LongCollections.isSortedUnique(false, new long[]{}, 0, 0));
     assertEquals(0, LongCollections.isSortedUnique(true, new long[]{1, 5, 10, 11, 20}, 0, 5));
+    assertEquals(0, LongCollections.isSortedUnique(false, new long[]{1, 5, 10, 11, 20}, 0, 5));
     assertEquals(-3, LongCollections.isSortedUnique(true, new long[]{1, 5, 5, 10, 15, 19, 19, 100, 121, 121}, 0, 10));
+    assertEquals(2, LongCollections.isSortedUnique(false, new long[]{1, 5, 5, 10, 15, 19, 19, 100, 121, 121}, 0, 10));
+    assertEquals(5, LongCollections.isSortedUnique(false, new long[]{1, 5, 10, 15, 19, 19, 100, 121, 121}, 0, 9));
+    assertEquals(7, LongCollections.isSortedUnique(false, new long[]{1, 5, 10, 15, 19, 100, 121, 121}, 0, 8));
   }
 
   public void testToSorted() {
     int arrLength = 100;
-    int maxVal = 150;
+    int maxVal = 300;
+    int attempts = 10;
     LongArray expected;
-    LongArray arr = new LongArray(LongProgression.arithmetic(0, arrLength, 0));
+    LongArray arr;
 
-    for (int test = 0; test < 10; test++) {
-      for (int i = 0; i < arrLength; i++) {
-        arr.set(i, RAND.nextInt(maxVal));
+    for (int attempt = 0; attempt < attempts; attempt++) {
+      if (attempt != attempts - 1) {
+        arr = generateRandomLongArray( arrLength, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+      } else {
+        arr = new LongArray();
       }
       expected = LongArray.copy(arr);
       expected.sort();
@@ -381,7 +390,7 @@ public class LongCollectionsTests extends IntegersFixture {
     array.addAll(LongIterators.range(21, 40));
     set.addAll(LongIterators.range(21, 40));
     StringBuilder expected = new StringBuilder().append("(0");
-    for (long i: range(1, 39)) {
+    for (long i: interval(1, 39)) {
       expected.append(", ").append(i);
     }
     expected.append(')');
@@ -394,34 +403,70 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   // TODO add test union for unsortable hash set
-  public void testUnionSets() {
+  public void testUnionSortedSets() {
+    int maxSize = 10000;
     WritableLongSet[] sets = new WritableLongSet[2];
     LongArray[] arrays = new LongArray[2];
-    LongList expected, actual;
-    for (int i = 0; i < 5; i++) {
+    LongArray expected, actual;
+    for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 2; j++) {
-        arrays[j] = generateRandomLongArray(10000, true);
-        sets[j] = LongTreeSet.createFromSortedUnique(arrays[j]);
+        arrays[j] = generateRandomLongArray( maxSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
+        sets[j] = (RAND.nextBoolean()) ?
+            LongTreeSet.createFromSortedUnique(arrays[j]) : LongOpenHashSet.createFrom(arrays[j]);
       }
-      expected = union(arrays[0], arrays[1]);
-      actual = union(sets[0], sets[1]).toArray();
+      expected = new LongArray(maxSize * 2);
+      expected.addAll(arrays[0]);
+      expected.merge(arrays[1]);
+      actual = unionSorted(sets[0], sets[1]).toArray();
       CHECK.order(expected, actual);
     }
   }
 
-  // TODO add test intersection for unsortable hash set
-  public void testIntersectionSets() {
-    WritableLongSet[] sets = new WritableLongSet[2];
+  public void checkUnion(LongList ... lists) {
+    LongArray expected = new LongArray();
+    for (LongList list : lists) {
+      if (list != null)
+        expected.addAll(list);
+    }
+    expected.sortUnique();
+    CHECK.order(expected, collectToSortedUnique(lists));
+  }
+
+  public void testCollectToSortedUnique() {
+    checkUnion();
+    checkUnion(null, null, null);
+    checkUnion(null, LongArray.create(1, 2, 3), null);
+    checkUnion(null, LongArray.create(1, 2, 3), LongArray.EMPTY);
+    checkUnion(null, LongArray.create(1, 2, 3), LongArray.EMPTY);
+    checkUnion(LongArray.create(2, 5, 10));
+    checkUnion(LongArray.create(2, 5, 10), LongArray.create(1, 2, 3), LongArray.EMPTY, null);
+    checkUnion(LongArray.create(2, 5, 10), null, LongArray.EMPTY, null);
+  }
+
+  public void testIntersectionUnionSets() {
+    int attempts = 10, maxVal = Integer.MAX_VALUE, size = 1000;
+    WritableLongSet[][] allSets = {{new LongTreeSet(), new LongOpenHashSet()},
+        {new LongTreeSet(), new LongOpenHashSet()}};
     LongArray[] arrays = new LongArray[2];
-    LongList expected, actual;
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 2; j++) {
-        arrays[j] = generateRandomLongArray(10000, true);
-        sets[j] = LongTreeSet.createFromSortedUnique(arrays[j]);
+    LongArray expected, actual;
+    for (int attempt = 0; attempt < attempts; attempt++) {
+      for (WritableLongSet set0: allSets[0]) {
+        for (WritableLongSet set1: allSets[1]) {
+          WritableLongSet[] sets = {set0, set1};
+          for (int j = 0; j < 2; j++) {
+            arrays[j] = generateRandomLongArray( size, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal);
+            sets[j].clear();
+            sets[j].addAll(arrays[j]);
+          }
+          expected = LongArray.copy(arrays[0]);
+          expected.retain(arrays[1]);
+          IntegersFixture.checkSet(intersection(sets[0], sets[1]), expected);
+
+          expected = LongArray.copy(arrays[0]);
+          expected.merge(arrays[1]);
+          IntegersFixture.checkSet(union(sets[0], sets[1]), expected);
+        }
       }
-      expected = intersectionSorted(arrays[0], arrays[1]);
-      actual = intersection(sets[0], sets[1]).toArray();
-      CHECK.order(expected, actual);
     }
   }
 
@@ -434,4 +479,204 @@ public class LongCollectionsTests extends IntegersFixture {
     }, new SetOperationsChecker.MinusGetter(), true, true);
   }
 
+  public void testIntersectionSorted() {
+    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        return LongCollections.intersectionSortedUnique(arrays[0], arrays[1]).iterator();
+      }
+    }, new SetOperationsChecker.IntersectionGetter(true), true, true);
+  }
+
+  public void testUnionSorted() {
+    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        return LongCollections.unionSortedUnique(arrays[0], arrays[1]).iterator();
+      }
+    }, new SetOperationsChecker.UnionGetter(), true, true);
+  }
+
+  public void checkToNativeArray(LongArray array) {
+    long[] expected = array.toNativeArray();
+    LongSet set = LongTreeSet.createFromSortedUnique(array);
+    LongIterable[] iterables = {array, set, array.iterator(), set.iterator(),
+        LongIterators.unionIterator(array, array.isEmpty() ? LongIterator.EMPTY : array.subList(0, 1))};
+    for (LongIterable iterable: iterables) {
+      CHECK.order(expected, LongCollections.toNativeArray(iterable));
+    }
+  }
+
+  public void testToNativeArray() {
+    long[][] arrays = {{}, {0}, {0, 1, 2}, {Long.MIN_VALUE, 0, Long.MAX_VALUE}, {0, 1, 2, 3, 4}};
+    for (long[] expected: arrays) {
+      checkToNativeArray(new LongArray(expected));
+    }
+    for (int attempt = 0; attempt < 10; attempt++) {
+      checkToNativeArray(generateRandomLongArray( 100, IntegersFixture.SortedStatus.SORTED_UNIQUE));
+    }
+  }
+
+  public void checkToWritableSortedUnique(long[] array) {
+    LongArray expected = LongArray.copy(array);
+    expected.sortUnique();
+    LongArray actual = toWritableSortedUnique(array);
+    CHECK.order(expected, actual);
+  }
+
+  public void testToWritableSortedUnique() {
+    long[][] arrays = {{}, {0}, {0, 1, 2}, {Long.MIN_VALUE, 0, Long.MAX_VALUE},
+        {0, 1, 2, 3, 4}, {0, 0, 1, 2, 3}, {0, 1, 2, 2, 3, 4}, {0, 1, 2, 3, 4, 4}};
+    for (int attempt = 0; attempt < 10; attempt++) {
+      LongArray array = generateRandomLongArray( 100, IntegersFixture.SortedStatus.UNORDERED, 150);
+      checkToWritableSortedUnique(array.toNativeArray());
+      array.sort();
+      checkToWritableSortedUnique(array.toNativeArray());
+      array.removeDuplicates();
+      checkToWritableSortedUnique(array.toNativeArray());
+    }
+  }
+
+  public void testHasMethods() {
+    int MIN = Integer.MIN_VALUE, MAX = Integer.MAX_VALUE;
+    LongArray someValues = LongArray.create(MIN, MIN + 1, 0, 1, 3, 5, MAX - 1, MAX);
+    for (LongArray first : LongCollections.allSubLists(someValues)) {
+      for (LongArray second : LongCollections.allSubLists(someValues)) {
+        IntegersDebug.println(LongCollections.toBoundedString(first) +
+            " " + LongCollections.toBoundedString(second));
+        assertEquals(new LongUnionIterator(first, second).hasNext(),
+            hasUnion(first, second));
+        assertEquals(new LongIntersectionIterator(first, second).hasNext(),
+            hasIntersection(first, second));
+        assertEquals(new LongMinusIterator(first.iterator(), second.iterator()).hasNext(),
+            hasComplement(first, second));
+      }
+    }
+  }
+
+  public void testSortPairs() {
+    try {
+      LongCollections.sortPairs(LongArray.create(0, 1, 2), LongArray.create(10, 20));
+      fail();
+    } catch (IllegalArgumentException e) {}
+
+    int attempts = 10;
+    int len = 100;
+    int maxVal = 200;
+    for (int attempt = 0; attempt < attempts; attempt++) {
+      LongArray[] actual = new LongArray[2];
+      for (int i = 0; i < 2; i++) {
+        actual[i] = generateRandomLongArray( len, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+      }
+
+      LongArray expected = new LongArray(len);
+      for (int i = 0; i < len; i++) {
+        expected.add(actual[0].get(i) * maxVal + actual[1].get(i));
+      }
+      expected.sort();
+
+      LongCollections.sortPairs(actual[0], actual[1]);
+
+      for (int i = 0; i < len; i++) {
+        assertEquals(expected.get(i), actual[0].get(i) * maxVal + actual[1].get(i));
+      }
+    }
+  }
+
+  public void checkAllSubLists(LongList list, ArrayList<Long>[] lists, int size) {
+    int i = 0;
+    for (LongArray array : allSubLists(list)) {
+      CHECK.order(LongCollections.asLongList(lists[i++]), array);
+    }
+    assertEquals(size, i);
+  }
+
+  public void testAllSubLists() {
+    ArrayList<Long>[] lists = new ArrayList[65];
+    lists[0] = new ArrayList<Long>();
+    LongArray cur = LongArray.create();
+    checkAllSubLists(cur, lists, 1);
+
+    int size = 1;
+    for (long elem = 0; elem < 6; elem++) {
+      for (int j = 0; j < size; j++) {
+        int idx = size + j;
+        lists[idx] = new ArrayList<Long>();
+        lists[idx].addAll(lists[j]);
+        lists[idx].add(elem);
+      }
+      size <<= 1;
+      cur.add(elem);
+      checkAllSubLists(cur, lists, size);
+    }
+  }
+
+  public void testEnsureCapacity() {
+    long[] values = new long[]{0, 1, 2, 3, 4};
+    for (int i = 0; i <= values.length; i++) {
+      assertEquals(values, ensureCapacity(values, i));
+    }
+    long[] expected = new long[16];
+    System.arraycopy(values, 0, expected, 0, 5);
+    for (int i = values.length + 1; i < 17; i++) {
+      CHECK.order(expected, ensureCapacity(values, i));
+    }
+
+    expected = new long[20];
+    System.arraycopy(values, 0, expected, 0, 5);
+    CHECK.order(expected, ensureCapacity(values, 20));
+
+    values = LongProgression.Arithmetic.fillArray(0, 1, 20);
+    assertEquals(values, ensureCapacity(values, 20));
+    expected = new long[40];
+    System.arraycopy(values, 0, expected, 0, 20);
+    CHECK.order(expected, ensureCapacity(values, 21));
+    CHECK.order(expected, ensureCapacity(values, 40));
+  }
+
+  public void checkCollect(LongList ... lists) {
+    LongArray expected = new LongArray();
+    for (LongList array : lists) {
+      expected.addAll(array);
+    }
+    CHECK.order(expected, collectLists(lists));
+
+    int attemptsCount = 5;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      LongIterable[] iterables = new LongIterable[lists.length];
+      for (int i = 0; i < lists.length; i++) {
+        switch (RAND.nextInt(3)) {
+          case 0: iterables[i] = lists[i]; break;
+          case 1: iterables[i] = lists[i].iterator(); break;
+          case 2:
+            int size2 = lists[i].size() / 2;
+            iterables[i] = new LongConcatIterator(lists[i].subList(0, size2), lists[i].subList(size2, lists[i].size()));
+            break;
+          default: assert false;
+        }
+      }
+      CHECK.order(expected, collectIterables(iterables));
+
+      for (int i = 0; i < iterables.length; i++) {
+        if (iterables[i] instanceof LongIterator) {
+          iterables[i] = lists[i].iterator();
+        }
+      }
+      CHECK.order(expected, collectIterables(expected.size(), iterables));
+    }
+  }
+
+  public void testCollect() {
+    checkCollect(LongList.EMPTY, LongArray.create(0, 1, 10), LongArray.create(10, 20, 30));
+    checkCollect(LongList.EMPTY, LongArray.create(5), LongList.EMPTY);
+
+    int maxSize = 10, maxArraySize = 15;
+    for (int size = 0; size < maxSize; size++) {
+      LongArray[] arrays = new LongArray[size];
+      for (int i = 0; i < arrays.length; i++) {
+        arrays[i] = generateRandomLongArray( maxArraySize, IntegersFixture.SortedStatus.UNORDERED);
+      }
+      checkCollect(arrays);
+    }
+  }
 }

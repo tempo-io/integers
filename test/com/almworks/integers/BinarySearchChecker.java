@@ -21,7 +21,7 @@ import static junit.framework.Assert.assertTrue;
 
 public class BinarySearchChecker {
   private static void check(BinarySearcher bs, LongArray values) {
-    assertTrue(LongArray.copy(values).isSorted());
+    assertTrue(values.isSorted());
     bs.init(values);
 
     for (int i = 0; i < bs.size(); i++) {
@@ -59,7 +59,7 @@ public class BinarySearchChecker {
     int[] maxVal = {50, 100, 110, 150, 200, 250, 300, 350};
     LongArray array;
     for (int i = 0; i < 10; i++) {
-      array = IntegersFixture.generateRandomLongArray(arrLength, false, maxVal);
+      array = IntegersFixture.generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED, maxVal);
       array.sort();
       check(bs, array);
     }
