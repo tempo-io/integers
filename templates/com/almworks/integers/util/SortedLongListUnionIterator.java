@@ -27,7 +27,7 @@ import java.util.List;
  * Iterates through two unique sorted int lists in O(N+M), providing unique sorted values that exist in
  * either of lists
  */
-public class SortedLongListUnionIterator extends SortedLongListOperationsIterator {
+public class SortedLongListUnionIterator extends LongOperationsIterator {
   private boolean isHeapBuilt = false;
 
   public SortedLongListUnionIterator(List<LongIterator> iterators) {

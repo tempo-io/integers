@@ -51,6 +51,9 @@ public class LongIntersectionIterator extends LongSetOperationsIterator {
   }
 
   protected boolean findNext() {
+    if (myIts.size() == 0) {
+      return false;
+    }
     for (int i = 0, n = myIts.size(); i < n; i++) {
       if (myIts.get(i).hasNext()) {
         myIts.get(i).next();

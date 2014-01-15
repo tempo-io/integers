@@ -26,7 +26,7 @@ public class LongConcatIteratorTests extends IntegersFixture {
   public LongIterator[] its;
 
   public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<LongIterator> get(final long... values) {
         List<LongIterator> res = new ArrayList<LongIterator>();
@@ -99,7 +99,7 @@ public class LongConcatIteratorTests extends IntegersFixture {
     LongArray[] arrays = new LongArray[5];
     for (int i = 0; i < 20; i++) {
       for (int j = 0; j < arrays.length; j++) {
-        arrays[j] = generateRandomLongArray(30, false);
+        arrays[j] = generateRandomLongArray( 30, IntegersFixture.SortedStatus.UNORDERED);
       }
       CHECK.order(collectIterables(300, arrays).iterator(), LongIterators.concat(arrays));
     }

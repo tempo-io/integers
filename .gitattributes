@@ -231,6 +231,7 @@ test/com/almworks/integers/LongIteratorSingleTests.java -text
 test/com/almworks/integers/LongIteratorSpecificationChecker.java -text
 test/com/almworks/integers/LongIteratorsTests.java -text
 test/com/almworks/integers/LongListChecker.java -text
+test/com/almworks/integers/LongListIteratorSpecificationChecker.java -text
 test/com/almworks/integers/LongNativeArrayIteratorTests.java -text
 test/com/almworks/integers/LongProgressionTests.java -text
 test/com/almworks/integers/LongSubListTests.java -text

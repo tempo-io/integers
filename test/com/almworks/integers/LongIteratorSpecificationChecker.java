@@ -2,87 +2,241 @@ package com.almworks.integers;
 
 import junit.framework.TestCase;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-import static com.almworks.integers.IntegersFixture.ap;
+import static com.almworks.integers.IntegersFixture.*;
+import static junit.framework.Assert.fail;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 
-public class LongIteratorSpecificationChecker {
-  public static interface IteratorGetter {
-    List<? extends LongIterator> get(long ... values);
+public class LongIteratorSpecificationChecker<I extends LongIterator> {
+  public static int MAX = Integer.MAX_VALUE;
+  public static int MIN = Integer.MIN_VALUE;
+
+  protected final IteratorGetter<I> getter;
+  protected final ValuesType type;
+
+
+  public interface IteratorGetter<I extends LongIterator> {
+    List<I> get(long ... values);
   }
 
-  public static void check(IteratorGetter getter) {
-    testEmpty(getter);
-    testSimple(getter);
-    testValues(getter, 0, 1, 2);
-    testValues(getter, 0, 2, 4, 6, 8);
-    testValues(getter);
-    testValues(getter, 5, -10, 5, 0);
-    testValues(getter, 0, 0, 1, 1, 2, 2);
-    testValues(getter, Long.MAX_VALUE, Long.MIN_VALUE, 0);
+  public static long[][] valuesArray = {{},
+      {5},
+      {0, 1, 2},
+      {239, 1000},
+      {0, 2, 4, 6, 8},
+      {0, 5, 6, 10, 11, 15},
+      {MIN / 10, 0, MAX / 10},
+      {MIN / 10},
+      {MAX / 10},
+      {0, 10, 20, 30, 40},
+      {0, -7, -14, -21},
+      {1000, 990, 980, 970},
+      {0, 0, 1, 1, 2, 2},
+      {-10, 10, 20, 30, -23, 40, 21, 33, 15, 0},
+      {1, 2, 3, 4, 5, 6, 29, -7, 144, 15},
+      ap(0, 1, 19),
+      ap(0, -1, 10),
+  };
 
-    testValues(getter, ap(0, 1, 100));
-    testValues(getter, IntegersFixture.generateRandomLongArray(100, false).extractHostArray());
-    testRemoveException(getter);
+  public enum ValuesType {
+    ALL {
+      @Override
+      public boolean check(long... values) {
+        return true;
+      }
+
+      @Override
+      public long[] generateValues(int size) {
+        return generateRandomLongArray( size, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
+      }
+
+      @Override
+      public ValuesType[] supportedTypes() {
+        return new ValuesType[]{ALL, SORTED, SORTED_UNIQUE, ARITHMETHIC};
+      }
+    },
+    SORTED {
+      @Override
+      public boolean check(long... values) {
+        return new LongArray(values).isSorted();
+      }
+
+      @Override
+      public long[] generateValues(int size) {
+        LongArray array = generateRandomLongArray( size, IntegersFixture.SortedStatus.UNORDERED);
+        array.sort();
+        return array.extractHostArray();
+      }
+
+      @Override
+      public ValuesType[] supportedTypes() {
+        return new ValuesType[]{SORTED, SORTED_UNIQUE};
+      }
+    },
+    SORTED_UNIQUE {
+      @Override
+      public boolean check(long... values) {
+        return new LongArray(values).isUniqueSorted();
+      }
+
+      @Override
+      public long[] generateValues(int size) {
+        return generateRandomLongArray( size, IntegersFixture.SortedStatus.SORTED_UNIQUE).extractHostArray();
+      }
+
+      @Override
+      public ValuesType[] supportedTypes() {
+        return new ValuesType[]{SORTED_UNIQUE};
+      }
+    },
+    ARITHMETHIC {
+      @Override
+      public boolean check(long... values) {
+        if (values.length < 3) {
+          return true;
+        }
+        long step = values[1] - values[0];
+        for (int i = 2; i < values.length; i++) {
+          if (values[i] - values[i - 1] != step) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @Override
+      public long[] generateValues(int size) {
+        long start = RAND.nextInt(), step = RAND.nextInt() - MAX / 2;
+        int count = RAND.nextInt(size);
+        return LongProgression.Arithmetic.fillArray(start, step, count);
+      }
+
+      @Override
+      public ValuesType[] supportedTypes() {
+        return new ValuesType[]{ARITHMETHIC};
+      }
+    };
+    public abstract boolean check(long ... values);
+    public abstract long[] generateValues(int size);
+    public abstract ValuesType[] supportedTypes();
   }
 
-  private static void testRemoveException(IteratorGetter getter) {
+  protected LongIteratorSpecificationChecker(IteratorGetter<I> getter, ValuesType type) {
+    this.getter = getter;
+    this.type = type;
+  }
+
+  public static void checkIterator(IteratorGetter<LongIterator> getter) {
+    checkIterator(getter, ValuesType.ALL);
+  }
+
+  public static void checkIterator(IteratorGetter<LongIterator> getter, ValuesType type) {
+    LongIteratorSpecificationChecker checker = new LongIteratorSpecificationChecker(getter, type);
+    checker.run();
+  }
+
+  protected void run() {
+    testEmpty();
+    testSimple();
+
+    for (long[] values : valuesArray) {
+      if (type.check(values)) {
+        testValues(values);
+      }
+    }
+    int attempts = 8, size = 10;
+    for (ValuesType curType : type.supportedTypes()) {
+      for (int attempt = 0; attempt < attempts; attempt++) {
+        testValues(curType.generateValues(size));
+      }
+    }
+
+    testRemoveException();
+  }
+
+  private void testRemoveException() {
     for(LongIterator it: getter.get(0, 1, 2)) {
       if (!(it instanceof WritableLongListIterator))
       try {
         it.next();
         it.remove();
-        TestCase.fail();
-      } catch (UnsupportedOperationException ex) {}
+        fail();
+      } catch (UnsupportedOperationException ex) {
+        // ok
+      }
     }
   }
 
-  private static void testSimple(IteratorGetter getter) {
+  private void testSimple() {
     for(LongIterator it: getter.get(0, 1, 2)) {
-      TestCase.assertFalse(it.hasValue());
-      TestCase.assertTrue(it.hasNext());
+      assertFalse(it.hasValue());
+      assertTrue(it.hasNext());
 
       it.next();
-      TestCase.assertEquals(0, it.value());
-      TestCase.assertTrue(it.hasNext());
-      TestCase.assertEquals(0, it.value());
+      assertEquals(0, it.value());
+      assertTrue(it.hasNext());
+      assertEquals(0, it.value());
 
-      TestCase.assertEquals(1, it.nextValue());
-      TestCase.assertTrue(it.hasNext());
-      TestCase.assertEquals(1, it.value());
+      assertEquals(1, it.nextValue());
+      assertTrue(it.hasNext());
+      assertEquals(1, it.value());
     }
   }
 
-  private static void testEmpty(IteratorGetter getter) {
+  private void testEmpty() {
     for (LongIterator empty: getter.get()) {
       TestCase.assertFalse(empty.hasValue());
       TestCase.assertFalse(empty.hasNext());
+
+      try {
+        empty.value();
+        fail();
+      } catch (NoSuchElementException ex) {}
+
+      try {
+        empty.next();
+        fail();
+      } catch (NoSuchElementException ex) {}
     }
   }
 
-  private static void testValues(IteratorGetter getter, long ... values) {
+  protected void testValues(long ... values) {
+    checkOrder(values);
+  }
+
+  private void checkOrder(long ... values) {
     for(LongIterator it: getter.get(values)) {
       TestCase.assertFalse(it.hasValue());
       for (int i = 0, n = values.length; i < n; i++) {
-        TestCase.assertTrue(it.hasNext());
+        assertTrue(Arrays.toString(values), it.hasNext());
         it.next();
-        TestCase.assertTrue(it.hasNext() || (i == n - 1 && !it.hasNext()));
-        TestCase.assertEquals(values[i], it.value());
-        TestCase.assertTrue(it.hasValue());
+        assertEquals(Arrays.toString(values), values[i], it.value());
+        assertTrue(Arrays.toString(values), it.hasValue());
       }
-      TestCase.assertFalse(it.hasNext());
+      TestCase.assertFalse(Arrays.toString(values), it.hasNext());
     }
     for(LongIterator it: getter.get(values)) {
       int i = 0;
       for (LongIterator it2: it) {
-        TestCase.assertEquals(values[i++], it2.value());
+        assertEquals(values[i++], it2.value());
       }
+      assertEquals(values.length, i);
     }
     for(LongIterator it: getter.get(values)) {
       int i = 0;
       while(it.hasNext()) {
-        TestCase.assertEquals(values[i++], it.nextValue());
+        assertEquals(values[i++], it.nextValue());
       }
+      assertEquals(values.length, i);
+    }
+
+    for(LongIterator it : getter.get(values)) {
+      CHECK.order(it, values);
     }
   }
 }

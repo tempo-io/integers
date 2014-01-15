@@ -32,7 +32,7 @@ public abstract class FindingIntLongIterator extends AbstractIntLongIteratorWith
   private boolean myIsValueStored = false;
 
   /**
-   * In this method in the {@code myCurrent} must be assigned next value, if it exist.
+   * In this method in {@code myCurrent} must be assigned next value, if it exist.
    * @return true if this iterator has next value, otherwise - false
    * */
   protected abstract boolean findNext();

@@ -31,7 +31,7 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
   }
 
   public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<LongIterator> get(long... values) {
         List<LongIterator> res = new ArrayList<LongIterator>();
@@ -44,7 +44,7 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
         res.add(new LongArrayIterator(values2, 0, length));
 
         LongArray arr = new LongArray(length * 2);
-        arr.addAll(generateRandomLongArray(length, false));
+        arr.addAll(generateRandomLongArray(length, IntegersFixture.SortedStatus.UNORDERED));
         arr.addAll(values);
         res.add(new LongArrayIterator(arr.extractHostArray(), length, length * 2));
 

@@ -38,16 +38,46 @@ public abstract class LongProgression extends AbstractLongList {
   }
 
   /**
-   * @param from starting index, inclusive
-   * @param to ending index, exclusive
+   * @param start starting value, inclusive
+   * @param stop ending value, exclusive; may be less than {@code start}, then {@code step} must be negative
+   * @param step may be negative, then {@code stop} must be not greater than {@code start}
    * @return list containing arithmetic progression.
    * @throws IllegalArgumentException if {@code step == 0}
    */
-  public static LongProgression range(final long from, final long to, final long step) throws IllegalArgumentException {
-    if (step == 0) throw new IllegalArgumentException("step = 0");
-    int myCount = (int)((to - 1 - from) / step);
-    if (myCount < 0) throw new IllegalArgumentException();
-    return LongProgression.arithmetic(from, myCount, step);
+  public static LongProgression range(long start, long stop, long step) throws IllegalArgumentException {
+    return LongProgression.arithmetic(start, getCount(start, stop, step), step);
+  }
+
+  /**
+   * @see #range(long, long, long)
+   */
+  public static LongProgression range(long start, long stop) throws IllegalArgumentException {
+    return range(start, stop, 1);
+  }
+
+  /**
+   * @see #range(long, long, long)
+   */
+  public static LongProgression range(long stop) throws IllegalArgumentException {
+    return range(0, stop, 1);
+  }
+
+  /**
+   * @param start starting value, inclusive
+   * @param stop ending value, exclusive; may be less than {@code start}, then {@code step} must be negative
+   * @param step may be negative, then {@code stop} must be not greater than {@code start}
+   * @return minimum value {@code count} such that {@code start + step * count} is
+   * between start and stop
+   * @throws IllegalArgumentException {@code if step == 0 || (start < stop && step < 0) || (stop < start && step > 0)}
+   */
+  public static int getCount(long start, long stop, long step) {
+    if (step == 0) {
+      throw new IllegalArgumentException("step = 0");
+    }
+    if (start == stop || (start < stop && step < 0) || (stop < start && step > 0)) {
+      return 0;
+    }
+    return 1 + (int)((Math.abs(stop - start) - 1) / Math.abs(step));
   }
 
   public static class Arithmetic extends LongProgression {

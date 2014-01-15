@@ -16,6 +16,9 @@
 
 package com.almworks.integers;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class LongProgressionTests extends IntegersFixture {
   public void testCreator() {
     LongProgression.Arithmetic progression = new LongProgression.Arithmetic(0, 5, 2);
@@ -45,6 +48,58 @@ public class LongProgressionTests extends IntegersFixture {
     for (LongIterator it : rO) {
       assertEquals(i++, it.value());
     }
+  }
+
+  public void testGetCount() {
+    // start, stop, step
+    int attemptsCount = 30;
+    int maxVal = 100000;
+    int maxStep = 100000;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      long start = RAND.nextInt(maxVal);
+      long stop = RAND.nextInt(maxVal);
+      if (stop == start) {
+        stop = start + 1;
+      }
+      // step in [-maxStep, maxStep)
+      long step = RAND.nextInt(maxStep * 2)  - maxStep;
+
+      int count = LongProgression.getCount(start, stop, step);
+      long lastValue = start + step * (count - 1);
+      long extraValue = lastValue + step;
+      if (count == 0) {
+        assertTrue((stop - start) * step < 0);
+      } else {
+        if (step > 0) {
+          assertTrue(start + " " + stop + " " + step + " " + count, lastValue < stop && stop <= extraValue);
+        } else {
+          assertTrue(start + " " + stop + " " + step + " " + count, extraValue <= stop && stop < lastValue);
+        }
+      }
+    }
+
+    try {
+      LongProgression.getCount(0, 10, 0);
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
+    }
+  }
+
+  public void testArithmeticIterator() {
+    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
+      @Override
+      public List<? extends LongIterator> get(long... values) {
+        long start = 0, step = 0;
+        int count = 0;
+        if (values.length != 0) {
+          start = values[0];
+          count = values.length;
+          step = (count > 1) ? values[1] - values[0] : 1;
+        }
+        return Arrays.asList(LongProgression.arithmetic(start, count, step).iterator());
+      }
+    }, LongIteratorSpecificationChecker.ValuesType.ARITHMETHIC);
   }
 
 }

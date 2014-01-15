@@ -24,9 +24,12 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
-  protected long myCurrent;
-  private long myNext;
-  private boolean myIsValueStored = false;
+  protected long myCurrent = Long.MAX_VALUE;
+  private long myNext = Long.MAX_VALUE;
+  // 0 - value not stored,
+  // 1 - value stored,
+  // 2 - iterator ended,
+  private int myIteratorStatus = 0;
 
   /**
    * In this method in {@code myCurrent} should be assigned the next value.
@@ -35,19 +38,24 @@ public abstract class FindingLongIterator extends AbstractLongIteratorWithFlag {
   protected abstract boolean findNext();
 
   public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIsValueStored) {
+    if (myIteratorStatus == 2) {
+      return false;
+    }
+    if (myIteratorStatus == 1) {
       return true;
     }
+    // myIteratorStatus = 0
     boolean hasNext = findNext();
-    if (hasNext) {
-      myIsValueStored = true;
-    }
+    myIteratorStatus = hasNext ? 1 : 2;
     return hasNext;
   }
 
   protected final void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIsValueStored) {
-      myIsValueStored = false;
+    if (myIteratorStatus == 2) {
+      throw new NoSuchElementException();
+    }
+    if (myIteratorStatus == 1) {
+      myIteratorStatus = 0;
     } else {
       boolean hasNext = findNext();
       if (!hasNext) throw new NoSuchElementException();

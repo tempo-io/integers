@@ -131,18 +131,20 @@ public class LongIterators {
   /**
    * {@link LongProgression#range(long, long, long)}
    */
-  public static LongIterator range(final long from, final long to, final long step) throws IllegalArgumentException {
-    if (step == 0) throw new IllegalArgumentException("step = 0");
-    int myCount = 1 + (int)((to - 1 - from) / step);
-    if (myCount < 0) throw new IllegalArgumentException();
-    return arithmetic(from, myCount, step);
+  public static LongIterator range(final long start, final long stop, final long step) throws IllegalArgumentException {
+    return LongIterators.arithmetic(start, LongProgression.getCount(start, stop, step), step);
   }
 
-  // todo javadoc from range(from, to, step)
+  /**
+   * {@link LongProgression#range(long, long, long)}
+   */
   public static LongIterator range(long from, long to) {
     return range(from, to, 1);
   }
 
+  /**
+   * {@link LongProgression#range(long, long, long)}
+   */
   public static LongIterator range(long to) {
     return range(0, to, 1);
   }

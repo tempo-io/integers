@@ -5,11 +5,8 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public class IntIterators {
-  public static IntIterator range(final int from, final int to, final int step) throws IllegalArgumentException {
-    if (step == 0) throw new IllegalArgumentException("step = 0");
-    int myCount = 1 + (int)((to - 1 - from) / step);
-    if (myCount < 0) throw new IllegalArgumentException();
-    return arithmetic(from, myCount, step);
+  public static IntIterator range(final int start, final int stop, final int step) throws IllegalArgumentException {
+    return IntIterators.arithmetic(start, LongProgression.getCount(start, stop, step), step);
   }
 
   // todo javadoc from range(from, to, step)

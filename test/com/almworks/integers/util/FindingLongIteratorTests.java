@@ -19,13 +19,11 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class FindingLongIteratorTests extends IntegersFixture {
   public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<? extends LongIterator> get(final long... values) {
         return Arrays.asList(new FindingLongIterator() {
@@ -37,7 +35,8 @@ public class FindingLongIteratorTests extends IntegersFixture {
             myCurrent = innerIt.nextValue();
             return true;
           }
-        });}
+        });
+      }
     });
   }
 }

@@ -3,7 +3,6 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LongUnionIteratorTests extends IntegersFixture {
@@ -25,9 +24,12 @@ public class LongUnionIteratorTests extends IntegersFixture {
   }
 
   public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.check(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<? extends LongIterator> get(final long... values) {
+        if (!new LongArray(values).isUniqueSorted()) {
+          throw new IllegalArgumentException();
+        }
         List<LongIterator> res = new ArrayList<LongIterator>();
         AbstractLongList list = new LongArray(values);
         int length = values.length;
@@ -63,6 +65,6 @@ public class LongUnionIteratorTests extends IntegersFixture {
 
         return res;
       }
-    });
+    }, LongIteratorSpecificationChecker.ValuesType.SORTED_UNIQUE);
   }
 }

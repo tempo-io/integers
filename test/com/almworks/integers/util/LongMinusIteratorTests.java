@@ -6,7 +6,7 @@ import com.almworks.integers.LongIterator;
 import com.almworks.integers.SetOperationsChecker;
 import junit.framework.TestCase;
 
-public class LongMinusIteratorTests extends TestCase {
+public class LongMinusIteratorTests extends TestCase {public static final int XXXX = 239;
   private LongArray create(long... values) {
     return new LongArray(values);
   }
@@ -14,6 +14,7 @@ public class LongMinusIteratorTests extends TestCase {
   public void testMinusNotUnique() {
     testMinus(create(1, 1, 3, 3, 5, 5), create(1, 3, 5), create());
     testMinus(create(1, 1, 3, 3, 5, 5), create(1, 5), create(3, 3));
+    testMinus(create(1, 1, 3, 3, 5, 5), create(1, 5, 5), create(3, 3));
     testMinus(create(1, 3, 5), create(1, 1, 5, 5), create(3));
     testMinus(create(1, 3, 5, 7, 9), create(1, 5, 9), create(3, 7));
   }

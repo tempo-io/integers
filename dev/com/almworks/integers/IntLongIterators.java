@@ -31,6 +31,10 @@ public class IntLongIterators {
     };
   }
 
+  public static IntLongIterator pair(final IntIterable left, final LongIterable right) {
+    return pair(left.iterator(), right.iterator());
+  }
+
   public static IntIterator leftProjection(final IntLongIterator pairs) {
     return new AbstractIntIterator() {
       @Override

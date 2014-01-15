@@ -38,27 +38,68 @@ public class LongIteratorsTests extends IntegersFixture {
     }
   }
 
-  public void checkRange(long start, long step, int count) {
-    if (step == 0) step++;
-    LongList expected = LongProgression.arithmetic(start, count, step);
-    long stop = expected.get(expected.size() - 1) + 1;
+  public void checkRange(long ... params) {
+    assert params.length == 3;
+    long start = params[0], stop = params[1], step = params[2];
+
+    // get range
+    LongArray expected = new LongArray();
+    long delta = stop - start;
+    assert step != 0 && (delta == 0 || ((delta > 0) == (step > 0)));
+    if (step > 0) {
+      for (long i = start; i < stop; i += step) {
+        expected.add(i);
+      }
+    } else {
+      for (long i = start; stop < i; i += step) {
+        expected.add(i);
+      }
+    }
     CHECK.order(expected.iterator(), LongIterators.range(start, stop, step));
-    CHECK.order(expected.iterator(), LongIterators.arithmetic(start, count, step));
   }
 
-
-  public void testRangeArithmetic() {
-    int[][] tests = {{0, 1, 10}, {0, 3, 10}, {0, 5, 10}, {0, 10, 1}, {20, -7, 5}, {-100, 10, 20}};
-    for (int[] test: tests) {
-      checkRange(test[0], test[1], test[2]);
+  public void testRange() {
+    long[][] tests = {{0, 0, 1}, {0, 0, -1}, {0, 0, -4},
+        {0, 1, 10}, {0, 10, 1}, {0, 10, 2},
+        {20, -7, -5}, {-100, 10, 20}, {15, 0, -4}};
+    for (long[] test: tests) {
+      checkRange(test);
     }
     for (int attempt = 0; attempt < 20; attempt++) {
-      checkRange(RAND.nextInt(), RAND.nextInt(2000) - 1000, RAND.nextInt(100));
+      long start = (long)RAND.nextInt(2000) - 1000;
+      long step = RAND.nextInt(2000) - 1000;
+      if (step == 0) step++;
+      long stop = start + (step > 0 ? 1 : -1) * RAND.nextInt(1000);
+      checkRange(start, stop, step);
     }
+
+    try {
+      LongProgression.getCount(0, 10, 0);
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
+    }
+  }
+
+  public void test() {
+    System.out.println(new LongArray(LongIterators.range(0, 0, 1)));
+    System.out.println(LongProgression.getCount(0, 0, 10));
+    System.out.println(new LongArray(LongIterators.range(0, 0, -4)));
   }
 
   public void testArithmetic() {
-    LongIterator arithmetic = LongIterators.arithmetic(0, 10, 5);
-    System.out.println(LongCollections.toBoundedString(arithmetic));
+    int[][] tests = {{0, 1, 10}, {0, 3, 10}, {0, 5, 10}, {0, 10, 1}, {20, 7, 5},
+        {-100, 10, 20}, {20, 5, -8}};
+    for (int[] t: tests) {
+      CHECK.order(LongProgression.arithmetic(t[0], t[1], t[2]).iterator(),
+          LongIterators.arithmetic(t[0], t[1], t[2]));
+    }
+    for (int attempt = 0; attempt < 20; attempt++) {
+      long start = RAND.nextInt();
+      int count = RAND.nextInt(100);
+      long step = RAND.nextInt(2000) - 1000;
+      CHECK.order(LongProgression.arithmetic(start, count, step).iterator(),
+          LongIterators.arithmetic(start, count, step));
+    }
   }
 }

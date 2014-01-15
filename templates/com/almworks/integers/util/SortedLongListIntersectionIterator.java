@@ -29,7 +29,7 @@ import java.util.List;
  * Iterates through two sorted int lists in O(N+M), providing values that exist in
  * both lists
  */
-public class SortedLongListIntersectionIterator extends SortedLongListOperationsIterator {
+public class SortedLongListIntersectionIterator extends LongOperationsIterator {
 
   public SortedLongListIntersectionIterator(List<LongIterator> iterators) {
     super(iterators);
