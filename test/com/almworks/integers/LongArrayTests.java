@@ -278,14 +278,9 @@ public class LongArrayTests extends WritableLongListChecker {
   }
 
   public void test() {
-    array = LongArray.create(0,2,4,7,9,10);
-    LongList src = LongArray.create(0,4,8,9);// --> [0,2, -1]
-    int[][] points = {null};
-    System.out.println(array.getInsertionPoints(src, points));
-    System.out.println(Arrays.deepToString(points));
-
-    System.out.println();
-    System.out.println(array.getRemovePoints(src, points));
-    System.out.println(Arrays.deepToString(points));
+    LongListIterator it = LongArray.create(1, 2, 3).iterator();
+    it.move(0);
+    System.out.println(it.nextValue());
+    System.out.println(it.index());
   }
 }

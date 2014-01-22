@@ -392,7 +392,6 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
   }
 
-  // todo refactor - make method makeSpaceForInsertion like in LongArray
   private void doExpand(int index, int count) {
     boolean leftward = isLeftwardExpand(index, count);
     if (leftward) {
@@ -421,10 +420,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     int leftAllocate = count <= myLeftOffset ? 0 : ((count - myLeftOffset - 1) >> mySegmentBits) + 1;
 
     // number of blocks to be allocated when shifting right
-    // todo use another field for right offset?
-    int si = (myLeftOffset + sz) & mySegmentMask;
-    int rightOffset = si == 0 ? 0 : mySegmentSize - si;
-    int rightAllocate = count <= rightOffset ? 0 : ((count - rightOffset - 1) >> mySegmentBits) + 1;
+    int rightAllocate = count <= myRightOffset ? 0 : ((count - myRightOffset - 1) >> mySegmentBits) + 1;
 
     // number of blocks to be affected (moving ints)
     int fromBlock = (from + myLeftOffset) >> mySegmentBits;
@@ -543,7 +539,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
           mySegmentSize = SEGS_LARGE;
           mySegmentMask = SEGS_LARGE - 1;
           expandSingleSegment(leftward);
-          relatedOffset = leftward ? myLeftOffset : myRightOffset;
+//          relatedOffset = leftward ? myLeftOffset : myRightOffset;
           assert added > relatedOffset : leftward + " " + relatedOffset + " " + added;
         }
         int allocateCount = ((added - relatedOffset - 1) >> mySegmentBits) + 1;
@@ -599,6 +595,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       }
       setSegment(0, s);
     }
+    checkInvariants();
   }
 
   private void allocateSegments(int allocateCount, boolean leftward) {
@@ -780,7 +777,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     private long myCurrent;
 
     /**
-     * The segment of the current value
+     * The segment of the next value
      */
     private int mySegmentIndex;
     private LongSegment mySegment;
@@ -805,11 +802,16 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
       assert !IntegersDebug.CHECK || checkIterator();
       checkMod();
-      if (myNext < 0)
+      if (myNext < 0) {
         throw new IllegalStateException();
+      }
+      if (offset == 0) {
+        return;
+      }
       int p = myNext - 1 + offset;
-      if (p < myFrom || p >= myTo)
+      if (p < myFrom || p >= myTo) {
         throw new NoSuchElementException(offset + " " + this);
+      }
       updateOffset(myOffset - 1 + offset);
       if (mySegment == null) {
         mySegment = mySegments.segments[mySegmentIndex];
@@ -827,8 +829,9 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         myNext = -myNext-1;
       if (myNext < myFrom || myNext >= myTo)
         throw new NoSuchElementException(String.valueOf(this));
-      if (mySegment == null)
+      if (mySegment == null) {
         mySegment = mySegments.segments[mySegmentIndex];
+      }
       myCurrent = mySegment.data[myOffset];
       myNext++;
       updateOffset(myOffset + 1);
