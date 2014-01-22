@@ -364,42 +364,36 @@ public class LongCollectionsTests extends IntegersFixture {
     return resultingIndices.iterator();
   }
 
-  public void checkToBoundedString(String expected, int lim, LongArray array, LongSet set) {
+  public void checkToBoundedString(String expected, int lim, LongArray array) {
+    WritableLongSet set = LongTreeSet.createFromSortedUnique(array);
     LongIterable[] iterables = {array, set, array.iterator(), set.iterator(),
         LongIterators.unionIterator(array, array.subList(0, 1))};
-    for (LongIterable iterable: iterables) {
+    for (LongIterable iterable : iterables) {
       assertEquals(iterable.toString(), expected, LongCollections.toBoundedString(iterable, lim));
     }
   }
 
   public void testToBoundedString() {
     LongArray array = new LongArray();
-    WritableLongSortedSet set = new LongTreeSet();
     array.addAll(LongIterators.range(10));
-    set.addAll(LongIterators.range(10));
-    checkToBoundedString("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", 5, array, set);
+    checkToBoundedString("(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)", 5, array);
 
     array.add(10);
-    set.add(10);
-    checkToBoundedString("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", 5, array, set);
+    checkToBoundedString("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", 5, array);
 
     array.addAll(LongIterators.range(11, 21));
-    set.addAll(LongIterators.range(11, 21));
-    checkToBoundedString("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", 5, array, set);
+    checkToBoundedString("[21] (0, 1, 2, 3, 4, ..., 16, 17, 18, 19, 20)", 5, array);
 
     array.addAll(LongIterators.range(21, 40));
-    set.addAll(LongIterators.range(21, 40));
     StringBuilder expected = new StringBuilder().append("(0");
-    for (long i: interval(1, 39)) {
+    for (int i = 1; i < 40; i++) {
       expected.append(", ").append(i);
     }
     expected.append(')');
-    checkToBoundedString(expected.toString(), 20, array, set);
+    checkToBoundedString(expected.toString(), 20, array);
 
     array = LongArray.create(0, 1, 2, 3, 4);
-    set.clear();
-    set.addAll(array);
-    checkToBoundedString("[5] (0, 1, ..., 3, 4)", 2, array, set);
+    checkToBoundedString("[5] (0, 1, ..., 3, 4)", 2, array);
   }
 
   // TODO add test union for unsortable hash set
@@ -410,7 +404,7 @@ public class LongCollectionsTests extends IntegersFixture {
     LongArray expected, actual;
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 2; j++) {
-        arrays[j] = generateRandomLongArray( maxSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
+        arrays[j] = generateRandomLongArray(maxSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
         sets[j] = (RAND.nextBoolean()) ?
             LongTreeSet.createFromSortedUnique(arrays[j]) : LongOpenHashSet.createFrom(arrays[j]);
       }

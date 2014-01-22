@@ -65,7 +65,7 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   /**
    * Puts the element for the specified key.
    *
-   * @return the previously stored value if the key was already present in the map, Otherwise, null.
+   * @return the previously stored value if the key was already present in the map. Otherwise, null.
    */
   @Nullable
   public E put(long key, @NonNls @Nullable E value) {
@@ -207,9 +207,6 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
       }
     }
 
-    /**
-     * @see #remove
-     */
     @Override
     public void remove() {
       if(myLastRetPos == -1) {

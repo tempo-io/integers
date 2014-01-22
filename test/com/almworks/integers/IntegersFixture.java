@@ -96,16 +96,18 @@ public abstract class IntegersFixture extends TestCase {
   public static void checkSet(WritableLongSet set, LongList sortedExpected) {
     assertEquals(sortedExpected.size(), set.size());
     if (set instanceof LongSortedSet) {
-      CHECK.order(sortedExpected, set.toArray());
-      CHECK.order(sortedExpected.iterator(), set.iterator());
-    } else {
       LongArray buffer = set.toArray();
-      buffer.sortUnique();
       CHECK.order(sortedExpected, buffer);
+      buffer.clear();
+      buffer.addAll(set.iterator());
+      CHECK.order(sortedExpected, buffer);
+    } else {
+      LongArray setToArray = set.toArray();
+      LongArray setToIterator = LongCollections.collectIterables(set.size(), set.iterator());
+      CHECK.order(setToArray, setToIterator);
 
-      buffer = LongCollections.collectIterables(set.size(), set.iterator());
-      buffer.sortUnique();
-      CHECK.order(sortedExpected, buffer);
+      setToArray.sort();
+      CHECK.order(sortedExpected, setToArray);
     }
   }
 
@@ -118,7 +120,7 @@ public abstract class IntegersFixture extends TestCase {
     CHECK.order(collection.iterator(), expected);
   }
 
-  protected long[] interval(int from, int to) {
+  public static long[] interval(int from, int to) {
     return from < to ? ap(from, 1, to - from + 1) : ap(from, -1, from - to + 1);
   }
 

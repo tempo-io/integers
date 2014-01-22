@@ -19,10 +19,15 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntFunction;
+import com.almworks.integers.func.LongFunction;
 import com.almworks.integers.util.FailFastIntLongIterator;
 import com.almworks.integers.util.IntegersDebug;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class IntLongMap extends AbstractWritableIntLongMap {
   private final WritableIntList myKeys;
@@ -208,6 +213,16 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     return failFast(valuesIterator(0));
   }
 
+  public IntList keysToList() {
+    checkMutatorPresence();
+    return myKeys;
+  }
+
+  public LongList valuesToList() {
+    checkMutatorPresence();
+    return myValues;
+  }
+
   private void checkIndex(int index) {
     if (index < 0 || index >= size()) throw new IndexOutOfBoundsException(index + " " + this);
   }
@@ -222,7 +237,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   }
 
   private boolean checkInvariants() {
-    if (!myKeys.isSorted()) return false;
+    if (!myKeys.isUniqueSorted()) return false;
     long curValue;
     long lastValue = myValues.get(0);
     for (LongIterator ii : myValues.iterator(1)) {
@@ -257,20 +272,20 @@ public class IntLongMap extends AbstractWritableIntLongMap {
       myMutator = this;
     }
 
-    public void setKey(int index, int key) {
-      myKeys.set(index, key);
-    }
-
     public int getKey(int index) {
       return myKeys.get(index);
     }
 
-    public void setValue(int index, long val) {
-      myValues.set(index, val);
-    }
-
     public long getValue(int index) {
       return myValues.get(index);
+    }
+
+    public void setKey(int index, int key) {
+      myKeys.set(index, key);
+    }
+
+    public void setValue(int index, long val) {
+      myValues.set(index, val);
     }
 
     public void insertAt(int idx, int key, long value) {
@@ -283,8 +298,27 @@ public class IntLongMap extends AbstractWritableIntLongMap {
       myValues.removeAt(idx);
     }
 
+    public void reverseValues() {
+      myValues.reverse();
+    }
+
+    public ConsistencyViolatingMutator replace(IntList keys, LongList values) {
+      myKeys.clear();
+      myValues.clear();
+      myKeys.addAll(keys);
+      myValues.addAll(values);
+      return this;
+    }
+
+    public void addPair(int key, long value) {
+      myKeys.add(key);
+      myValues.add(value);
+    }
+
     public void commit() {
-      assert !IntegersDebug.CHECK || checkInvariants();
+      if (!checkInvariants()) {
+        throw new IllegalStateException(myKeys + " " + myValues);
+      }
       IntLongMap.this.myMutator = null;
     }
   }

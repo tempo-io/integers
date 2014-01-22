@@ -677,11 +677,12 @@ public class LongCollections {
    */
   public static LongArray collectIterables(int capacity, LongIterable ... iterables) {
     LongArray res = new LongArray(capacity);
-    for (LongIterable iterable: iterables) {
+    for (LongIterable iterable : iterables) {
       if (iterable instanceof LongList) {
         res.addAll((LongList) iterable);
+      } else if (iterable instanceof LongSet) {
+        res.addAll((LongSet)iterable);
       } else {
-
         if (iterable instanceof LongSizedIterable) {
           res.ensureCapacity(res.size() + ((LongSizedIterable) iterable).size());
         }
@@ -689,6 +690,14 @@ public class LongCollections {
       }
     }
     return res;
+  }
+
+  public static void addIterable(LongCollector collector, LongIterable iterable) {
+    if (iterable instanceof LongList) {
+      collector.addAll((LongList) iterable);
+    } else {
+      collector.addAll(iterable.iterator());
+    }
   }
 
   /**
@@ -717,6 +726,11 @@ public class LongCollections {
     return sb;
   }
 
+  /**
+   * Returns the string representation of {@code iterable}, bounded by {@code 20} elements.
+   * This method calls {@link #toBoundedString(LongIterable, int)} with {@code lim = 10}.
+   * @see #toBoundedString(LongIterable, int)
+   */
   public static String toBoundedString(LongIterable iterable) {
     return toBoundedString(iterable, 10);
   }
@@ -729,6 +743,7 @@ public class LongCollections {
    * the last {@code lim} elements of {@code iterable}.
    * Example: "[size] (a, b, c, ..., d, e, f)"
    * if {@code lim == 3} and size of {@code iterable} is more than 6.
+   * @param lim defines the maximum count of elements({@code 2 * lim}) of iterable to display
    *
    * @return the string representation of {@code iterable}, bounded by {@code 2 * lim} elements.
    */
@@ -737,10 +752,11 @@ public class LongCollections {
       LongSizedIterable sizedIterable = (LongSizedIterable)iterable;
       int size = sizedIterable.size();
       if (size > lim * 2) {
-        LongIterator lastElemsIt = sizedIterable.iterator();
-        if (lastElemsIt instanceof LongListIterator) {
-          ((LongListIterator) lastElemsIt).move(size - lim);
+        LongIterator lastElemsIt;
+        if (iterable instanceof LongList) {
+          lastElemsIt = ((LongList) iterable).iterator(size - lim);
         } else {
+          lastElemsIt = iterable.iterator();
           for (int i = 0; i < size - lim; i++) {
             lastElemsIt.next();
           }
