@@ -22,6 +22,21 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FindingLongIteratorTests extends IntegersFixture {
+  LongArray values = LongArray.create(0, 2, 4, 6, 8);
+  LongIterator it;
+  public void setUp() throws Exception {
+    super.setUp();
+    it = new FindingLongIterator() {
+      LongIterator innerIt = values.iterator();
+      @Override
+      protected boolean findNext() {
+        if (!innerIt.hasNext()) return false;
+        myCurrent = innerIt.nextValue();
+        return true;
+      }
+    };
+  }
+
   public void testIteratorSpecification() {
     LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
@@ -38,5 +53,30 @@ public class FindingLongIteratorTests extends IntegersFixture {
         });
       }
     });
+  }
+
+  public void testSimple() {
+    assertFalse(it.hasValue());
+    for (int i = 0, n = values.size(); i < n; i++) {
+      assertTrue(it.hasNext());
+      it.next();
+      assertTrue(it.hasNext() || (i == n - 1 && !it.hasNext()));
+      assertEquals(values.get(i), it.value());
+      assertTrue(it.hasValue());
+    }
+  }
+
+  public void testSimple2() {
+    long cur = 0;
+    while (it.hasNext()) {
+      assertEquals(cur, it.nextValue());
+      cur += 2;
+    }
+  }
+
+  public void testSimple3() {
+    for (int i = 0; i < 5; i++) {
+      assertEquals(i * 2, it.nextValue());
+    }
   }
 }

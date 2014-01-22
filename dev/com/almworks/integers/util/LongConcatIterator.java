@@ -22,29 +22,34 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 public class LongConcatIterator extends FindingLongIterator implements LongIterator {
-  private final LongIterable[] iterables;
-  int curItNum = 0;
-  LongIterator curIt = LongIterator.EMPTY;
-  boolean myEnded = false;
+  private final Iterator<LongIterable> myIterables;
+  private LongIterator myCurIterator = LongIterator.EMPTY;
 
   public LongConcatIterator(LongIterable ... iterables) {
-    this.iterables = iterables;
+    this(Arrays.asList(iterables));
+  }
+
+  public LongConcatIterator(@NotNull Iterable<LongIterable> iterables) {
+    this.myIterables = iterables.iterator();
   }
 
   protected boolean findNext() {
-    if (myEnded) return false;
-    while (!curIt.hasNext() && curItNum < iterables.length) {
-      curIt = iterables[curItNum++].iterator();
-    }
-
-    if (curIt.hasNext()) {
-      myCurrent = curIt.nextValue();
+    if (myCurIterator.hasNext()) {
+      myCurrent = myCurIterator.nextValue();
       return true;
     }
-    myEnded = true;
+
+    while (!myCurIterator.hasNext() && myIterables.hasNext()) {
+      myCurIterator = myIterables.next().iterator();
+    }
+
+    if (myCurIterator.hasNext()) {
+      myCurrent = myCurIterator.nextValue();
+      return true;
+    }
+
     return false;
   }
 }

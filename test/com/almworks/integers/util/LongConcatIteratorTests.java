@@ -18,6 +18,7 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.LongCollections.collectIterables;
@@ -31,6 +32,8 @@ public class LongConcatIteratorTests extends IntegersFixture {
       public List<LongIterator> get(final long... values) {
         List<LongIterator> res = new ArrayList<LongIterator>();
         res.add(new LongConcatIterator(new LongArrayIterator(values)));
+        res.add(new LongConcatIterator(Arrays.<LongIterable>asList(new LongArrayIterator(values))));
+
         res.add(new LongConcatIterator(LongIterator.EMPTY, new LongArrayIterator(values)));
         res.add(new LongConcatIterator(new LongArrayIterator(values), LongIterator.EMPTY));
         if (values.length < 2) return res;

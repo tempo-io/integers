@@ -18,7 +18,7 @@ public class IntIterators {
     return range(0, to, 1);
   }
 
-public static IntIterator arithmetic(final int initial, final int count, final int step) {
+  public static IntIterator arithmetic(final int initial, final int count, final int step) {
     if (step == 0) throw new IllegalArgumentException("step = 0");
     return new AbstractIntIterator() {
       int myCount = count;
@@ -40,6 +40,28 @@ public static IntIterator arithmetic(final int initial, final int count, final i
       public int value() throws NoSuchElementException {
         if (myCount == count) throw new NoSuchElementException();
         return myValue;
+      }
+    };
+  }
+
+  /**
+   * @return an infinite iterator whose {@code value()} is always equal to the specified value
+   */
+  public static IntIterator repeat(final int value) {
+    return  new AbstractIntIterator() {
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return true;
+      }
+
+      @Override
+      public int value() throws NoSuchElementException {
+        return value;
+      }
+
+      @Override
+      public IntIterator next() {
+        return this;
       }
     };
   }
