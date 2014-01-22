@@ -12,7 +12,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
     return new LongAmortizedSet();
   }
 
-  protected  WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
+  protected  WritableLongSortedSet[] createSetFromSortedUniqueList(LongList sortedList) {
     return new WritableLongSortedSet[] {LongAmortizedSet.createFromSortedUnique(sortedList)};
   }
 
@@ -72,15 +72,43 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
   }
 
   public void testIsEmpty2() {
+    // baseList, myAdded, myRemoved
     LongAmortizedSet set = new LongAmortizedSet(20);
+
+    // 0, 0, 0
     assertTrue(set.isEmpty());
     set.addAll(0,5,10);
+
+    // 0, A, 0
     assertFalse(set.isEmpty());
     set.coalesce();
+
+    // A, 0, 0
     assertFalse(set.isEmpty());
+
+    set.addAll(5, 10, 15);
+
+    // AB, AC, 0
+    assertFalse(set.isEmpty());
+
+    set.removeAll(20, 25, 30, 35, 40, 45, 50, 55);
+
+    // AB, AC, D
+    assertFalse(set.isEmpty());
+
     set.removeAll(0, 5, 10);
+
+    // A, C, AD
+    assertFalse(set.isEmpty());
+
+    set.remove(15);
+
+    // A, 0, AD
     assertTrue(set.isEmpty());
+
     set.coalesce();
+
+    // 0, 0, D
     assertTrue(set.isEmpty());
   }
 
@@ -161,8 +189,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
         long key0 = it.value();
         for (long key = key0 - 1; key <= key0 + 1; key++) {
           int ind = expected.binarySearch(key);
-          if (ind < 0) ind = -ind - 1;
-          CHECK.order(expected.iterator(ind), sortedSet.tailIterator(key));
+          CHECK.order(expected.iterator(ind >= 0 ? ind : -ind - 1), sortedSet.tailIterator(key));
         }
       }
     }

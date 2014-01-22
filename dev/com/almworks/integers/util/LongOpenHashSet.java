@@ -193,7 +193,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
 
 
   @Override
-  public void toNativeArrayImpl(long[] dest, int destPos) {
+  protected void toNativeArrayImpl(long[] dest, int destPos) {
     int j = destPos;
     for (int i = 0; i < myKeysLength; i++) {
       if (myAllocated.get(i)) dest[j++] = myKeys[i];

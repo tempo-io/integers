@@ -15,10 +15,22 @@ public class LongOpenHashSetTests extends WritableLongSetChecker {
   }
 
   @Override
-  protected WritableLongSet[] createSetFromSortedList(LongList sortedList) {
+  protected WritableLongSet[] createSetFromSortedUniqueList(LongList sortedList) {
     WritableLongSet set = createSet();
     set.addAll(sortedList);
     return new WritableLongSet[]{set};
+  }
+
+  public void test() {
+    int size = 30;
+    set = LongOpenHashSet.createForAdd(size);
+    for (int i = 0; i < 48; i++) {
+      long value = RAND.nextLong();
+      set.add(value);
+    }
+    System.out.println("OK!");
+    set.add(RAND.nextLong());
+    System.out.println("OK!");
   }
 }
 

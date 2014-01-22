@@ -18,7 +18,7 @@ public class LongHppcOpenHashSetTests extends WritableLongSetChecker {
   }
 
   @Override
-  protected WritableLongSet[] createSetFromSortedList(LongList sortedList) {
+  protected WritableLongSet[] createSetFromSortedUniqueList(LongList sortedList) {
     WritableLongSet tempSet = createSet();
     tempSet.addAll(sortedList);
     return new WritableLongSet[]{tempSet};

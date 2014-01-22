@@ -46,7 +46,7 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     }
   }
 
-  protected WritableLongSortedSet[] createSetFromSortedList(LongList sortedList) {
+  protected WritableLongSortedSet[] createSetFromSortedUniqueList(LongList sortedList) {
     return new WritableLongSortedSet[]{
         LongTreeSet.createFromSortedUnique(sortedList),
         LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_ADD),

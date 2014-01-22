@@ -215,7 +215,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
     }
   }
 
-  void coalesce() {
+  public void coalesce() {
     myCoalesced = true;
     // todo add method WLL.removeSortedFromSorted(LIterable)
     // todo optimize
@@ -262,7 +262,6 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   public void clear() {
     modified();
     myAdded.clear();
-    myRemoved.clear();
     myBaseList.clear();
   }
 
@@ -304,7 +303,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   }
 
   @Override
-  public void toNativeArrayImpl(long[] dest, int destPos) {
+  protected void toNativeArrayImpl(long[] dest, int destPos) {
     coalesce();
     myBaseList.toNativeArray(0, dest, destPos, size());
   }
@@ -332,7 +331,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
       if (myShouldReactOnCoalesce && myCoalesced) {
         myShouldReactOnCoalesce = false;
         // baseIndex always >= -1
-        if (!myIterated) {
+        if (!hasValue()) {
           myIterator = myBaseList.iterator();
         } else {
           // myIterated = true -> myNext always exist in myBaseList

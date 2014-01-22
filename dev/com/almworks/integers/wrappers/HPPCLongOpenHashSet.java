@@ -51,7 +51,7 @@ public class HPPCLongOpenHashSet extends AbstractWritableLongSet implements Writ
   }
 
   @Override
-  public void toNativeArrayImpl(long[] dest, int destPos) {
+  protected void toNativeArrayImpl(long[] dest, int destPos) {
     for (int i = 0, j = destPos; i < set.keys.length; i++) {
       if (set.allocated[i]) {
         dest[j++] = set.keys[i];

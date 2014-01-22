@@ -710,7 +710,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   }
 
   @Override
-  public void toNativeArrayImpl(long[] dest, int destPos) {
+  protected void toNativeArrayImpl(long[] dest, int destPos) {
     int i = destPos;
     for (IntIterator it : new LURIterator()) {
       dest[i++] = myKeys[it.value()];

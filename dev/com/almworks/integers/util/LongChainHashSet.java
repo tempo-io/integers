@@ -189,18 +189,20 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   public LongIterator iterator() {
     return failFast(new FindingLongIterator() {
-      private int curHead = 0;
-      private int curIndex = 0;
+      private int myCurIndex = 1;
+      private int myNextRemoved = myRemoved.nextSetBit(1);
 
       @Override
       protected boolean findNext() {
-        while (curIndex == 0) {
-          if (curHead == myHeadNum) return false;
-          curIndex = myHead[curHead++];
+        while (myNextRemoved == myCurIndex) {
+          myNextRemoved = myRemoved.nextSetBit(myNextRemoved + 1);
+          myCurIndex++;
         }
-        myCurrent = myKeys[curIndex];
-        curIndex = myNext[curIndex];
-        return true;
+        if (myCurIndex < cnt) {
+          myCurrent = myKeys[myCurIndex++];
+          return true;
+        }
+        return false;
       }
     });
   }
@@ -214,7 +216,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   @Override
-  public void toNativeArrayImpl(long[] dest, int destPos) {
+  protected void toNativeArrayImpl(long[] dest, int destPos) {
     // todo add 2 variants: below and new LongArray(iterator()) if myRemoved.cardinality() > size() / 10
     int from = 1, to = myRemoved.nextSetBit(from);
     int index = destPos;

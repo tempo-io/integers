@@ -15,7 +15,7 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
   }
 
   @Override
-  protected WritableLongSet[] createSetFromSortedList(LongList sortedList) {
+  protected WritableLongSet[] createSetFromSortedUniqueList(LongList sortedList) {
     WritableLongSet set = createSet();
     set.addAll(sortedList);
     return new WritableLongSet[]{set};
