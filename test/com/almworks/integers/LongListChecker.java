@@ -62,7 +62,6 @@ public abstract class LongListChecker extends IntegersFixture {
     }
   }
 
-
   public void testGetMethodsSimpleCase() {
     _testGetMethods(0, 10, 30, 20, 5, 4, 1, 6);
     _testGetMethods(0, -10, 20, 30, 50);

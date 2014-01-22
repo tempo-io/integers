@@ -23,6 +23,7 @@ import com.almworks.integers.*;
 
 /**
  * Removing int list decorator that does not alter the given list of removed indices.
+ * @see WritableLongListRemovingDecorator
  * @author igor baltiyskiy
  */
 public class LongListRemovingDecorator extends AbstractLongListRemovingDecorator {

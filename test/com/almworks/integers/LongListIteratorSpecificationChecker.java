@@ -1,11 +1,14 @@
 package com.almworks.integers;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.LongProgression.Arithmetic.fillArray;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertFalse;
 
@@ -28,12 +31,10 @@ public class LongListIteratorSpecificationChecker extends LongIteratorSpecificat
     super.testValues(values);
     testIteratorIndex(values);
     testIteratorMove();
+    testIteratorGet();
   }
 
   private void testIteratorIndex(long... values) {
-    if (values.length == 2 && values[0] == 239 && values[1] == 1000) {
-      values[0] += 0;
-    }
     for (LongListIterator it : getter.get(values)) {
       try {
         it.index();
@@ -91,7 +92,35 @@ public class LongListIteratorSpecificationChecker extends LongIteratorSpecificat
 
       it.move(-1);
       assertEquals(19, it.nextValue());
-      Assert.assertFalse(it.hasNext());
+      assertFalse(it.hasNext());
+    }
+  }
+
+  private void testIteratorGet() {
+    long[] values = IntegersFixture.interval(0, 10);
+    for (LongListIterator it : getter.get(values)) {
+      for (int idx = 0; idx < values.length; idx++) {
+        assertTrue(it.hasNext());
+        assertEquals(values[idx], it.nextValue());
+
+        try {
+          it.get(-idx - 1);
+          fail();
+        } catch (NoSuchElementException _) {
+          // ok
+        }
+
+        for (int i = 0; i < values.length; i++) {
+          assertEquals(values[i], it.get(-idx + i));
+        }
+
+        try {
+          it.get(-idx - values.length);
+          fail();
+        } catch (NoSuchElementException _) {
+          // ok
+        }
+      }
     }
   }
 

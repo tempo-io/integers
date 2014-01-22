@@ -74,7 +74,9 @@ public abstract class AbstractLongList implements LongList {
    * <pre>[get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]</pre><br>
    *
    * One of the possible usages is for MATLAB-like indexing, i.e. vector indexed by vector.
-   * Also {@link IndexedLongIterator} and {@link IndexedLongListIterator} are suit to iterate this list.
+   *
+   * Also {@link IndexedLongIterator} and {@link IndexedLongListIterator} can be used
+   * to iterate over this list via a custom set of indices.
    * @return LongList with values located at {@code indices} in this list
    * @see IndexedLongIterator
    * @see IndexedLongListIterator
@@ -184,7 +186,7 @@ public abstract class AbstractLongList implements LongList {
   }
 
   /**
-   * @return true if this list sorted unique, otherwise false
+   * @return true if this list is sorted unique, otherwise false
    */
   @Override
   public boolean isUniqueSorted() {
@@ -192,7 +194,7 @@ public abstract class AbstractLongList implements LongList {
   }
 
   /**
-   * @return true if this list sorted, otherwise false
+   * @return true if this list is sorted, otherwise false
    */
   @Override
   public boolean isSorted() {

@@ -120,10 +120,15 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
   }
 
   public int getNewIndex(int baseIndex) {
-    int idx = insertedBefore(baseIndex);
-    for (IntIterator ii = myInserted.keysIterator(idx, myInserted.size()); ii.hasNext(); idx++) {
-      if (ii.nextValue() - idx > baseIndex)
+    int idx = findInsertion(baseIndex);
+    if (idx < 0) {
+      idx = -idx - 1;
+    }
+    for (IntIterator ii : myInserted.keysIterator(idx, myInserted.size())) {
+      if (ii.value() - idx > baseIndex) {
         break;
+      }
+      idx++;
     }
     return baseIndex + idx;
   }
@@ -136,22 +141,17 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
 
     private LocalIterator(int from, int to) {
       super(from, to);
+      myBaseIterator = base().iterator();
       sync();
     }
 
     private void sync() {
       int curIndex = getNextIndex() - 1;
-      myBaseIterator = base().iterator();
-      int insertIdx = 0;
-      if (curIndex != -1) {
-        insertIdx = insertedBefore(curIndex);
-        if (curIndex != insertIdx) {
-          myBaseIterator.move(curIndex - insertIdx);
-        }
-        if (myBaseIterator.hasNext()) {
-          myBaseIterator.next();
-        }
-      }
+      int insertIdx = insertedBefore(curIndex);
+      int move = Math.min(curIndex - insertIdx, base().size() - 1);
+      int baseIndex = myBaseIterator.hasValue() ? myBaseIterator.index() : -1;
+
+      myBaseIterator.move(move - baseIndex);
       myInsertedIterator = myInserted.iterator(insertIdx);
       advanceToNextInsert();
     }

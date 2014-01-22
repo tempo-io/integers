@@ -123,7 +123,7 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
    */
   protected static void prepareSortedIndicesInternal(WritableIntList indices) {
     int i = 1;
-    int last = Integer.MIN_VALUE;
+    int last = 0;
     // todo apply "-i" when sortedRemoveIndexes are collected
     for (WritableIntListIterator ii = indices.iterator(1); ii.hasNext();) {
       int value = ii.nextValue();
@@ -162,7 +162,7 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
     private LocalIterator(int from, int to) {
       super(from, to);
       int count = removedBefore(from);
-      // super iterator checking borders, so we can simply create myBaseIterator without from and to
+      // super iterator checks borders, so we can suppose that from and to is correct values.
       myBaseIterator = base().iterator();
       int offset = from + count;
       if (offset != 0) {
@@ -222,10 +222,11 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
     }
 
     protected long absget(int index) {
-      if (index == getNextIndex())
-        return myBaseIterator.get(1);
-      else
+      if (index == index()) {
+        return value();
+      } else {
         return AbstractLongListRemovingDecorator.this.get(index);
+      }
     }
   }
 }

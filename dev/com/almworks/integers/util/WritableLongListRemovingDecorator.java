@@ -22,7 +22,8 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 
 /**
- * Removing decorator for a list of native ints that modifies the list of removed indices with which it works.
+ * Decorator on the specified list that allows to remove indices on the fly rather than decorating the already happened removals.
+ * @see LongListRemovingDecorator
  * @author igor baltiyskiy
  */
 public class WritableLongListRemovingDecorator extends AbstractLongListRemovingDecorator {

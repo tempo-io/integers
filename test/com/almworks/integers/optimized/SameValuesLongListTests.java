@@ -4,7 +4,6 @@ import com.almworks.integers.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -237,8 +236,13 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     SameValuesLongList actual = SameValuesLongList.create(values, counts);
     CHECK.order(expected, actual);
 
-    for (int i = 0; i < 12; i++) {
-      values = generateRandomLongArray( 100, IntegersFixture.SortedStatus.UNORDERED);
+    actual = SameValuesLongList.create(LongArray.create(9, 9, 2, 4, 6), IntArray.create(0, 1, 0, 3, 1));
+    expected = LongArray.create(9, 4, 4, 4, 6);
+    CHECK.order(expected, actual);
+
+    int attemptsCount = 12;
+    for (int i = 0; i < attemptsCount; i++) {
+      values = generateRandomLongArray(100, IntegersFixture.SortedStatus.UNORDERED);
       counts = generateRandomIntArray(100, SortedStatus.UNORDERED, 4);
       if (i == 11) {
         values.add(RAND.nextLong());
@@ -246,16 +250,30 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
       }
       expected = new LongArray(values.size() * 3);
       for (int j = 0; j < values.size(); j++) {
-        for (int k = 0; k < counts.get(j); k++) {
-          expected.add(values.get(j));
-        }
+        expected.addAll(LongCollections.repeat(values.get(j), counts.get(j)));
       }
       actual = SameValuesLongList.create(values, counts);
       CHECK.order(expected, actual);
     }
 
+    for (int i = 0; i < attemptsCount; i++) {
+      values = generateRandomLongArray(100, SortedStatus.SORTED, 150);
+      counts = new IntArray(IntCollections.repeat(1, 100));
+      actual = SameValuesLongList.create(values, counts);
+      CHECK.order(values, actual);
+    }
+
     expected = generateRandomLongArray( 100, IntegersFixture.SortedStatus.UNORDERED);
     CHECK.order(expected, SameValuesLongList.create(expected));
+  }
+
+  public void testCreateException() {
+    try {
+      list = SameValuesLongList.create(LongArray.create(1, 2, 3), IntArray.create(1));
+      System.out.println(list);
+      fail();
+    } catch (IllegalArgumentException _) {
+    }
   }
 
   public void testRemoveFromBeginning() {
@@ -283,6 +301,10 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     list.setRange(1, 2, 1);
     expected.setRange(1, 2, 1);
     CHECK.order(expected, list);
+
+    expected = LongArray.create(1, 1, 2, 2, 3, 3, 3, 3, 3, 4);
+    SameValuesLongList list = SameValuesLongList.create(expected);
+    CHECK.order(expected, list);
   }
 
   public void testIntLongMap() {
@@ -294,10 +316,43 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     assertEquals(10, map.getValueAt(0));
   }
 
-  public void test() {
+  public void test2() {
+    for (WritableLongList list: empty()) {
+      list.insertMultiple(0, Integer.MIN_VALUE, 3);
+      checkCollection(list, ap(Integer.MIN_VALUE, 0, 3));
+    }
+  }
+
+  public void test3() {
     list.addAll(1, 2, 3, 4, 5);
-    list.set(2, 10);
+    list.removeRange(0, 3);
     System.out.println(list);
+  }
+
+  public void testR() {
+    LongArray expected = LongArray.create(0, 0, 0, 0, 0, 0);
+    list.addAll(expected);
+
+    int from = 0, to = 3;
+    list.removeRange(from, to);
+    expected.removeRange(from, to);
+    System.out.println(list);
+    CHECK.order(list, expected);
+  }
+
+  public void testV() {
+    long z = Integer.MIN_VALUE;
+    list.insertMultiple(0, z, 2);
+    list.insertMultiple(2, 1, 2);
+    list.insertMultiple(4, z, 2);
+    list.removeRange(1, 5);
+    checkCollection(list, z, z);
+  }
+
+  public void testVV() {
+    list.addAll(0, 0, 0, 1, 1, 1);
+    LongIterator it = list.iterator(0, 4);
+    System.out.println(it.nextValue());
   }
 
 }

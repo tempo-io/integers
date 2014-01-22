@@ -132,7 +132,7 @@ import java.util.NoSuchElementException;
     if (from >= 0) {
       int to;
       if (value < Long.MAX_VALUE) {
-        to = binarySearch((long)(value + 1), from + 1, size());
+        to = binarySearch(value + 1, from + 1, size());
         if (to < 0)
           to = -to - 1;
       } else to = size();
