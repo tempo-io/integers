@@ -31,7 +31,7 @@ import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class DynamicLongSet implements WritableSortedLongSet {
+public class DynamicLongSet implements WritableSortedLongSet, Cloneable {
   /** Dummy key for NIL. */
   private static final long NIL_DUMMY_KEY = Long.MIN_VALUE;
   private static final long[] EMPTY_KEYS = new long[] { NIL_DUMMY_KEY };
@@ -935,7 +935,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
       int r = myRight[x];
       if (r > 0) assert myParent[r] == x : x + " " + r + " " + myParent[r] + "\n" + debugMegaPrint(whatWasDoing, x);
     }
-
+    assert myParent[myRoot] == 0 : debugMegaPrint(whatWasDoing, myRoot);
 
     return true;
   }
@@ -973,7 +973,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
         .append("\nkey   ").append(myKeys[node])
         .append("\nleft  ").append(myLeft[node])
         .append("\nright ").append(myRight[node])
-        .append("\ncolor ").append(myBlack.get(node) ? "BLACK\n" : "RED\n")
+        .append("\ncolor ").append(myBlack.get(node) ? "BLACK" : "RED")
         .append("\nparent").append(myParent[node]).append("\n");
   }
 
@@ -1149,7 +1149,7 @@ public class DynamicLongSet implements WritableSortedLongSet {
     if (node == myRoot || node == 0) return true;
     boolean l = myLeft[myParent[node]] == node;
     boolean r = myRight[myParent[node]] == node;
-    assert l ^ r : node + " " + l + " " + r;
+    assert l ^ r : node + " " + l + " " + r + "|" + debugMegaPrint("", node);
     return l;
   }
 
@@ -1158,6 +1158,8 @@ public class DynamicLongSet implements WritableSortedLongSet {
   }
 
   int uncle(int node) {
-    return (leftChildOfParent(node) ? myLeft : myRight)[myParent[myParent[node]]];
+    if (node == myRoot) return myRoot;
+    int parent = myParent[node];
+    return (leftChildOfParent(parent) ? myRight : myLeft)[myParent[parent]];
   }
 }

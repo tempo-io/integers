@@ -4,19 +4,21 @@ import com.almworks.integers.DynamicLongSet;
 import com.almworks.integers.IntIterator;
 import com.almworks.integers.IntegersFixture;
 
+import java.util.Arrays;
+
 /**
  * Generator of a test case that covers all cases in red-black tree remove.
  * The generated sequence is a series of batches, each containing 3 additions and 2 removals.
  * */
 public class LTSCasesGenTests extends IntegersFixture {
 
-  // dimension 0: (two children) or (one child and the property is fulfilled by the next node) | size = 2
-  // dimension 1: deleted node is R or B                                                       | size = 2
-  // dimension 2: the deleted node is left / right child of its parent                         | size = 2
-  // dimension 3: cases                                                                        | size = 5
-  // case 1: uncle of deleted node is red
-  // case 2: uncle of deleted node is black && all cases for children colors (4 cases)
-  //
+  // dimension 0: (two children) (0) or (one child and the property is fulfilled by the next node) (1) | size = 2
+  // dimension 1: deleted node is B (0) or R (1)                                                       | size = 2
+  // dimension 2: the deleted node is left (0) / right (1) child of its parent                         | size = 2
+  // dimension 3: cases                                                                                | size = 5
+  // case 1: uncle of deleted node is red (0)
+  // case 2: uncle of deleted node is black && all cases for children colors (4 cases) (1 + fromBinary(color(L)color(R)))
+  //  where color(x) = 0 means B and color = 1 means R
   boolean[][][][] casesVisited = new boolean[2][][][];
   int casesLeft;
 
@@ -31,7 +33,12 @@ public class LTSCasesGenTests extends IntegersFixture {
         casesVisited[d0][d1] = new boolean[2][];
         for (int d2 = 0; d2 < 2; ++d2) {
           casesVisited[d0][d1][d2] = new boolean[5];
-          casesLeft += 5;
+          // Consider visited all balancing-related cases when node is R
+          if (d1 == 1) {
+            Arrays.fill(casesVisited[d0][d1][d2], true);
+          } else {
+            casesLeft += 5;
+          }
         }
       }
     }
@@ -41,6 +48,7 @@ public class LTSCasesGenTests extends IntegersFixture {
     int MAX_VAL = 100;
 
     DynamicLongSet set = new DynamicLongSet();
+    set.addAll(LongProgression.arithmetic(0, 10, 10));
     while (casesLeft > 0) {
     batch:
       for (int add1 = 0; add1 < MAX_VAL; ++add1) {
@@ -52,26 +60,28 @@ public class LTSCasesGenTests extends IntegersFixture {
             DynamicLongSet curSet = set.clone();
             curSet.addAll(add1, add2, add3);
 
-            int nRem = 0;
           rem:
-            for (int rem = 0; rem < MAX_VAL; ++rem) {
-              for (IntIterator nodeIt : curSet.nodeLurIterator()) {
-                if (isUnseenCaseRealization(curSet, nodeIt.value())) {
-                  casesLeft -= 1;
-                  curSet.exclude(curSet.key(nodeIt.value()));
-                  if (nRem == 0) {
-                    nRem = 1;
-                    break rem;
-                  } else {
-                    set = curSet;
-                    System.out.format("add %d %d %d rem %d%n", add1, add2, add3, rem);
-                    break batch;
+            for (int nRem = 0; nRem < 2; ++nRem) {
+              for (int rem = 0; rem < MAX_VAL; ++rem) {
+                for (IntIterator nodeIt : curSet.nodeLurIterator()) {
+                  if (isUnseenCaseRealization(curSet, nodeIt.value())) {
+                    casesLeft -= 1;
+                    curSet.exclude(curSet.key(nodeIt.value()));
+                    if (nRem == 0) {
+                      nRem = 1;
+                      continue rem;
+                    } else {
+                      set = curSet;
+                      System.out.format("add %d %d %d rem %d%n", add1, add2, add3, rem);
+                      break batch;
+                    }
                   }
                 }
               }
             }
           }
         }
+        if (add1 % 100 == 0) System.out.format("%d/%d\r", add1, MAX_VAL);
       }
       // Nothing added, add random
       int add1 = RAND.nextInt(MAX_VAL);
@@ -94,6 +104,11 @@ public class LTSCasesGenTests extends IntegersFixture {
       d0case = 1;
     }
 
+    if (set.parent(delNode) == 0) {
+      // Uninteresting
+      return false;
+    }
+
     // dim1
     int d1case = set.black(delNode) ? 0 : 1;
 
@@ -109,7 +124,15 @@ public class LTSCasesGenTests extends IntegersFixture {
     if (!set.black(delUncle)) {
       d3case = 0;
     } else {
-      todo
+      int lc = set.black(set.left(delUncle)) ? 0 : 1;
+      int rc = set.black(set.right(delUncle)) ? 0 : 1;
+      d3case = (lc << 1) | rc;
+    }
+
+    if (!casesVisited[d0case][d1case][d2case][d3case]) {
+      casesVisited[d0case][d1case][d2case][d3case] = true;
+      casesLeft -= 1;
+      return true;
     }
 
     return false;
