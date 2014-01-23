@@ -78,15 +78,6 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     }
   }
 
-  public void testInclude() {
-    for (long i: ap(0, 2, 100)) {
-      assertTrue(set.include(i));
-    }
-    for (long i: ap(0, 1, 200)) {
-      assertEquals(i % 2 == 1, set.include(i));
-    }
-  }
-
   public void testEdgeCasesWithCompactify() {
     LongTreeSet set = new LongTreeSet();
     assertFalse(set.exclude(MIN));
@@ -132,17 +123,6 @@ public class LongTreeSetTests extends WritableLongSetChecker {
             sortedUniqueArray.iterator(), RAND.nextInt(listSize * 2), types[attempt % 4  - 1]);
       }
       checkSet(set, sortedUniqueArray);
-    }
-  }
-
-  public void _test() {
-    for (int len = 1; len < 66; len++) {
-      System.out.println("data: " + LongCollections.toBoundedString(LongIterators.range(len - 1)));
-      LongTreeSet set = LongTreeSet.createFromSortedUnique(LongIterators.range(len - 1), len, TO_REMOVE);
-      System.out.println("set : " + LongCollections.toBoundedString(set));
-      System.out.println(set.toDebugString());
-      System.out.println("---------------------------------");
-      if (len == 30) len *= 2;
     }
   }
 }

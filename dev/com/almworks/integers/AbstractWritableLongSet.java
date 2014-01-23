@@ -1,8 +1,6 @@
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction;
 import com.almworks.integers.util.FailFastLongIterator;
-import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractWritableLongSet extends AbstractLongSet implements WritableLongSet {
   protected int myModCount = 0;
@@ -86,10 +84,10 @@ public abstract class AbstractWritableLongSet extends AbstractLongSet implements
   }
 
   @Override
-  public void addAll(LongIterator iterator) {
+  public void addAll(LongIterable iterable) {
     modified();
-    while (iterator.hasNext()) {
-      include0(iterator.nextValue());
+    for (LongIterator it : iterable) {
+      include0(it.value());
     }
   }
 

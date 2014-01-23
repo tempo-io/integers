@@ -29,7 +29,7 @@ public interface LongCollector {
 
   void addAll(LongList values);
 
-  void addAll(LongIterator iterator);
+  void addAll(LongIterable iterable);
 
   void addAll(long ... values);
 
@@ -43,7 +43,7 @@ public interface LongCollector {
     }
 
     @Override
-    public void addAll(LongIterator iterator) {
+    public void addAll(LongIterable iterable) {
     }
 
     @Override

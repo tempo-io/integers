@@ -24,9 +24,10 @@ public abstract class AbstractLongCollector implements LongCollector {
     addAll(values.iterator());
   }
 
-  public void addAll(LongIterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
+  public void addAll(LongIterable iterable) {
+    for (LongIterator it : iterable) {
+      add(it.value());
+    }
   }
 
   public void addAll(long... values) {
