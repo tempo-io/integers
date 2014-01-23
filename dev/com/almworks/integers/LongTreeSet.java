@@ -20,10 +20,8 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntFunction2;
-import com.almworks.integers.util.FailFastLongIterator;
 import com.almworks.integers.util.IntegersDebug;
 import com.almworks.integers.util.LongSizedIterable;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -215,11 +213,10 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
   // todo optimize - we can don't check myStackCache on the every adding
   @Override
-  public void addAll(LongIterator iterator) {
+  public void addAll(LongIterable iterable) {
     modified();
-    if (!iterator.hasNext()) return;
-    while (iterator.hasNext()) {
-      include0(iterator.nextValue());
+    for (LongIterator it : iterable) {
+      include0(it.value());
     }
   }
 

@@ -191,6 +191,9 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     return mySize;
   }
 
+  int getThreshold() {
+    return myThreshold;
+  }
 
   @Override
   protected void toNativeArrayImpl(long[] dest, int destPos) {

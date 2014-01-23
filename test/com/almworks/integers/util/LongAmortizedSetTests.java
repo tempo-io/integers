@@ -49,28 +49,6 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
     assertFalse(it.hasNext());
   }
 
-  public void _testToString() {
-    LongAmortizedSet set = new LongAmortizedSet();
-    set.addAll(0, 2, 4, 6, 8);
-    set.coalesce();
-    set.addAll(1, 3, 5, 7, 9);
-    set.removeAll(0, 3, 6, 9);
-    System.out.println(set.toString());
-    System.out.println(LongCollections.toBoundedString(set));
-  }
-
-  public void testIterators2() {
-    set.addAll(ap(0, 1, 10));
-    LongIterator it1 = set.iterator();
-    for (int i = 0; i < 5; i++) {
-      assertEquals(i, it1.nextValue());
-    }
-    // call coalesce
-    CHECK.order(new LongArray(ap(0, 1, 10)), set.toArray());
-    CHECK.order(new LongArray(ap(0, 1, 10)).iterator(), set.iterator());
-    CHECK.order(new LongArray(ap(5, 1, 5)).iterator(), it1);
-  }
-
   public void testIsEmpty2() {
     // baseList, myAdded, myRemoved
     LongAmortizedSet set = new LongAmortizedSet(20);
@@ -163,35 +141,6 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
       checkSet(set, expected);
       set.coalesce();
       checkSet(set, expected);
-    }
-  }
-
-  public void testTailIteratorRandom2() {
-    WritableLongSortedSet sortedSet = (WritableLongSortedSet)set;
-    final int size = 600,
-        testCount = 5;
-    LongArray expected = new LongArray(size);
-    LongArray testValues = new LongArray(size * 3);
-    for (int i = 0; i < testCount; i++) {
-      expected.clear();
-      testValues.clear();
-      sortedSet.clear();
-      for (int j = 0; j < size; j++) {
-        long val = RAND.nextLong();
-        expected.add(val);
-        testValues.addAll(val - 1, val, val + 1);
-      }
-      sortedSet.addAll(expected);
-      expected.sortUnique();
-      testValues.sortUnique();
-
-      for (LongIterator it : testValues) {
-        long key0 = it.value();
-        for (long key = key0 - 1; key <= key0 + 1; key++) {
-          int ind = expected.binarySearch(key);
-          CHECK.order(expected.iterator(ind >= 0 ? ind : -ind - 1), sortedSet.tailIterator(key));
-        }
-      }
     }
   }
 

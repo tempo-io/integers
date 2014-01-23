@@ -13,6 +13,28 @@ public class LongSetBuilderTests extends IntegersFixture {
     check(interval(0, 100), interval(100, 0), interval(50, 150), interval(10, -200), interval(0, 0));
   }
 
+  protected LongSetBuilder prog(long start, int step, int count) {
+    LongSetBuilder r = new LongSetBuilder();
+    for (int i = 0; i < count; i++)
+      r.add(start + i * step);
+    return r;
+  }
+
+  protected void checkSet(LongSetBuilder builder, long[]... v) {
+    LongList collection = builder.clone().commitToArray();
+    checkSet(collection, v);
+  }
+
+  protected void checkSet(LongList collection, long[]... v) {
+    LongArray r = new LongArray();
+    for (long[] ints : v) {
+      r.addAll(ints);
+    }
+    r.sortUnique();
+    long[] expected = r.toNativeArray();
+    CHECK.order(collection.iterator(), expected);
+  }
+
   protected void check(long[] ... v) {
     LongSetBuilder builder = new LongSetBuilder();
     for (long[] ints : v) {

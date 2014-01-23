@@ -11,13 +11,21 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
 
   @Override
   protected WritableLongSet createSetWithCapacity(int capacity) {
-    return new LongChainHashSet(capacity);
+    return LongChainHashSet.createForAdd(capacity);
   }
 
   @Override
   protected WritableLongSet[] createSetFromSortedUniqueList(LongList sortedList) {
-    WritableLongSet set = createSet();
+    WritableLongSet set = LongChainHashSet.createForAdd(sortedList.size());
     set.addAll(sortedList);
     return new WritableLongSet[]{set};
   }
+
+  public void testCreateForAdd() {
+    int maxSize = 128;
+    for (int size = 0; size <= maxSize; size++) {
+      assertTrue(LongOpenHashSet.createForAdd(size).getThreshold() >= size);
+    }
+  }
+
 }

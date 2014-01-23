@@ -513,20 +513,20 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
         int i = 0;
         int maxCount = 10;
         for (int tryCoalesce = 0; tryCoalesce < 2; tryCoalesce++) {
-        for (LongArray toAdd : LongCollections.allSubLists(new LongArray(values))) {
-          for (LongArray toRemove : LongCollections.allSubLists(new LongArray(toRemoveAll))) {
-            WritableLongSet createdSet = createSetFromSortedUniqueList(new LongArray(values))[0];
-            createdSet.addAll(toAdd);
-            if (tryCoalesce == 1 && createdSet instanceof LongAmortizedSet) {
-              ((LongAmortizedSet)createdSet).coalesce();
+          for (LongArray toAdd : LongCollections.allSubLists(new LongArray(values))) {
+            for (LongArray toRemove : LongCollections.allSubLists(new LongArray(toRemoveAll))) {
+              WritableLongSet createdSet = createSetFromSortedUniqueList(new LongArray(values))[0];
+              createdSet.addAll(toAdd);
+              if (tryCoalesce == 1 && createdSet instanceof LongAmortizedSet) {
+                ((LongAmortizedSet) createdSet).coalesce();
+              }
+              createdSet.removeAll(toRemove);
+              res.add(createdSet.iterator());
             }
-            createdSet.removeAll(toRemove);
-            res.add(createdSet.iterator());
+            if (i++ >= maxCount) {
+              break;
+            }
           }
-          if (i++ >= maxCount) {
-            break;
-          }
-        }
         }
 
         return res;
@@ -663,4 +663,56 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     actual = new LongArray(new LongArray(ar).subList(4, 4 + expected.size()));
     CHECK.unordered(actual, expected);
   }
+
+  public void testInclude() {
+    for (long i: ap(0, 2, 100)) {
+      assertTrue(set.include(i));
+    }
+    for (long i: ap(0, 1, 200)) {
+      assertEquals(i % 2 == 1, set.include(i));
+    }
+  }
+
+  public void testIterators2() {
+    set.addAll(ap(0, 1, 10));
+    LongIterator it1 = set.iterator();
+    for (int i = 0; i < 5; i++) {
+      assertEquals(i, it1.nextValue());
+    }
+    // call coalesce
+    CHECK.order(new LongArray(ap(0, 1, 10)), set.toArray());
+    CHECK.order(new LongArray(ap(0, 1, 10)).iterator(), set.iterator());
+    CHECK.order(new LongArray(ap(5, 1, 5)).iterator(), it1);
+  }
+
+  public void testTailIteratorRandom2() {
+    if (!(set instanceof LongSortedSet)) return;
+    WritableLongSortedSet sortedSet = (WritableLongSortedSet)set;
+    final int size = 600,
+      testCount = 5;
+    LongArray expected = new LongArray(size);
+    LongArray testValues = new LongArray(size * 3);
+    for (int i = 0; i < testCount; i++) {
+      expected.clear();
+      testValues.clear();
+      sortedSet.clear();
+      for (int j = 0; j < size; j++) {
+        long val = RAND.nextLong();
+        expected.add(val);
+        testValues.addAll(val - 1, val, val + 1);
+      }
+      sortedSet.addAll(expected);
+      expected.sortUnique();
+      testValues.sortUnique();
+
+      for (LongIterator it : testValues) {
+        long key0 = it.value();
+        for (long key = key0 - 1; key <= key0 + 1; key++) {
+          int ind = expected.binarySearch(key);
+          CHECK.order(expected.iterator(ind >= 0 ? ind : -ind - 1), sortedSet.tailIterator(key));
+        }
+      }
+    }
+  }
+
 }

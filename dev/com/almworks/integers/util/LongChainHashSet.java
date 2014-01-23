@@ -11,10 +11,10 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   private long[] myKeys;
 
   private int myHeadNum;
-  private int cnt = 1;
-  private int threshold;
+  private int myCnt = 1;
+  private int myThreshold;
   private int mySize = 0;
-  private final float loadFactor;
+  private final float myLoadFactor;
   private final BitSet myRemoved = new BitSet();
 
   static final int DEFAULT_INITIAL_CAPACITY = 16;
@@ -32,11 +32,11 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     myHeadNum = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
     assert (myHeadNum & (myHeadNum - 1)) == 0 : myHeadNum;
 
-    this.loadFactor = loadFactor;
-    threshold = (int)(myHeadNum * loadFactor);
+    this.myLoadFactor = loadFactor;
+    myThreshold = (int)(myHeadNum * loadFactor);
     myHead = new int[this.myHeadNum];
-    myKeys = new long[threshold];
-    myNext = new int[threshold];
+    myKeys = new long[myThreshold];
+    myNext = new int[myThreshold];
     myMask = myHeadNum - 1;
   }
 
@@ -61,10 +61,10 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   private void resize(int newCapacity) {
     // check that newCapacity = 2^k
     assert (newCapacity & (newCapacity - 1)) == 0 && newCapacity > 0;
-    assert cnt == size() + 1 + myRemoved.cardinality();
+    assert myCnt == size() + 1 + myRemoved.cardinality();
 
     int mask = newCapacity - 1;
-    int thresholdNew = (int)(newCapacity * loadFactor);
+    int thresholdNew = (int)(newCapacity * myLoadFactor);
     int[] myHeadNew = new int[newCapacity + 1];
     int[] myNextNew = new int[thresholdNew + 1];
 
@@ -77,17 +77,17 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
       myNextNew[i] = myHeadNew[h];
       myHeadNew[h] = i;
     }
-    cnt = mySize + 1;
+    myCnt = mySize + 1;
     myNext = myNextNew;
     myKeys = myKeysNew;
     myHead = myHeadNew;
-    threshold = thresholdNew;
+    myThreshold = thresholdNew;
     myHeadNum = newCapacity;
     myMask = mask;
   }
 
   protected boolean include0(long value) {
-    if (size() + 1 >= threshold) {
+    if (size() + 1 >= myThreshold) {
       resize(myHeadNum << 1);
     }
     return include1(value);
@@ -97,8 +97,8 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     mySize++;
     int res;
     if (myRemoved.isEmpty()) {
-      assert cnt < threshold;
-      res = cnt++;
+      assert myCnt < myThreshold;
+      res = myCnt++;
     } else {
       res = myRemoved.nextSetBit(0);
       myRemoved.clear(res);
@@ -129,8 +129,8 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   public void addAll(LongList values) {
     modified();
     int newSize = size() + values.size();
-    if (newSize >= threshold) {
-      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / loadFactor) + 1);
+    if (newSize >= myThreshold) {
+      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
       resize(newCap);
     }
     for (LongIterator it: values.iterator()) {
@@ -163,8 +163,8 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   private void removeNode(int i) {
-    if (i == cnt - 1) {
-      cnt--;
+    if (i == myCnt - 1) {
+      myCnt--;
     } else {
       assert !myRemoved.get(i);
       myRemoved.set(i);
@@ -198,7 +198,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
           myNextRemoved = myRemoved.nextSetBit(myNextRemoved + 1);
           myCurIndex++;
         }
-        if (myCurIndex < cnt) {
+        if (myCurIndex < myCnt) {
           myCurrent = myKeys[myCurIndex++];
           return true;
         }
@@ -209,7 +209,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   public void clear() {
     modified();
-    cnt = 1;
+    myCnt = 1;
     mySize = 0;
     Arrays.fill(myHead, 0);
     myRemoved.clear();
@@ -230,7 +230,11 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
       from = to + 1;
       to = myRemoved.nextSetBit(from);
     }
-    System.arraycopy(myKeys, from, dest, index, cnt - from);
+    System.arraycopy(myKeys, from, dest, index, myCnt - from);
+  }
+
+  int getMyThreshold() {
+    return myThreshold;
   }
 
   public boolean contains(long value) {

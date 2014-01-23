@@ -67,9 +67,10 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
     addAll(new LongArray(values));
   }
 
-  public void addAll(LongIterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
+  public void addAll(LongIterable iterable) {
+    for (LongIterator it : iterable) {
+      add(it.value());
+    }
   }
 
   public void addAll(LongList values) {
