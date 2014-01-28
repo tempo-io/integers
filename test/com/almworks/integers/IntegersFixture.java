@@ -67,47 +67,22 @@ public abstract class IntegersFixture extends TestCase {
     return new Random(seed);
   }
 
-  protected static LongArray a(long... values) {
-    return new LongArray(values);
-  }
-
-  protected LongSetBuilder prog(long start, int step, int count) {
-    LongSetBuilder r = new LongSetBuilder();
-    for (int i = 0; i < count; i++)
-      r.add(start + i * step);
-    return r;
-  }
-
-  protected void checkSet(LongSetBuilder builder, long[]... v) {
-    LongList collection = builder.clone().commitToArray();
-    checkSet(collection, v);
-  }
-
-  protected void checkSet(LongList collection, long[]... v) {
-    LongArray r = new LongArray();
-    for (long[] ints : v) {
-      r.addAll(ints);
-    }
-    r.sortUnique();
-    long[] expected = r.toNativeArray();
-    CHECK.order(collection.iterator(), expected);
-  }
-
-  public static void checkSet(WritableLongSet set, LongList sortedExpected) {
-    assertEquals(sortedExpected.size(), set.size());
+  public static void checkSet(WritableLongSet set, LongList sortedUniqueExpected) {
+    assert sortedUniqueExpected.isUniqueSorted();
+    assertEquals(sortedUniqueExpected.size(), set.size());
     if (set instanceof LongSortedSet) {
       LongArray buffer = set.toArray();
-      CHECK.order(sortedExpected, buffer);
+      CHECK.order(sortedUniqueExpected, buffer);
       buffer.clear();
       buffer.addAll(set.iterator());
-      CHECK.order(sortedExpected, buffer);
+      CHECK.order(sortedUniqueExpected, buffer);
     } else {
       LongArray setToArray = set.toArray();
       LongArray setToIterator = LongCollections.collectIterables(set.size(), set.iterator());
       CHECK.order(setToArray, setToIterator);
 
       setToArray.sort();
-      CHECK.order(sortedExpected, setToArray);
+      CHECK.order(sortedUniqueExpected, setToArray);
     }
   }
 
@@ -171,33 +146,6 @@ public abstract class IntegersFixture extends TestCase {
       AbstractLongListDecorator.iterate(collection, 0, i, checker);
       assertEquals(i, checker.index);
     }
-  }
-
-  protected void checkInsertIndexes(final LongListInsertingDecorator ins, int... expected) {
-    if (expected == null)
-      expected = IntegersUtils.EMPTY_INTS;
-    CHECK.order(ins.insertIndexIterator(), expected);
-    LongList base = ins.getBase();
-    for (int i = 0; i < base.size(); i++) {
-      int newIndex = ins.getNewIndex(i);
-      assertTrue(IntegersUtils.indexOf(expected, newIndex) < 0);
-      assertEquals(base.get(i), ins.get(newIndex));
-    }
-    final int[] expectedCopy = expected;
-    boolean res = ins.iterate(0, ins.size(), new AbstractLongListDecorator.LongVisitor() {
-      int index = -1;
-
-      public boolean accept(long value, LongList source) {
-        index++;
-        assertEquals(value, ins.get(index));
-        if (IntegersUtils.indexOf(expectedCopy, index) >= 0)
-          assertSame(ins, source);
-        else
-          assertSame(ins.getBase(), source);
-        return true;
-      }
-    });
-    assertTrue(res);
   }
 
   protected void checkRemovedIndexes(final AbstractLongListRemovingDecorator rem, int... expected) {

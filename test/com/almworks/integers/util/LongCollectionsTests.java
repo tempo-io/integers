@@ -147,32 +147,27 @@ public class LongCollectionsTests extends IntegersFixture {
     CHECK.order(diffSortedUniqueLists(LongList.EMPTY, LongList.EMPTY));
     CHECK.order(diffSortedUniqueLists(LongArray.create(0, 3, 4, 7), LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
 
-    LongArray diff = new LongArray();
-    LongArray a = new LongArray();
-    LongArray b = new LongArray();
     for (int i = 0; i < 10; ++i) {
-      initLists(a, b, diff);
-      CHECK.order(diffSortedUniqueLists(a, b), diff);
+      LongArray[] arrays = getListsAndDiff(RAND.nextInt(100), RAND.nextInt(100));
+      CHECK.order(diffSortedUniqueLists(arrays[0], arrays[1]), arrays[2]);
     }
   }
 
-  private void initLists(LongArray a, LongArray b, LongArray diff) {
-    a.clear();
-    b.clear();
-    diff.clear();
-    for (int i = 0; i < 100; ++i) {
-      a.add(RAND.nextInt(1000));
-      b.add(RAND.nextInt(1000));
+  private LongArray[] getListsAndDiff(int... sizes) {
+    assert sizes.length == 2;
+    // ar[2] = diff
+    LongArray[] ar = new LongArray[3];
+    for (int i = 0; i < 2; i++) {
+      ar[i] = generateRandomLongArray(sizes[0], SortedStatus.SORTED_UNIQUE, sizes[0] * 10);
     }
-    a.sortUnique();
-    b.sortUnique();
-    LongArray notb = LongArray.copy(a);
-    notb.removeAll(b);
-    LongArray nota = LongArray.copy(b);
-    nota.removeAll(a);
-    diff.addAll(nota);
-    diff.addAll(notb);
-    diff.sortUnique();
+    ar[2] = new LongArray();
+    for (int i = 0; i < 2; i++) {
+      LongArray notAr = LongArray.copy(ar[1 - i]);
+      notAr.removeAll(ar[i]);
+      ar[2].addAll(notAr);
+    }
+    ar[2].sortUnique();
+    return ar;
   }
 
   public void testAsLongList() {
@@ -240,13 +235,14 @@ public class LongCollectionsTests extends IntegersFixture {
     assertFalse(LongCollections.isSorted(new long[]{1, 4, 5, 20, 19}));
     assertTrue(LongCollections.isSorted(new long[]{1, 4, 5, 20, 19, 15}, 1, 3));
     assertFalse(LongCollections.isSorted(new long[]{1, 4, 3, 20, 19, 15}, 1, 3));
-//  }
-//
-//  public void testIsSortedUnique() {
+  }
+
+  public void testIsSortedUnique() {
     assertEquals(0, LongCollections.isSortedUnique(true, new long[]{}, 0, 0));
     assertEquals(0, LongCollections.isSortedUnique(false, new long[]{}, 0, 0));
     assertEquals(0, LongCollections.isSortedUnique(true, new long[]{1, 5, 10, 11, 20}, 0, 5));
     assertEquals(0, LongCollections.isSortedUnique(false, new long[]{1, 5, 10, 11, 20}, 0, 5));
+    assertEquals(2, LongCollections.isSortedUnique(true, new long[]{1, 10, 5, 11, 4}, 0, 5));
     assertEquals(-3, LongCollections.isSortedUnique(true, new long[]{1, 5, 5, 10, 15, 19, 19, 100, 121, 121}, 0, 10));
     assertEquals(2, LongCollections.isSortedUnique(false, new long[]{1, 5, 5, 10, 15, 19, 19, 100, 121, 121}, 0, 10));
     assertEquals(5, LongCollections.isSortedUnique(false, new long[]{1, 5, 10, 15, 19, 19, 100, 121, 121}, 0, 9));
@@ -398,11 +394,11 @@ public class LongCollectionsTests extends IntegersFixture {
 
   // TODO add test union for unsortable hash set
   public void testUnionSortedSets() {
-    int maxSize = 10000;
+    int maxSize = 1000, attemptsCount = 30;
     WritableLongSet[] sets = new WritableLongSet[2];
     LongArray[] arrays = new LongArray[2];
     LongArray expected, actual;
-    for (int i = 0; i < 10; i++) {
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
       for (int j = 0; j < 2; j++) {
         arrays[j] = generateRandomLongArray(maxSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
         sets[j] = (RAND.nextBoolean()) ?
@@ -521,8 +517,11 @@ public class LongCollectionsTests extends IntegersFixture {
   public void testToWritableSortedUnique() {
     long[][] arrays = {{}, {0}, {0, 1, 2}, {Long.MIN_VALUE, 0, Long.MAX_VALUE},
         {0, 1, 2, 3, 4}, {0, 0, 1, 2, 3}, {0, 1, 2, 2, 3, 4}, {0, 1, 2, 3, 4, 4}};
+    for (long[] array : arrays) {
+      checkToWritableSortedUnique(array);
+    }
     for (int attempt = 0; attempt < 10; attempt++) {
-      LongArray array = generateRandomLongArray( 100, IntegersFixture.SortedStatus.UNORDERED, 150);
+      LongArray array = generateRandomLongArray(100, IntegersFixture.SortedStatus.UNORDERED, 150);
       checkToWritableSortedUnique(array.toNativeArray());
       array.sort();
       checkToWritableSortedUnique(array.toNativeArray());
@@ -672,5 +671,10 @@ public class LongCollectionsTests extends IntegersFixture {
       }
       checkCollect(arrays);
     }
+  }
+
+  public void test() {
+    System.out.println(complementSorted(SameValuesLongList.create(
+      LongProgression.range(0, 20), IntIterators.repeat(2)), LongProgression.range(0, 20, 2)));
   }
 }

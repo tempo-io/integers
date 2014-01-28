@@ -2,14 +2,16 @@ import com.sun.xml.internal.ws.transport.http.DeploymentDescriptorParser
 import groovy.transform.Field
 
 ant.taskdef (  name : 'groovyc' , classname : 'org.codehaus.groovy.ant.Groovyc' )
-final almMessage = {Object v -> println " [almworks] " + (isDirty ? "[dirty] ": "") + v; System.out.flush(); System.err.flush() }
 
-// run "gant -Ddirty"
-isDirty = ant.project.properties["dirty"] != null;
+final getCommandProperty = {String param -> (ant.project.properties[param] in [null, "false"])}
+
+// run "gant -Ddirty" or "gant -Ddirty=true"
+final isDirty = getCommandProperty("dirty")
 
 // run "gant -DskipCheck"
-isCheck = ant.project.properties["skipCheck"] == null ? "true" : "false";
+final isCheckStr = !getCommandProperty("skipCheck") ? "true" : "false"
 
+final almMessage = {Object v -> println " [almworks] " + (isDirty ? "[dirty] ": "") + v; System.out.flush(); System.err.flush() }
 final String antProp(String it) {
   prop = ant.project.properties[it] as String
   if (prop == null) ant.fail("missing property: $it")
@@ -188,7 +190,7 @@ target(name: 'test') {
     }
   }
   almMessage "make tests done"
-  almMessage "run tests(check = " + isCheck + ")"
+  almMessage "run tests(check = " + isCheckStr + ")"
   ant.mkdir(dir: testResultsDir)
   ant.junit(fork: "true", forkmode: "once", printsummary: "true", haltonfailure: isDirty ? "false" : "true") {
     formatter(type: "xml", usefile: "true")
@@ -205,7 +207,7 @@ target(name: 'test') {
       fileset(dir: testsClassesDir, includes: "**/*Test.class")
       fileset(dir: testsClassesDir, includes: "**/*Tests.class")
     }
-    jvmarg(value: "-Dcom.almworks.integers.check=" + isCheck)
+    jvmarg(value: "-Dcom.almworks.integers.check=" + isCheckStr)
   }
   almMessage "tests succeeded"
 }

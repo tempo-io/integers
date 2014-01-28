@@ -204,19 +204,19 @@ public class LongCollections {
     final LongArray sorted = new LongArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-        new IntFunction2() {
-          @Override
-          public int invoke(int a, int b) {
-            return LongCollections.compare(sorted.get(a), sorted.get(b));
-          }
-        },
-        new IntProcedure2() {
-          @Override
-          public void invoke(int a, int b) {
-            sorted.swap(a, b);
-            perms.swap(a, b);
-          }
-        });
+      new IntFunction2() {
+        @Override
+        public int invoke(int a, int b) {
+          return LongCollections.compare(sorted.get(a), sorted.get(b));
+        }
+      },
+      new IntProcedure2() {
+        @Override
+        public void invoke(int a, int b) {
+          sorted.swap(a, b);
+          perms.swap(a, b);
+        }
+      });
     int result = findDuplicateSorted(sorted);
     return result == -1 ? -1 : perms.get(result);
   }
@@ -251,8 +251,12 @@ public class LongCollections {
   }
 
   /**
-   * @return {@code array} if {@code array.length} equals {@code length},
-   * otherwise its copy(or subarray) whose length equals {@code length}.
+   * @return <ul>
+   *   <li> {@link IntegersUtils#EMPTY_LONGS} if {@code length == 0}</li>
+   *   <li> copy of the initial {@code length} elements of {@code array} if {@code 0 < length < array.length}</li>
+   *   <li> {@code array} if {@code length == array.length}</li>
+   *   <li> copies {@code array} in the new array with the specified length and return it if {@code length > array.length}</li>
+   * </ul>
    */
   public static long[] reallocArray(@Nullable long[] array, int length) {
     assert length >= 0 : length;
@@ -263,8 +267,9 @@ public class LongCollections {
       return EMPTY_LONGS;
     long[] newArray = new long[length];
     int copy = Math.min(length, current);
-    if (copy > 0)
+    if (copy > 0) {
       System.arraycopy(array, 0, newArray, 0, copy);
+    }
     return newArray;
   }
 
@@ -348,8 +353,8 @@ public class LongCollections {
   }
 
   /**
-   * @param a sorted {@code LongList}
-   * @param b sorted {@code LongList}
+   * @param a sorted unique {@code LongList}
+   * @param b sorted unique {@code LongList}
    * @return union of {@code a} and {@code b} without elements that are contained both in {@code a} and {@code b}
    */
   public static LongList diffSortedUniqueLists(LongList a, LongList b) {
@@ -430,84 +435,46 @@ public class LongCollections {
   }
 
   /**
-   * @return the set - union of the specified sets
+   * @return union of the two sets
    */
+  @NotNull
   public static WritableLongSet union(LongSet first, LongSet second) {
     WritableLongSet set = LongOpenHashSet.createForAdd(first.size() + second.size());
-    set.addAll(first.iterator());
-    set.addAll(second.iterator());
+    set.addAll(first);
+    set.addAll(second);
     return set;
   }
 
   /**
-   * @return the sorted set - union of the specified sets
+   * @return union of the two sets
    */
   public static WritableLongSortedSet unionSorted(LongSet first, LongSet second) {
-    boolean firstSorted = (first instanceof LongSortedSet),
-        secondSorted = (second instanceof LongSortedSet);
-    if (firstSorted) {
-      LongArray buf;
-      if (secondSorted) {
-        buf = new LongArray(first.size() + second.size());
-        buf.addAll(new LongUnionIterator(first, second));
-      } else {
-        // second unsorted and probably hash
-        buf = second.toArray();
-        for (LongIterator it : first) {
-          if (!second.contains(it.value())) {
-            buf.add(it.value());
-          }
-        }
-        buf.sortUnique();
-      }
-      return LongAmortizedSet.createFromSortedUniqueArray(buf);
-    }
-    if (secondSorted) {
-      // first unsorted and probably hash
-      LongArray buf = first.toArray();
-      for (LongIterator it : second) {
-        if (!first.contains(it.value())) {
-          buf.add(it.value());
-        }
-      }
-      buf.sortUnique();
-      return LongAmortizedSet.createFromSortedUniqueArray(buf);
-    }
-    LongArray buf;
-    if (first.size() > second.size()) {
-      buf = first.toArray();
-      for (LongIterator it : second) {
-        if (!first.contains(it.value())) {
-          buf.add(it.value());
-        }
-      }
-    } else {
-      buf = second.toArray();
-      for (LongIterator it : first) {
-        if (!second.contains(it.value())) {
-          buf.add(it.value());
-        }
-      }
-    }
-    buf.sortUnique();
-    return LongAmortizedSet.createFromSortedUniqueArray(buf);
-  }
-
-  /**
-     * @return intersection of the two sets
-     */
-  public static LongTreeSet intersection(LongSet first, LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     if (!(first instanceof LongSortedSet)) arrays[0].sort();
     if (!(second instanceof LongSortedSet)) arrays[1].sort();
+    assert arrays[0].size() == first.size() && arrays[1].size() == second.size();
 
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
-    arrays[dest].retainSorted(arrays[1 - dest]);
-    return LongTreeSet.createFromSortedUnique(arrays[dest]);
+    arrays[dest].merge(arrays[1 - dest]);
+    return LongAmortizedSet.createFromSortedUniqueArray(arrays[dest]);
   }
 
   /**
-   * @return union of the specified lists
+   * @return intersection of the two sets
+   */
+  public static WritableLongSortedSet intersection(LongSet first, LongSet second) {
+    LongArray[] arrays = {first.toArray(), second.toArray()};
+    if (!(first instanceof LongSortedSet)) arrays[0].sort();
+    if (!(second instanceof LongSortedSet)) arrays[1].sort();
+    assert arrays[0].size() == first.size() && arrays[1].size() == second.size();
+
+    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
+    arrays[dest].retainSorted(arrays[1 - dest]);
+    return LongAmortizedSet.createFromSortedUniqueArray(arrays[dest]);
+  }
+
+  /**
+   * @return union of the specified lists. If all except one lists are null or empty returns this list.
    */
   public static LongList collectToSortedUnique(LongList... lists) {
     int sumSize = 0, count = 0, curIdx = -1;
@@ -537,7 +504,7 @@ public class LongCollections {
   }
 
   /**
-   * @param includeSorted sorted unique {@code LongList}
+   * @param includeSorted sorted {@code LongList}
    * @param excludeSorted sorted {@code LongList}
    * @return LongList that contains elements from {@code includeSorted}
    * with the exception of those elements that are contained in {@code excludeSorted}.
@@ -628,33 +595,37 @@ public class LongCollections {
   }
 
   /**
-   * Sorts lists comparing corresponding pairs of the specified arrays.
-   * @param secondary ties with {@code primary}. Must not be shorter than {@code primary}
+   * Sorts lists by comparing corresponding pairs of the specified lists.
+   * {@code primary} and {@code secondary} are supposed to be a representation of a list P that
+   * consists of pairs (primary[i], secondary[i]).
+   * This method modifies given lists so that P becomes sorted lexicographically.
+   * @param secondary must not be shorter than {@code primary}
    * @throws IllegalArgumentException in case {@code secondary} is shorter than the {@code primary}
    * */
   public static void sortPairs(final WritableLongList primary, final WritableLongList secondary) throws IllegalArgumentException {
-    if (primary.size() > secondary.size()) throw new IllegalArgumentException("This array is longer than sortAlso: " +
-        primary.size() + " > " + secondary.size());
+    if (primary.size() > secondary.size()) throw new IllegalArgumentException("secondary is shorter than primary: " +
+      primary.size() + " > " + secondary.size());
     IntegersUtils.quicksort(primary.size(), new IntFunction2() {
-          @Override
-          public int invoke(int i, int j) {
-            int comp = LongCollections.compare(primary.get(i), primary.get(j));
-            if (comp == 0) comp = LongCollections.compare(secondary.get(i), secondary.get(j));
-            return comp;
-          }
-        },
-        new IntProcedure2() {
-          @Override
-          public void invoke(int i, int j) {
-            primary.swap(i, j);
-            secondary.swap(i, j);
-          }
-        });
+        @Override
+        public int invoke(int i, int j) {
+          int comp = LongCollections.compare(primary.get(i), primary.get(j));
+          if (comp == 0) comp = LongCollections.compare(secondary.get(i), secondary.get(j));
+          return comp;
+        }
+      },
+      new IntProcedure2() {
+        @Override
+        public void invoke(int i, int j) {
+          primary.swap(i, j);
+          secondary.swap(i, j);
+        }
+      });
   }
 
   /**
    * @return array with elements from {@code iterables}.
    * @see #collectIterables(int, LongIterable...)
+   * @see #concatLists(LongList...)
    */
   public static LongArray collectIterables(LongIterable ... iterables) {
     return collectIterables(0, iterables);
@@ -665,10 +636,13 @@ public class LongCollections {
   }
 
   /**
+   * Represent given lists as a single {@link LongList}.
+   * Changes in lists propagate to returned list.
+   * @see LongListConcatenation
    * @see #collectLists(LongList...)
    */
   public static LongList concatLists(LongList ... lists) {
-    return new LongListConcatenation(lists);
+    return LongListConcatenation.concatUnmodifiable(lists);
   }
 
   /**
@@ -690,14 +664,6 @@ public class LongCollections {
       }
     }
     return res;
-  }
-
-  public static void addIterable(LongCollector collector, LongIterable iterable) {
-    if (iterable instanceof LongList) {
-      collector.addAll((LongList) iterable);
-    } else {
-      collector.addAll(iterable.iterator());
-    }
   }
 
   /**
@@ -805,7 +771,14 @@ public class LongCollections {
     return sb.append(")").toString();
   }
 
-  public static Iterable<LongArray> allSubLists(final LongList list) {
+  /**
+   * @return Iterable with all sublists of the {@code list}
+   * @throws IllegalArgumentException if {@code list.size >= 32}
+   */
+  public static Iterable<LongArray> allSubLists(final LongList list) throws IllegalArgumentException {
+    if (list.size() >= 32) {
+      throw new IllegalArgumentException();
+    }
     return new Iterable<LongArray>() {
 
       @Override
