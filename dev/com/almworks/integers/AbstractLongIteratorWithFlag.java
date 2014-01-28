@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
  * {@link com.almworks.integers.LongIterator#hasValue()}
  * state in a separate boolean flag.
  * These are the iterators that cannot calculate {@link LongIterator#hasValue()}
- * based only on their state. Example: {@link IndexedLongIterator}.
+ * based only on their state. Example: {@link LongIterators#repeat(long)}, {@link LongIterator.Single}
  *
  * <br>Instead of implementing {@code next()} and {@code value()}, you'll need to implement {@code nextImpl()} and {@code valueImpl()}, where:
  * <ul>

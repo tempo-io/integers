@@ -2,6 +2,10 @@ package com.almworks.integers;
 
 import java.util.NoSuchElementException;
 
+/**
+ * @see IntLongIterator
+ * @see AbstractLongIteratorWithFlag
+ */
 public abstract class AbstractIntLongIteratorWithFlag extends AbstractIntLongIterator {
 
   protected boolean myIterated = false;

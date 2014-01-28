@@ -19,20 +19,26 @@
 
 package com.almworks.integers;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class PairIntLongIterator implements Iterable<PairIntLongIterator>, Iterator<PairIntLongIterator> {
+/**
+ * Iterator for iterating through two specified iterators created from iterables.
+ * Invocation of the {@link #next()} invokes {@code next()} in the both inner iterators.
+ * {@link #left()} and {@link #right()} returns {@code value()} of the corresponding inner iterators.
+ * {@link #hasNext()} returns false if any of the inner iterators returns false.
+ * I.e. the remaining values in the other iterator is ignored.
+ */
+public class PairIntLongIterator implements IntLongIterator {
   private final IntIterator myIt1;
   private final LongIterator myIt2;
   private boolean myIterated;
 
-  public PairIntLongIterator(IntIterator first, LongIterator second) {
-    myIt1 = first;
-    myIt2 = second;
+  public PairIntLongIterator(IntIterable first, LongIterable second) {
+    myIt1 = first.iterator();
+    myIt2 = second.iterator();
   }
 
-  public PairIntLongIterator iterator() {
+  public IntLongIterator iterator() {
     return this;
   }
 
@@ -42,8 +48,8 @@ public class PairIntLongIterator implements Iterable<PairIntLongIterator>, Itera
 
   public PairIntLongIterator next() {
     myIterated = false;
-    myIt2.next();
     myIt1.next();
+    myIt2.next();
     myIterated = true;
     return this;
   }

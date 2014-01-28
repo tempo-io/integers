@@ -24,20 +24,18 @@ import java.util.NoSuchElementException;
 
 public abstract class LongProgression extends AbstractLongList {
   /**
-   * @param initial
-   * @param count
-   * @param step
    * @return list containing arithmetic progression.
    */
-  public static LongProgression arithmetic(long initial, int count, long step) {
-    return new Arithmetic(initial, count, step);
+  public static LongProgression arithmetic(long start, int count, long step) {
+    return new Arithmetic(start, count, step);
   }
 
-  public static LongProgression arithmetic(long initial, int count) {
-    return new Arithmetic(initial, count, 1);
+  public static LongProgression arithmetic(long start, int count) {
+    return new Arithmetic(start, count, 1);
   }
 
   /**
+   * Examples: range(3, 10, 3) -> (3, 6, 9); range(3, -10, -4) -> (3, -1, -5, -9)
    * @param start starting value, inclusive
    * @param stop ending value, exclusive; may be less than {@code start}, then {@code step} must be negative
    * @param step may be negative, then {@code stop} must be not greater than {@code start}
@@ -49,6 +47,8 @@ public abstract class LongProgression extends AbstractLongList {
   }
 
   /**
+   * Examples: range(4, 7) -> (4, 5, 6); range(0, -3) -> ()
+   * @return {@link #range(long, long, long)} with the specified start and stop and {@code step = 1}
    * @see #range(long, long, long)
    */
   public static LongProgression range(long start, long stop) throws IllegalArgumentException {
@@ -56,6 +56,8 @@ public abstract class LongProgression extends AbstractLongList {
   }
 
   /**
+   * Examples: range(4) -> (0, 1, 2, 3); range(-3) -> ()
+   * @return {@link #range(long, long, long)} with {@code start = 0}, the specified stop and {@code step = 1}
    * @see #range(long, long, long)
    */
   public static LongProgression range(long stop) throws IllegalArgumentException {
@@ -129,9 +131,9 @@ public abstract class LongProgression extends AbstractLongList {
     private final long myInitial;
     private final long myDifference;
 
-    public ArithmeticIterator(long initial, long step, int count) {
+    public ArithmeticIterator(long start, long step, int count) {
       super(0, count);
-      myInitial = initial;
+      myInitial = start;
       myDifference = step;
     }
 
