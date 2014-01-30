@@ -26,19 +26,20 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   private int[][] myTempInsertionPoints = {null};
   private LongArray myRemovedTemp = null;
+//  private long[] myRemovedTemp = null;
 
-  public LongAmortizedSet(WritableLongSortedSet myAddedSet, WritableLongSet myRemovedSet) {
-    this(0, myAddedSet, myRemovedSet, DEFAULT_CHUNKSIZE);
+  public LongAmortizedSet(WritableLongSortedSet addedSet, WritableLongSet removedSet) {
+    this(0, addedSet, removedSet, DEFAULT_CHUNKSIZE);
   }
 
-  public LongAmortizedSet(int capacity, WritableLongSortedSet myAdded, WritableLongSet myRemoved, int chunkSize) {
-    if (!myAdded.isEmpty() || !myRemoved.isEmpty()) {
+  public LongAmortizedSet(int capacity, WritableLongSortedSet addedSet, WritableLongSet removedSet, int chunkSize) {
+    if (!addedSet.isEmpty() || !removedSet.isEmpty()) {
       throw new IllegalArgumentException("sets must be empty");
     }
     myChunkSize = chunkSize;
     myBaseList = new LongArray(capacity);
-    this.myAdded = myAdded;
-    this.myRemoved = myRemoved;
+    this.myAdded = addedSet;
+    this.myRemoved = removedSet;
   }
 
   public LongAmortizedSet() {
@@ -46,7 +47,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   }
 
   public LongAmortizedSet(int capacity) {
-    this(capacity, new LongTreeSet(), new LongChainHashSet(), DEFAULT_CHUNKSIZE);
+    this(capacity, new LongTreeSet(), LongChainHashSet.createForAdd(DEFAULT_CHUNKSIZE), DEFAULT_CHUNKSIZE);
   }
 
   /**
@@ -62,14 +63,16 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   }
 
   /**
-   * @return new LongAmortizedSet contained all elements from the specified iterable
+   * @return new LongAmortizedSet that contains all elements from the specified iterable
    */
   public static LongAmortizedSet createFromSortedUnique(LongIterable iterable) {
     return createFromSortedUnique(iterable, 0);
   }
 
   /**
+   * Extracts elements from the specified array.
    * @return new LongAmortizedSet with elements extracted from the specified array.
+   * @see com.almworks.integers.LongArray#extractHostArray()
    */
   public static LongAmortizedSet createFromSortedUniqueArray(LongArray array) {
     assert array.isUniqueSorted();
@@ -87,7 +90,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   /**
    * {@inheritDoc}
-   * <br>{@link #include} in most cases is faster than {@link LongAmortizedSet#add(long)}
+   * <br>{@link #include} in most cases is slower than {@link LongAmortizedSet#add(long)}
    */
   @Override
   public boolean include(long value) {
@@ -111,7 +114,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   /**
    * {@inheritDoc}
-   * {@link #exclude} in most cases is faster than {@link LongAmortizedSet#remove(long)}
+   * {@link #exclude} in most cases is slower than {@link LongAmortizedSet#remove(long)}
    */
   public boolean exclude(long value) {
     return super.exclude(value);
@@ -131,14 +134,6 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
     myBaseList.retain(values);
   }
 
-  private IntList getIndicesToRemove() {
-    int size = myBaseList.getRemovePoints(myRemoved, myTempInsertionPoints);
-    if (!(myRemoved instanceof LongSortedSet)) {
-      Arrays.sort(myTempInsertionPoints[0], 0, size);
-    }
-    return new IntArray(myTempInsertionPoints[0], size);
-  }
-
   private LongIterator sortedRemovedIterator() {
     if (myRemoved instanceof LongSortedSet) {
       return myRemoved.iterator();
@@ -152,6 +147,16 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
       myRemovedTemp.sort();
       return myRemovedTemp.iterator();
     }
+
+//  } else {
+//    if (myRemovedTemp == null) {
+//      myRemovedTemp = new long[myChunkSize];
+//    }
+//    myRemoved.toNativeArray(myRemovedTemp);
+//    int removedSize = myRemoved.size();
+//    Arrays.sort(myRemovedTemp, 0, removedSize);
+//    return new LongArrayIterator(myRemovedTemp, 0, removedSize);
+//  }
   }
 
   private IntIterator sortedIndicesToRemove() {
@@ -174,9 +179,6 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
         }
       }
     }
-    if (!(myRemoved instanceof LongSortedSet)) {
-      points.sort();
-    }
     return points.iterator();
   }
 
@@ -196,7 +198,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   public long getUpperBound() {
     long val = myAdded.getUpperBound();
-    for (int index = myBaseList.size() - 1; 0 < index; index--) {
+    for (int index = myBaseList.size() - 1; 0 <= index; index--) {
       long baseValue = myBaseList.get(index);
       if (baseValue < val) {
         return val;
@@ -221,9 +223,6 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
     // todo optimize
     myBaseList.removeAllAtSorted(sortedIndicesToRemove());
 
-//    for (LongIterator removeIt : sortedRemovedIterator()) {
-//      myBaseList.removeAllSorted(removeIt.value());
-//    }
     myBaseList.mergeWithSmall(myAdded.toArray(), myTempInsertionPoints);
     myAdded.clear();
     myRemoved.clear();
@@ -268,10 +267,10 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   public int size() {
     int size = myBaseList.size();
     // myAdded and myRemoved are disjoint
-    int from = 0, to = myBaseList.size();
     if (!myAdded.isEmpty()) {
+      int from = 0;
       for (LongIterator iterator: myAdded.iterator()) {
-        int idx = myBaseList.binarySearch(iterator.value(), from, to);
+        int idx = myBaseList.binarySearch(iterator.value(), from, myBaseList.size());
         if (idx < 0) {
           size++;
           idx = -idx - 1;
@@ -288,7 +287,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   }
 
   /**
-   * @return a sorted list of numbers, contained in this set,
+   * @return a sorted list of numbers contained in this set,
    * which should be used before any further mutation of this set.
    * Changes in set may affect the returned list
    */

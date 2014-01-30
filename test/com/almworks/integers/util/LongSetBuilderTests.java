@@ -73,7 +73,7 @@ public class LongSetBuilderTests extends IntegersFixture {
       LongArray set = new LongArray();
       LongSetBuilder builder = new LongSetBuilder(100);
       for (int j = 0; j < count; j++) {
-        LongArray v = IntegersFixture.generateRandomLongArray( elementsCount, IntegersFixture.SortedStatus.UNORDERED, size);
+        LongArray v = IntegersFixture.generateRandomLongArray(elementsCount, IntegersFixture.SortedStatus.UNORDERED, size);
         set.addAll(v);
         builder.addAll(v);
       }

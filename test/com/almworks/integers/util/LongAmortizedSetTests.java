@@ -2,6 +2,11 @@ package com.almworks.integers.util;
 
 import com.almworks.integers.*;
 
+import java.util.ArrayList;
+
+import static com.almworks.integers.LongCollections.allSubLists;
+import static com.almworks.integers.LongCollections.asLongList;
+
 public class LongAmortizedSetTests extends WritableLongSetChecker {
 
   protected WritableLongSortedSet createSet() {
@@ -13,8 +18,38 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
   }
 
   protected  WritableLongSortedSet[] createSetFromSortedUniqueList(LongList sortedList) {
-    return new WritableLongSortedSet[] {LongAmortizedSet.createFromSortedUnique(sortedList)};
+    ArrayList<WritableLongSortedSet> sets = new ArrayList<WritableLongSortedSet>();
+    sets.add(LongAmortizedSet.createFromSortedUnique(sortedList));
+
+    if (sortedList.size() != 0 && sortedList.size() < 5) {
+      LongArray removedVariants = LongArray.create(
+        sortedList.get(0) - 1, MIN, 0, MAX, sortedList.get(sortedList.size() - 1));
+      removedVariants.removeAll(sortedList);
+      removedVariants.sortUnique();
+
+      int count = 1 << sortedList.size();
+      for (int maskBase = 0; maskBase < count; maskBase++) {
+        for (int maskAdded = 0; maskAdded < count; maskAdded++) {
+          if ((maskBase | maskAdded) != count - 1) continue;
+          LongArray baseList = LongCollections.getSubList(sortedList, maskBase);
+          LongArray toAdd = LongCollections.getSubList(sortedList, maskAdded);
+          for (LongArray toRemove : allSubLists(removedVariants)) {
+            sets.add(createSetFromSortedUniqueList(baseList, toAdd, toRemove));
+          }
+        }
+      }
+    }
+    return sets.toArray(new WritableLongSortedSet[]{});
   }
+
+  protected WritableLongSortedSet createSetFromSortedUniqueList(LongList sortedList, LongList toAdd, LongList toRemove) {
+    assert !(new LongIntersectionIterator(toAdd, toRemove).hasNext());
+    LongAmortizedSet set = LongAmortizedSet.createFromSortedUnique(sortedList);
+    set.coalesce();
+    set.addAll(toAdd);
+    set.removeAll(toRemove);
+    return set;
+  };
 
   public void testIteratorCoalesce() {
     LongAmortizedSet set = new LongAmortizedSet();
@@ -47,6 +82,13 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
     set.toArray();
     assertEquals(2, it.nextValue());
     assertFalse(it.hasNext());
+
+    set = new LongAmortizedSet();
+    set.addAll(1, 2, 3);
+    set.coalesce();
+    set.addAll(4, 5);
+    set.removeAll(2, 4, 5);
+    CHECK.order(set.tailIterator(0), 1L, 3);
   }
 
   public void testIsEmpty2() {
@@ -92,8 +134,8 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
 
   public void testAddRemove2() {
     LongArray array = new LongArray(LongProgression.range(0, 7));
-    for (LongArray a : LongCollections.allSubLists(array)) {
-      for (LongArray b : LongCollections.allSubLists(array)) {
+    for (LongArray a : allSubLists(array)) {
+      for (LongArray b : allSubLists(array)) {
         for (int i = 0; i < 2; i++) {
           LongAmortizedSet set = new LongAmortizedSet();
 
@@ -121,14 +163,14 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
     LongAmortizedSet set;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
       // LongAmortizedSet.createFromSortedUnique
-      LongArray res = generateRandomLongArray( size, IntegersFixture.SortedStatus.SORTED_UNIQUE);
+      LongArray res = generateRandomLongArray(size, IntegersFixture.SortedStatus.SORTED_UNIQUE);
       set = LongAmortizedSet.createFromSortedUnique(res);
       checkSet(set, res);
       set.coalesce();
       checkSet(set, res);
 
       // LongAmortizedSet.createFromSortedUniqueArray
-      res = generateRandomLongArray( size, IntegersFixture.SortedStatus.SORTED_UNIQUE);
+      res = generateRandomLongArray(size, IntegersFixture.SortedStatus.SORTED_UNIQUE);
       LongArray expected = LongArray.copy(res);
       set = LongAmortizedSet.createFromSortedUniqueArray(res);
       checkSet(set, expected);
@@ -148,7 +190,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
     LongAmortizedSet set = new LongAmortizedSet();
     int arSize = 200, maxVal = Integer.MAX_VALUE, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
-      LongArray arr = generateRandomLongArray( arSize, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal);
+      LongArray arr = generateRandomLongArray(arSize, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal);
       set.addAll(arr.subList(0, arSize / 2));
       set.coalesce();
       set.addAll(arr.subList(arSize / 2, arSize));
@@ -175,7 +217,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
     for (int attempt = 0; attempt < attempts; attempt++) {
       if (attempt % 3 == 0) set = new LongAmortizedSet();
       set.clear();
-      LongArray expected = generateRandomLongArray( addCount, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+      LongArray expected = generateRandomLongArray(addCount, IntegersFixture.SortedStatus.UNORDERED, maxVal);
       int size2 = expected.size() / 2;
       set.addAll(expected.subList(0, size2));
       if (attempt % 2 == 0) {
@@ -193,14 +235,14 @@ public class LongAmortizedSetTests extends WritableLongSetChecker {
     LongArray toAdd = new LongArray(listSize);
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
       if (attempt % 3 == 0) set = new LongAmortizedSet();
-      LongArray expected = generateRandomLongArray( setSize, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+      LongArray expected = generateRandomLongArray(setSize, IntegersFixture.SortedStatus.UNORDERED, maxVal);
       set.clear();
       set.addAll(expected);
       expected.sortUnique();
       checkSet(set, expected);
 
       toAdd.clear();
-      toAdd.addAll(generateRandomLongArray( listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal));
+      toAdd.addAll(generateRandomLongArray(listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal));
       for (LongIterator it : set) {
         toAdd.removeAllSorted(it.value());
       }

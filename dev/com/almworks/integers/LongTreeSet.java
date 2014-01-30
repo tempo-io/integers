@@ -173,7 +173,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   }
 
   public int size() {
-    return myRemoved.isEmpty() ? myFront - 1 : myFront - 1 - myRemoved.cardinality();
+    return myFront - 1 - myRemoved.cardinality();
   }
 
   @Override

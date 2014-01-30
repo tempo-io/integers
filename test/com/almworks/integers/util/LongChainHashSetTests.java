@@ -24,7 +24,7 @@ public class LongChainHashSetTests extends WritableLongSetChecker {
   public void testCreateForAdd() {
     int maxSize = 128;
     for (int size = 0; size <= maxSize; size++) {
-      assertTrue(LongOpenHashSet.createForAdd(size).getThreshold() >= size);
+      assertTrue(LongChainHashSet.createForAdd(size).getThreshold() >= size);
     }
   }
 

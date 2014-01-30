@@ -18,6 +18,7 @@ package com.almworks.integers;
 
 import java.lang.reflect.Field;
 
+import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.LongTreeSet.ColoringType.BALANCED;
 import static com.almworks.integers.LongTreeSet.ColoringType.TO_ADD;
 import static com.almworks.integers.LongTreeSet.ColoringType.TO_REMOVE;
@@ -61,12 +62,12 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     LongArray toAdd = new LongArray(listSize);
     for (int attempt = 0; attempt < nAttempts; ++attempt) {
       LongTreeSet treeSet = new LongTreeSet(setSize);
-      LongArray expected = generateRandomLongArray( setSize, IntegersFixture.SortedStatus.UNORDERED);
+      LongArray expected = generateRandomLongArray(setSize, IntegersFixture.SortedStatus.UNORDERED);
       treeSet.addAll(expected);
       expected.sortUnique();
 
       toAdd.clear();
-      toAdd.addAll(generateRandomLongArray( listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE));
+      toAdd.addAll(generateRandomLongArray(listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE));
       for (LongIterator it: treeSet) {
         toAdd.removeAllSorted(it.value());
       }
@@ -115,7 +116,7 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     LongTreeSet set;
 
     for (int attempt = 0; attempt < nAttempts; attempt++) {
-      LongArray sortedUniqueArray = generateRandomLongArray( listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
+      LongArray sortedUniqueArray = generateRandomLongArray(listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
       if (attempt % 4 == 0) {
         set = LongTreeSet.createFromSortedUnique(sortedUniqueArray);
       } else {
@@ -123,6 +124,21 @@ public class LongTreeSetTests extends WritableLongSetChecker {
             sortedUniqueArray.iterator(), RAND.nextInt(listSize * 2), types[attempt % 4  - 1]);
       }
       checkSet(set, sortedUniqueArray);
+    }
+  }
+
+  public void testRetainSimple2() {
+    LongTreeSet set = new LongTreeSet();
+    set.addAll(range(20));
+    set.removeAll(range(0, 20, 2));
+    checkSet(set, range(1, 20, 2));
+
+    set = new LongTreeSet();
+    for (int i = 0; i < 2; i++) {
+      set.addAll(range(2, 25, 2));
+      set.retain(LongTreeSet.createFromSortedUnique(range(3, 25, 3)));
+      checkSet(set, range(6, 25, 6));
+      set.clear();
     }
   }
 }

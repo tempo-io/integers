@@ -43,6 +43,7 @@ dev/com/almworks/integers/AbstractWritableLongSet.java -text
 dev/com/almworks/integers/DynamicIntSet.java -text
 dev/com/almworks/integers/EmptyIntIterator.java -text
 dev/com/almworks/integers/EmptyLongIterator.java -text
+dev/com/almworks/integers/EmptyLongSet.java -text
 dev/com/almworks/integers/IndexedIntIterator.java -text
 dev/com/almworks/integers/IndexedIntListIterator.java -text
 dev/com/almworks/integers/IndexedLongIterator.java -text
