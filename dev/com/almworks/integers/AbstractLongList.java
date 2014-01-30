@@ -287,6 +287,26 @@ public abstract class AbstractLongList implements LongList {
     return get(size() - backwardIndex - 1);
   }
 
+  public boolean equalSortedValues(LongList collection) {
+    assert isUniqueSorted();
+    if (size() != collection.size())
+      return false;
+    LongIterator ownIt = iterator();
+    long prevOther = Long.MIN_VALUE;
+    for (LongIterator it : collection) {
+      long own = ownIt.nextValue();
+      long other = it.value();
+      if (other <= prevOther) {
+        assert false : collection; // Not sorted
+        return false;
+      }
+      if (own != other)
+        return false;
+      prevOther = other;
+    }
+    return true;
+  }
+
   protected class IndexIterator extends AbstractLongListIndexIterator {
     public IndexIterator(int from, int to) {
       super(from, to);

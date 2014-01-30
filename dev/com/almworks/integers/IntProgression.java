@@ -31,6 +31,18 @@ public abstract class IntProgression extends AbstractIntList {
     return new Arithmetic(initial, count, 1);
   }
 
+  public static IntProgression range(int start, int stop, int step) throws IllegalArgumentException {
+    return IntProgression.arithmetic(start, LongProgression.getCount(start, stop, step), step);
+  }
+
+  public static IntProgression range(int start, int stop) throws IllegalArgumentException {
+    return range(start, stop, 1);
+  }
+
+  public static IntProgression range(int stop) throws IllegalArgumentException {
+    return range(0, stop, 1);
+  }
+
   public static class Arithmetic extends IntProgression {
     private final int myInitial;
     private final int myStep;

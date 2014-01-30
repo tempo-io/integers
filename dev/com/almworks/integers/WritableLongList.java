@@ -47,31 +47,35 @@ public interface WritableLongList extends LongList, LongCollector {
    * Removes the first occurrence of the specified element from this list, if it is present.
    * @return true if this list was modified, otherwise false
    */
-  public boolean remove(long value);
+  boolean remove(long value);
 
   /**
-   * This method removes from this list all values that are equals to {@code value}
+   * This method removes from this list all values that are equal to {@code value}
+   * <br> {@link #removeAllSorted(long)} may be more effective than this method
    * @return true if this list was modified, otherwise false
+   * @see #removeAllSorted(long)
    */
   boolean removeAll(long value);
 
   /**
-   * Removes all appearances of {@code value} from this sorted list, if this list contains {@code value}.
+   * Removes all appearances of {@code value} from this sorted list.
+   * <br>May be more effective than {@link #removeAll(long)}
+   * <br>Invoking this method on an unsorted array produces unspecified results.
    * @return true if this array was modified, otherwise false
    */
-  public boolean removeAllSorted(long value);
+  boolean removeAllSorted(long value);
 
   /**
-   * Removes all values contained in collection.
+   * Removes from this list all values contained in collection.
    * @return true if this list was modified, otherwise false
    */
-  public boolean removeAll(LongList collection);
+  boolean removeAll(LongIterable iterable);
 
   /**
-   * Removes all values contained in the specified array.
+   * Removes from this list all values contained in the specified array
    * @return true if this list was modified, otherwise false
    */
-  public boolean removeAll(long... values);
+  boolean removeAll(long... values);
 
   /**
    * Insert {@code value} {@code count} times between indexes {@code index, index + 1}
@@ -94,7 +98,7 @@ public interface WritableLongList extends LongList, LongCollector {
   void insertAll(int index, LongList values, int sourceIndex, int count);
 
   /**
-   * Inserts {@code value} in this sorted list, if this list doesn't contain {@code value}, keeping sorted order.
+   * Inserts {@code value} in this sorted list if this list doesn't contain {@code value}, keeping sorted order.
    * @return true if this list was modified, otherwise false
    */
   boolean addSorted(long value);
@@ -128,7 +132,8 @@ public interface WritableLongList extends LongList, LongCollector {
   void apply(int from, int to, LongFunction function);
 
   /**
-   * Sorts this list. Stability is not guaranteed
+   * Sorts this list. Stability is not guaranteed. Permutation of indices in this array
+   * will be reflected in the same permutation of indices in each array of {@code sortAlso}.
    * @param sortAlso lists in which the order is changed as well as this list
    */
   void sort(WritableLongList... sortAlso);

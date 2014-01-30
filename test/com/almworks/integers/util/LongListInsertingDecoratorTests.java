@@ -58,6 +58,26 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
       long posVal = array.removeAt(pos);
       res.add(new LongListInsertingDecorator(array, new IntLongMap(IntArray.create(pos), LongArray.create(posVal))));
     }
+
+    if (4 < values.length && values.length < 100) {
+      int count = 4;
+      for (int i = 0; i < count; i++) {
+        LongArray source = LongArray.copy(values);
+        IntLongMap inserted = new IntLongMap();
+        int maxDiff = 4;
+        int curIdx = RAND.nextInt(maxDiff);
+        int removeCount = 0;
+        while (curIdx < source.size()) {
+          inserted.add(curIdx + removeCount, source.removeAt(curIdx));
+          curIdx += 1 + RAND.nextInt(maxDiff);
+          removeCount++;
+        }
+        LongList resArray = new LongListInsertingDecorator(source, inserted);
+        CHECK.order(resArray, values);
+        res.add(resArray);
+      }
+    }
+
     return res;
   }
 
@@ -67,6 +87,34 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
   protected void setUp() throws Exception {
     myArray.clear();
   }
+
+  protected void checkInsertIndexes(final LongListInsertingDecorator ins, int... expected) {
+    if (expected == null)
+      expected = IntegersUtils.EMPTY_INTS;
+    CHECK.order(ins.insertIndexIterator(), expected);
+    LongList base = ins.getBase();
+    for (int i = 0; i < base.size(); i++) {
+      int newIndex = ins.getNewIndex(i);
+      assertTrue(IntegersUtils.indexOf(expected, newIndex) < 0);
+      assertEquals(base.get(i), ins.get(newIndex));
+    }
+    final int[] expectedCopy = expected;
+    boolean res = ins.iterate(0, ins.size(), new AbstractLongListDecorator.LongVisitor() {
+      int index = -1;
+
+      public boolean accept(long value, LongList source) {
+        index++;
+        assertEquals(value, ins.get(index));
+        if (IntegersUtils.indexOf(expectedCopy, index) >= 0)
+          assertSame(ins, source);
+        else
+          assertSame(ins.getBase(), source);
+        return true;
+      }
+    });
+    assertTrue(res);
+  }
+
 
   public void testInsertDecorator() {
     LongListInsertingDecorator ins = new LongListInsertingDecorator(myArray);
@@ -144,26 +192,48 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     assertFalse(res.isEmpty());
   }
 
-  public void testSimple() {
-    LongArray source = LongArray.create(ap(0, 10, 7));
+  public void testIndexSimple() {
+    LongArray source = LongArray.create(1, 3, 4, 7, 8, 9);
     LongListInsertingDecorator tst = new LongListInsertingDecorator(source, new IntLongMap());
-    tst.insert(5, 45);
-    tst.insert(3, 25);
-    tst.insert(4, 28);
-    LongArray expected = new LongArray(tst);
-//    System.out.println(tst);
-
+    IntArray toInsert = IntArray.create(0, 2, 5, 6, 10);
+    for (IntIterator it : toInsert) {
+      tst.insert(it.value(), it.value());
+    }
     LongListIterator it = tst.iterator();
-    LongListIterator expIt = expected.iterator();
-
-    for (int i = 0; i < 3; i++) {
+    while (it.hasNext()) {
       it.next();
-      expIt.next();
+      assertEquals(it.index(), it.value());
+    }
+  }
+
+  public void testMapConstructor() {
+    LongArray source = LongArray.create(2, 4, 6);
+    LongListInsertingDecorator tst = new LongListInsertingDecorator(source,
+        new IntLongMap(IntArray.create(0, 3), LongArray.create(-20, 20)));
+    CHECK.order(tst, -20, 2, 4, 20, 6);
+
+    tst = new LongListInsertingDecorator(source, new IntLongMap());
+    CHECK.order(source, tst);
+
+    tst = new LongListInsertingDecorator(source,
+        new IntLongMap(IntArray.create(0, 4), LongArray.create(-20, 20)));
+    CHECK.order(tst, -20, 2, 4, 6, 20);
+
+    try {
+      new LongListInsertingDecorator(source,
+          new IntLongMap(IntArray.create(0, 5), LongArray.create(-20, 20)));
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
     }
 
-    assertEquals(expIt.value(), it.value());
-    it.move(-2);
-    expIt.move(-2);
-    assertEquals(expIt.value(), it.value());
+    try {
+      new LongListInsertingDecorator(source,
+          new IntLongMap(IntArray.create(-2, 4), LongArray.create(-20, 20)));
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
+    }
+
   }
 }

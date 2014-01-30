@@ -37,14 +37,32 @@ public class LongListConcatenationTests extends LongListChecker {
     if (values.length == 0 || len2 == 0) return res;
 
     // [][]
-    res.add(new LongListConcatenation(new LongArray(array.subList(0, len2)), new LongArray(array.subList(len2, array.size()))));
+    LongList[] lists = {new LongArray(array.subList(0, len2)), new LongArray(array.subList(len2, array.size()))};
+    res.add(new LongListConcatenation(lists));
+
+    LongListConcatenation concatenation = new LongListConcatenation();
+    concatenation.addSlice(lists[0]);
+    concatenation.addSlice(lists[1]);
+    res.add(concatenation);
+
+    concatenation = new LongListConcatenation();
+    concatenation.addSlice(LongList.EMPTY);
+    concatenation.addSlice(lists[0]);
+    concatenation.addSlice(LongList.EMPTY);
+    concatenation.addSlice(lists[1]);
+    concatenation.addSlice(LongList.EMPTY);
+    concatenation.addSlice(LongList.EMPTY);
+    res.add(concatenation);
 
     // [][][][]...[]
-    LongList[] lists = new LongList[values.length];
+    concatenation = new LongListConcatenation();
     for (int i = 0; i < values.length; i++) {
-      lists[i] = LongArray.create(values[i]);
+      concatenation.addSlice(LongArray.create(values[i]));
+      if (RAND.nextInt(5) == 0) {
+        concatenation.addSlice(LongList.EMPTY);
+      }
     }
-    res.add(new LongListConcatenation(lists));
+    res.add(concatenation);
     return res;
   }
 

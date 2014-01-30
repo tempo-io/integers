@@ -29,6 +29,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Arrays;
 
+/**
+ * List that allows to access a concatenation of several lists (here called slices) as a list
+ * as if they go one after the other.
+ * <br>Changes in lists propagate to this list — added / removed values are immediately visible through this list.
+ * <br>Because of that, {@link #get(int)}, {@link #indexOf(long)}, {@link #size()}, {@link #isEmpty()} are O(n).
+ * <br>Slices can be added during the lifetime of the list.
+ */
 public class LongListConcatenation extends AbstractLongList {
   private final List<LongList> mySlices = IntegersUtils.arrayList();
 

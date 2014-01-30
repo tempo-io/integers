@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.util.LongListRemovingDecorator.createFromPrepared;
 import static com.almworks.integers.util.LongListRemovingDecorator.prepareSortedIndices;
@@ -37,7 +38,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     // [...]
     LongArray source = LongArray.copy(values);
     LongList resArray = new LongListRemovingDecorator(source);
-    CHECK.order(expected, resArray);
+    CHECK.order(resArray, values);
     res.add(resArray);
 
     if (values.length == 0) return res;
@@ -45,27 +46,27 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     // [...]~
     source = LongArray.copy(values);
     source.add(-RAND.nextInt());
-    IntArray indexes = IntArray.create(values.length);
-    prepareSortedIndices(indexes);
-    resArray = createFromPrepared(source, indexes);
-    CHECK.order(expected, resArray);
+    IntArray indices = IntArray.create(values.length);
+    prepareSortedIndices(indices);
+    resArray = createFromPrepared(source, indices);
+    CHECK.order(resArray, values);
     res.add(resArray);
 
     // ~[...]~
     source = LongCollections.collectIterables(values.length + 2, new LongIterator.Single(-RAND.nextInt()), source);
-    indexes = IntArray.create(0, values.length + 1);
-    prepareSortedIndices(indexes);
-    resArray = createFromPrepared(source, indexes);
-    CHECK.order(expected, resArray);
+    indices = IntArray.create(0, values.length + 1);
+    prepareSortedIndices(indices);
+    resArray = createFromPrepared(source, indices);
+    CHECK.order(resArray, values);
     res.add(resArray);
 
     // ~[...]
     source = LongArray.copy(source);
     source.removeLast();
-    indexes = IntArray.create(0);
-    prepareSortedIndices(indexes);
-    resArray = createFromPrepared(source, indexes);
-    CHECK.order(expected, resArray);
+    indices = IntArray.create(0);
+    prepareSortedIndices(indices);
+    resArray = createFromPrepared(source, indices);
+    CHECK.order(resArray, values);
     res.add(resArray);
 
     // [..~..]
@@ -73,11 +74,30 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     if (pos != 0) {
       source = LongArray.copy(values);
       source.insert(pos, -RAND.nextInt());
-      indexes = IntArray.create(pos);
-      prepareSortedIndices(indexes);
-      resArray = createFromPrepared(source, indexes);
-      CHECK.order(expected, resArray);
+      indices = IntArray.create(pos);
+      prepareSortedIndices(indices);
+      resArray = createFromPrepared(source, indices);
+      CHECK.order(resArray, values);
       res.add(resArray);
+    }
+
+    if (4 < values.length && values.length < 100) {
+      int count = 4;
+      for (int i = 0; i < count; i++) {
+        source = LongArray.copy(values);
+        indices = IntArray.create();
+        int maxDiff = 4;
+        int curIdx = RAND.nextInt(maxDiff);
+        while (curIdx < source.size()) {
+          indices.add(curIdx);
+          source.insert(curIdx, RAND.nextInt());
+          curIdx += 1 + RAND.nextInt(maxDiff);
+        }
+        prepareSortedIndices(indices);
+        resArray = createFromPrepared(source, indices);
+        CHECK.order(resArray, values);
+        res.add(resArray);
+      }
     }
     return res;
   }
@@ -96,9 +116,9 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     int indexesLength = 50;
     int maxValue = 1000;
 
-    LongArray base = generateRandomLongArray( arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
+    LongArray base = generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
     for (int test = 0; test < 20; test++) {
-      IntArray indexes = generateRandomIntArray(indexesLength, SortedStatus.SORTED_UNIQUE, arrLength);
+      IntArray indexes = generateRandomIntArray(indexesLength, SORTED_UNIQUE, arrLength);
       LongArray expected = LongArray.copy(base);
       expected.removeAllAtSorted(indexes.iterator());
 
@@ -110,28 +130,24 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
 
   public void testIterator() {
     LongArray source = LongArray.create(10,13,15,14,11,12,16,17,18),
-        expected = LongArray.create(10,15,14,12,16,18),
-        result = new LongArray();
+      expected = LongArray.create(10,15,14,12,16,18),
+      result = new LongArray();
     IntArray indexes = IntArray.create(1, 4, 7);
     prepareSortedIndices(indexes);
-    LongListRemovingDecorator tst2 =
-        createFromPrepared(source, indexes);
-    for (LongIterator i : tst2) {
-      result.add(i.value());
-    }
+    LongListRemovingDecorator tst2 = createFromPrepared(source, indexes);
+    result.addAll(tst2.iterator());
     assertEquals(expected, result);
   }
 
   public void testIteratorGet() {
-    LongArray source = LongArray.create(10,13,15,14,11,12,16,17,18),
-        expected = LongArray.create(10,15,14,12,16,18),
-        result = new LongArray();
+    LongArray source = LongArray.create(10, 13, 15, 14, 11, 12, 16, 17, 18),
+      expected = LongArray.create(10, 15, 14, 12, 16, 18);
     IntArray indexes = IntArray.create(1, 4, 7);
     prepareSortedIndices(indexes);
     LongListRemovingDecorator tst2 =
-        createFromPrepared(source, indexes);
+      createFromPrepared(source, indexes);
     LongListIterator it = tst2.iterator(), expIt = expected.iterator();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       assertEquals(it.nextValue(), expIt.nextValue());
     }
     assertEquals(it.hasNext(), expIt.hasNext());
@@ -140,40 +156,29 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     }
   }
 
-  public void testCreate() {
-    LongArray myArray = new LongArray();
-    myArray.addAll(0, 1, 2, 3, 4, 5, 6);
-    LongList array2 = LongArray.create(10, 11, 12, 13, 14, 15, 16);
+  public void testCompound() {
+    long[][] valuesArray = {{0, 1, 2, 3, 4, 5, 6}, {10, 11, 12, 13, 14, 15, 16}};
+    int[][] indicesToRemove = {{0, 4, 1, 5}, {2, 6, 1}, {0, 6, 1, 2}};
 
-    IntList removeIndices = LongListRemovingDecorator.prepareUnsortedIndices(0, 4, 1, 5);
-    LongListRemovingDecorator rem = createFromPrepared(myArray, removeIndices);
-    checkCollection(rem, 2, 3, 6);
-    checkRemovedIndexes(rem, 0, 1, 4, 5);
-    assertEquals(4, rem.getRemoveCount());
-    rem = createFromPrepared(array2, removeIndices);
-    checkCollection(rem, 12, 13, 16);
-    checkRemovedIndexes(rem, 0, 1, 4, 5);
-    assertEquals(4, rem.getRemoveCount());
+    for (long[] values : valuesArray) {
+      LongArray array = LongArray.create(values);
+      for (int[] indices : indicesToRemove) {
+        IntArray removedIndices = LongListRemovingDecorator.prepareUnsortedIndices(indices);
+        LongListRemovingDecorator rem = createFromPrepared(array, removedIndices);
 
-    removeIndices = LongListRemovingDecorator.prepareUnsortedIndices(2, 6, 1);
-    rem = createFromPrepared(myArray, removeIndices);
-    checkCollection(rem, 0, 3, 4, 5);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-    rem = createFromPrepared(array2, removeIndices);
-    checkCollection(rem, 10, 13, 14, 15);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
+        LongArray expected = LongArray.copy(values);
+        for (int idx : indices) {
+          expected.set(idx, -1);
+        }
+        expected.removeAll(-1);
+        CHECK.order(expected, rem);
 
-    removeIndices = LongListRemovingDecorator.prepareUnsortedIndices(2, 6, 1, 2);
-    rem = createFromPrepared(myArray, removeIndices);
-    checkCollection(rem, 0, 3, 4, 5);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
-    rem = createFromPrepared(array2, removeIndices);
-    checkCollection(rem, 10, 13, 14, 15);
-    checkRemovedIndexes(rem, 1, 2, 6);
-    assertEquals(3, rem.getRemoveCount());
+        removedIndices = IntArray.copy(indices);
+        removedIndices.sort();
+        checkRemovedIndexes(rem, removedIndices.extractHostArray());
+        assertEquals(indices.length, rem.getRemoveCount());
+      }
+    }
   }
 
   public void testSimple() {

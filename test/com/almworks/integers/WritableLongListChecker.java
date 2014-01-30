@@ -71,7 +71,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
       values.addAll(expected.get(i) - 1, expected.get(i), expected.get(i) + 1);
     }
     for (WritableLongList list:
-        createWritableLongListVariants(expected.toNativeArray())) {
+      createWritableLongListVariants(expected.toNativeArray())) {
       for (int i = 0; i < values.size(); i++) {
         long value = values.get(i);
         switch (i % 3) {
@@ -105,7 +105,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
 
   public void testIndexOf() {
     for (WritableLongList list: createWritableLongListVariants(
-        new LongArray(LongProgression.arithmetic(99, 100, -1)).extractHostArray())) {
+      new LongArray(LongProgression.arithmetic(99, 100, -1)).extractHostArray())) {
       for (int i = 0; i < 100; i++) {
         assertEquals(99 - i, list.indexOf(i));
       }
@@ -115,9 +115,9 @@ public abstract class WritableLongListChecker extends LongListChecker {
   public void testSort() {
     int arrayLength = 200, maxValue = arrayLength * 2;
     for (int attempt = 0; attempt < 10; attempt++) {
-      long[] res = generateRandomLongArray( arrayLength, IntegersFixture.SortedStatus.UNORDERED, maxValue).extractHostArray();
+      long[] res = generateRandomLongArray(arrayLength, IntegersFixture.SortedStatus.UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
-          createWritableLongListVariants(res)) {
+        createWritableLongListVariants(res)) {
 
         list.sort();
         long[] expectedNative = Arrays.copyOf(res, res.length);
@@ -131,9 +131,9 @@ public abstract class WritableLongListChecker extends LongListChecker {
   public void testSortUnique() {
     int arrayLength = 200, maxValue = arrayLength * 2;
     for (int attempt = 0; attempt < 10; attempt++) {
-      long[] res = generateRandomLongArray( arrayLength, IntegersFixture.SortedStatus.UNORDERED, maxValue).extractHostArray();
+      long[] res = generateRandomLongArray(arrayLength, IntegersFixture.SortedStatus.UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
-          createWritableLongListVariants(res)) {
+        createWritableLongListVariants(res)) {
 
         list.sortUnique();
         long[] expectedNative = Arrays.copyOf(res, res.length);
@@ -147,7 +147,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
 
   public void testRemove() {
     for (WritableLongList list:
-        createWritableLongListVariants(ap(1, 1, 10))) {
+      createWritableLongListVariants(ap(1, 1, 10))) {
       checkCollection(list, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
       list.remove(5);
       checkCollection(list, 1, 2, 3, 4, 6, 7, 8, 9, 10);
@@ -187,7 +187,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
 
   public void testSet() {
     for (WritableLongList list:
-        createWritableLongListVariants(0, 1, 2, -1, 1, 3)) {
+      createWritableLongListVariants(0, 1, 2, -1, 1, 3)) {
 
       list.set(0, 10);
       list.setAll(3, LongArray.create(5, 31, 36, 100), 1, 2);
@@ -551,7 +551,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
 
     // have to use toNativeArray() instead of extractHostArray(), because of in the myArray may be duplicates
     for (WritableLongList list:
-        createWritableLongListVariants(generateRandomLongArray( 20, IntegersFixture.SortedStatus.SORTED_UNIQUE, 200).toNativeArray())) {
+      createWritableLongListVariants(generateRandomLongArray(20, IntegersFixture.SortedStatus.SORTED_UNIQUE, 200).toNativeArray())) {
       list.reverse();
       for (int i = 1; i < list.size(); i++) {
         assertFalse(list.get(i - 1) <= list.get(i));
@@ -560,32 +560,35 @@ public abstract class WritableLongListChecker extends LongListChecker {
   }
 
   public void testRemoveAll2() {
-    for (WritableLongList list: empty()) {
-
       long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
       long[][] tests = {{MIN, MIN, 0, 0, MAX, MAX},
-          {-10, -5, 0, 0, 5, 10},
-          {MIN, MIN, MIN},
-          {0, 0, 0},
-          {MAX, MAX, MAX}};
+        {-10, -5, 0, 0, 5, 10},
+        {MIN, MIN, MIN},
+        {0, 0, 0},
+        {MAX, MAX, MAX},
+        {0, 0, 10, 10, -5, -5, MAX, MIN}};
       long[] values = {MIN, -10, -5, 0, 5, 10, 0, MAX};
-      LongArray actual, expected;
+      LongArray expected;
       for (long[] test: tests) {
-        for (long value: values) {
-          actual = LongArray.copy(test);
-          actual.removeAllSorted(value);
-          expected = LongArray.create(test);
-          expected.removeAll(value);
-          CHECK.order(expected, actual);
+        for (long valueToRemove: values) {
+          for (WritableLongList list : createWritableLongListVariants(test)) {
+            list.removeAll(valueToRemove);
+            expected = new LongArray();
+            for (long val : test) {
+              if (val != valueToRemove) {
+                expected.add(val);
+              }
+            }
+            CHECK.order(expected, list);
         }
-      }
     }
+  }
   }
 
   public void testExpandException() {
     for (int size = 0; size < 5; size++) {
       for (WritableLongList list: createWritableLongListVariants(
-          LongCollections.repeat(10, size).toNativeArray())) {
+        LongCollections.repeat(10, size).toNativeArray())) {
         try {
           list.expand(list.size() + 1, 0);
           fail();
@@ -639,9 +642,9 @@ public abstract class WritableLongListChecker extends LongListChecker {
     int arrayLength = 200, maxValue = Integer.MAX_VALUE;
     int maxExpandCount = 10, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
-      long[] elements = generateRandomLongArray( arrayLength, IntegersFixture.SortedStatus.UNORDERED, maxValue).extractHostArray();
+      long[] elements = generateRandomLongArray(arrayLength, IntegersFixture.SortedStatus.UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
-          createWritableLongListVariants(elements)) {
+        createWritableLongListVariants(elements)) {
         int index = RAND.nextInt(elements.length);
         checkExpand(elements, index, RAND.nextInt(maxExpandCount), list);
       }
@@ -668,7 +671,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
     int arraySize = 100;
     for (int attempt = 0; attempt < 10; attempt++) {
       for (WritableLongList list: empty()) {
-        LongArray values = generateRandomLongArray( arraySize, IntegersFixture.SortedStatus.UNORDERED);
+        LongArray values = generateRandomLongArray(arraySize, IntegersFixture.SortedStatus.UNORDERED);
         long[] nativeArray = new long[arraySize * 2];
         values.toNativeArray(0, nativeArray, 0, arraySize);
         values.toNativeArray(0, nativeArray, arraySize, arraySize);
@@ -683,7 +686,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
   public void testUpdate() {
     int size = 100, maxVal = Integer.MAX_VALUE;
     for (int attempt = 0; attempt < 10; attempt++) {
-      long[] array = generateRandomLongArray( size, IntegersFixture.SortedStatus.UNORDERED, maxVal).extractHostArray();
+      long[] array = generateRandomLongArray(size, IntegersFixture.SortedStatus.UNORDERED, maxVal).extractHostArray();
       for (WritableLongList list: createWritableLongListVariants(array)) {
         long[] values = Arrays.copyOf(array, array.length);
         if (!(list instanceof AbstractWritableLongList)) return;
@@ -708,7 +711,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
   public void testRemoveLast() {
     int size = 10, maxVal = Integer.MAX_VALUE;
     for (int attempt = 0; attempt < 10; attempt++) {
-      LongArray expected = generateRandomLongArray( size, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+      LongArray expected = generateRandomLongArray(size, IntegersFixture.SortedStatus.UNORDERED, maxVal);
       long[] array = new long[expected.size() + 1];
       expected.toNativeArray(0, array, 0, expected.size());
       for (WritableLongList list: createWritableLongListVariants(array)) {
@@ -757,8 +760,8 @@ public abstract class WritableLongListChecker extends LongListChecker {
   public void testSetRangeSimple() {
     for (WritableLongList list : empty()) {
       list.insertMultiple(0, 2, 2);
-    list.setRange(0, 2, Integer.MIN_VALUE);
-    CHECK.order(list, Integer.MIN_VALUE, Integer.MIN_VALUE);
-  }
+      list.setRange(0, 2, Integer.MIN_VALUE);
+      CHECK.order(list, Integer.MIN_VALUE, Integer.MIN_VALUE);
+    }
   }
 }

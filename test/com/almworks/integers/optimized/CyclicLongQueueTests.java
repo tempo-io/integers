@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.*;
+
 public class CyclicLongQueueTests extends LongListChecker {
   private CyclicLongQueue myArray = new CyclicLongQueue(5);
 
@@ -23,7 +25,7 @@ public class CyclicLongQueueTests extends LongListChecker {
     res.add(queue);
 
     int count = values.length / 2;
-    LongArray randomArray = generateRandomLongArray( count, IntegersFixture.SortedStatus.UNORDERED);
+    LongArray randomArray = generateRandomLongArray(count, UNORDERED);
 
     queue = new CyclicLongQueue(values.length);
     queue.addAll(randomArray);
@@ -38,6 +40,21 @@ public class CyclicLongQueueTests extends LongListChecker {
     res.add(queue);
 
     return res;
+  }
+
+  public void checkRemoveAndCatchISE(CyclicLongQueue queue, int count) {
+    try {
+      if (count == -2) {
+        queue.clear();
+      } else if (count == -1) {
+        queue.removeFirst();
+      } else {
+        queue.removeFirst(count);
+      }
+      fail("should have thrown ISE, state: " + queue);
+    } catch (IllegalStateException _) {
+      // ok
+    }
   }
 
   public void testGrow() {
@@ -92,7 +109,7 @@ public class CyclicLongQueueTests extends LongListChecker {
     assertEquals(0, myArray.size());
   }
 
-  public void testRandom() {
+  public void testRandomAddRemove() {
     for (int rtest = 0; rtest < 100; ++rtest) {
       String msg = "rtest #" + rtest;
       myArray.clear();
@@ -114,11 +131,6 @@ public class CyclicLongQueueTests extends LongListChecker {
   }
 
   public void testPinnedIterator() {
-    try {
-      CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
-      fail();
-    } catch (NoSuchElementException _) {}
-
     myArray.addAll(10, 11, 12, 13);
     CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
 
@@ -129,10 +141,8 @@ public class CyclicLongQueueTests extends LongListChecker {
     myArray.removeFirst();
     assertEquals(11, it.value());
 
-    try {
-      myArray.removeFirst();
-      fail("should have thrown ISE, state: " + myArray);
-    } catch (IllegalStateException expected) {}
+    checkRemoveAndCatchISE(myArray, -1);
+
     assertEquals(11, it.value());
     assertEquals(11, myArray.get(0));
     assertEquals(11, myArray.peek());
@@ -156,10 +166,7 @@ public class CyclicLongQueueTests extends LongListChecker {
     assertFalse(it.hasNext());
     assertEquals(15, it.value());
 
-    try {
-      assertEquals(2, myArray.removeFirst(2));
-      fail("should have thrown ISE, state: " + myArray);
-    } catch (IllegalStateException expected) {}
+    checkRemoveAndCatchISE(myArray, 2);
 
     assertFalse(it.hasNext());
     assertEquals(15, it.value());
@@ -182,17 +189,16 @@ public class CyclicLongQueueTests extends LongListChecker {
   public void testAttachDetach() {
     myArray.add(10);
     CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
-    try {
-      myArray.removeFirst();
-      fail("should have thrown ISE, state: " + myArray);
-    } catch (IllegalStateException expected) {}
+
+    checkRemoveAndCatchISE(myArray, -1);
+
     assertEquals(10, it.nextValue());
 
     it.detach();
 
     myArray.removeFirst();
     assertEquals(10, it.value());
-    myArray.addAll(11, 12, 13, 14, 15);
+    myArray.addAll(LongArray.create(11, 12, 13, 14, 15).iterator());
     CHECK.order(myArray, 11, 12, 13, 14, 15);
     myArray.removeFirst();
     myArray.add(16);
@@ -204,14 +210,9 @@ public class CyclicLongQueueTests extends LongListChecker {
     assertEquals(16, it.value());
     assertFalse(it.hasNext());
 
-    try {
-      myArray.clear();
-      fail("should have thrown ISE, state: " + myArray);
-    } catch (IllegalStateException expected) {}
-    try {
-      myArray.removeFirst(5);
-      fail("should have thrown ISE, state: " + myArray);
-    } catch (IllegalStateException expected) {}
+    checkRemoveAndCatchISE(myArray, -2);
+    checkRemoveAndCatchISE(myArray, 5);
+
     myArray.removeFirst(4);
     myArray.add(17);
     assertTrue(it.hasNext());
@@ -237,7 +238,7 @@ public class CyclicLongQueueTests extends LongListChecker {
     assertEquals("(12*, 13, 14*, 15, 16)", clq.toStringWithPiterators());
 
     clq.addAll(LongProgression.arithmetic(17, 10, 1));
-    i3.next().next().next().next().next();
+    for (int i = 0; i < 5; i++) i3.next();
     assertEquals("[15] (12*, 13, 14, 15, 16, ..., 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators());
 
     CyclicLongQueue.PinnedIterator i4 = clq.pinnedIterator();
@@ -259,6 +260,61 @@ public class CyclicLongQueueTests extends LongListChecker {
     clq.removeFirst(5);
     clq.addAll(11, 12, 13);
     clq.pinnedIterator(8);
-    assertEquals("(5*, 6, 7, 8, 9, 10, 11*, 12, 13)", clq.toStringWithPiterators());
+    assertEquals(5, clq.peek());
+    assertEquals("(5*, 6, 7, 8, 9, 10, 11, 12, 13*)", clq.toStringWithPiterators());
   }
+
+  public void testPiteratorIndex() {
+    myArray.addAll(LongIterators.range(15));
+    CHECK.order(LongProgression.range(15), myArray);
+
+    CyclicLongQueue.PinnedIterator it = myArray.pinnedIterator();
+    try {
+      it.index();
+      fail();
+    } catch (NoSuchElementException _) {
+      // ok
+    }
+    for (int i = 0; i < 10; i++) {
+      it.next();
+      assertEquals(i, it.index());
+    }
+    myArray.addAll(15, 16, 17);
+    assertEquals(9, it.index());
+
+    for (int i = 1; i < 10; i++) {
+      myArray.removeFirst();
+      assertEquals(9 - i, it.index());
+    }
+  }
+
+  public void test() {
+    int mSize = 16;
+    for (int startIdx = 0; startIdx < mSize; startIdx++) {
+      for (int pinnedIdx = 0; pinnedIdx < mSize; pinnedIdx++) {
+        CyclicLongQueue queue = new CyclicLongQueue();
+        queue.addAll(LongCollections.repeat(-1, startIdx));
+        queue.removeFirst(startIdx);
+        queue.addAll(LongProgression.range(mSize));
+
+        CyclicLongQueue.PinnedIterator it = queue.pinnedIterator(pinnedIdx);
+        try {
+          queue.removeFirst(pinnedIdx + 1);
+          fail();
+        } catch (IllegalStateException _) {
+          // ok
+        }
+        it.next();
+
+        assertEquals(pinnedIdx + 1, it.index());
+        queue.addAll(1, 2, 3);
+        assertEquals(pinnedIdx + 1, it.index());
+        if (pinnedIdx != 0) {
+          queue.removeFirst();
+          assertEquals(pinnedIdx, it.index());
+        }
+      }
+    }
+  }
+
 }

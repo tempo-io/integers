@@ -91,10 +91,14 @@ public class ParallelLongListTests extends TestCase {
     it.set(0, 1, 3);
     checkStorage(0, 1, 2, 3);
 
+    it.set(-1, 0, -10);
+    it.set(-1, 1, -5);
+    checkStorage(-10, -5, 2, 3);
+
     it = myList.iterator(1);
     it.next(null);
     it.set(0, 0, 20);
-    checkStorage(0, 1, 20, 3);
+    checkStorage(-10, -5, 20, 3);
   }
 
   public void testGet() {
@@ -247,6 +251,8 @@ public class ParallelLongListTests extends TestCase {
     try {
       it.next(vals);
       fail();
-    } catch (NoSuchElementException ex) {}
+    } catch (NoSuchElementException ex) {
+      // ok
+    }
   }
 }

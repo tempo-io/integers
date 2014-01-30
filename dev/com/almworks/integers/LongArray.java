@@ -357,58 +357,35 @@ public final class LongArray extends AbstractWritableLongList {
     updateSize(insertionPoint);
   }
 
-  public boolean equalSortedValues(LongList collection) {
-    assert isUniqueSorted();
-    if (size() != collection.size())
-      return false;
-    LongIterator ownIt = iterator();
-    long prevOther = Long.MIN_VALUE;
-    for (LongIterator it : collection) {
-      long own = ownIt.nextValue();
-      long other = it.value();
-      if (other <= prevOther) {
-        assert false : collection; // Not sorted
-        return false;
-      }
-      if (own != other)
-        return false;
-      prevOther = other;
-    }
-    return true;
-  }
-
   /**
    * Adds first maxCount elements from collection or the whole collection if it size is less than maxCount.
-   * @param collection
-   * @param maxCount
    * @return number of added elements
    */
-  public int addAllNotMore(LongArray collection, int maxCount) {
+  public int addAllNotMore(LongList collection, int maxCount) {
     int toAdd = Math.min(maxCount, collection.size());
-    ensureCapacity(size() + toAdd);
-    System.arraycopy(collection.myArray, 0, myArray, size(), toAdd);
-    updateSize(size() + toAdd);
+    addAll(collection.subList(0, toAdd));
     return toAdd;
   }
 
   /**
-   * Adds elements from iterator until maxCount elements are added or iterator reaches its end.
-   * @param iterator
-   * @param maxCount
+   * Adds elements from iterable until maxCount elements are added or iterable reaches its end.
    * @return number of added elements
    */
-  public int addAllNotMore(LongIterator iterator, int maxCount) {
+  public int addAllNotMore(LongIterable iterable, int maxCount) {
     int counter = 0;
-    while (iterator.hasNext() && counter < maxCount) {
-      add(iterator.nextValue());
+    LongIterator it = iterable.iterator();
+    while (it.hasNext() && counter < maxCount) {
+      add(it.nextValue());
       counter++;
     }
     return counter;
   }
 
   /**
-   * Removes {@code value} from this sorted list, if this list contains {@code value}.
+   * Removes 1 times {@code value} from this sorted list, if this list contains {@code value}.
+   * <br>Example: ar = [0, 1, 1, 2]; ar.removeSorted(1) -> [0, 1, 2]
    * @return {@code true} if this set contained {@code value}. Otherwise {@code false}.
+   * @see #removeAllSorted(long)
    */
   public boolean removeSorted(long value) {
     assert isSorted();
@@ -419,7 +396,9 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Removes from the specified list all elements whose index is contained in the specified {@code IntList indexes}
+   * Removes from the this list all elements whose index is contained in the specified {@code IntList indexes}
+   * <br>This method is more effective than {@link LongCollections#removeAllAtSorted(WritableLongList, IntList)}
+   * due to the usage System.arraycopy
    * @param indices sorted {@code IntIterator}
    * @see com.almworks.integers.LongCollections#removeAllAtSorted(WritableLongList, IntList)
    */

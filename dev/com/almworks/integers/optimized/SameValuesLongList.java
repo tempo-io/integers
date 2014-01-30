@@ -75,6 +75,14 @@ public class SameValuesLongList extends AbstractWritableLongList {
     return list;
   }
 
+  /**
+   * @return SameValuesLongList containing the specified values
+   * @see #create(com.almworks.integers.util.LongSizedIterable, com.almworks.integers.IntIterable)
+   */
+  public static SameValuesLongList create(LongSizedIterable values) throws IllegalArgumentException {
+    return create(values, IntCollections.repeat(1, values.size()));
+  }
+
   public void init(LongSizedIterable values, IntIterable counts) throws IllegalArgumentException {
     assert size() == 0;
 
@@ -99,10 +107,6 @@ public class SameValuesLongList extends AbstractWritableLongList {
     m.commit();
     updateSize(pos);
     assert !IntegersDebug.CHECK || checkInvariants();
-  }
-
-  public static SameValuesLongList create(LongArray values) throws IllegalArgumentException {
-    return create(values, IntCollections.repeat(1, values.size()));
   }
 
   public long get(int index) {
@@ -188,18 +192,23 @@ public class SameValuesLongList extends AbstractWritableLongList {
       throw new IllegalArgumentException();
     }
     int size = size();
-    if (index < 0 || index > size)
+    if (index < 0 || index > size) {
       throw new IndexOutOfBoundsException(index + " " + this);
+    }
     if (count == 0) {
       return;
     }
-    int ki = myMap.findKey(index);
-    // will shift all rightward indexes by +count
-    int shiftFrom = ki >= 0 ? ki + 1 : -ki - 1;
-    int sz = myMap.size();
-    // we have to adjust first, or insert will fail because keys will conflict
-    if (shiftFrom < sz) {
-      myMap.adjustKeys(shiftFrom, sz, count);
+    if (size == 0) {
+      myMap.add(0, 0);
+    } else {
+      int ki = myMap.findKey(index);
+      // will shift all rightward indexes by +count
+      int shiftFrom = ki >= 0 ? ki + 1 : -ki - 1;
+      int sz = myMap.size();
+      // we have to adjust first, or insert will fail because keys will conflict
+      if (shiftFrom < sz) {
+        myMap.adjustKeys(shiftFrom, sz, count);
+      }
     }
     updateSize(size + count);
     assert !IntegersDebug.CHECK || checkInvariants();
@@ -353,6 +362,34 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
     updateSize(size - count);
     assert !IntegersDebug.CHECK || checkInvariants();
+  }
+
+  @Override
+  public boolean removeAll(long value) {
+    boolean modified = false;
+    int removed = 0;
+
+    int lastIdx = myMap.size() - 1;
+    if (myMap.getValueAt(lastIdx) == value) {
+      removed += size() - myMap.getKeyAt(lastIdx);
+      myMap.removeAt(lastIdx);
+    }
+
+    for (int idx = 0; idx < myMap.size() - 1; ) {
+      if (myMap.getValueAt(idx) == value) {
+        modified = true;
+        int count = myMap.getKeyAt(idx + 1) - myMap.getKeyAt(idx);
+        removed += count;
+        myMap.removeAt(idx);
+        myMap.adjustKeys(idx, myMap.size(), -count);
+      } else {
+        idx++;
+      }
+    }
+
+    updateSize(size() - removed);
+    assert !IntegersDebug.CHECK || checkInvariants();
+    return modified;
   }
 
   @NotNull

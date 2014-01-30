@@ -1,6 +1,7 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
+import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +11,7 @@ import static com.almworks.integers.IntCollections.range;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class CyclicLongQueue extends AbstractLongList {
+public class CyclicLongQueue extends AbstractLongList implements LongCollector {
   private long[] myHostArray;
   private int myL;
   private int myR;
@@ -97,13 +98,31 @@ public class CyclicLongQueue extends AbstractLongList {
 
   public void addAll(long... xs) {
     if (xs == null) return;
-    addAll(new LongArray(xs));
+    ensureCapacity(size() + xs.length);
+    addAll0(new LongArrayIterator(xs));
   }
 
   public void addAll(LongList xs) {
     if (xs == null) return;
     ensureCapacity(size() + xs.size());
-    for (LongIterator x: xs) {
+    addAll0(xs);
+  }
+
+  @Override
+  public void addAll(LongIterable iterable) {
+    if (iterable == null) return;
+    if (iterable instanceof LongSizedIterable) {
+      ensureCapacity(size() + ((LongSizedIterable) iterable).size());
+      addAll0(iterable);
+    } else {
+      for (LongIterator it : iterable) {
+        add(it.value());
+      }
+    }
+  }
+
+  private void addAll0(LongIterable iterable) {
+    for (LongIterator x : iterable) {
       myHostArray[myR] = x.value();
       myR = normalizeOver(myR + 1);
     }
@@ -258,7 +277,8 @@ public class CyclicLongQueue extends AbstractLongList {
     }
 
     /** Current index of the iterator's position. */
-    public int index() {
+    public int index() throws NoSuchElementException {
+      if (!hasValue()) throw new NoSuchElementException();
       return myHostIdx >= myL ? myHostIdx - myL : myHostIdx + (myHostArray.length - myL + 1);
     }
 
@@ -291,8 +311,7 @@ public class CyclicLongQueue extends AbstractLongList {
     public StringBuilder build() {
       if (myIterators != null) {
         for (PinnedIterator pi : myIterators) {
-          int idx = pi.myHostIdx;
-          myPiPos.add(idx + myL * (myL <= idx ? -1 : 1));
+          myPiPos.add(normalizeUnder(pi.myHostIdx - myL));
         }
         myPiPos.sortUnique();
       }

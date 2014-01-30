@@ -16,6 +16,7 @@
 
 package com.almworks.integers;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.util.TestUtil.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
@@ -56,10 +57,8 @@ public class BinarySearchChecker {
     check(bs, LongArray.create());
 
     int arrLength = 100;
-    int[] maxVal = {50, 100, 110, 150, 200, 250, 300, 350};
-    LongArray array;
-    for (int i = 0; i < 10; i++) {
-      array = IntegersFixture.generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+    for (IntIterator it : IntIterators.range(50, 400, 50)) {
+      LongArray array = IntegersFixture.generateRandomLongArray(arrLength, UNORDERED, it.value());
       array.sort();
       check(bs, array);
     }

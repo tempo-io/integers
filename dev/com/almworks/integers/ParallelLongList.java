@@ -82,8 +82,8 @@ public class ParallelLongList {
     myStorage.insertAll(offset * getListCount(), new LongArray(values));
   }
 
-  public Iterator iterator(int offset) {
-    return new Iterator(myStorage.iterator(offset * getListCount()));
+  public Iterator iterator(int from) {
+    return new Iterator(myStorage.iterator(from * getListCount()));
   }
 
   public Iterator iterator(int from, int to) {
@@ -150,7 +150,7 @@ public class ParallelLongList {
     }
 
     public void set(int offset, int list, long value) {
-      assert offset < getListCount();
+      assert 0 <= list && list < getListCount();
       myIt.set(getListCount() * (offset - 1) + list + 1, value);
     }
 

@@ -17,14 +17,14 @@
 package com.almworks.integers;
 
 import com.almworks.integers.util.IntegersDebug;
-
-import java.util.Iterator;
+import com.almworks.integers.util.LongMinusIterator;
 
 import static com.almworks.integers.IntegersFixture.RAND;
-import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.IntegersFixture.generateRandomLongArray;
 import static com.almworks.integers.LongArray.create;
+import static com.almworks.integers.LongCollections.collectIterables;
 
 /**
  * add {@code -Dcom.almworks.integers.print=true} in VM options to print more information
@@ -40,22 +40,22 @@ public class SetOperationsChecker {
 
   private SetCreator creator;
   private SetCreator expected;
-  private boolean sortUniqueStatus = true;
+  private SortedStatus[] sortedStatuses;
   // indicate that set creator can take only 2 arrays
   private boolean myTwoArrays = true;
 
   /**
+   *
    * @param intersectionLength the number of common values for all arrays
    * @param arraysNumber number of arrays
    * @param maxArrayLength max random length for every array
-   * @param isSortUnique
    * @param minMaxValues the min and max values for arrays. There is 4 possible values for minMaxValues.length
    *                 <ul><li>0 - for all arrays values {@code min = 0, max = MAX}
    *                     <li>1 - for all arrays values {@code min = 0, max = minMaxValues[0]}
    *                     <li>2 - for all arrays values {@code min = minMaxValues[0], max = minMaxValues[1]}
    *                     <li>arraysNumber * 2 - min and max are contained in minMaxValues and different for all arrays
    *                     @return LongArray[arraysNumber]   */
-  public static LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, boolean isSortUnique, int... minMaxValues) {
+  public LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, int... minMaxValues) {
     final int mLen = minMaxValues.length;
     assert mLen == 0 || mLen == 1 || mLen == 2 || mLen == arraysNumber * 2 : mLen;
     int[] mValues = new int[arraysNumber * 2];
@@ -74,15 +74,15 @@ public class SetOperationsChecker {
         mValues[i + 1] = max;
       }
     }
-    LongArray intersection = generateRandomLongArray(intersectionLength, isSortUnique ? SORTED_UNIQUE : UNORDERED);
+    LongArray intersection = generateRandomLongArray(intersectionLength, UNORDERED);
     LongArray[] arrays = new LongArray[arraysNumber];
     for (int i = 0; i < arraysNumber; i++) {
-      arrays[i] = generateRandomLongArray( RAND.nextInt(maxArrayLength), UNORDERED, mValues[i * 2], mValues[i * 2 + 1]);
+      arrays[i] = generateRandomLongArray(RAND.nextInt(maxArrayLength), UNORDERED, mValues[i * 2], mValues[i * 2 + 1]);
       arrays[i].addAll(intersection);
-      if (isSortUnique) {
-        arrays[i].sortUnique();
-      } else {
+      if (getCurrentStatus(i) == UNORDERED) {
         arrays[i].shuffle(RAND);
+      } else {
+        getCurrentStatus(i).action(arrays[i]);
       }
     }
     return arrays;
@@ -90,18 +90,30 @@ public class SetOperationsChecker {
 
   private void checkNewSetCreator(LongArray... arrays) {
     CHECK.order(creator.get(arrays).iterator(), expected.get(arrays).iterator());
-    if (arrays.length == 2) {
+    if (arrays.length == 2 && getCurrentStatus(0) == getCurrentStatus(1)) {
       CHECK.order(creator.get(arrays[1], arrays[0]).iterator(), expected.get(arrays[1], arrays[0]).iterator());
     }
   }
 
-  public void check(SetCreator creator, SetCreator expected, boolean sortUniqueStatus, boolean onlyTwo) {
+  public void check(SetCreator creator, SetCreator expected, boolean onlyTwo, SortedStatus... statuses) {
     this.creator = creator;
     this.expected = expected;
-    this.sortUniqueStatus = sortUniqueStatus;
+    assert statuses.length == 1 || statuses.length == 2;
+    sortedStatuses = statuses;
     this.myTwoArrays = onlyTwo;
     testSetOperations();
   }
+
+  public SortedStatus getCurrentStatus(int num) {
+    if (sortedStatuses.length == 1) {
+      return sortedStatuses[0];
+    } else {
+      if (num < 0 || num > 1) throw new IllegalArgumentException();
+      return sortedStatuses[num];
+    }
+  }
+
+
 
   private void testSetOperations() {
     LongArray someValues = LongArray.create(MIN, MIN + 1, 0, 1, 3, 5, MAX - 1, MAX);
@@ -109,12 +121,12 @@ public class SetOperationsChecker {
     for (LongArray first : LongCollections.allSubLists(someValues)) {
       for (LongArray second : LongCollections.allSubLists(someValues)) {
         IntegersDebug.println(LongCollections.toBoundedString(first) +
-            " " + LongCollections.toBoundedString(second));
+          " " + LongCollections.toBoundedString(second));
         checkNewSetCreator(first, second);
       }
     }
     checkNewSetCreator(create(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24),
-        create(3, 6, 9, 12, 15, 18, 21, 24));
+      create(3, 6, 9, 12, 15, 18, 21, 24));
     checkNewSetCreator(a(MIN), a(MIN + 1));
     checkNewSetCreator(a(MAX), a(MAX - 1));
     checkNewSetCreator(a(0, 2, 4, 10), a(1, 3, 5, 10));
@@ -125,20 +137,22 @@ public class SetOperationsChecker {
       checkNewSetCreator(a(0, 10, 20), a(1, 11, 20), a(2, 12, 20));
     }
 
-    if (!sortUniqueStatus) {
+    if (getCurrentStatus(0) == UNORDERED && getCurrentStatus(1) == UNORDERED) {
       checkNewSetCreator(a(10, 5, 1), a(2, 4, 6, 4));
       checkNewSetCreator(a(5, 10, 15), a(10, 9, 8));
       checkNewSetCreator(a(1, 2, 3), a(3, 2, 1));
+      checkNewSetCreator(a(5, 10, -10, 4, 15), a(4, 1, 7, 5, 9, -1));
+      checkNewSetCreator(a(3, -3, 6, -6, 9, -9), a(2, -2, 4, -4, 6, -6));
     }
 
     if (myTwoArrays) {
       int[][] sizes = {{1, 100}, {10, 1000}, {100, 100}, {50, 100}, {90, 100},
-          {100, 110}, {100, 10000}, {1000, 10000}};
+        {100, 110}, {100, 10000}, {1000, 10000}};
       for (int attempt = 0; attempt < 10; attempt++) {
         for (int[] size: sizes) {
           checkNewSetCreator(
-              generateRandomLongArray(size[0], sortUniqueStatus ? SORTED_UNIQUE : UNORDERED),
-              generateRandomLongArray(size[1], sortUniqueStatus ? SORTED_UNIQUE : UNORDERED));
+            generateRandomLongArray(size[0], getCurrentStatus(0), size[0] * 5),
+            generateRandomLongArray(size[1], getCurrentStatus(1), size[1] * 5));
         }
       }
     }
@@ -154,8 +168,15 @@ public class SetOperationsChecker {
       // empty intersection
       testRandom(0, 2, 100, 0, 1000, 1100, 2000);
       testRandom(0, 2, 1000, 0, MAX / 2, MAX / 2 + 1, MAX);
-      LongArray first = generateRandomLongArray( 1000, SORTED_UNIQUE);
-      LongList complement = LongCollections.complementSorted(generateRandomLongArray( 1000, SORTED_UNIQUE), first);
+
+      LongArray first = generateRandomLongArray(1000, SortedStatus.SORTED_UNIQUE);
+      LongArray complement = collectIterables(LongMinusIterator.create(generateRandomLongArray(1000, SortedStatus.SORTED_UNIQUE), first));
+      if (getCurrentStatus(0) == UNORDERED) {
+        first.shuffle(RAND);
+      }
+      if (getCurrentStatus(1) == UNORDERED) {
+        complement.shuffle(RAND);
+      }
       checkNewSetCreator(first, new LongArray(complement));
     }
     if (!myTwoArrays) {
@@ -172,7 +193,7 @@ public class SetOperationsChecker {
   }
 
   private void testRandom(int intersectionLength, int arraysNumber, int maxArrayLength, int... minMaxValues) {
-    LongArray[] arrays = generateRandomArrays(intersectionLength, arraysNumber, maxArrayLength, sortUniqueStatus, minMaxValues);
+    LongArray[] arrays = generateRandomArrays(intersectionLength, arraysNumber, maxArrayLength, minMaxValues);
     checkNewSetCreator(arrays);
   }
 

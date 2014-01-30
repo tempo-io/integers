@@ -86,7 +86,7 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker {
     int arrLength = 100;
     int indexesLength = 50;
     int maxValue = 1000;
-    LongList base = generateRandomLongArray( arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
+    LongList base = generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
 
     for (int test = 0; test < 20; test++) {
       IntArray indexes = generateRandomIntArray(indexesLength, SortedStatus.SORTED_UNIQUE, arrLength);

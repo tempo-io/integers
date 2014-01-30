@@ -25,16 +25,49 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
+/**
+ * Inserting decorator for {@code LongList} that designed
+ * to accumulate insertions into a very large list and then use it as a read-only list.
+ * Accumulation should be done with {@link #insert(int, long)}
+ * <br>Also underline that the insertion index is in the new list, not the old one.
+ * The benefit is that we don't copy elements around while inserting.
+ * We expect the amount of insertions to be much smaller then the size of the list.
+ */
 public class LongListInsertingDecorator extends AbstractLongListDecorator {
   private final IntLongMap myInserted;
 
-  public LongListInsertingDecorator(LongList base, IntLongMap inserted) {
-    super(base);
-    myInserted = inserted;
-  }
-
   public LongListInsertingDecorator(LongList base) {
     this(base, new IntLongMap());
+  }
+
+  /**
+   * Creates a new decorator that decorates the specified insertions into the specified base list.
+   * {@code inserted} maps indices of insertion to the inserted values,
+   * where each index is interpreted in the list that results from inserting previous elements (with lesser indices.)
+   * Note that in most cases you'll want to use {@link #LongListInsertingDecorator(com.almworks.integers.LongList)}
+   * which constructs a decorator without any insertions and
+   * add elements through {@link #insert(int, long)}. Use this method if you have previously collected the insertions.
+   * <br>Examples:
+   * <br>decorator( [2, 8],    [(0, 0), (2, 4), (3, 6)] ) -> [0, 2, 4, 6, 8]
+   * <br>decorator( [2, 8, 9], [(2, 4)] ) -> [2, 8, 4, 9]
+   * <br>decorator( [3, 9],    [(0, 2), (3, 0)] ) -> [2, 3, 9, 0]
+   * <br>decorator( [0, 4],    [(5, 10)] ) -> IllegalArgumentException
+   * @param inserted map in which keys represent insertion points and values the inserted values
+   * @throws IllegalArgumentException if first key in {@code inserted} less than 0 or
+   * last key in more than {@code base.size() + inserted.size()}
+   */
+  public LongListInsertingDecorator(LongList base, IntLongMap inserted) throws IllegalArgumentException {
+    super(base);
+    if (inserted.size() != 0) {
+      if (inserted.getKeyAt(0) < 0) {
+        throw new IllegalArgumentException("first key in inserted < 0.");
+      }
+      int key = inserted.getKeyAt(inserted.size() - 1);
+      if (key >= base.size() + inserted.size()) {
+        throw new IllegalArgumentException("last key in inserted too big: " + key);
+      }
+    }
+    myInserted = inserted;
   }
 
   public int size() {
@@ -148,11 +181,12 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
     private void sync() {
       int curIndex = getNextIndex() - 1;
       int insertIdx = insertedBefore(curIndex);
-      int move = Math.min(curIndex - insertIdx, base().size() - 1);
-      int baseIndex = myBaseIterator.hasValue() ? myBaseIterator.index() : -1;
 
-      myBaseIterator.move(move - baseIndex);
       myInsertedIterator = myInserted.iterator(insertIdx);
+      myBaseIterator = base().iterator(curIndex - insertIdx);
+      if (myBaseIterator.hasNext()) {
+        myBaseIterator.next();
+      }
       advanceToNextInsert();
     }
 
@@ -166,19 +200,15 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       } else myCurInsert = -1;
     }
 
-    public boolean hasNext() {
-      boolean r = super.hasNext();
-      assert !r || (myCurInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
-      return r;
-    }
-
     public LongListIterator next() throws NoSuchElementException {
       if (myCurInsert >= 0 && myCurInsert == getNextIndex() - 1) {
         // if current index on inserted value
         advanceToNextInsert();
       } else {
-        if (myBaseIterator.hasNext()) {
-          myBaseIterator.next();
+        if (getNextIndex() != 0) {
+          if (myBaseIterator.hasNext()) {
+            myBaseIterator.next();
+          }
         }
       }
       super.next();

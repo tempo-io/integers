@@ -52,7 +52,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       @Override
       public long[] generateValues(int size) {
-        return generateRandomLongArray( size, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
+        return generateRandomLongArray(size, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
       }
 
       @Override
@@ -68,7 +68,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       @Override
       public long[] generateValues(int size) {
-        LongArray array = generateRandomLongArray( size, IntegersFixture.SortedStatus.UNORDERED);
+        LongArray array = generateRandomLongArray(size, IntegersFixture.SortedStatus.UNORDERED);
         array.sort();
         return array.extractHostArray();
       }
@@ -86,7 +86,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       @Override
       public long[] generateValues(int size) {
-        return generateRandomLongArray( size, IntegersFixture.SortedStatus.SORTED_UNIQUE).extractHostArray();
+        return generateRandomLongArray(size, IntegersFixture.SortedStatus.SORTED_UNIQUE).extractHostArray();
       }
 
       @Override
@@ -212,7 +212,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
   private void checkOrder(long ... values) {
     for(LongIterator it: getter.get(values)) {
       TestCase.assertFalse(it.hasValue());
-      for (int i = 0, n = values.length; i < n; i++) {
+      for (int i = 0; i < values.length; i++) {
         assertTrue(Arrays.toString(values), it.hasNext());
         it.next();
         assertEquals(Arrays.toString(values), values[i], it.value());

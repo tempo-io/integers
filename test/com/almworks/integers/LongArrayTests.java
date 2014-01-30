@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+
 public class LongArrayTests extends WritableLongListChecker {
   private LongArray array = new LongArray();
   private SetOperationsChecker setOperations = new SetOperationsChecker();
@@ -44,7 +48,7 @@ public class LongArrayTests extends WritableLongListChecker {
 
     arr = new LongArray(values.length * 2);
     arr.addAll(values);
-    arr.addAll(generateRandomLongArray(values.length, IntegersFixture.SortedStatus.UNORDERED));
+    arr.addAll(generateRandomLongArray(values.length, UNORDERED));
     arr.removeRange(values.length, values.length * 2);
     res.add(arr);
 
@@ -53,16 +57,22 @@ public class LongArrayTests extends WritableLongListChecker {
 
   public void testAddAllNotMore() {
     array.addAllNotMore(LongArray.create(3, 4, 10, 20), 2);
-    CHECK.order(array, LongArray.create(3, 4));
+    CHECK.order(LongArray.create(3, 4), array);
 
     array.addAllNotMore(LongArray.create(5, 6, 10, 20), 2);
-    CHECK.order(array, LongArray.create(3, 4, 5, 6));
+    CHECK.order(LongArray.create(3, 4, 5, 6), array);
 
     assertEquals(2, array.addAllNotMore(LongArray.create(10, 20, 30, 50, 100).iterator(), 2));
-    CHECK.order(array, LongArray.create(3, 4, 5, 6, 10, 20));
+    CHECK.order(LongArray.create(3, 4, 5, 6, 10, 20), array);
 
     assertEquals(1, array.addAllNotMore(LongArray.create(30).iterator(), 4));
-    CHECK.order(array, LongArray.create(3, 4, 5, 6, 10, 20, 30));
+    CHECK.order(LongArray.create(3, 4, 5, 6, 10, 20, 30), array);
+
+    assertEquals(7, array.addAllNotMore(array, 20));
+    CHECK.order(LongArray.create(3, 4, 5, 6, 10, 20, 30, 3, 4, 5, 6, 10, 20, 30), array);
+
+    assertEquals(0, array.addAllNotMore(LongIterator.EMPTY, 2));
+    CHECK.order(LongArray.create(3, 4, 5, 6, 10, 20, 30, 3, 4, 5, 6, 10, 20, 30), array);
   }
 
   public void testCopy() {
@@ -88,8 +98,15 @@ public class LongArrayTests extends WritableLongListChecker {
 
   public void testRemoveSorted() {
     array = LongArray.create(0, 20, 21, 30, 35, 80);
-    array.removeSorted(20);
-    CHECK.order(array, LongArray.create(0, 21, 30, 35, 80));
+    assertTrue(array.removeSorted(20));
+    CHECK.order(LongArray.create(0, 21, 30, 35, 80), array);
+
+    array.clear();
+    assertFalse(array.removeSorted(0));
+
+    array.addAll(0, 1, 1, 1, 2, 10);
+    assertTrue(array.removeSorted(1));
+    CHECK.order(array, 0, 1, 1, 2, 10);
   }
 
   public void testEnsureCapacity() {
@@ -117,7 +134,7 @@ public class LongArrayTests extends WritableLongListChecker {
     for (int i = 0; i < array.size(); i++) {
       long value = array.get(i);
       if ((isSorted && values.binarySearch(value) >= 0) ||
-          (!isSorted && values.contains(value))) {
+        (!isSorted && values.contains(value))) {
         expected.add(value);
       }
     }
@@ -134,7 +151,7 @@ public class LongArrayTests extends WritableLongListChecker {
     checkRetain(LongArray.create(Long.MIN_VALUE), LongArray.create(Long.MIN_VALUE + 1), false);
     checkRetain(LongArray.create(Long.MIN_VALUE), LongArray.create(Long.MIN_VALUE + 1), true);
     checkRetain(LongArray.create(2, 3, 5, 6, 8, 9, 10, 13, 3, 4, 5, 3),
-        LongArray.create(1, 4, 5, 6, 7, 8, 10, 15), false);
+      LongArray.create(1, 4, 5, 6, 7, 8, 10, 15), false);
     checkRetain(LongArray.create(0, 1, 2, 3, 5, 3, 2, 1, -10), LongArray.create(0, 2, -10), false);
 
     checkRetain(LongProgression.arithmetic(0, 20, 1), LongProgression.arithmetic(1, 15, 2), true);
@@ -150,25 +167,29 @@ public class LongArrayTests extends WritableLongListChecker {
         res.sortUnique();
         return res;
       }
-    }, new SetOperationsChecker.IntersectionGetter(false), false, true);
+    }, new SetOperationsChecker.IntersectionGetter(false), true, UNORDERED);
 
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray res = LongArray.copy(arrays[0]);
-        res.retain(arrays[1]);
+        res.retainSorted(arrays[1]);
+        res.sortUnique();
         return res;
       }
-    }, new SetOperationsChecker.IntersectionGetter(true), true, true);
+    }, new SetOperationsChecker.IntersectionGetter(true), true, UNORDERED, SORTED);
   }
 
   public void testRetainWithDuplicates() {
     int arraySize = 100, valuesSize = 10;
     for (int attempt = 0; attempt < 20; attempt++) {
-      LongArray array = generateRandomLongArray( arraySize, IntegersFixture.SortedStatus.UNORDERED, arraySize);
+      LongArray array = generateRandomLongArray(arraySize, UNORDERED, arraySize);
       array.sort();
-      LongArray values = generateRandomLongArray( valuesSize, IntegersFixture.SortedStatus.UNORDERED, arraySize / 2);
+      LongArray values = generateRandomLongArray(valuesSize, UNORDERED, arraySize);
+      values.addAll(values.get(IntProgression.range(0, values.size(), 2)));
+      values.shuffle(RAND);
       checkRetain(array, values, false);
+
       values.sort();
       checkRetain(array, values, true);
     }
@@ -194,7 +215,7 @@ public class LongArrayTests extends WritableLongListChecker {
         copy.mergeWithSameLength(arrays[1]);
         return copy;
       }
-    }, unionGetter, true, true);
+    }, unionGetter, true, SORTED_UNIQUE);
 
     // guaranteed launch branch with replace
     setOperations.check(new SetOperationsChecker.SetCreator() {
@@ -205,7 +226,7 @@ public class LongArrayTests extends WritableLongListChecker {
         copy.mergeWithSameLength(arrays[1]);
         return copy;
       }
-    }, unionGetter, true, true);
+    }, unionGetter, true, SORTED_UNIQUE);
   }
 
   public void testMergeWithSmall() {
@@ -217,7 +238,7 @@ public class LongArrayTests extends WritableLongListChecker {
         copy.mergeWithSmall(arrays[1]);
         return copy;
       }
-    }, unionGetter, true, true);
+    }, unionGetter, true, SORTED_UNIQUE, SORTED);
 
     // guaranteed launch branch with replace
     setOperations.check(new SetOperationsChecker.SetCreator() {
@@ -228,7 +249,7 @@ public class LongArrayTests extends WritableLongListChecker {
         copy.mergeWithSmall(arrays[1]);
         return copy;
       }
-    }, unionGetter, true, true);
+    }, unionGetter, true, SORTED_UNIQUE, SORTED);
   }
 
   public void testMerge() {
@@ -239,7 +260,7 @@ public class LongArrayTests extends WritableLongListChecker {
         copy.merge(arrays[1]);
         return copy;
       }
-    }, unionGetter, true, true);
+    }, unionGetter, true, SORTED_UNIQUE);
   }
 
   public void testRemoveAllAtSorted() {
@@ -247,8 +268,8 @@ public class LongArrayTests extends WritableLongListChecker {
     int indexesSize = 10;
     int attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
-      array = generateRandomLongArray( arSize, IntegersFixture.SortedStatus.UNORDERED);
-      IntArray indexes = generateRandomIntArray(indexesSize, SortedStatus.SORTED_UNIQUE, array.size());
+      array = generateRandomLongArray(arSize, UNORDERED);
+      IntArray indexes = generateRandomIntArray(indexesSize, SORTED_UNIQUE, array.size());
       if (attempt % 2 == 0) {
         indexes.add(indexes.get(indexes.size() / 2) + 1);
         indexes.sortUnique();
@@ -282,5 +303,34 @@ public class LongArrayTests extends WritableLongListChecker {
     it.move(0);
     System.out.println(it.nextValue());
     System.out.println(it.index());
+
+    System.out.println(Arrays.toString(interval(5, -5)));
+  }
+
+  public void test2() {
+    LongArray a = LongArray.create(0, 1, 1, 1, 2);
+    a.removeSorted(1);
+    System.out.println(a);
+  }
+
+  public void test3() {
+    for (int i = 0; i < 20; i++) {
+      LongArray a = LongArray.create(1, 2, 1);
+      LongArray sortAlso = LongArray.create(3, 2, 1);
+      a.sort(sortAlso);
+      System.out.println(sortAlso);
+    }
+
+  }
+
+  public void test4() {
+    for (int i = 0; i < 5; i++) {
+      LongArray ar = LongArray.create(0, 1, 2);
+      ar.addAll(LongCollections.repeat(3, i));
+      ar.addAll(4, 5);
+      System.out.print(ar);
+      ar.removeSorted(3);
+      System.out.println(" " + ar);
+    }
   }
 }

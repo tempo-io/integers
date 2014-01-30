@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class  SameValuesLongListTests extends WritableLongListChecker {
+public class SameValuesLongListTests extends WritableLongListChecker {
 
   @Override
   protected List<WritableLongList> createWritableLongListVariants(long... values) {
@@ -28,6 +28,7 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     array.removeRange(values.length, values.length + 10);
     res.add(array);
 
+    res.add(SameValuesLongList.create(new LongArray(values)));
     return res;
   }
 
@@ -143,14 +144,14 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
 
   public void testSetAll() {
     for (int i = 0; i < 10; i++) {
-      LongArray array = generateRandomLongArray( 1000, IntegersFixture.SortedStatus.UNORDERED, 500);
+      LongArray array = generateRandomLongArray(1000, IntegersFixture.SortedStatus.UNORDERED, 500);
       array.sort();
       list.addAll(array);
       int index = RAND.nextInt(list.size());
       int len = list.size() - index;
       LongList insertArray;
       if (len > 1) {
-        insertArray = generateRandomLongArray( len, IntegersFixture.SortedStatus.UNORDERED, len / 2);
+        insertArray = generateRandomLongArray(len, IntegersFixture.SortedStatus.UNORDERED, len / 2);
       } else {
         insertArray = LongList.EMPTY;
       }
@@ -212,6 +213,15 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     }
   }
 
+  public void testExpandSimple2() {
+    list.expand(0, 10);
+    CHECK.order(LongCollections.repeat(0, 10), list);
+    list.insert(0, 99);
+    list.clear();
+    list.expand(0, 3);
+    CHECK.order(LongCollections.repeat(0, 3), list);
+  }
+
   public void testExpandComplex2() {
     LongArray expected = LongArray.create(0, 1, 2, 3, 4, 5);
     list.addAll(expected.iterator());
@@ -263,7 +273,7 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
       CHECK.order(values, actual);
     }
 
-    expected = generateRandomLongArray( 100, IntegersFixture.SortedStatus.UNORDERED);
+    expected = generateRandomLongArray(100, IntegersFixture.SortedStatus.UNORDERED);
     CHECK.order(expected, SameValuesLongList.create(expected));
   }
 
@@ -277,7 +287,6 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
   }
 
   public void testRemoveFromBeginning() {
-    list = SameValuesLongList.create(LongArray.create(0, 1, 2));
     LongArray expected = LongArray.create(-1, 0, 1, 2);
     list = SameValuesLongList.create(expected);
     list.removeAt(0);
@@ -294,65 +303,28 @@ public class  SameValuesLongListTests extends WritableLongListChecker {
     }
     list = SameValuesLongList.create(values, IntCollections.repeat(4, values.size()));
     CHECK.order(expected, list);
-    list.setRange(0, 1, 1);
-    expected.setRange(0, 1, 1);
-    CHECK.order(expected, list);
-
-    list.setRange(1, 2, 1);
-    expected.setRange(1, 2, 1);
-    CHECK.order(expected, list);
 
     expected = LongArray.create(1, 1, 2, 2, 3, 3, 3, 3, 3, 4);
-    SameValuesLongList list = SameValuesLongList.create(expected);
+    list = SameValuesLongList.create(expected);
     CHECK.order(expected, list);
   }
 
-  public void testIntLongMap() {
-    IntLongMap map = new IntLongMap();
-    map.insertAt(0, 5, 10);
-    IntLongMap.ConsistencyViolatingMutator m = map.startMutation();
-    m.commit();
-    assertEquals(5, map.getKeyAt(0));
-    assertEquals(10, map.getValueAt(0));
-  }
+  public void testSetRangeSimple2() {
+    int count = 4;
+    LongArray values = LongArray.create(0, 2, 4);
+    LongArray expected = new LongArray(values.size() * count);
+    for (int i = 0; i < values.size(); i++) {
+      expected.addAll(LongCollections.repeat(values.get(i), count));
+    }
+    list.addAll(expected);
+    CHECK.order(expected, list);
 
-  public void test2() {
-    for (WritableLongList list: empty()) {
-      list.insertMultiple(0, Integer.MIN_VALUE, 3);
-      checkCollection(list, ap(Integer.MIN_VALUE, 0, 3));
+
+    int[][] valuesForSet = {{0, 1, 1}, {1, 2, 1}, {4, 9, -1}};
+    for (int[] vals : valuesForSet) {
+      list.setRange(vals[0], vals[1], vals[2]);
+      expected.setRange(vals[0], vals[1], vals[2]);
+      CHECK.order(expected, list);
     }
   }
-
-  public void test3() {
-    list.addAll(1, 2, 3, 4, 5);
-    list.removeRange(0, 3);
-    System.out.println(list);
-  }
-
-  public void testR() {
-    LongArray expected = LongArray.create(0, 0, 0, 0, 0, 0);
-    list.addAll(expected);
-
-    int from = 0, to = 3;
-    list.removeRange(from, to);
-    expected.removeRange(from, to);
-    System.out.println(list);
-    CHECK.order(list, expected);
-  }
-
-  public void testV() {
-    long z = Integer.MIN_VALUE;
-    list.insertMultiple(0, z, 2);
-    list.insertMultiple(2, 1, 2);
-    list.insertMultiple(4, z, 2);
-    list.removeRange(1, 5);
-    checkCollection(list, z, z);
-  }
-
-  public void testVV() {
-    list.addAll(0, 0, 0, 1, 1, 1);
-    LongIterator it = list.iterator(0, 4);
-    System.out.println(it.nextValue());
-  }
-
 }

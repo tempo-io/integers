@@ -542,6 +542,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
 //          relatedOffset = leftward ? myLeftOffset : myRightOffset;
           assert added > relatedOffset : leftward + " " + relatedOffset + " " + added;
         }
+        relatedOffset = leftward ? myLeftOffset : myRightOffset;
         int allocateCount = ((added - relatedOffset - 1) >> mySegmentBits) + 1;
         allocateSegments(allocateCount, leftward);
         myCapacity += allocateCount << mySegmentBits;

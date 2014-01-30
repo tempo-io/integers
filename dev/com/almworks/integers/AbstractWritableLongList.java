@@ -85,9 +85,10 @@ import java.util.NoSuchElementException;
     }
   }
 
-  public void addAll(LongIterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
+  public void addAll(LongIterable iterable) {
+    for (LongIterator it : iterable) {
+      add(it.value());
+    }
   }
 
   public void addAll(long... values) {
@@ -154,9 +155,9 @@ import java.util.NoSuchElementException;
    * <p/>
    * // todo something effective
    */
-  public boolean removeAll(LongList collection) {
+  public boolean removeAll(LongIterable iterable) {
     boolean modified = false;
-    for (LongIterator ii : collection) {
+    for (LongIterator ii : iterable) {
       modified |= removeAll(ii.value());
     }
     return modified;
@@ -164,7 +165,7 @@ import java.util.NoSuchElementException;
 
   public boolean removeAll(long... values) {
     if (values != null && values.length > 0) {
-      return removeAll(new LongArray(values));
+      return removeAll(new LongArrayIterator(values));
     }
     return false;
   }

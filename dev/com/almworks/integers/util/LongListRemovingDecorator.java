@@ -22,7 +22,7 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 
 /**
- * Removing int list decorator that does not alter the given list of removed indices.
+ * Removing {@code LongList} decorator that does not alter the given list of removed indices.
  * @see WritableLongListRemovingDecorator
  * @author igor baltiyskiy
  */

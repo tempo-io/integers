@@ -33,6 +33,8 @@ public abstract class LongListChecker extends IntegersFixture {
     LongList expected = LongArray.create(values);
     for (LongList arr : createLongListVariants(values)) {
       assertEquals(expected.isEmpty(), arr.isEmpty());
+      assertEquals(expected.isSorted(), arr.isSorted());
+      assertEquals(expected.isUniqueSorted(), arr.isUniqueSorted());
       CHECK.order(expected, arr);
     }
   }
@@ -43,6 +45,11 @@ public abstract class LongListChecker extends IntegersFixture {
     checkValues(0, 10, 10, 20);
     checkValues(0, 10, 9);
     checkValues(Integer.MIN_VALUE, 10, 20, 40, Integer.MAX_VALUE);
+    int attemptsCount = 10;
+    int size = 100;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      checkValues(generateRandomLongArray(size, SortedStatus.UNORDERED).extractHostArray());
+    }
   }
 
   protected void _testGetMethods(long ... values) {
@@ -82,7 +89,7 @@ public abstract class LongListChecker extends IntegersFixture {
   public void testRandom() {
     int arrLength = 200, tests = 5;
     for (int test = 0; test < tests; test++) {
-      long[] arr = generateRandomLongArray( arrLength, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
+      long[] arr = generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
       _testGetMethods(arr);
       checkValues(arr);
       _testToMethods(arr);
@@ -153,7 +160,7 @@ public abstract class LongListChecker extends IntegersFixture {
 
   public void testGetLast() {
     for (int attempt = 0; attempt < 10; attempt++) {
-      long[] array = generateRandomLongArray( 1000, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
+      long[] array = generateRandomLongArray(1000, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
       for (LongList list:
           createLongListVariants(array)) {
         if (!(list instanceof AbstractLongList)) return;
