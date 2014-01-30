@@ -19,6 +19,6 @@ public class LongUnionIteratorTwoTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         return LongUnionIteratorTwo.create(arrays[0], arrays[1]);
       }
-    }, new SetOperationsChecker.UnionGetter(), true, true);
+    }, new SetOperationsChecker.UnionGetter(), true, SortedStatus.SORTED_UNIQUE);
   }
 }

@@ -118,11 +118,4 @@ public class LongIteratorsTests extends IntegersFixture {
       CHECK.order(LongProgression.arithmetic(start, count, step).iterator(), actual);
     }
   }
-
-  public void test() {
-    LongIterator it = LongIterators.arithmetic(0, 10, 1);
-    System.out.println(new LongArray(LongIterators.range(10, 0, -1)));
-    CHECK.order(LongIterators.range(0, 0, -1), LongIterator.EMPTY);
-    CHECK.order(LongIterators.range(10, 0, -1), 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
-  }
 }

@@ -438,7 +438,7 @@ public class LongCollections {
    * @return union of the two sets
    */
   @NotNull
-  public static WritableLongSet union(LongSet first, LongSet second) {
+  public static WritableLongSet union(@NotNull LongSet first, @NotNull LongSet second) {
     WritableLongSet set = LongOpenHashSet.createForAdd(first.size() + second.size());
     set.addAll(first);
     set.addAll(second);
@@ -448,7 +448,8 @@ public class LongCollections {
   /**
    * @return union of the two sets
    */
-  public static WritableLongSortedSet unionSorted(LongSet first, LongSet second) {
+  @NotNull
+  public static WritableLongSortedSet toSortedUnion(@NotNull LongSet first, @NotNull LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     if (!(first instanceof LongSortedSet)) arrays[0].sort();
     if (!(second instanceof LongSortedSet)) arrays[1].sort();
@@ -462,7 +463,8 @@ public class LongCollections {
   /**
    * @return intersection of the two sets
    */
-  public static WritableLongSortedSet intersection(LongSet first, LongSet second) {
+  @NotNull
+  public static WritableLongSortedSet intersection(@NotNull LongSet first, @NotNull LongSet second) {
     LongArray[] arrays = {first.toArray(), second.toArray()};
     if (!(first instanceof LongSortedSet)) arrays[0].sort();
     if (!(second instanceof LongSortedSet)) arrays[1].sort();
@@ -806,10 +808,17 @@ public class LongCollections {
     };
   }
 
-  private static LongArray getSubList(LongList values, int mask) {
+  /**
+   * Creates array and add there elements from {@code values} whose indices belong to {@code mask},
+   * i.e. {@code (mask & (1 << idx)) != 0}.
+   * <br>Examples: get([0, 1, 2], 0) -> [], get([0, 1, 2], 1) -> [2], get([0, 1, 2], 5) -> [0, 2]
+   * @param mask {@code 0 <= mask && mask < values.size()}
+   * @return array with elements from {@code values}
+   */
+  public static LongArray getSubList(LongList values, int mask) {
     assert (mask + 1) <= (1 << values.size()) : mask + " " + (1 << values.size());
     LongArray res = new LongArray();
-    for (int i = 0, n = values.size(); i < n; i++) {
+    for (int i = 0; i < values.size(); i++) {
       if ((mask & (1 << i)) != 0) {
         res.add(values.get(i));
       }
@@ -817,6 +826,9 @@ public class LongCollections {
     return res;
   }
 
+  /**
+   * @return size of {@code iterable} if it is instance of {@code LongSizedIterable} otherwise {@code defaultSize}
+   */
   public static int sizeOfIterable(LongIterable iterable, int defaultSize) {
     return (iterable instanceof LongSizedIterable) ? ((LongSizedIterable) iterable).size() : defaultSize;
   }

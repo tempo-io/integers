@@ -6,7 +6,9 @@ import com.almworks.integers.LongIterator;
 import com.almworks.integers.SetOperationsChecker;
 import junit.framework.TestCase;
 
-public class LongMinusIteratorTests extends TestCase {public static final int XXXX = 239;
+import static com.almworks.integers.IntegersFixture.SortedStatus.*;
+
+public class LongMinusIteratorTests extends TestCase {
   private LongArray create(long... values) {
     return new LongArray(values);
   }
@@ -29,7 +31,7 @@ public class LongMinusIteratorTests extends TestCase {public static final int XX
       public LongIterator get(LongArray... arrays) {
         return LongMinusIterator.create(arrays[0], arrays[1]);
       }
-    }, new SetOperationsChecker.MinusGetter(), true, true);
+    }, new SetOperationsChecker.MinusGetter(), true, SORTED_UNIQUE, SORTED);
   }
 
 }

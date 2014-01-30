@@ -55,7 +55,7 @@ public abstract class WritableIntLongMapChecker extends IntegersFixture {
     int size = 20, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       IntArray keys = generateRandomIntArray(size, SortedStatus.SORTED_UNIQUE);
-      LongArray values = generateRandomLongArray( keys.size(), IntegersFixture.SortedStatus.UNORDERED);
+      LongArray values = generateRandomLongArray(keys.size(), IntegersFixture.SortedStatus.UNORDERED);
 
 //      map.putAll(keys, values);
     }

@@ -75,7 +75,7 @@ public class LongIntersectionIteratorTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         return new LongIntersectionIterator(arrays);
       }
-    }, new SetOperationsChecker.IntersectionGetter(false), true, false);
+    }, new SetOperationsChecker.IntersectionGetter(false), false, SortedStatus.SORTED_UNIQUE);
   }
 
 }

@@ -23,6 +23,9 @@ import com.almworks.util.Pair;
 
 import java.util.*;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.*;
 import static com.almworks.integers.LongIterators.arithmetic;
 
@@ -258,7 +261,7 @@ public class LongCollectionsTests extends IntegersFixture {
 
     for (int attempt = 0; attempt < attempts; attempt++) {
       if (attempt != attempts - 1) {
-        arr = generateRandomLongArray( arrLength, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+        arr = generateRandomLongArray(arrLength, UNORDERED, maxVal);
       } else {
         arr = new LongArray();
       }
@@ -407,7 +410,7 @@ public class LongCollectionsTests extends IntegersFixture {
       expected = new LongArray(maxSize * 2);
       expected.addAll(arrays[0]);
       expected.merge(arrays[1]);
-      actual = unionSorted(sets[0], sets[1]).toArray();
+      actual = toSortedUnion(sets[0], sets[1]).toArray();
       CHECK.order(expected, actual);
     }
   }
@@ -444,7 +447,7 @@ public class LongCollectionsTests extends IntegersFixture {
         for (WritableLongSet set1: allSets[1]) {
           WritableLongSet[] sets = {set0, set1};
           for (int j = 0; j < 2; j++) {
-            arrays[j] = generateRandomLongArray( size, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal);
+            arrays[j] = generateRandomLongArray(size, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal);
             sets[j].clear();
             sets[j].addAll(arrays[j]);
           }
@@ -466,7 +469,7 @@ public class LongCollectionsTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         return LongCollections.complementSorted(arrays[0], arrays[1]).iterator();
       }
-    }, new SetOperationsChecker.MinusGetter(), true, true);
+    }, new SetOperationsChecker.MinusGetter(), true, SORTED_UNIQUE, SORTED);
   }
 
   public void testIntersectionSorted() {
@@ -475,7 +478,7 @@ public class LongCollectionsTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         return LongCollections.intersectionSortedUnique(arrays[0], arrays[1]).iterator();
       }
-    }, new SetOperationsChecker.IntersectionGetter(true), true, true);
+    }, new SetOperationsChecker.IntersectionGetter(true), true, SORTED_UNIQUE);
   }
 
   public void testUnionSorted() {
@@ -484,7 +487,7 @@ public class LongCollectionsTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         return LongCollections.unionSortedUnique(arrays[0], arrays[1]).iterator();
       }
-    }, new SetOperationsChecker.UnionGetter(), true, true);
+    }, new SetOperationsChecker.UnionGetter(), true, SORTED_UNIQUE);
   }
 
   public void checkToNativeArray(LongArray array) {
@@ -503,7 +506,7 @@ public class LongCollectionsTests extends IntegersFixture {
       checkToNativeArray(new LongArray(expected));
     }
     for (int attempt = 0; attempt < 10; attempt++) {
-      checkToNativeArray(generateRandomLongArray( 100, IntegersFixture.SortedStatus.SORTED_UNIQUE));
+      checkToNativeArray(generateRandomLongArray(100, IntegersFixture.SortedStatus.SORTED_UNIQUE));
     }
   }
 
@@ -521,7 +524,7 @@ public class LongCollectionsTests extends IntegersFixture {
       checkToWritableSortedUnique(array);
     }
     for (int attempt = 0; attempt < 10; attempt++) {
-      LongArray array = generateRandomLongArray(100, IntegersFixture.SortedStatus.UNORDERED, 150);
+      LongArray array = generateRandomLongArray(100, UNORDERED, 150);
       checkToWritableSortedUnique(array.toNativeArray());
       array.sort();
       checkToWritableSortedUnique(array.toNativeArray());
@@ -559,7 +562,7 @@ public class LongCollectionsTests extends IntegersFixture {
     for (int attempt = 0; attempt < attempts; attempt++) {
       LongArray[] actual = new LongArray[2];
       for (int i = 0; i < 2; i++) {
-        actual[i] = generateRandomLongArray( len, IntegersFixture.SortedStatus.UNORDERED, maxVal);
+        actual[i] = generateRandomLongArray(len, UNORDERED, maxVal);
       }
 
       LongArray expected = new LongArray(len);
@@ -667,7 +670,7 @@ public class LongCollectionsTests extends IntegersFixture {
     for (int size = 0; size < maxSize; size++) {
       LongArray[] arrays = new LongArray[size];
       for (int i = 0; i < arrays.length; i++) {
-        arrays[i] = generateRandomLongArray( maxArraySize, IntegersFixture.SortedStatus.UNORDERED);
+        arrays[i] = generateRandomLongArray(maxArraySize, UNORDERED);
       }
       checkCollect(arrays);
     }

@@ -102,7 +102,7 @@ public class LongConcatIteratorTests extends IntegersFixture {
     LongArray[] arrays = new LongArray[5];
     for (int i = 0; i < 20; i++) {
       for (int j = 0; j < arrays.length; j++) {
-        arrays[j] = generateRandomLongArray( 30, IntegersFixture.SortedStatus.UNORDERED);
+        arrays[j] = generateRandomLongArray(30, IntegersFixture.SortedStatus.UNORDERED);
       }
       CHECK.order(collectIterables(300, arrays).iterator(), LongIterators.concat(arrays));
     }

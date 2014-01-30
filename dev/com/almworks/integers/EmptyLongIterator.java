@@ -53,8 +53,9 @@ public class EmptyLongIterator extends AbstractLongIterator implements WritableL
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
-    if (offset != 0) throw new NoSuchElementException();
-//    throw new NoSuchElementException();
+    if (offset != 0) {
+      throw new NoSuchElementException();
+    }
   }
 
   public long get(int offset) throws NoSuchElementException {

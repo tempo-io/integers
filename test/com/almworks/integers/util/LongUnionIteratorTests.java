@@ -20,7 +20,7 @@ public class LongUnionIteratorTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         return new LongUnionIterator(arrays);
       }
-    }, new SetOperationsChecker.UnionGetter(), true, false);
+    }, new SetOperationsChecker.UnionGetter(), false, SortedStatus.SORTED_UNIQUE);
   }
 
   public void testIteratorSpecification() {

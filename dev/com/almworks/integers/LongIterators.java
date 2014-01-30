@@ -61,7 +61,8 @@ public class LongIterators {
   }
 
   /**
-   * @return an infinite arithmetic progression beginning with {@code start}, increasing by {@code step}
+   * @return an infinite arithmetic progression beginning with {@code start}, increasing by {@code step}.
+   * Unlike {@link #arithmetic(long, int, long)} it's infinite iterator
    * @see #arithmetic(long, int, long)
    */
   public static LongIterator arithmeticProgression(final long start, final long step) {
@@ -138,7 +139,7 @@ public class LongIterators {
    * @see LongProgression#arithmetic(long, int, long)
    * @see #arithmeticProgression(long, long)
    */
-  public static LongIterator arithmetic(final long start, final int count, final long step) {
+  public static LongIterator arithmetic(long start, final int count, final long step) {
     if (step == 0) throw new IllegalArgumentException("step = 0");
     if (count < 0) throw new IllegalArgumentException("count < 0");
     final long myPrevValue = start - step;
@@ -229,10 +230,12 @@ public class LongIterators {
   }
 
   /**
+   * Argument in {@code currentModCount} is always ignored.
    * @return wrapper around the specified iterator that throws ConcurrentModificationException if
    * {@code currentModCount} changes its value.
    * @throws NullPointerException if {@code iterator} or {@code currentModCount} are null.
    */
+  @NotNull
   public static LongIterator failFastIterator(LongIterator iterator, final IntFunction currentModCount) throws NullPointerException {
     if (iterator == null || currentModCount == null) {
       throw new NullPointerException();
