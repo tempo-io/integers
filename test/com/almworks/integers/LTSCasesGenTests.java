@@ -1,6 +1,6 @@
 package com.almworks.integers;
 
-import com.almworks.integers.DynamicLongSet;
+import com.almworks.integers.DynamicLongSetP;
 import com.almworks.integers.IntIterator;
 import com.almworks.integers.IntegersFixture;
 
@@ -47,7 +47,7 @@ public class LTSCasesGenTests extends IntegersFixture {
   public void testGen() {
     int MAX_VAL = 100;
 
-    DynamicLongSet set = new DynamicLongSet();
+    DynamicLongSetP set = new DynamicLongSetP();
     set.addAll(LongProgression.arithmetic(0, 10, 10));
     while (casesLeft > 0) {
     batch:
@@ -57,7 +57,7 @@ public class LTSCasesGenTests extends IntegersFixture {
           for (int add3 = 0; add3 < MAX_VAL; ++add3) {
             if (add3 == add1 || add3 == add2) continue;
 
-            DynamicLongSet curSet = set.clone();
+            DynamicLongSetP curSet = set.clone();
             curSet.addAll(add1, add2, add3);
 
           rem:
@@ -92,7 +92,7 @@ public class LTSCasesGenTests extends IntegersFixture {
     }
   }
 
-  private boolean isUnseenCaseRealization(DynamicLongSet set, int node) {
+  private boolean isUnseenCaseRealization(DynamicLongSetP set, int node) {
     // dim0
     int delNode;
     int d0case;
