@@ -675,9 +675,4 @@ public class LongCollectionsTests extends IntegersFixture {
       checkCollect(arrays);
     }
   }
-
-  public void test() {
-    System.out.println(complementSorted(SameValuesLongList.create(
-      LongProgression.range(0, 20), IntIterators.repeat(2)), LongProgression.range(0, 20, 2)));
-  }
 }

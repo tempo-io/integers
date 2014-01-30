@@ -247,12 +247,11 @@ public class IntLongMap extends AbstractWritableIntLongMap {
    * Checks if this map correct: <ul>
    *   <li>sizes of {@link #myKeys} and {@link #myValues} should be equal;
    *   <li>{@link #myKeys} should be sorted unique;
-   *   <li>adjacent elements in {@link #myValues} should be different;
    * </ul>
    * @return String with information about error in {@link #myKeys} and {@link #myValues} if it exist,
    * otherwise {@code null}
    */
-  public String checkInvariants() {
+  private String checkInvariants() {
     if (myKeys.size() != myValues.size()) {
       return "sizes of keys and values should be equal";
     }
@@ -261,17 +260,6 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     }
     if (myValues.size() < 2) {
       return null;
-    }
-    long curValue;
-    long lastValue = myValues.get(0);
-    int idx = 0;
-    for (LongIterator ii : myValues.iterator(1)) {
-      curValue = ii.value();
-      if (curValue == lastValue) {
-        return "adjacent elements in values are equal; indices: " + idx + " " + (idx + 1);
-      }
-      lastValue = curValue;
-      idx++;
     }
     return null;
   }

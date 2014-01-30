@@ -31,7 +31,7 @@ public class LongMinusIteratorTests extends TestCase {
       public LongIterator get(LongArray... arrays) {
         return LongMinusIterator.create(arrays[0], arrays[1]);
       }
-    }, new SetOperationsChecker.MinusGetter(), true, SORTED_UNIQUE, SORTED);
+    }, new SetOperationsChecker.MinusGetter(), true, SORTED);
   }
 
 }

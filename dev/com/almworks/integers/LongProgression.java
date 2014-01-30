@@ -65,6 +65,8 @@ public abstract class LongProgression extends AbstractLongList {
   }
 
   /**
+   * Returns the minimum value {@code count} such that {@code start + step * count} is
+   * between start and stop
    * @param start starting value, inclusive
    * @param stop ending value, exclusive; may be less than {@code start}, then {@code step} must be negative
    * @param step may be negative, then {@code stop} must be not greater than {@code start}
