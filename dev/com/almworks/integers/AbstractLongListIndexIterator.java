@@ -29,6 +29,7 @@ public abstract class AbstractLongListIndexIterator extends AbstractLongIterator
 
   protected AbstractLongListIndexIterator(int from, int to) {
     if (from > to) throw new IllegalArgumentException(from + " > " + to);
+    if (from < 0) throw new IllegalArgumentException("from < 0");
     myFrom = from;
     myTo = to;
     myNext = myFrom;

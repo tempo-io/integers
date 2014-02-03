@@ -20,14 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
-import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
-import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.IntegersFixture.SortedStatus.*;
 
 public class LongArrayTests extends WritableLongListChecker {
   private LongArray array = new LongArray();
   private SetOperationsChecker setOperations = new SetOperationsChecker();
-  SetOperationsChecker.SetCreator unionGetter = new SetOperationsChecker.UnionGetter();
+  private SetOperationsChecker.SetCreator unionGetter = new SetOperationsChecker.UnionGetter();
 
 
   protected void tearDown() throws Exception {
@@ -140,11 +138,10 @@ public class LongArrayTests extends WritableLongListChecker {
     }
     if (isSorted) {
       array.retainSorted(values);
-      CHECK.order(expected, array);
     } else {
       array.retain(values);
-      CHECK.order(expected, array);
     }
+    CHECK.order(expected, array);
   }
 
   public void testRetainSimple() {
@@ -183,9 +180,8 @@ public class LongArrayTests extends WritableLongListChecker {
   public void testRetainWithDuplicates() {
     int arraySize = 100, valuesSize = 10;
     for (int attempt = 0; attempt < 20; attempt++) {
-      LongArray array = generateRandomLongArray(arraySize, UNORDERED, arraySize);
-      array.sort();
-      LongArray values = generateRandomLongArray(valuesSize, UNORDERED, arraySize);
+      LongArray array = generateRandomLongArray(arraySize, SORTED, arraySize * 3 / 2);
+      LongArray values = generateRandomLongArray(valuesSize, UNORDERED, arraySize * 3 / 2);
       values.addAll(values.get(IntProgression.range(0, values.size(), 2)));
       values.shuffle(RAND);
       checkRetain(array, values, false);
@@ -299,38 +295,15 @@ public class LongArrayTests extends WritableLongListChecker {
   }
 
   public void test() {
-    LongListIterator it = LongArray.create(1, 2, 3).iterator();
-    it.move(0);
-    System.out.println(it.nextValue());
-    System.out.println(it.index());
 
-    System.out.println(Arrays.toString(interval(5, -5)));
-  }
+    // todo upgrade: [0,2,4,7,9,10], src: [0,4,8,9] --> [-1, -3, 4, -5], i.e. >0 - ok, <0 - should be inserted at (-x-1) pos
 
-  public void test2() {
-    LongArray a = LongArray.create(0, 1, 1, 1, 2);
-    a.removeSorted(1);
-    System.out.println(a);
-  }
+    array = LongArray.create(0, 2, 4, 7, 9, 10);
+    int[][] points = {null};
+    LongArray src = LongArray.create(0, 4, 8, 9);
+    array.getInsertionPoints(src, points);
+    System.out.println(Arrays.toString(points[0]));
 
-  public void test3() {
-    for (int i = 0; i < 20; i++) {
-      LongArray a = LongArray.create(1, 2, 1);
-      LongArray sortAlso = LongArray.create(3, 2, 1);
-      a.sort(sortAlso);
-      System.out.println(sortAlso);
-    }
-
-  }
-
-  public void test4() {
-    for (int i = 0; i < 5; i++) {
-      LongArray ar = LongArray.create(0, 1, 2);
-      ar.addAll(LongCollections.repeat(3, i));
-      ar.addAll(4, 5);
-      System.out.print(ar);
-      ar.removeSorted(3);
-      System.out.println(" " + ar);
-    }
+    System.out.println(LongArray.create(0, 1, 2, 3).subList(0, 2));
   }
 }

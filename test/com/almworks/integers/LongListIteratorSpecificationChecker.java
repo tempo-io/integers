@@ -115,7 +115,7 @@ public class LongListIteratorSpecificationChecker extends LongIteratorSpecificat
         }
 
         try {
-          it.get(-idx - values.length);
+          it.get(-idx + values.length);
           fail();
         } catch (NoSuchElementException _) {
           // ok

@@ -399,16 +399,18 @@ public final class LongArray extends AbstractWritableLongList {
    * Removes from the this list all elements whose index is contained in the specified {@code IntList indexes}
    * <br>This method is more effective than {@link LongCollections#removeAllAtSorted(WritableLongList, IntList)}
    * due to the usage System.arraycopy
-   * @param indices sorted {@code IntIterator}
+   *
+   * @param indices sorted {@code IntIterable}
    * @see com.almworks.integers.LongCollections#removeAllAtSorted(WritableLongList, IntList)
    */
-  public void removeAllAtSorted(IntIterator indices) {
-    if (!indices.hasNext()) return;
-    int index = indices.nextValue(), to, len;
+  public void removeAllAtSorted(IntIterable indices) {
+    IntIterator it = indices.iterator();
+    if (!it.hasNext()) return;
+    int index = it.nextValue(), to, len;
     int indicesSize = 1;
     int from = index + 1;
-    while (indices.hasNext()) {
-      to = indices.nextValue();
+    while (it.hasNext()) {
+      to = it.nextValue();
       indicesSize++;
       len = to - from;
       System.arraycopy(myArray, from, myArray, index, len);
@@ -431,7 +433,17 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   // todo add javadoc
-  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [-1, -1, 4, -1]
+  // todo upgrade: [0,2,4,7,9,10], src: [0,4,8,9] --> [-1, -3, 4, -5], i.e. >0 - ok, <0 - should be inserted at (-x-1) pos
+  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0, 2, -1, 4]
+
+  /**
+   * Writes positions for inserting elements in this sorted unique array from {@code src} to {@code points}.
+   * {@code points[0].length} must be more than {@code src.size()}.
+   * {@code points[0][idx]} will be equal to {@code -1} if {@code src.get(idx)} is contained in this array,
+   * otherwise equal to index in this array where inserting {@code src.get(idx)} keeps this array sorted unique
+   * @param points
+   * @return count of elements from {@code src} that are not contained in this array
+   */
   public int getInsertionPoints(LongSizedIterable src, int[][] points) {
     final int srcSize = src.size(), size = size();
     if (points[0] == null || points[0].length < srcSize) {
@@ -468,39 +480,6 @@ public final class LongArray extends AbstractWritableLongList {
     return insertCount;
   }
 
-  // todo add javadoc
-  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0, 2, -1, 4]
-  public int getRemovePoints(LongSizedIterable src, int[][] points) {
-    final int srcSize = src.size(), size = size();
-    if (points[0] == null || points[0].length < srcSize) {
-      points[0] = new int[srcSize];
-    }
-    int[] insertionPoints0 = points[0];
-    Arrays.fill(insertionPoints0, 0, srcSize, -1);
-    int insertCount = 0;
-    int destIndex = 0;
-    long last = 0;
-    LongIterator it = src.iterator();
-    for (int i = 0; i < srcSize; i++) {
-      long v = it.nextValue();
-      if (i > 0 && v == last)
-        continue;
-      last = v;
-      if (destIndex < size) {
-        int k = LongCollections.binarySearch(v, myArray, destIndex, size);
-        if (k < 0) {
-          // not found
-          destIndex = -k - 1;
-          continue;
-        }
-        destIndex = k;
-      }
-      insertionPoints0[i] = destIndex;
-      insertCount++;
-    }
-    return insertCount;
-  }
-
   /**
    * Merges the specified sorted unique list and this sorted unique array.
    * Depending on {@code size()} and {@code src.size()} uses
@@ -530,13 +509,13 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * <p>Merges the specified sorted list and this sorted array into this array.
-   * If src or this array are not sorted, result is undefined.
+   * If src or this array are not sorted unique, result is undefined.
    * If {@code getCapacity() < src.size() + size()}, will do reallocation.
    * <p>Complexity: {@code O(eps(N/T, this, src) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
    * {@code eps} grows as {@code N/T} grows.
    * {@code eps} also depends on how evenly {@code src} values are distributed in this array: it is higher when
    * they are uniformly distributed.
-   * In the general case, if N/T > 4, then on average eps < 0.5.
+   * In the general case, if {@code N/T > 4}, then on average {@code eps < 0.5}.
    * <p>Prefer to use this method over {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}
    * If {@code src.size()} is much smaller than {@code size()}. If they are close
    * use {@link com.almworks.integers.LongArray#mergeWithSameLength(LongList)}

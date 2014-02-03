@@ -21,6 +21,9 @@ import com.almworks.integers.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+
 
 public class WritableLongListRemovingDecoratorTests extends LongListChecker {
 
@@ -86,10 +89,10 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker {
     int arrLength = 100;
     int indexesLength = 50;
     int maxValue = 1000;
-    LongList base = generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
+    LongList base = generateRandomLongArray(arrLength, UNORDERED, maxValue);
 
     for (int test = 0; test < 20; test++) {
-      IntArray indexes = generateRandomIntArray(indexesLength, SortedStatus.SORTED_UNIQUE, arrLength);
+      IntArray indexes = generateRandomIntArray(indexesLength, SORTED_UNIQUE, arrLength);
       LongArray expected = LongArray.copy(base);
       for (int i = indexes.size() - 1; i >= 0; i--) {
         int val = indexes.get(i);

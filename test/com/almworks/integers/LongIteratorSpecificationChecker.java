@@ -52,7 +52,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       @Override
       public long[] generateValues(int size) {
-        return generateRandomLongArray(size, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
+        return generateRandomLongArray(size, SortedStatus.UNORDERED).extractHostArray();
       }
 
       @Override
@@ -68,8 +68,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       @Override
       public long[] generateValues(int size) {
-        LongArray array = generateRandomLongArray(size, IntegersFixture.SortedStatus.UNORDERED);
-        array.sort();
+        LongArray array = generateRandomLongArray(size, SortedStatus.SORTED);
         return array.extractHostArray();
       }
 
@@ -86,7 +85,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       @Override
       public long[] generateValues(int size) {
-        return generateRandomLongArray(size, IntegersFixture.SortedStatus.SORTED_UNIQUE).extractHostArray();
+        return generateRandomLongArray(size, SortedStatus.SORTED_UNIQUE).extractHostArray();
       }
 
       @Override

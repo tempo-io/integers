@@ -361,6 +361,18 @@ public abstract class AbstractLongList implements LongList {
         return new SubList(myParent, myFrom + from, myFrom + to);
     }
 
+    @Override
+    public long[] toNativeArray(int startIndex, long[] dest, int destOffset, int length) {
+      return getParent().toNativeArray(myFrom + startIndex, dest, destOffset, length);
+    }
+
+    @Override
+    public long[] toNativeArray() {
+      int size = size();
+      if (size == 0) return EMPTY_LONGS;
+      return getParent().toNativeArray(myFrom, new long[size], 0, size);
+    }
+
     public AbstractLongList getParent() {
       return myParent;
     }

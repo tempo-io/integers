@@ -124,6 +124,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
+  public static SegmentedLongArray create(LongList values) {
+    SegmentedLongArray array = new SegmentedLongArray();
+    array.addAll(values);
+    return array;
+  }
+
   public long get(int index) {
     assert !IntegersDebug.CHECK || checkInvariants();
     try {
@@ -539,7 +545,6 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
           mySegmentSize = SEGS_LARGE;
           mySegmentMask = SEGS_LARGE - 1;
           expandSingleSegment(leftward);
-//          relatedOffset = leftward ? myLeftOffset : myRightOffset;
           assert added > relatedOffset : leftward + " " + relatedOffset + " " + added;
         }
         relatedOffset = leftward ? myLeftOffset : myRightOffset;

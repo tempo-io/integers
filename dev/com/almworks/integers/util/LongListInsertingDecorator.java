@@ -174,7 +174,6 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
 
     private LocalIterator(int from, int to) {
       super(from, to);
-      myBaseIterator = base().iterator();
       sync();
     }
 
@@ -183,11 +182,22 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       int insertIdx = insertedBefore(curIndex);
 
       myInsertedIterator = myInserted.iterator(insertIdx);
-      myBaseIterator = base().iterator(curIndex - insertIdx);
-      if (myBaseIterator.hasNext()) {
+      advanceToNextInsert();
+
+      int baseIdx = curIndex - insertIdx;
+      if (baseIdx < 0) {
+        myBaseIterator = base().iterator();
+      } else {
+        myBaseIterator = base().iterator(baseIdx);
+        advanceToNextBase();
+      }
+    }
+
+    private void advanceToNextBase() {
+      if (myCurInsert != getNextIndex() - 1) {
+        assert myBaseIterator.hasNext();
         myBaseIterator.next();
       }
-      advanceToNextInsert();
     }
 
     /**
@@ -200,18 +210,18 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       } else myCurInsert = -1;
     }
 
+    public boolean hasNext() {
+      boolean r = super.hasNext();
+      assert !r || (myCurInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
+      return r;
+    }
+
     public LongListIterator next() throws NoSuchElementException {
-      if (myCurInsert >= 0 && myCurInsert == getNextIndex() - 1) {
-        // if current index on inserted value
-        advanceToNextInsert();
-      } else {
-        if (getNextIndex() != 0) {
-          if (myBaseIterator.hasNext()) {
-            myBaseIterator.next();
-          }
-        }
-      }
       super.next();
+      if (myCurInsert == index() - 1) {
+        advanceToNextInsert();
+      }
+      advanceToNextBase();
       return this;
     }
 
@@ -228,6 +238,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
+      if (count == 0) return;
       super.move(count);
       sync();
     }

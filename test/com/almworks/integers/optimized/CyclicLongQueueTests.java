@@ -42,7 +42,13 @@ public class CyclicLongQueueTests extends LongListChecker {
     return res;
   }
 
-  public void checkRemoveAndCatchISE(CyclicLongQueue queue, int count) {
+  /**<ul>
+   * <li>if {@code count == -2} tries to invoke {@code queue.clear()}.
+   * <li>if {@code count == -1} tries to invoke {@code queue.removeFirst()}.
+   * <li>if {@code count >= 0} tries to invoke {@code queue.removeFirst(count)}.
+   * </ul>
+   */
+  private void checkRemoveAndCatchISE(CyclicLongQueue queue, int count) {
     try {
       if (count == -2) {
         queue.clear();
@@ -288,7 +294,7 @@ public class CyclicLongQueueTests extends LongListChecker {
     }
   }
 
-  public void test() {
+  public void testPiteratorIndex2() {
     int mSize = 16;
     for (int startIdx = 0; startIdx < mSize; startIdx++) {
       for (int pinnedIdx = 0; pinnedIdx < mSize; pinnedIdx++) {

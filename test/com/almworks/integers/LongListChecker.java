@@ -19,6 +19,8 @@ package com.almworks.integers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+
 /**
  * Base class for testing {@code LongList} implementation.
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -48,11 +50,11 @@ public abstract class LongListChecker extends IntegersFixture {
     int attemptsCount = 10;
     int size = 100;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      checkValues(generateRandomLongArray(size, SortedStatus.UNORDERED).extractHostArray());
+      checkValues(generateRandomLongArray(size, UNORDERED).extractHostArray());
     }
   }
 
-  protected void _testGetMethods(long ... values) {
+  protected void checkGetMethods(long... values) {
     LongList expected = LongArray.create(values);
     for (LongList arr : createLongListVariants(values)) {
       for (int i = 0; i < arr.size(); i++) {
@@ -70,12 +72,12 @@ public abstract class LongListChecker extends IntegersFixture {
   }
 
   public void testGetMethodsSimpleCase() {
-    _testGetMethods(0, 10, 30, 20, 5, 4, 1, 6);
-    _testGetMethods(0, -10, 20, 30, 50);
-    _testGetMethods(0, 9, 9, 5, 4, -1);
+    checkGetMethods(0, 10, 30, 20, 5, 4, 1, 6);
+    checkGetMethods(0, -10, 20, 30, 50);
+    checkGetMethods(0, 9, 9, 5, 4, -1);
   }
 
-  private void _testToMethods(long ... values) {
+  private void checkToMethods(long... values) {
     LongList expected = LongArray.create(values);
     int length = values.length;
     long[] tmp = new long[length];
@@ -87,12 +89,12 @@ public abstract class LongListChecker extends IntegersFixture {
   }
 
   public void testRandom() {
-    int arrLength = 200, tests = 5;
-    for (int test = 0; test < tests; test++) {
-      long[] arr = generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
-      _testGetMethods(arr);
+    int arrLength = 200, attemptsCount = 5;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      long[] arr = generateRandomLongArray(arrLength, UNORDERED).extractHostArray();
+      checkGetMethods(arr);
       checkValues(arr);
-      _testToMethods(arr);
+      checkToMethods(arr);
     }
   }
 
@@ -145,10 +147,10 @@ public abstract class LongListChecker extends IntegersFixture {
   public void testGet() {
     for (int attempt = 0; attempt < 10; attempt++) {
       for (LongList list:
-          createLongListVariants(generateRandomLongArray(1000, IntegersFixture.SortedStatus.UNORDERED).extractHostArray()))
+          createLongListVariants(generateRandomLongArray(1000, UNORDERED).extractHostArray()))
       {
         if (!(list instanceof AbstractLongList)) return;
-        IntArray indices = generateRandomIntArray(100, SortedStatus.UNORDERED, 0, 1000);
+        IntArray indices = generateRandomIntArray(100, UNORDERED, 0, 1000);
         AbstractLongList abstractList = (AbstractLongList)list;
         LongList actual = abstractList.get(indices);
         for (int j = 0; j < actual.size(); j++) {
@@ -160,7 +162,7 @@ public abstract class LongListChecker extends IntegersFixture {
 
   public void testGetLast() {
     for (int attempt = 0; attempt < 10; attempt++) {
-      long[] array = generateRandomLongArray(1000, IntegersFixture.SortedStatus.UNORDERED).extractHostArray();
+      long[] array = generateRandomLongArray(1000, UNORDERED).extractHostArray();
       for (LongList list:
           createLongListVariants(array)) {
         if (!(list instanceof AbstractLongList)) return;

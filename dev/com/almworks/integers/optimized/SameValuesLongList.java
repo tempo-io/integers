@@ -28,6 +28,7 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntIterators.range;
+import static com.almworks.integers.IntIterators.repeat;
 
 /**
  * This list is memory-optimized to contain values where each value is
@@ -80,7 +81,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
    * @see #create(com.almworks.integers.util.LongSizedIterable, com.almworks.integers.IntIterable)
    */
   public static SameValuesLongList create(LongSizedIterable values) throws IllegalArgumentException {
-    return create(values, IntCollections.repeat(1, values.size()));
+    return create(values, repeat(1));
   }
 
   public void init(LongSizedIterable values, IntIterable counts) throws IllegalArgumentException {
@@ -279,7 +280,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     int newSize = newValues.size();
 
     myMap.startMutation().
-      replace(IntProgression.arithmetic(0, newSize), newValues).
+      replaceKeysAndValues(IntProgression.arithmetic(0, newSize), newValues).
       commit();
     updateSize(newSize);
   }
@@ -290,7 +291,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
     values.sort(sortAlso);
     myMap.clear();
     updateSize(0);
-    init(values, IntIterators.repeat(1));
+    init(values, repeat(1));
   }
 
   /**

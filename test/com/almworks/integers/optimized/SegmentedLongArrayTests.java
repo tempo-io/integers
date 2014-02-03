@@ -6,9 +6,7 @@ import com.almworks.integers.util.IntegersDebug;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.almworks.integers.IntegersFixture.SortedStatus;
-import static com.almworks.integers.LongIterators.concat;
-import static com.almworks.integers.LongIterators.repeat;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -69,10 +67,9 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
   public void testBigArrays() {
     int maxValue = 1000;
     for (int i = 0; i < 10; i++) {
-      long[] ar = generateRandomLongArray(checkedSize, SortedStatus.UNORDERED, maxValue).extractHostArray();
-      System.out.println(LongCollections.toBoundedString(new LongArray(ar)));
+      long[] ar = generateRandomLongArray(checkedSize, UNORDERED, maxValue).extractHostArray();
       checkValues(ar);
-      _testGetMethods(ar);
+      checkGetMethods(ar);
     }
   }
 
@@ -295,21 +292,22 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
   }
 
   public void testSimpleResize() {
-    LongArray values = LongArray.create(-1, 0, 10, -10, 20, 30);
+    long[] values0 = {-1, 0, 10, -10, 20, 30};
+    LongArray values = new LongArray(values0);
     LongArray toAdd = LongArray.create(0, -4, -10, 20);
     LongList expected = LongCollections.concatLists(values, toAdd);
-    for (WritableLongList list : createWritableLongListVariants(values.toNativeArray())) {
+    for (WritableLongList list : createWritableLongListVariants(values0)) {
       CHECK.order(values, list);
       list.addAll(toAdd);
       CHECK.order(expected, list);
     }
 
     LongList valuesList = LongProgression.range(1024);
-    long[] values2 = valuesList.toNativeArray();
-    long[] expected2 = LongCollections.collectLists(valuesList, new LongList.Single(1025)).extractHostArray();
-    for (WritableLongList list : createWritableLongListVariants(values2)) {
+    values0 = valuesList.toNativeArray();
+    long[] expected0 = LongCollections.collectLists(valuesList, new LongList.Single(1025)).extractHostArray();
+    for (WritableLongList list : createWritableLongListVariants(values0)) {
       list.add(1025);
-      CHECK.order(list, expected2);
+      CHECK.order(list, expected0);
     }
   }
 
@@ -358,6 +356,15 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
     it.move(1024);
     for (int i = -10, cur = 1013; i < 5; i++) {
       assertEquals(it.get(i), cur++);
+    }
+  }
+
+  public void testCreate() {
+    int[] sizes = {15, 100, 200, 1022, 1025, 2000, 2050};
+    for (int size : sizes) {
+      LongArray expected = generateRandomLongArray(size, UNORDERED);
+      array = SegmentedLongArray.create(expected);
+      CHECK.order(expected, array);
     }
   }
 }

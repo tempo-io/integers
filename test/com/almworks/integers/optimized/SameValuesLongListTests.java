@@ -5,6 +5,9 @@ import com.almworks.integers.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
@@ -144,14 +147,14 @@ public class SameValuesLongListTests extends WritableLongListChecker {
 
   public void testSetAll() {
     for (int i = 0; i < 10; i++) {
-      LongArray array = generateRandomLongArray(1000, IntegersFixture.SortedStatus.UNORDERED, 500);
+      LongArray array = generateRandomLongArray(1000, UNORDERED, 500);
       array.sort();
       list.addAll(array);
       int index = RAND.nextInt(list.size());
       int len = list.size() - index;
       LongList insertArray;
       if (len > 1) {
-        insertArray = generateRandomLongArray(len, IntegersFixture.SortedStatus.UNORDERED, len / 2);
+        insertArray = generateRandomLongArray(len, UNORDERED, len / 2);
       } else {
         insertArray = LongList.EMPTY;
       }
@@ -252,9 +255,9 @@ public class SameValuesLongListTests extends WritableLongListChecker {
 
     int attemptsCount = 12;
     for (int i = 0; i < attemptsCount; i++) {
-      values = generateRandomLongArray(100, IntegersFixture.SortedStatus.UNORDERED);
-      counts = generateRandomIntArray(100, SortedStatus.UNORDERED, 4);
-      if (i == 11) {
+      values = generateRandomLongArray(100, UNORDERED);
+      counts = generateRandomIntArray(100, UNORDERED, 4);
+      if (i == attemptsCount - 1) {
         values.add(RAND.nextLong());
         counts.add(0);
       }
@@ -267,19 +270,19 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     }
 
     for (int i = 0; i < attemptsCount; i++) {
-      values = generateRandomLongArray(100, SortedStatus.SORTED, 150);
+      values = generateRandomLongArray(100, SORTED, 150);
       counts = new IntArray(IntCollections.repeat(1, 100));
       actual = SameValuesLongList.create(values, counts);
       CHECK.order(values, actual);
     }
 
-    expected = generateRandomLongArray(100, IntegersFixture.SortedStatus.UNORDERED);
+    expected = generateRandomLongArray(100, UNORDERED);
     CHECK.order(expected, SameValuesLongList.create(expected));
   }
 
   public void testCreateException() {
     try {
-      list = SameValuesLongList.create(LongArray.create(1, 2, 3), IntArray.create(1));
+      list = SameValuesLongList.create(LongArray.create(1, 2, 3), IntArray.create(1, 2));
       System.out.println(list);
       fail();
     } catch (IllegalArgumentException _) {

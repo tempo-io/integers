@@ -19,10 +19,12 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.util.LongListRemovingDecorator.createFromPrepared;
 import static com.almworks.integers.util.LongListRemovingDecorator.prepareSortedIndices;
@@ -81,6 +83,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
       res.add(resArray);
     }
 
+    // random removes
     if (4 < values.length && values.length < 100) {
       int count = 4;
       for (int i = 0; i < count; i++) {
@@ -116,7 +119,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     int indexesLength = 50;
     int maxValue = 1000;
 
-    LongArray base = generateRandomLongArray(arrLength, IntegersFixture.SortedStatus.UNORDERED, maxValue);
+    LongArray base = generateRandomLongArray(arrLength, UNORDERED, maxValue);
     for (int test = 0; test < 20; test++) {
       IntArray indexes = generateRandomIntArray(indexesLength, SORTED_UNIQUE, arrLength);
       LongArray expected = LongArray.copy(base);
@@ -163,19 +166,15 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     for (long[] values : valuesArray) {
       LongArray array = LongArray.create(values);
       for (int[] indices : indicesToRemove) {
-        IntArray removedIndices = LongListRemovingDecorator.prepareUnsortedIndices(indices);
+        IntList removedIndices = LongListRemovingDecorator.prepareUnsortedIndices(indices);
         LongListRemovingDecorator rem = createFromPrepared(array, removedIndices);
 
         LongArray expected = LongArray.copy(values);
-        for (int idx : indices) {
-          expected.set(idx, -1);
-        }
-        expected.removeAll(-1);
+        removedIndices = IntCollections.toSorted(false, new IntArray(indices));
+        expected.removeAllAtSorted(removedIndices);
         CHECK.order(expected, rem);
 
-        removedIndices = IntArray.copy(indices);
-        removedIndices.sort();
-        checkRemovedIndexes(rem, removedIndices.extractHostArray());
+        checkRemovedIndexes(rem, removedIndices.toNativeArray());
         assertEquals(indices.length, rem.getRemoveCount());
       }
     }
@@ -200,13 +199,9 @@ public class LongListRemovingDecoratorTests extends LongListChecker {
     IntArray prepared = IntArray.create(2);
     prepareSortedIndices(prepared);
     LongListRemovingDecorator rem = createFromPrepared(range(0, 4), prepared);
-    System.out.println(rem);
-
     LongListIterator it = rem.iterator();
     it.next();
-    System.out.println(it.get(0));
-    System.out.println(it.get(1));
-
+    assertEquals(3, it.get(2));
     it.next();
     assertEquals(3, it.get(1));
   }
