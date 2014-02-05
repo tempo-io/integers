@@ -17,6 +17,8 @@
 package com.almworks.integers;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.LongTreeSet.ColoringType.BALANCED;
@@ -26,13 +28,13 @@ import static com.almworks.integers.LongTreeSet.ColoringType.TO_REMOVE;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class LongTreeSetTests extends WritableLongSetChecker {
+public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
 
-  protected WritableLongSortedSet createSet() {
+  protected LongTreeSet createSet() {
     return createSetWithCapacity(-1);
   }
 
-  protected WritableLongSortedSet createSetWithCapacity(int capacity) {
+  protected LongTreeSet createSetWithCapacity(int capacity) {
     LongTreeSet newSet;
     newSet = capacity == -1 ? new LongTreeSet() : new LongTreeSet(capacity);
     try {
@@ -47,12 +49,11 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     }
   }
 
-  protected WritableLongSortedSet[] createSetFromSortedUniqueList(LongList sortedList) {
-    return new WritableLongSortedSet[]{
+  protected List<LongTreeSet> createSetFromSortedUniqueList(LongList sortedList) {
+    return Arrays.asList(
         LongTreeSet.createFromSortedUnique(sortedList),
         LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_ADD),
-        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_REMOVE)
-    };
+        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_REMOVE));
   }
 
   public void testRandom2() {
@@ -80,7 +81,7 @@ public class LongTreeSetTests extends WritableLongSetChecker {
   }
 
   public void testEdgeCasesWithCompactify() {
-    LongTreeSet set = new LongTreeSet();
+    set = new LongTreeSet();
     assertFalse(set.exclude(MIN));
     assertFalse(set.exclude(0));
     set.removeAll(12, 23, 12, 51);
@@ -113,8 +114,6 @@ public class LongTreeSetTests extends WritableLongSetChecker {
     int listSize = 510, nAttempts = 12;
     LongTreeSet.ColoringType[] types = {TO_ADD, TO_REMOVE, BALANCED};
 
-    LongTreeSet set;
-
     for (int attempt = 0; attempt < nAttempts; attempt++) {
       LongArray sortedUniqueArray = generateRandomLongArray(listSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
       if (attempt % 4 == 0) {
@@ -128,7 +127,7 @@ public class LongTreeSetTests extends WritableLongSetChecker {
   }
 
   public void testRetainSimple2() {
-    LongTreeSet set = new LongTreeSet();
+    set = new LongTreeSet();
     set.addAll(range(20));
     set.removeAll(range(0, 20, 2));
     checkSet(set, range(1, 20, 2));

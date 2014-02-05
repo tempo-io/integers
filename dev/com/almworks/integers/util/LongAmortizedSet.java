@@ -147,18 +147,9 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
       myRemovedTemp.sort();
       return myRemovedTemp.iterator();
     }
-
-//  } else {
-//    if (myRemovedTemp == null) {
-//      myRemovedTemp = new long[myChunkSize];
-//    }
-//    myRemoved.toNativeArray(myRemovedTemp);
-//    int removedSize = myRemoved.size();
-//    Arrays.sort(myRemovedTemp, 0, removedSize);
-//    return new LongArrayIterator(myRemovedTemp, 0, removedSize);
-//  }
   }
 
+  // todo refactor after rebuild - we can return FindingIntIterator without buffering points to remove
   private IntIterator sortedIndicesToRemove() {
     if (myRemoved.isEmpty()) {
       return IntIterator.EMPTY;
@@ -309,7 +300,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   public String toDebugString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("LongAmortizedSet\n");
+    builder.append("LongAmortizedSet ").append("<").append(size()).append(">\n");
     builder.append("myBaseList: ").append(LongCollections.toBoundedString(myBaseList)).append('\n');
     builder.append("myAdded: ").append(LongCollections.toBoundedString(myAdded)).append('\n');
     builder.append("myRemoved: ").append(LongCollections.toBoundedString(sortedRemovedIterator()));

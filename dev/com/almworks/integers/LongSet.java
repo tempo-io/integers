@@ -36,7 +36,7 @@ public interface LongSet extends LongSizedIterable {
 
    /**
    * Writes values from this set (without duplicates) to dest.
-   * @param dest {@code long[]} array. It's {@code dest.length} should be greater than
+   * @param dest {@code long[]} array. Its {@code dest.length} should be greater than
    * {@link #size()}{@code + destPos}
    * @param destPos starting position in the destination data.
    * @return dest

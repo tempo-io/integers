@@ -17,19 +17,22 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
+import com.almworks.integers.func.LongFunctions;
+import com.almworks.integers.util.LongChainHashSet;
 
 import java.util.*;
 
+import static com.almworks.integers.LongCollections.map;
 import static com.almworks.integers.LongProgression.range;
 
-public abstract class WritableLongSetChecker extends IntegersFixture {
-  protected abstract WritableLongSet createSet();
+public abstract class WritableLongSetChecker<T extends WritableLongSet> extends IntegersFixture {
+  protected abstract T createSet();
 
-  protected abstract WritableLongSet createSetWithCapacity(int capacity);
+  protected abstract T createSetWithCapacity(int capacity);
 
-  protected abstract WritableLongSet[] createSetFromSortedUniqueList(LongList sortedList) ;
+  protected abstract List<T> createSetFromSortedUniqueList(LongList sortedList) ;
 
-  protected WritableLongSet set;
+  protected T set;
 
   private SetOperationsChecker setOperations = new SetOperationsChecker();
 
@@ -67,21 +70,15 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
   }
 
   public void testContains() {
-    int arSize = 100, maxVal = Integer.MAX_VALUE, attempts = 10;
+    int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       LongArray arr = generateRandomLongArray(arSize, IntegersFixture.SortedStatus.SORTED_UNIQUE, maxVal);
-      set.addAll(arr);
-      for (int i = 0; i < arr.size(); i++) {
-        for (int j = -1; j < 2; j++) {
-          long value = arr.get(i) + j;
-          assertEquals(arr.binarySearch(value) >= 0, set.contains(value));
-        }
-      }
-      for (int i = 0; i < arr.size(); i++) {
-        for (int j = -1; j < 2; j++) {
-          long value = arr.get(i) + j;
-          set.remove(value);
-          assertFalse(set.contains(value));
+      LongArray arr2 = LongCollections.collectLists(arr, map(LongFunctions.INC, arr), map(LongFunctions.DEC, arr));
+      arr2.sortUnique();
+      for (WritableLongSet curSet : createSetFromSortedUniqueList(arr)) {
+        for (int i = 0; i < arr2.size(); i++) {
+          long value = arr2.get(i);
+          assertEquals(arr.binarySearch(value) >= 0, curSet.contains(value));
         }
       }
     }
@@ -197,7 +194,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
       set.add(i);
     }
     for (int i = 0; i < 20; i++) {
-      assertTrue(i % 2 == 0 ? set.contains(i) : !set.contains(i));
+      assertEquals(i % 2 == 0, set.contains(i));
     }
     LongArray expected = new LongArray(ap(0, 2, 10));
     checkSet(set, expected);
@@ -226,17 +223,10 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
   public void testSimple3() {
     int size = 20, maxVal = 1000, attemptsCount = 10;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      if (attempt % 2 == 0) {
-        set = createSet();
-      } else {
-        set.clear();
+      LongArray expected = generateRandomLongArray(size, SortedStatus.SORTED_UNIQUE, maxVal);
+      for (LongSet set : createSetFromSortedUniqueList(expected)) {
+        checkSet(set, expected);
       }
-      LongArray expected = generateRandomLongArray(size, SortedStatus.UNORDERED, maxVal);
-      set.addAll(expected);
-      expected.sortUnique();
-      LongArray actual = new LongArray(set.iterator());
-      actual.sortUnique();
-      CHECK.order(expected, actual);
     }
   }
 
@@ -295,6 +285,7 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
 
   public void testRandom() {
     // maxVal, setSize, listSize, nAttempts
+    testRandom(100, 5, 20, 10);
     testRandom(100, 20, 20, 10);
     testRandom(700, 100, 100, 10);
     testRandom(Integer.MAX_VALUE, 510, 510, 10);
@@ -421,12 +412,12 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
   public void testRetainComplex() {
     set = createSet();
     final boolean isSorted = set instanceof LongSortedSet;
-    if (isSorted) return;
-    final SortedStatus sortedStatus = isSorted ? SortedStatus.SORTED : SortedStatus.UNORDERED;
+    final SortedStatus sortedStatus = isSorted ? SortedStatus.SORTED_UNIQUE : SortedStatus.UNORDERED;
     setOperations.check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        WritableLongSet set = createSetFromSortedUniqueList(arrays[0])[0];
+        WritableLongSet set = createSetWithCapacity(arrays[0].size());
+        set.addAll(arrays[0]);
         set.retain(arrays[1]);
         return isSorted ? set.iterator() : LongCollections.toSorted(false, set).iterator();
       }
@@ -537,37 +528,6 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     }
   }
 
-  public void testTailIteratorRandom() {
-    if (!(set instanceof WritableLongSortedSet)) return;
-    WritableLongSortedSet sortedSet = (WritableLongSortedSet)set;
-    final int size = 300,
-        testCount = 5;
-    LongArray expected = new LongArray(size);
-    LongArray testValues = new LongArray(size * 3);
-    for (int i = 0; i < testCount; i++) {
-      expected.clear();
-      testValues.clear();
-      sortedSet.clear();
-      for (int j = 0; j < size; j++) {
-        long val = RAND.nextLong();
-        expected.add(val);
-        testValues.addAll(val - 1, val, val + 1);
-      }
-      sortedSet.addAll(expected);
-      expected.sortUnique();
-      testValues.sortUnique();
-
-      for (LongIterator it : testValues) {
-        long key0 = it.value();
-        for (long key = key0 - 1; key <= key0 + 1; key++) {
-          int ind = expected.binarySearch(key);
-          if (ind < 0) ind = -ind - 1;
-          CHECK.order(expected.iterator(ind), sortedSet.tailIterator(key));
-        }
-      }
-    }
-  }
-
   public void testRemoveRandom() {
     int attempts = 3, maxVal = Integer.MAX_VALUE;
     boolean deepCheck = false;
@@ -654,29 +614,22 @@ public abstract class WritableLongSetChecker extends IntegersFixture {
     CHECK.order(new LongArray(ap(5, 1, 5)).iterator(), it1);
   }
 
-  public void testTailIteratorRandom2() {
+  public void testTailIteratorRandom() {
     if (!(set instanceof LongSortedSet)) return;
-    WritableLongSortedSet sortedSet = (WritableLongSortedSet)set;
-    final int size = 600,
-      testCount = 5;
-    LongArray expected = new LongArray(size);
-    LongArray testValues = new LongArray(size * 3);
+    final int size = 200,
+        testCount = 5;
+    LongArray expected;
+    LongArray testValues;
     for (int i = 0; i < testCount; i++) {
-      expected.clear();
-      testValues.clear();
-      sortedSet.clear();
-      for (int j = 0; j < size; j++) {
-        long val = RAND.nextLong();
-        expected.add(val);
-        testValues.addAll(val - 1, val, val + 1);
-      }
-      sortedSet.addAll(expected);
+      expected = new LongArray(LongIterators.limit(randomIterator(), size));
       expected.sortUnique();
+      testValues = LongCollections.collectLists(
+          expected, map(LongFunctions.INC, expected), map(LongFunctions.DEC, expected));
       testValues.sortUnique();
-
-      for (LongIterator it : testValues) {
-        long key0 = it.value();
-        for (long key = key0 - 1; key <= key0 + 1; key++) {
+      for (T set0 : createSetFromSortedUniqueList(expected)) {
+        LongSortedSet sortedSet = (LongSortedSet) set0;
+        for (int j = 0; j < testValues.size(); j++) {
+          long key = testValues.get(j);
           int ind = expected.binarySearch(key);
           CHECK.order(expected.iterator(ind >= 0 ? ind : -ind - 1), sortedSet.tailIterator(key));
         }

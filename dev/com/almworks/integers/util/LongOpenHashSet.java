@@ -10,7 +10,6 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   public final static float DEFAULT_LOAD_FACTOR = 0.75f;
 
   private long[] myKeys;
-  private int myKeysLength;
   private BitSet myAllocated;
   private final float myLoadFactor;
   private int myThreshold;
@@ -33,16 +32,19 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
         throw new IllegalArgumentException("Illegal load factor: " +
             loadFactor);
 
-    myKeysLength = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
-    assert (myKeysLength & (myKeysLength - 1)) == 0;
+    int keysLength = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
+    assert (keysLength & (keysLength - 1)) == 0;
 
     this.myLoadFactor = loadFactor;
-    myThreshold = (int)(myKeysLength * loadFactor);
-//    myHead = new int[this.myHeadNum];
-    myKeys = new long[myKeysLength];
-    myMask = myKeysLength - 1;
-    myAllocated = new BitSet(myKeysLength);
-    //    myNext = new int[myThreshold];
+    init(new long[keysLength], new BitSet(keysLength), (int) (keysLength * loadFactor));
+  }
+
+  private void init(long[] keys, BitSet allocated, int threshold) {
+    myKeys = keys;
+    myAllocated = allocated;
+    myThreshold = threshold;
+    myMask = keys.length - 1;
+    assert (myMask & (myMask + 1)) == 0;
   }
 
   public static LongOpenHashSet createForAdd(int count, float loadFactor) {
@@ -69,7 +71,6 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
 
   protected int hash(long value) {
     return IntegersUtils.hash(value);
-//    return ((int)(value ^ (value >>> 32))) + 1;
   }
 
   private int index(int hash, int mask) {
@@ -81,37 +82,32 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   private void resize(int newCapacity) {
     assert (newCapacity & (newCapacity - 1)) == 0 && newCapacity > 0;
     int mask = newCapacity - 1;
-    int thresholdNew = (int)(newCapacity * myLoadFactor);
 
-    long[] myKeysNew = new long[newCapacity];
-    BitSet myAllocatedNew = new BitSet(newCapacity);
+    long[] keysNew = new long[newCapacity];
+    BitSet alocatedNew = new BitSet(newCapacity);
 
     for (LongIterator it: iterator()) {
       long value = it.value();
       int slot = index(hash(value), mask);
-      while (myAllocatedNew.get(slot)) {
+      while (alocatedNew.get(slot)) {
         slot = index(slot + 1, mask);
       }
-      myKeysNew[slot] = value;
-      myAllocatedNew.set(slot);
+      keysNew[slot] = value;
+      alocatedNew.set(slot);
     }
 
-    myKeys = myKeysNew;
-    myKeysLength = myKeys.length;
-    myAllocated = myAllocatedNew;
-    myThreshold = thresholdNew;
-    myMask = mask;
+    init(keysNew, alocatedNew, (int)(newCapacity * myLoadFactor));
   }
 
   @Override
   protected boolean include0(long value) {
-    if (size() + 1 >= myThreshold) {
-      resize(myKeysLength << 1);
+    if (size() + 1 > myThreshold) {
+      resize(myKeys.length << 1);
     }
     return include1(value);
   }
 
-  protected boolean include1(long value) {
+  private boolean include1(long value) {
     int slot = index(hash(value), myMask);
     while (myAllocated.get(slot)) {
       if (value == myKeys[slot]) return false;
@@ -135,12 +131,11 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
       slotCurr = index(slotCurr + 1, myMask);
 
       while (myAllocated.get(slotCurr)) {
-        slotOther = hash(myKeys[slotCurr]) & myMask;
+        slotOther = index(hash(myKeys[slotCurr]), myMask);
         if (slotPrev <= slotCurr) {
           // We are on the right of the original slot.
           if (slotPrev >= slotOther || slotOther > slotCurr) break;
-        }
-        else {
+        } else {
           // We have wrapped around.
           if (slotPrev >= slotOther && slotOther > slotCurr) break;
         }
@@ -198,7 +193,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   @Override
   protected void toNativeArrayImpl(long[] dest, int destPos) {
     int j = destPos;
-    for (int i = 0; i < myKeysLength; i++) {
+    for (int i = 0; i < myKeys.length; i++) {
       if (myAllocated.get(i)) dest[j++] = myKeys[i];
     }
   }

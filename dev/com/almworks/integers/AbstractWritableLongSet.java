@@ -15,10 +15,6 @@ public abstract class AbstractWritableLongSet extends AbstractLongSet implements
    */
   protected abstract boolean exclude0(long value);
 
-  protected abstract void toNativeArrayImpl(long[] dest, int destPos);
-
-  public abstract LongIterator iterator();
-
   protected void add0(long value) {
     include0(value);
   }

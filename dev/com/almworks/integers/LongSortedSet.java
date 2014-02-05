@@ -20,7 +20,7 @@ public interface LongSortedSet extends LongSet {
   LongIterator tailIterator(long fromElement);
 
   /**
-   * @return the greatest element of this set if it exist or {@link Long#MIN_VALUE} in case the set is empty
+   * @return the greatest element of this set if it exists or {@link Long#MIN_VALUE} in case the set is empty
    */
   public long getUpperBound();
 
@@ -30,13 +30,13 @@ public interface LongSortedSet extends LongSet {
   public long getLowerBound();
 
     /**
-     * Writes values from this set to the {@code dest} in the sorted order
+     * Writes values from this set to the {@code dest} in the ascending order.<br>
      * {@inheritDoc}
      */
   long[] toNativeArray(long[] dest, int destPos);
 
   /**
-   * Writes values from this set to the {@code dest} in the sorted order
+   * Writes values from this set to {@code dest} in the sorted order
    * @see {@link #toNativeArray(long[], int)}
    */
   @Override

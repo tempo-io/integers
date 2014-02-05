@@ -1,6 +1,7 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -48,12 +49,29 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
   }
 
+  public static LongChainHashSet createFrom(LongIterable keys) {
+    int capacity = LongCollections.sizeOfIterable(keys, 0);
+    LongChainHashSet set = createForAdd(capacity);
+    for (LongIterator it : keys.iterator()) {
+      set.add(it.value());
+    }
+    return set;
+  }
 
+
+  /**
+   * Creates new hashset with the specified loafFactor
+   * that is garanteed to not invoke {@code resize} after adding {@code} count elements
+   * @return new hashset with the specified capacity dependent on {@code count} and {@code loadFactor}
+   */
   public static LongChainHashSet createForAdd(int count, float loadFactor) {
     int initialCapacity = (int)(count / loadFactor) + 1;
     return new LongChainHashSet(initialCapacity, loadFactor);
   }
 
+  /**
+   * @see #createForAdd(int, float)
+   */
   public static LongChainHashSet createForAdd(int count) {
     return createForAdd(count, DEFAULT_LOAD_FACTOR);
   }
@@ -82,6 +100,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     myHead = headNew;
     myThreshold = thresholdNew;
     myMask = mask;
+    myRemoved.clear();
   }
 
   protected boolean include0(long value) {
@@ -98,7 +117,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
       assert myFront < myThreshold;
       res = myFront++;
     } else {
-      res = myRemoved.nextSetBit(0);
+      res = myRemoved.nextSetBit(1);
       myRemoved.clear(res);
     }
     myKeys[res] = value;
@@ -121,6 +140,12 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     }
     myNext[prev] = createNode(value);
     return true;
+  }
+
+  @Override
+  public void addAll(long... values) {
+    modified();
+    addAll(new LongArray(values));
   }
 
   @Override
@@ -184,6 +209,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     return mySize;
   }
 
+  @NotNull
   public LongIterator iterator() {
     return failFast(new FindingLongIterator() {
       private int myCurIndex = 1;
@@ -240,7 +266,10 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     return false;
   }
 
+  /**
+   * @return count of elements that is can contains this set will be resized.
+   */
   public int getThreshold() {
-    return myThreshold;
+    return myThreshold - 1;
   }
 }

@@ -159,7 +159,6 @@ dev/com/almworks/integers/util/ReadonlyIntListRemovingDecorator.java -text
 dev/com/almworks/integers/util/SortedIntListIntersectionIterator.java -text
 dev/com/almworks/integers/util/SortedIntListMinusIterator.java -text
 dev/com/almworks/integers/util/WritableLongListRemovingDecorator.java -text
-dev/com/almworks/integers/wrappers/HPPCLongOpenHashSet.java -text
 dev/com/almworks/integers/wrappers/IntHppcWrappers.java -text
 dev/com/almworks/integers/wrappers/IntLongHppcOpenHashMap.java -text
 dev/com/almworks/integers/wrappers/IntLongHppcWrappers.java -text
@@ -274,7 +273,6 @@ test/com/almworks/integers/util/LongUnionIteratorTests.java -text
 test/com/almworks/integers/util/LongUnionIteratorTwoTests.java -text
 test/com/almworks/integers/util/WritableLongListRemovingDecoratorTests.java -text
 test/com/almworks/integers/wrappers/IntLongHppcOpenHashMapTests.java -text
-test/com/almworks/integers/wrappers/LongHppcOpenHashSetTests.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text
 util/com/almworks/util/BadFormatException.java -text

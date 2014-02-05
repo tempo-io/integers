@@ -120,7 +120,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
    * To create {@code LongTreeSet} with the specified capacity use
    * {@link com.almworks.integers.LongTreeSet#createFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
    * @return {@code LongTreeSet} with elements from {@code src}.
-   * If {@code src} inherited from {@code LongSizedIterable} capacity of new set equals to {@code src.size()}.
+   * If {@code src} inherited from {@code LongSizedIterable}, capacity of new set equals to {@code src.size()}.
    */
   public static LongTreeSet createFromSortedUnique(LongIterable src) {
     return createFromSortedUnique(src,
@@ -428,7 +428,6 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   void compactify(ColoringType coloringType) {
     modified();
     initFromSortedUnique(this, size(), coloringType);
-    assert checkRedsAmount(coloringType);
   }
 
   private void initFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
@@ -907,57 +906,6 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
         return level + 1;
       }
     });
-  }
-
-//  int levels = log(2, usedSize), step = coloringType.redLevelsDensity();
-//  boolean[] levelsColoring = new boolean[levels];
-//
-//  // coloring of levels: (1 - black, 0 - red)
-//  // TO_ADD:      1...1111110 (or 1...1111111 if last level completely filled)
-//  // TO_REMOVE:   1...0101010
-//  // TO_BALANCED: 1...0111011101110
-//  Arrays.fill(levelsColoring, true);
-//  if (coloringType == ColoringType.TO_ADD) {
-//    // if last level completely filled (usedSize = 2^k - 1) and cT = TO_ADD color is black otherwise red
-//    levelsColoring[levels - 1] = (usedSize & (usedSize + 1)) == 0;
-//  } else {
-//    for (IntIterator it: range(levels - 1, 0, -step)) {
-//      levelsColoring[it.value()] = false;
-//    }
-//  }
-
-  /**
-   * Calculates the expected amount of red nodes in a tree of a size sz after it is compactified with coloringType.
-   */
-  static int redsExpected(int sz, ColoringType coloringType) {
-    int result = 0;
-    if (coloringType == ColoringType.BALANCED || coloringType == ColoringType.TO_REMOVE) {
-      int redLevelsDensity = coloringType.redLevelsDensity();
-      int internalLevels = log(2, sz);
-      if (Math.pow(2,internalLevels) != sz + 1)
-        internalLevels = internalLevels - 2;
-      int internalRedLevels = (internalLevels+redLevelsDensity-2)/redLevelsDensity;
-      while (internalRedLevels > 0) {
-        int levelHeight = (internalRedLevels-1)*redLevelsDensity + 2;
-        result += Math.pow(2, levelHeight-1);
-        internalRedLevels--;
-      }
-    }
-    int top = (int)Math.pow(2, log(2, sz));
-    if (top != sz+1)
-      result += sz - top/2 + 1;
-    return result;
-  }
-
-  /**
-   * Checks that amount of red nodes in newly constructed set is correct.
-   */
-  private boolean checkRedsAmount(ColoringType coloringType) {
-    int sz = size();
-    int expected = redsExpected(sz, coloringType);
-    int actual = sz - myBlack.cardinality() + 1;
-//    assert expected == actual : sz + " " + actual + " " + expected;
-    return true;
   }
 
   private class LURIterator extends AbstractIntIterator {
