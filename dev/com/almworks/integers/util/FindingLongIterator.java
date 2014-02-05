@@ -29,8 +29,8 @@ public abstract class FindingLongIterator extends AbstractLongIterator {
   protected long myCurrent = Long.MAX_VALUE;
   private long myNext = Long.MAX_VALUE;
 
-  // (2, 1) bits: (myNotEnded, myValueStored)
-  private int myIteratorStatus = 2;
+  private static int FINISHED = 0, NO_VALUE = 1, VALUE_STORED = 2;
+  private int myIteratorStatus = NO_VALUE;
   private boolean myIterated = false;
 
   /**
@@ -40,33 +40,33 @@ public abstract class FindingLongIterator extends AbstractLongIterator {
   protected abstract boolean findNext();
 
   public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIteratorStatus == 2) {
+    if (myIteratorStatus == NO_VALUE) {
       boolean hasNext = findNext();
       if (hasNext) {
-        myIteratorStatus = 3;
+        myIteratorStatus = VALUE_STORED;
         return true;
       } else {
-        myIteratorStatus = 0;
+        myIteratorStatus = FINISHED;
         return false;
       }
     }
-    assert myIteratorStatus == 3 || myIteratorStatus == 0;
-    return myIteratorStatus == 3;
+    assert myIteratorStatus == VALUE_STORED || myIteratorStatus == FINISHED;
+    return myIteratorStatus == VALUE_STORED;
   }
 
   public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIteratorStatus == 3) {
+    if (myIteratorStatus == VALUE_STORED) {
       myNext = myCurrent;
-      myIteratorStatus = 2;
+      myIteratorStatus = NO_VALUE;
     } else {
-      if (myIteratorStatus == 0) {
+      if (myIteratorStatus == FINISHED) {
         throw new NoSuchElementException();
       }
       boolean hasNext = findNext();
       if (!hasNext) {
         throw new NoSuchElementException();
       }
-      assert myIteratorStatus == 2;
+      assert myIteratorStatus == NO_VALUE;
       myNext = myCurrent;
     }
     myIterated = true;

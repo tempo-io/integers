@@ -214,7 +214,7 @@ public class LongIterators {
     switch (iterables.length) {
       case 0: return LongIterator.EMPTY;
       case 1: return iterables[0].iterator();
-      case 2: return LongUnionIteratorTwo.create(iterables[0], iterables[1]);
+      case 2: return new LongUnionIteratorTwo(iterables[0], iterables[1]);
       default: return new LongUnionIterator(iterables);
     }
   }

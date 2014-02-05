@@ -9,7 +9,7 @@ public class LongUnionIteratorTwoTests extends IntegersFixture {
     expected = LongArray.copy(a);
     expected.addAll(b);
     expected.sortUnique();
-    LongArray union = new LongArray(LongUnionIteratorTwo.create(a, b));
+    LongArray union = new LongArray(new LongUnionIteratorTwo(a, b));
     CHECK.order(union, expected);
   }
 
@@ -17,7 +17,7 @@ public class LongUnionIteratorTwoTests extends IntegersFixture {
     new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        return LongUnionIteratorTwo.create(arrays[0], arrays[1]);
+        return new LongUnionIteratorTwo(arrays[0], arrays[1]);
       }
     }, new SetOperationsChecker.UnionGetter(), true, SortedStatus.SORTED_UNIQUE);
   }

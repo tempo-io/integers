@@ -318,7 +318,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
       myValues.reverse();
     }
 
-    public ConsistencyViolatingMutator replace(IntList keys, LongList values) {
+    public ConsistencyViolatingMutator replaceKeysAndValues(IntList keys, LongList values) {
       myKeys.clear();
       myValues.clear();
       myKeys.addAll(keys);

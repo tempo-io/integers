@@ -29,7 +29,7 @@ public class LongMinusIteratorTests extends TestCase {
     new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        return LongMinusIterator.create(arrays[0], arrays[1]);
+        return new LongMinusIterator(arrays[0], arrays[1]);
       }
     }, new SetOperationsChecker.MinusGetter(), true, SORTED);
   }

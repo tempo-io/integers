@@ -30,13 +30,9 @@ public class LongMinusIterator extends FindingLongIterator {
   private final LongIterator myInclude;
   private final LongIterator myExclude;
 
-  public LongMinusIterator(LongIterator include, LongIterator exclude) {
-    myInclude = include;
-    myExclude = exclude;
-  }
-
-  public static LongMinusIterator create(LongIterable include, LongIterable exclude) {
-    return new LongMinusIterator(include.iterator(), exclude.iterator());
+  public LongMinusIterator(LongIterable include, LongIterable exclude) {
+    myInclude = include.iterator();
+    myExclude = exclude.iterator();
   }
 
   protected boolean findNext() {

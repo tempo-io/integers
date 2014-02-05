@@ -5,19 +5,22 @@ import com.almworks.integers.LongList;
 import com.almworks.integers.WritableIntLongMap;
 import com.almworks.integers.WritableIntLongMapChecker;
 
-public class IntLongHppcOpenHashMapTests extends WritableIntLongMapChecker {
+import java.util.Arrays;
+import java.util.List;
+
+public class IntLongHppcOpenHashMapTests extends WritableIntLongMapChecker<IntLongHppcOpenHashMap> {
   @Override
-  protected WritableIntLongMap createMap() {
+  protected IntLongHppcOpenHashMap createMap() {
     return new IntLongHppcOpenHashMap();
   }
 
   @Override
-  protected WritableIntLongMap createMapWithCapacity(int capacity) {
+  protected IntLongHppcOpenHashMap createMapWithCapacity(int capacity) {
     return new IntLongHppcOpenHashMap(capacity);
   }
 
   @Override
-  protected WritableIntLongMap[] createMapFromSortedList(IntList keys, LongList values) {
-    return new WritableIntLongMap[]{IntLongHppcOpenHashMap.createFrom(keys, values)};
+  protected List<IntLongHppcOpenHashMap> createMapFromSortedList(IntList keys, LongList values) {
+    return Arrays.asList(IntLongHppcOpenHashMap.createFrom(keys, values));
   }
 }

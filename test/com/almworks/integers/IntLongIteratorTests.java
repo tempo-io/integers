@@ -49,7 +49,7 @@ public class IntLongIteratorTests extends IntegersFixture {
     } catch(NoSuchElementException ex) { }
   }
 
-  public void testUOE() {
+  public void testUnsupportedOperationException() {
     res = res.iterator();
     res.next();
     try {

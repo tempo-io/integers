@@ -17,7 +17,7 @@ public interface IntLongIterator extends Iterator<IntLongIterator>, IntLongItera
 
   /**
    * @return false if iterator has never been and
-   * next call to {@link #left()} or {@link #right()} throw NoSuchElementException advanced otherwise true
+   * next call to {@link #left()} or {@link #right()} throw NoSuchElementException advanced, otherwise true
    */
   boolean hasValue();
 

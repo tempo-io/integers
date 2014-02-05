@@ -32,7 +32,7 @@ public class PairIntLongIterator implements IntLongIterator {
   private final IntIterator myIt1;
   private final LongIterator myIt2;
   // 0 - no value, 1 - has value, 2 - broken
-  private int myIteratortStatus;
+  private int myIteratorStatus;
 
   public PairIntLongIterator(IntIterable first, LongIterable second) {
     myIt1 = first.iterator();
@@ -48,13 +48,13 @@ public class PairIntLongIterator implements IntLongIterator {
   }
 
   public PairIntLongIterator next() {
-    if (myIteratortStatus == 2) {
+    if (myIteratorStatus == 2) {
       throw new NoSuchElementException();
     }
-    myIteratortStatus = 2;
+    myIteratorStatus = 2;
     myIt1.next();
     myIt2.next();
-    myIteratortStatus = 1;
+    myIteratorStatus = 1;
     return this;
   }
 
@@ -71,7 +71,7 @@ public class PairIntLongIterator implements IntLongIterator {
   }
 
   public boolean hasValue() {
-    return myIteratortStatus == 1;
+    return myIteratorStatus == 1;
   }
 
   public void remove() throws UnsupportedOperationException {

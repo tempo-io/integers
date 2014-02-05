@@ -39,7 +39,7 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
 
 
   /**
-   * @return false if iterator has never been advanced otherwise true
+   * @return false if iterator has never been advanced, otherwise true
    */
   boolean hasValue();
 

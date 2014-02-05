@@ -1,22 +1,17 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.IntSizedIterable;
-import com.almworks.integers.util.LongOpenHashSet;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ConcurrentModificationException;
-import java.util.NoSuchElementException;
+import java.util.List;
 
 import static com.almworks.integers.IntIterators.range;
 
-public abstract class WritableIntLongMapChecker extends IntegersFixture {
-  protected abstract WritableIntLongMap createMap();
+public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> extends IntegersFixture {
+  protected abstract T createMap();
 
-  protected abstract WritableIntLongMap createMapWithCapacity(int capacity);
+  protected abstract T createMapWithCapacity(int capacity);
 
-  protected abstract WritableIntLongMap[] createMapFromSortedList(IntList keys, LongList values);
+  protected abstract List<T> createMapFromSortedList(IntList keys, LongList values);
 
-  protected WritableIntLongMap map;
+  protected T map;
 
   public void setUp() throws Exception {
     super.setUp();
@@ -102,7 +97,7 @@ public abstract class WritableIntLongMapChecker extends IntegersFixture {
   }
 
   public void testPut() {
-    int size = 100, attempts = 10, maxVal = 1000000;
+    int size = 100, attempts = 10, maxVal = 1000;
     for (int attempt = 0; attempt < attempts; attempt++) {
       map.clear();
       IntArray keys = generateRandomIntArray(size, SortedStatus.SORTED_UNIQUE, maxVal);

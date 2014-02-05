@@ -203,8 +203,6 @@ public class ListLongMapTests extends TestCase {
 
   public void testIteratorSetValue() {
     ListLongMap.Iterator it = myMap.iterator(1);
-    System.out.println(new LongArray(myMap.valuesIterator(0, myMap.size())));
-
     for (; it.hasNext(); it.next()) {
       it.setValue(1, it.getValue(1) - 11);
     }

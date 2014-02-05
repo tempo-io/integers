@@ -3,6 +3,7 @@ package com.almworks.integers;
 import com.almworks.integers.util.*;
 
 import static com.almworks.integers.IntLongIterators.*;
+import static com.almworks.integers.IntegersUtils.appendShortName;
 
 public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
   protected int myModCount = 0;
@@ -162,5 +163,59 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     for (IntIterator it : keys.iterator()) {
       removeImpl(it.value());
     }
+  }
+
+
+  public StringBuilder toString(StringBuilder builder) {
+    appendShortName(builder, this);
+    builder.append(" ").append(size()).append(" [");
+    String sep = "";
+    for (IntLongIterator ii : this) {
+      builder.append(sep).append('(').append(ii.left()).append(' ').append(ii.right()).append(')');
+      sep = ", ";
+    }
+    builder.append("]");
+    return builder;
+  }
+
+  public final String toString() {
+    return toString(new StringBuilder()).toString();
+  }
+
+  private void joinCurrent(StringBuilder[] cur, StringBuilder[] builders) {
+    int maxLength = Math.max(cur[0].length(), cur[1].length());
+    for (int idx = 0; idx < 2; idx++) {
+      for (int i = 0; i < maxLength - cur[idx].length(); i++) {
+        builders[idx].append(' ');
+      }
+      builders[idx].append(cur[idx]);
+    }
+  }
+
+  public String toTableString() {
+    StringBuilder[] builders = {new StringBuilder(), new StringBuilder()};
+    StringBuilder[] cur = {new StringBuilder(), new StringBuilder()};
+
+    cur[0] = appendShortName(cur[0], this).append(" /");
+    cur[1].append(size()).append(" \\");
+    joinCurrent(cur, builders);
+
+    String sep = "";
+    for (IntLongIterator ii : this) {
+      cur[0].setLength(0);
+      cur[1].setLength(0);
+
+      cur[0].append(ii.left());
+      cur[1].append(ii.right());
+
+      builders[0].append(sep);
+      builders[1].append(sep);
+
+
+      joinCurrent(cur, builders);
+      sep = ", ";
+    }
+    builders[0].append(" \\\n").append(builders[1]).append(" /");
+    return builders[0].toString();
   }
 }

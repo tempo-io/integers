@@ -8,16 +8,12 @@ public class LongUnionIteratorTwo extends FindingLongIterator {
   private int myItsCount = 2;
   private long[] v = {0, 0};
 
-  public LongUnionIteratorTwo(LongIterator first, LongIterator second) {
-    myIts[0] = first;
-    myIts[1] = second;
+  public LongUnionIteratorTwo(LongIterable first, LongIterable second) {
+    myIts[0] = first.iterator();
+    myIts[1] = second.iterator();
     advanceIterator(0);
     advanceIterator(1);
     maybeMoveIterator1();
-  }
-
-  public static LongUnionIteratorTwo create(LongIterable first, LongIterable second) {
-    return new LongUnionIteratorTwo(first.iterator(), second.iterator());
   }
 
   protected boolean findNext() {
