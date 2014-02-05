@@ -21,6 +21,7 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntFunction2;
 import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.LongFunction;
 import com.almworks.integers.optimized.CyclicLongQueue;
 import com.almworks.integers.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -431,6 +432,12 @@ public class LongCollections {
       public long get(int index) throws NoSuchElementException {
         return value;
       }
+
+      @Override
+      public long[] toNativeArray(int startIndex, long[] dest, int destOffset, int length) {
+        Arrays.fill(dest, destOffset, destOffset + length, value);
+        return dest;
+      }
     };
   }
 
@@ -473,36 +480,6 @@ public class LongCollections {
     int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
     arrays[dest].retainSorted(arrays[1 - dest]);
     return LongAmortizedSet.createFromSortedUniqueArray(arrays[dest]);
-  }
-
-  /**
-   * @return union of the specified lists. If all except one lists are null or empty returns this list.
-   */
-  public static LongList collectToSortedUnique(LongList... lists) {
-    int sumSize = 0, count = 0, curIdx = -1;
-    int idx = 0;
-    for (LongList list : lists) {
-      if (list != null && list.size() != 0) {
-        sumSize += list.size();
-        count++;
-        curIdx = idx;
-      }
-      idx++;
-    }
-    if (count == 0) {
-      return LongList.EMPTY;
-    }
-    if (count == 1) {
-      return lists[curIdx];
-    }
-    LongArray res = new LongArray(sumSize);
-    for (LongList list : lists) {
-      if (list != null) {
-        res.addAll(list);
-      }
-    }
-    res.sortUnique();
-    return res;
   }
 
   /**
@@ -831,5 +808,19 @@ public class LongCollections {
    */
   public static int sizeOfIterable(LongIterable iterable, int defaultSize) {
     return (iterable instanceof LongSizedIterable) ? ((LongSizedIterable) iterable).size() : defaultSize;
+  }
+
+  public static LongList map(final LongFunction fun, final LongList list) {
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return list.size();
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        return fun.invoke(list.get(index));
+      }
+    };
   }
 }

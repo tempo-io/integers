@@ -67,18 +67,18 @@ public abstract class IntegersFixture extends TestCase {
     return new Random(seed);
   }
 
-  public static void checkSet(WritableLongSet set, LongList sortedUniqueExpected) {
+  public static void checkSet(LongSet set, LongList sortedUniqueExpected) {
     assert sortedUniqueExpected.isUniqueSorted();
     assertEquals(sortedUniqueExpected.size(), set.size());
     if (set instanceof LongSortedSet) {
-      LongArray buffer = set.toArray();
+      LongArray buffer = LongCollections.collectIterables(set.size(), set.iterator());
       CHECK.order(sortedUniqueExpected, buffer);
-      buffer.clear();
-      buffer.addAll(set.iterator());
+
+      buffer = set.toArray();
       CHECK.order(sortedUniqueExpected, buffer);
     } else {
-      LongArray setToArray = set.toArray();
       LongArray setToIterator = LongCollections.collectIterables(set.size(), set.iterator());
+      LongArray setToArray = set.toArray();
       CHECK.order(setToArray, setToIterator);
 
       setToArray.sort();
@@ -120,9 +120,7 @@ public abstract class IntegersFixture extends TestCase {
     LongListIterator it;
     for (int i = 0; i < ints.length; i++) {
       it = collection.iterator();
-      if (i > 0) {
-        it.move(i);
-      }
+      it.move(i);
       CHECK.order(it, IntegersUtils.arrayCopy(ints, i, ints.length - i));
     }
     it = collection.iterator();
@@ -285,7 +283,7 @@ public abstract class IntegersFixture extends TestCase {
 
   public static LongIterator randomIterator() {
     return new AbstractLongIteratorWithFlag() {
-      int myValue;
+      long myValue;
       @Override
       protected long valueImpl() {
         return myValue;
@@ -293,7 +291,7 @@ public abstract class IntegersFixture extends TestCase {
 
       @Override
       protected void nextImpl() throws NoSuchElementException {
-        myValue = RAND.nextInt();
+        myValue = RAND.nextLong();
       }
 
       @Override

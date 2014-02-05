@@ -151,7 +151,7 @@ public class LongCollectionsTests extends IntegersFixture {
     CHECK.order(diffSortedUniqueLists(LongArray.create(0, 3, 4, 7), LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
 
     for (int i = 0; i < 10; ++i) {
-      LongArray[] arrays = getListsAndDiff(RAND.nextInt(100), RAND.nextInt(100));
+      LongArray[] arrays = getListsAndDiff(5 + RAND.nextInt(100), 5 + RAND.nextInt(100));
       CHECK.order(diffSortedUniqueLists(arrays[0], arrays[1]), arrays[2]);
     }
   }
@@ -331,10 +331,19 @@ public class LongCollectionsTests extends IntegersFixture {
     CHECK.order(array, 0, 0, 0, 0);
 
     assertEquals(0, LongCollections.repeat(3, 0).size());
+
+    long[] expected = new long[10];
+    Arrays.fill(expected, 3, 10, -1);
+    long[] actual = new long[10];
+    LongCollections.repeat(-1, 10).toNativeArray(3, actual, 3, 7);
+    CHECK.order(expected, actual);
+
     try {
       LongCollections.repeat(3, -1);
       fail("must throw IAE");
-    } catch(IllegalArgumentException ex) {}
+    } catch(IllegalArgumentException ex) {
+      // ok
+    }
   }
 
   public void testGetNextDiffValueIndex() {
@@ -413,27 +422,6 @@ public class LongCollectionsTests extends IntegersFixture {
       actual = toSortedUnion(sets[0], sets[1]).toArray();
       CHECK.order(expected, actual);
     }
-  }
-
-  public void checkUnion(LongList ... lists) {
-    LongArray expected = new LongArray();
-    for (LongList list : lists) {
-      if (list != null)
-        expected.addAll(list);
-    }
-    expected.sortUnique();
-    CHECK.order(expected, collectToSortedUnique(lists));
-  }
-
-  public void testCollectToSortedUnique() {
-    checkUnion();
-    checkUnion(null, null, null);
-    checkUnion(null, LongArray.create(1, 2, 3), null);
-    checkUnion(null, LongArray.create(1, 2, 3), LongArray.EMPTY);
-    checkUnion(null, LongArray.create(1, 2, 3), LongArray.EMPTY);
-    checkUnion(LongArray.create(2, 5, 10));
-    checkUnion(LongArray.create(2, 5, 10), LongArray.create(1, 2, 3), LongArray.EMPTY, null);
-    checkUnion(LongArray.create(2, 5, 10), null, LongArray.EMPTY, null);
   }
 
   public void testIntersectionUnionSets() {

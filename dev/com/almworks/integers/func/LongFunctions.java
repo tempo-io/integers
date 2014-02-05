@@ -37,6 +37,30 @@ public class LongFunctions {
     }
   };
 
+  public static final LongFunction INC = new LongFunction() {
+    @Override
+    public long invoke(long a) {
+      return a + 1;
+    }
+
+    @Override
+    public String toString() {
+      return "++";
+    }
+  };
+
+  public static final LongFunction DEC = new LongFunction() {
+    @Override
+    public long invoke(long a) {
+      return a - 1;
+    }
+
+    @Override
+    public String toString() {
+      return "--";
+    }
+  };
+
   public static final LongFunction2 ADD = new LongFunction2() {
     @Override
     public long invoke(long a, long b) {
@@ -132,9 +156,9 @@ public class LongFunctions {
       @Override
       public long invoke(long x) {
         return
-          x == v1 ? v2 :
-          x == v2 ? v1 :
-          x;
+            x == v1 ? v2 :
+                x == v2 ? v1 :
+                    x;
       }
 
       @Override
@@ -143,7 +167,7 @@ public class LongFunctions {
       }
     };
   }
-  
+
   public static LongFunction compose(final LongFunction f1, final LongFunction f2) {
     return new LongFunction() {
       @Override
@@ -157,7 +181,7 @@ public class LongFunctions {
       }
     };
   }
-    
+
   /** Returns a function that returns values from the supplied Iterable. Function argument is ignored. */
   public static LongFunction sequence(final LongIterable iterable) {
     return new LongFunction() {
@@ -166,7 +190,7 @@ public class LongFunctions {
       public long invoke(long a) {
         return it.nextValue();
       }
-  
+
       @Override
       public String toString() {
         return "i => " + iterable;

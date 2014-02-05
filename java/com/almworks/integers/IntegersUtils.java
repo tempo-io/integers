@@ -51,6 +51,18 @@ public final class IntegersUtils {
       return string.substring(k + separator.length());
   }
 
+  public static StringBuilder appendShortName(StringBuilder builder, Object obj) {
+    String name = obj.getClass().getSimpleName();
+    // LongAmortizedSet -> LAS, LongTreeSet -> LTS
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if ('A' <= c && c <= 'Z') {
+        builder.append(c);
+      }
+    }
+    return builder;
+  }
+
   // Copied from Collections15
   public static <T> List<T> arrayList() {
     return new ArrayList<T>();
