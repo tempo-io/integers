@@ -31,8 +31,8 @@ import java.util.NoSuchElementException;
 public class PairIntLongIterator implements IntLongIterator {
   private final IntIterator myIt1;
   private final LongIterator myIt2;
-  // 0 - no value, 1 - has value, 2 - broken
-  private int myIteratorStatus;
+  private static final int NO_VALUE = 0, HAS_VALUE = 1, BROKEN = 2;
+  private int myIteratorStatus = NO_VALUE;
 
   public PairIntLongIterator(IntIterable first, LongIterable second) {
     myIt1 = first.iterator();
@@ -48,13 +48,13 @@ public class PairIntLongIterator implements IntLongIterator {
   }
 
   public PairIntLongIterator next() {
-    if (myIteratorStatus == 2) {
+    if (myIteratorStatus == BROKEN) {
       throw new NoSuchElementException();
     }
-    myIteratorStatus = 2;
+    myIteratorStatus = BROKEN;
     myIt1.next();
     myIt2.next();
-    myIteratorStatus = 1;
+    myIteratorStatus = HAS_VALUE;
     return this;
   }
 
@@ -71,7 +71,7 @@ public class PairIntLongIterator implements IntLongIterator {
   }
 
   public boolean hasValue() {
-    return myIteratorStatus == 1;
+    return myIteratorStatus == HAS_VALUE;
   }
 
   public void remove() throws UnsupportedOperationException {

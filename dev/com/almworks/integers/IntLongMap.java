@@ -62,7 +62,11 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   public long get(int key) {
     int idx = findKey(key);
     // todo update default value
-    return Math.max((idx >= 0) ? getValueAt(idx) - 1 : 0, 0);
+    if (idx >= 0) {
+      return getValueAt(idx);
+    } else {
+      return DEFAULT_VALUE;
+    }
   }
 
   public int findKey(int key) {

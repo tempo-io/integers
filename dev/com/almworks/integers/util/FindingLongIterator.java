@@ -29,7 +29,7 @@ public abstract class FindingLongIterator extends AbstractLongIterator {
   protected long myCurrent = Long.MAX_VALUE;
   private long myNext = Long.MAX_VALUE;
 
-  private static int FINISHED = 0, NO_VALUE = 1, VALUE_STORED = 2;
+  private static final int FINISHED = 0, NO_VALUE = 1, VALUE_STORED = 2;
   private int myIteratorStatus = NO_VALUE;
   private boolean myIterated = false;
 
