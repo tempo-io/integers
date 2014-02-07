@@ -19,53 +19,75 @@
 
 package com.almworks.integers.util;
 
-import com.almworks.integers.AbstractIntLongIteratorWithFlag;
+import com.almworks.integers.AbstractIntLongIterator;
+import com.almworks.integers.IntLongIterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class FindingIntLongIterator extends AbstractIntLongIteratorWithFlag {
-  protected int myCurrentLeft;
-  protected long myCurrentRight;
-  private int myNextLeft;
-  private long myNextRight;
-  private boolean myIsValueStored = false;
+public abstract class FindingIntLongIterator extends AbstractIntLongIterator {
+  protected int myCurrentLeft, myNextLeft;
+  protected long myCurrentRight, myNextRight;
+  private static final int FINISHED = 0, NO_VALUE = 1, VALUE_STORED = 2;
+  private int myIteratorStatus = NO_VALUE;
+  private boolean myIterated = false;
 
   /**
-   * In this method in {@code myCurrent} must be assigned next value, if it exist.
+   * In this method in {@code myNextLeft} and {@code myNextRight} must be assigned next value, if it exist.
    * @return true if this iterator has next value, otherwise - false
    * */
   protected abstract boolean findNext();
 
   public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIsValueStored) {
-      return true;
-    }
-    boolean hasNext = findNext();
-    if (hasNext) {
-      myIsValueStored = true;
-    }
-    return hasNext;
-  }
-
-  protected final void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIsValueStored) {
-      myIsValueStored = false;
-    } else {
+    if (myIteratorStatus == NO_VALUE) {
       boolean hasNext = findNext();
-      if (!hasNext) throw new NoSuchElementException();
+      if (hasNext) {
+        myIteratorStatus = VALUE_STORED;
+        return true;
+      } else {
+        myIteratorStatus = FINISHED;
+        return false;
+      }
     }
-    myNextLeft = myCurrentLeft;
-    myNextRight = myCurrentRight;
+    return myIteratorStatus == VALUE_STORED;
+  }
+
+
+  @Override
+  public IntLongIterator next() {
+    if (myIteratorStatus == VALUE_STORED) {
+      myCurrentLeft = myNextLeft;
+      myCurrentRight = myNextRight;
+      myIteratorStatus = NO_VALUE;
+    } else {
+      if (myIteratorStatus == FINISHED || !findNext()) {
+        throw new NoSuchElementException();
+      }
+      myCurrentLeft = myNextLeft;
+      myCurrentRight = myNextRight;
+    }
+    myIterated = true;
+    return this;
   }
 
   @Override
-  protected int leftImpl() {
-    return myNextLeft;
+  public boolean hasValue() {
+    return myIterated;
   }
 
   @Override
-  protected long rightImpl() {
-    return myNextRight;
+  public int left() throws NoSuchElementException {
+    if (!hasValue()) {
+      throw new NoSuchElementException();
+    }
+    return myCurrentLeft;
+  }
+
+  @Override
+  public long right() throws NoSuchElementException {
+    if (!hasValue()) {
+      throw new NoSuchElementException();
+    }
+    return myCurrentRight;
   }
 }

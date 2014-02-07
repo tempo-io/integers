@@ -11,7 +11,11 @@ public interface IntLongIterator extends Iterator<IntLongIterator>, IntLongItera
   IntLongIterator EMPTY = new EmptyIntLongIterator();
 
   /**
-   * @return true next call to {@link #next()} wasn't throw NoSuchElementException
+   * Returns <tt>true</tt> if the iteration has more elements. (In other
+   * words, returns <tt>true</tt> if <tt>next</tt> would return an element
+   * rather than throwing an exception.)
+   *
+   * @return <tt>true</tt> if the iterator has more elements.
    */
   boolean hasNext() throws ConcurrentModificationException;
 

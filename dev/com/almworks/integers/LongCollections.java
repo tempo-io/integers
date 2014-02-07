@@ -821,6 +821,18 @@ public class LongCollections {
       public long get(int index) throws NoSuchElementException {
         return fun.invoke(list.get(index));
       }
+
+      @Override
+      public long[] toNativeArray(int startIndex, long[] dest, int destOffset, int length) {
+        if (length > 0) {
+          list.toNativeArray(startIndex, dest, destOffset, length);
+          int destEnd = destOffset + length;
+          for (int i = destOffset; i < destEnd; i++) {
+            dest[i] = fun.invoke(dest[i]);
+          }
+        }
+        return dest;
+      }
     };
   }
 }

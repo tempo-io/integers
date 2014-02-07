@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 
 public abstract class FindingLongIterator extends AbstractLongIterator {
   protected long myCurrent = Long.MAX_VALUE;
-  private long myNext = Long.MAX_VALUE;
+  private long myNext;
 
   private static final int FINISHED = 0, NO_VALUE = 1, VALUE_STORED = 2;
   private int myIteratorStatus = NO_VALUE;
@@ -59,11 +59,7 @@ public abstract class FindingLongIterator extends AbstractLongIterator {
       myNext = myCurrent;
       myIteratorStatus = NO_VALUE;
     } else {
-      if (myIteratorStatus == FINISHED) {
-        throw new NoSuchElementException();
-      }
-      boolean hasNext = findNext();
-      if (!hasNext) {
+      if (myIteratorStatus == FINISHED || !findNext()) {
         throw new NoSuchElementException();
       }
       assert myIteratorStatus == NO_VALUE;
