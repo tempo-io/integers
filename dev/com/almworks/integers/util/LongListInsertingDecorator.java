@@ -25,13 +25,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
+
 /**
- * Inserting decorator for {@code LongList} that designed
+ * Inserting decorator for {@code LongList} designed
  * to accumulate insertions into a very large list and then use it as a read-only list.
- * Accumulation should be done with {@link #insert(int, long)}
- * <br>Also underline that the insertion index is in the new list, not the old one.
- * The benefit is that we don't copy elements around while inserting.
- * We expect the amount of insertions to be much smaller then the size of the list.
+ * Accumulation should be done with {@link #insert(int, long)}.
+ * Insertion index is considered as index in the new list, not the old one.
+ * <br> example: list = [0, 2, 4]; insert(1, -1) -> [0, -1, 2, 4]; insert(1, -4) -> [0, -4, -1, 2, 4]
+ * <br>The insertions is stored separately from the base list.
+ * The benefit is that we don't overwrite elements around while inserting.
+ * It's expected that the amount of insertions is much smaller then the size of the list.
  */
 public class LongListInsertingDecorator extends AbstractLongListDecorator {
   private final IntLongMap myInserted;
@@ -53,8 +56,8 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
    * <br>decorator( [3, 9],    [(0, 2), (3, 0)] ) -> [2, 3, 9, 0]
    * <br>decorator( [0, 4],    [(5, 10)] ) -> IllegalArgumentException
    * @param inserted map in which keys represent insertion points and values the inserted values
-   * @throws IllegalArgumentException if first key in {@code inserted} less than 0 or
-   * last key in more than {@code base.size() + inserted.size()}
+   * @throws IllegalArgumentException if first key in {@code inserted} is less than 0 or
+   * last key is more than {@code base.size() + inserted.size()}
    */
   public LongListInsertingDecorator(LongList base, IntLongMap inserted) throws IllegalArgumentException {
     super(base);
@@ -64,7 +67,8 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       }
       int key = inserted.getKeyAt(inserted.size() - 1);
       if (key >= base.size() + inserted.size()) {
-        throw new IllegalArgumentException("last key in inserted too big: " + key);
+        throw new IllegalArgumentException("last key in inserted is too big: " +
+            key + " " + base.size() + " " + inserted.size());
       }
     }
     myInserted = inserted;
@@ -87,7 +91,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
   }
 
   /**
-   * @return count of elements inserted before {@code index} inclusively
+   * @return count of elements inserted in the decorated list before {@code index} inclusively
    */
   private int insertedBefore(int index) {
     int res = findInsertion(index);
@@ -169,8 +173,6 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
   private class LocalIterator extends AbstractLongListIndexIterator {
     private LongListIterator myBaseIterator;
     private IntLongIterator myInsertedIterator;
-    // position of the myInsertedIterator
-    private int myCurInsert = -1;
 
     private LocalIterator(int from, int to) {
       super(from, to);
@@ -182,7 +184,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       int insertIdx = insertedBefore(curIndex);
 
       myInsertedIterator = myInserted.iterator(insertIdx);
-      advanceToNextInsert();
+      if (myInsertedIterator.hasNext()) myInsertedIterator.next();
 
       int baseIdx = curIndex - insertIdx;
       if (baseIdx < 0) {
@@ -194,32 +196,22 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
     }
 
     private void advanceToNextBase() {
-      if (myCurInsert != getNextIndex() - 1) {
-        assert myBaseIterator.hasNext();
+      if (!myInsertedIterator.hasValue() || myInsertedIterator.left() != getNextIndex() - 1) {
         myBaseIterator.next();
       }
     }
 
-    /**
-     * switch the myInsertedIterator to the next insert and update myCurInsert
-     */
-    private void advanceToNextInsert() {
-      if (myInsertedIterator.hasNext()) {
-        myInsertedIterator.next();
-        myCurInsert = myInsertedIterator.left();
-      } else myCurInsert = -1;
-    }
-
     public boolean hasNext() {
       boolean r = super.hasNext();
-      assert !r || (myCurInsert >= 0 || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
+      assert !r || (myInsertedIterator.hasValue() || myInsertedIterator.hasNext() || myBaseIterator.hasNext()) : this;
       return r;
     }
 
     public LongListIterator next() throws NoSuchElementException {
       super.next();
-      if (myCurInsert == index() - 1) {
-        advanceToNextInsert();
+      if ((!myInsertedIterator.hasValue() || myInsertedIterator.left() == index() - 1)
+          && myInsertedIterator.hasNext()) {
+        myInsertedIterator.next();
       }
       advanceToNextBase();
       return this;
@@ -229,7 +221,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       if (!hasValue()) {
         throw new NoSuchElementException();
       }
-      if (myCurInsert == index()) {
+      if (myInsertedIterator.hasValue() && myInsertedIterator.left() == index()) {
         // if current index on inserted value
         return myInsertedIterator.right();
       } else {

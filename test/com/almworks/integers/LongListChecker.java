@@ -25,19 +25,20 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
  * Base class for testing {@code LongList} implementation.
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public abstract class LongListChecker extends IntegersFixture {
+public abstract class LongListChecker<T extends LongList> extends IntegersFixture {
   /**
    * @return list of different representations of LongList's with the specified values.
    */
-  protected abstract List<? extends LongList> createLongListVariants(long... values);
+  protected abstract List<T> createLongListVariants(long... values);
 
   protected void checkValues(long... values) {
-    LongList expected = LongArray.create(values);
     for (LongList arr : createLongListVariants(values)) {
-      assertEquals(expected.isEmpty(), arr.isEmpty());
-      assertEquals(expected.isSorted(), arr.isSorted());
-      assertEquals(expected.isUniqueSorted(), arr.isUniqueSorted());
-      CHECK.order(expected, arr);
+      int length = values.length;
+      assertEquals(length == 0, arr.isEmpty());
+      assertEquals(LongCollections.isSorted(values, 0, length), arr.isSorted());
+      boolean res = LongCollections.isSortedUnique(false, values, 0, length) == 0;
+      assertEquals(res, arr.isUniqueSorted());
+      checkCollection(arr, values);
     }
   }
 
@@ -146,9 +147,8 @@ public abstract class LongListChecker extends IntegersFixture {
 
   public void testGet() {
     for (int attempt = 0; attempt < 10; attempt++) {
-      for (LongList list:
-          createLongListVariants(generateRandomLongArray(1000, UNORDERED).extractHostArray()))
-      {
+      long[] values = generateRandomLongArray(1000, UNORDERED).extractHostArray();
+      for (LongList list: createLongListVariants(values)) {
         if (!(list instanceof AbstractLongList)) return;
         IntArray indices = generateRandomIntArray(100, UNORDERED, 0, 1000);
         AbstractLongList abstractList = (AbstractLongList)list;
@@ -162,15 +162,36 @@ public abstract class LongListChecker extends IntegersFixture {
 
   public void testGetLast() {
     for (int attempt = 0; attempt < 10; attempt++) {
-      long[] array = generateRandomLongArray(1000, UNORDERED).extractHostArray();
-      for (LongList list:
-          createLongListVariants(array)) {
+      long[] values = generateRandomLongArray(1000, UNORDERED).extractHostArray();
+      for (LongList list: createLongListVariants(values)) {
         if (!(list instanceof AbstractLongList)) return;
         AbstractLongList abstractList = (AbstractLongList)list;
-        for (int j = 0; j < array.length; j++) {
-          assertEquals(abstractList.getLast(j), array[array.length - j - 1]);
+        for (int j = 0; j < values.length; j++) {
+          assertEquals(abstractList.getLast(j), values[values.length - j - 1]);
         }
       }
     }
   }
+
+  public void testToNativeArray() {
+    int attemptsCount = 5, length = 25;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      long[] values = generateRandomLongArray(length, UNORDERED).extractHostArray();
+      for (T list : createLongListVariants(values)) {
+        for (int startIdx = 0; startIdx < length; startIdx++) {
+          for(int endIdx = startIdx + 1; endIdx < length; endIdx++) {
+            long[] expected = LongCollections.repeat(-1, length).toNativeArray();
+            long[] actual = LongCollections.repeat(-1, length).toNativeArray();
+
+            int len = endIdx - startIdx;
+            System.arraycopy(values, startIdx, expected, startIdx, len);
+            list.toNativeArray(startIdx, actual, startIdx, len);
+            CHECK.order(actual, expected);
+          }
+        }
+      }
+
+    }
+  }
+
 }

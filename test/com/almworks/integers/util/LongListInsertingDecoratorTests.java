@@ -21,11 +21,11 @@ import com.almworks.integers.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LongListInsertingDecoratorTests extends LongListChecker {
+public class LongListInsertingDecoratorTests extends LongListChecker<LongListInsertingDecorator> {
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
-    List<LongList> res = new ArrayList<LongList>();
+  protected List<LongListInsertingDecorator> createLongListVariants(long... values) {
+    List<LongListInsertingDecorator> res = new ArrayList<LongListInsertingDecorator>();
 
     // [...]
     LongArray array = LongArray.copy(values);
@@ -71,7 +71,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
           curIdx += 1 + RAND.nextInt(maxDiff);
           removeCount++;
         }
-        LongList resArray = new LongListInsertingDecorator(source, inserted);
+        LongListInsertingDecorator resArray = new LongListInsertingDecorator(source, inserted);
         CHECK.order(resArray, values);
         res.add(resArray);
       }
@@ -87,7 +87,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     myArray.clear();
   }
 
-  protected void checkInsertIndices(final LongListInsertingDecorator ins, int... expected) {
+  protected void checkInsertIndexes(final LongListInsertingDecorator ins, int... expected) {
     if (expected == null) {
       expected = IntegersUtils.EMPTY_INTS;
     }
@@ -124,7 +124,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     ins.insert(0, 1);
     checkCollection(ins, 1);
     assertEquals(1, ins.getInsertCount());
-    checkInsertIndices(ins, 0);
+    checkInsertIndexes(ins, 0);
     CHECK.order(ins.insertValueIterator(), 1);
 
     myArray.insert(0, 3);
@@ -132,25 +132,25 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     myArray.insert(1, 4);
     checkCollection(ins, 1, 3, 4);
     assertEquals(1, ins.getInsertCount());
-    checkInsertIndices(ins, 0);
+    checkInsertIndexes(ins, 0);
     CHECK.order(ins.insertValueIterator(), 1);
 
     ins.insert(1, 2);
     checkCollection(ins, 1, 2, 3, 4);
     assertEquals(2, ins.getInsertCount());
-    checkInsertIndices(ins, 0, 1);
+    checkInsertIndexes(ins, 0, 1);
     CHECK.order(ins.insertValueIterator(), 1, 2);
 
     ins.insert(0, 0);
     checkCollection(ins, 0, 1, 2, 3, 4);
     assertEquals(3, ins.getInsertCount());
-    checkInsertIndices(ins, 0, 1, 2);
+    checkInsertIndexes(ins, 0, 1, 2);
     CHECK.order(ins.insertValueIterator(), 0, 1, 2);
 
     ins.insert(5, 5);
     checkCollection(ins, 0, 1, 2, 3, 4, 5);
     assertEquals(4, ins.getInsertCount());
-    checkInsertIndices(ins, 0, 1, 2, 5);
+    checkInsertIndexes(ins, 0, 1, 2, 5);
     CHECK.order(ins.insertValueIterator(), 0, 1, 2, 5);
   }
 
@@ -236,5 +236,14 @@ public class LongListInsertingDecoratorTests extends LongListChecker {
     } catch (IllegalArgumentException _) {
       // ok
     }
+  }
+
+  public void test() {
+    myArray.addAll(0, 2, 4, 6);
+    LongListInsertingDecorator list = new LongListInsertingDecorator(myArray);
+    list.insert(1, 1);
+    list.insert(3, 3);
+    list.insert(5, 5);
+    System.out.println(list);
   }
 }

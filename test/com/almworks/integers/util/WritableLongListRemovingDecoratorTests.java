@@ -19,17 +19,20 @@ package com.almworks.integers.util;
 import com.almworks.integers.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.util.LongListRemovingDecorator.createFromPrepared;
+import static com.almworks.integers.util.LongListRemovingDecorator.prepareSortedIndices;
 
 
-public class WritableLongListRemovingDecoratorTests extends LongListChecker {
+public class WritableLongListRemovingDecoratorTests extends LongListChecker<WritableLongListRemovingDecorator> {
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
-    List<LongList> res = new ArrayList<LongList>();
+  protected List<WritableLongListRemovingDecorator> createLongListVariants(long... values) {
+    List<WritableLongListRemovingDecorator> res = new ArrayList();
     WritableLongListRemovingDecorator array;
 
     // [...]
@@ -66,6 +69,31 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker {
       array.removeAt(pos);
       res.add(array);
     }
+
+    // random removes
+    if (4 < values.length && values.length < 100) {
+      int count = 4;
+      for (int i = 0; i < count; i++) {
+        source = LongArray.copy(values);
+        IntArray indices = IntArray.create();
+        int maxDiff = 4;
+        int curIdx = RAND.nextInt(maxDiff);
+        while (curIdx < source.size()) {
+          indices.add(curIdx);
+          source.insert(curIdx, RAND.nextInt());
+          curIdx += 1 + RAND.nextInt(maxDiff);
+        }
+        WritableLongListRemovingDecorator resArray = new WritableLongListRemovingDecorator(source);
+        prepareSortedIndices(indices);
+        for (int j = 0; j < indices.size(); j++) {
+          resArray.removeAt(indices.get(j));
+        }
+
+        CHECK.order(resArray, values);
+        res.add(resArray);
+      }
+    }
+
     return res;
   }
 

@@ -14,16 +14,16 @@ import static com.almworks.integers.LongIterators.range;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public abstract class WritableLongListChecker extends LongListChecker {
+public abstract class WritableLongListChecker<T extends WritableLongList> extends LongListChecker {
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
+  protected List<T> createLongListVariants(long... values) {
     return createWritableLongListVariants(values);
   }
 
-  abstract protected List<WritableLongList> createWritableLongListVariants(long... values);
+  abstract protected List<T> createWritableLongListVariants(long... values);
 
-  protected List<WritableLongList> empty() {
+  protected List<T> empty() {
     return createWritableLongListVariants();
   }
 
@@ -568,7 +568,7 @@ public abstract class WritableLongListChecker extends LongListChecker {
         {0, 0, 0},
         {MAX, MAX, MAX},
         {0, 0, 10, 10, -5, -5, MAX, MIN}};
-      long[] values = {MIN, -10, -5, 0, 5, 10, 0, MAX};
+      long[] values = {MIN, -10, -5, 0, 5, 0, 10, 0, MAX};
       LongArray expected;
       for (long[] test: tests) {
         for (long valueToRemove: values) {

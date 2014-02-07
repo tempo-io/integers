@@ -30,16 +30,16 @@ import static com.almworks.integers.util.LongListRemovingDecorator.createFromPre
 import static com.almworks.integers.util.LongListRemovingDecorator.prepareSortedIndices;
 
 
-public class LongListRemovingDecoratorTests extends LongListChecker {
+public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemovingDecorator> {
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
+  protected List<LongListRemovingDecorator> createLongListVariants(long... values) {
     LongArray expected = LongArray.copy(values);
-    List<LongList> res = new ArrayList<LongList>();
+    List<LongListRemovingDecorator> res = new ArrayList<LongListRemovingDecorator>();
 
     // [...]
     LongArray source = LongArray.copy(values);
-    LongList resArray = new LongListRemovingDecorator(source);
+    LongListRemovingDecorator resArray = new LongListRemovingDecorator(source);
     CHECK.order(resArray, values);
     res.add(resArray);
 

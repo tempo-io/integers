@@ -22,7 +22,7 @@ import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.*;
 
-public class LongArrayTests extends WritableLongListChecker {
+public class LongArrayTests extends WritableLongListChecker<LongArray> {
   private LongArray array = new LongArray();
   private SetOperationsChecker setOperations = new SetOperationsChecker();
   private SetOperationsChecker.SetCreator unionGetter = new SetOperationsChecker.UnionGetter();
@@ -35,8 +35,8 @@ public class LongArrayTests extends WritableLongListChecker {
   }
 
   @Override
-  protected List<WritableLongList> createWritableLongListVariants(long... values) {
-    List<WritableLongList> res = new ArrayList<WritableLongList>();
+  protected List<LongArray> createWritableLongListVariants(long... values) {
+    List<LongArray> res = new ArrayList<LongArray>();
     LongArray arr = LongArray.copy(values);
     res.add(arr);
 
@@ -292,18 +292,5 @@ public class LongArrayTests extends WritableLongListChecker {
         assertEquals(values[i], actual.get(i));
       }
     }
-  }
-
-  public void test() {
-
-    // todo upgrade: [0,2,4,7,9,10], src: [0,4,8,9] --> [-1, -3, 4, -5], i.e. >0 - ok, <0 - should be inserted at (-x-1) pos
-
-    array = LongArray.create(0, 2, 4, 7, 9, 10);
-    int[][] points = {null};
-    LongArray src = LongArray.create(0, 4, 8, 9);
-    array.getInsertionPoints(src, points);
-    System.out.println(Arrays.toString(points[0]));
-
-    System.out.println(LongArray.create(0, 1, 2, 3).subList(0, 2));
   }
 }

@@ -45,7 +45,6 @@ public class SetOperationsChecker {
   private boolean myTwoArrays = true;
 
   /**
-   *
    * @param intersectionLength the number of common values for all arrays
    * @param arraysNumber number of arrays
    * @param maxArrayLength max random length for every array
@@ -108,9 +107,11 @@ public class SetOperationsChecker {
     if (sortedStatuses.length == 1) {
       return sortedStatuses[0];
     } else {
-      if (num < 0 || num > 1) throw new IllegalArgumentException();
-      return sortedStatuses[num];
+      if (num == 0 || num == 1) {
+        return sortedStatuses[num];
+      }
     }
+    throw new IllegalArgumentException();
   }
 
 
@@ -158,7 +159,10 @@ public class SetOperationsChecker {
     }
 
     for (int attempt = 0; attempt < 10; attempt++) {
-      testRandom(0, 2, 100, 1000000);
+      testRandom(0, 2, 100, 150);
+      testRandom(0, 2, 100, 200);
+      testRandom(0, 2, 100, 300);
+      testRandom(0, 2, 100, 400);
       testRandom(100, 2, 200, 1000000);
       testRandom(50, 2, 500, 10000000);
       testRandom(250, 2, 500, 10000000);
@@ -170,14 +174,14 @@ public class SetOperationsChecker {
       testRandom(0, 2, 1000, 0, MAX / 2, MAX / 2 + 1, MAX);
 
       LongArray first = generateRandomLongArray(1000, SortedStatus.SORTED_UNIQUE);
-      LongArray complement = collectIterables(LongMinusIterator.create(generateRandomLongArray(1000, SortedStatus.SORTED_UNIQUE), first));
+      LongArray complement = collectIterables(new LongMinusIterator(generateRandomLongArray(1000, SortedStatus.SORTED_UNIQUE), first));
       if (getCurrentStatus(0) == UNORDERED) {
         first.shuffle(RAND);
       }
       if (getCurrentStatus(1) == UNORDERED) {
         complement.shuffle(RAND);
       }
-      checkNewSetCreator(first, new LongArray(complement));
+      checkNewSetCreator(first, complement);
     }
     if (!myTwoArrays) {
       testRandom(0, 4, 10, 0, 100, 105, 200, 205, 300, 305, 400);

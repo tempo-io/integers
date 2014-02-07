@@ -396,9 +396,9 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Removes from the this list all elements whose index is contained in the specified {@code IntList indexes}
+   * Removes from this list all elements whose index is contained in the specified {@code IntList indexes}
    * <br>This method is more effective than {@link LongCollections#removeAllAtSorted(WritableLongList, IntList)}
-   * due to the usage System.arraycopy
+   * due to the more efficient use {@link System#arraycopy(Object, int, Object, int, int)}
    *
    * @param indices sorted {@code IntIterable}
    * @see com.almworks.integers.LongCollections#removeAllAtSorted(WritableLongList, IntList)
@@ -432,17 +432,19 @@ public final class LongArray extends AbstractWritableLongList {
     return array;
   }
 
-  // todo add javadoc
-  // todo upgrade: [0,2,4,7,9,10], src: [0,4,8,9] --> [-1, -3, 4, -5], i.e. >0 - ok, <0 - should be inserted at (-x-1) pos
-  // this: [0,2,4,7,9,10], src: [0,4,8,9] --> [0, 2, -1, 4]
-
   /**
-   * Writes positions for inserting elements in this sorted unique array from {@code src} to {@code points}.
-   * {@code points[0].length} must be more than {@code src.size()}.
+   * Finds positions for inserting elements of sorted {@code src} into this sorted unique array and writes them to {@code points[0]}.
+   * If {@code points == {null}} or {@code points[0].length < src.size()}, a new array will be allocated in {@code points[0]}.
+   * If {@code points[0].length > src.size()}, elements in {@code points[0]} beyond {@code src.size()} will be ignored.
    * {@code points[0][idx]} will be equal to {@code -1} if {@code src.get(idx)} is contained in this array,
-   * otherwise equal to index in this array where inserting {@code src.get(idx)} keeps this array sorted unique
-   * @param points
-   * @return count of elements from {@code src} that are not contained in this array
+   * otherwise equal to index in this array where inserting {@code src.get(idx)} keeps this array sorted unique.
+   * <br>Examples:
+   * <br>this: [0, 2, 4, 7, 9, 10], src: [0, 4, 8, 8, 9]; return: 1, points: [-1, -1, 4, -1, -1]
+   * <br>this: [0, 2, 4, 7, 9, 10], src: [1, 4, 6, 6, 7, 11, 12]; return: 2, points: [1, -1, 3, -1, -1, 6, 6]
+   * <br>this: [3, 6, 7, 8, 10, 11, 15], src: [0, 2, 8, 12, 15]; return: 3, points: [0, 0, -1, 6, -1]
+   * @param src sorted iterable
+   * @param points container for insertion points array.
+   * @return number of unique elements from {@code src} that are not contained in this array.
    */
   public int getInsertionPoints(LongSizedIterable src, int[][] points) {
     final int srcSize = src.size(), size = size();
@@ -509,7 +511,7 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * <p>Merges the specified sorted list and this sorted array into this array.
-   * If src or this array are not sorted unique, result is undefined.
+   * If src or this array are not sorted, result is undefined.
    * If {@code getCapacity() < src.size() + size()}, will do reallocation.
    * <p>Complexity: {@code O(eps(N/T, this, src) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
    * {@code eps} grows as {@code N/T} grows.
