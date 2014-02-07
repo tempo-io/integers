@@ -17,6 +17,7 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.LongArray;
+import com.almworks.integers.LongIterator;
 import com.almworks.integers.LongList;
 import com.almworks.integers.LongListChecker;
 import com.almworks.integers.optimized.SegmentedLongArray;
@@ -24,11 +25,11 @@ import com.almworks.integers.optimized.SegmentedLongArray;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LongListConcatenationTests extends LongListChecker {
+public class LongListConcatenationTests extends LongListChecker<LongListConcatenation> {
 
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
-    List<LongList> res = new ArrayList<LongList>();
+  protected List<LongListConcatenation> createLongListVariants(long... values) {
+    List<LongListConcatenation> res = new ArrayList();
 
     // []
     LongArray array = new LongArray(values);
@@ -56,8 +57,8 @@ public class LongListConcatenationTests extends LongListChecker {
 
     // [][][][]...[]
     concatenation = new LongListConcatenation();
-    for (int i = 0; i < values.length; i++) {
-      concatenation.addSlice(LongArray.create(values[i]));
+    for (long value : values) {
+      concatenation.addSlice(LongArray.create(value));
       if (RAND.nextInt(5) == 0) {
         concatenation.addSlice(LongList.EMPTY);
       }

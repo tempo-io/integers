@@ -162,7 +162,7 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
     private LocalIterator(int from, int to) {
       super(from, to);
       int count = removedBefore(from);
-      // super iterator checks borders, so we can suppose that from and to is correct values.
+      // super iterator checks borders, so we can suppose that from and to are correct.
       myBaseIterator = base().iterator();
       int offset = from + count;
       if (offset != 0) {

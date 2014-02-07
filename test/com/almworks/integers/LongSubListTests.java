@@ -19,11 +19,11 @@ package com.almworks.integers;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LongSubListTests extends LongListChecker {
+public class LongSubListTests extends LongListChecker<AbstractLongList.SubList> {
   @Override
-  protected List<? extends LongList> createLongListVariants(long... values) {
+  protected List<AbstractLongList.SubList> createLongListVariants(long... values) {
     final int length = values.length;
-    List<LongList> result = new ArrayList<LongList>(4);
+    List<AbstractLongList.SubList> result = new ArrayList<AbstractLongList.SubList>(4);
 
     // [...]
     result.add(new AbstractLongList.SubList(LongArray.create(values), 0, length));

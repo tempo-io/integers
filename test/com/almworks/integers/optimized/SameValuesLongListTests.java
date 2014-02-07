@@ -7,15 +7,20 @@ import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.LongCollections.concatLists;
+import static com.almworks.integers.LongCollections.repeat;
+import static com.almworks.integers.LongCollections.toSortedUnique;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class SameValuesLongListTests extends WritableLongListChecker {
+public class SameValuesLongListTests extends WritableLongListChecker<SameValuesLongList> {
 
   @Override
-  protected List<WritableLongList> createWritableLongListVariants(long... values) {
-    List<WritableLongList> res = new ArrayList<WritableLongList>();
+  protected List<SameValuesLongList> createWritableLongListVariants(long... values) {
+    List<SameValuesLongList> res = new ArrayList<SameValuesLongList>();
     SameValuesLongList array = new SameValuesLongList();
     array.addAll(values);
     res.add(array);
@@ -283,10 +288,18 @@ public class SameValuesLongListTests extends WritableLongListChecker {
   public void testCreateException() {
     try {
       list = SameValuesLongList.create(LongArray.create(1, 2, 3), IntArray.create(1, 2));
-      System.out.println(list);
       fail();
     } catch (IllegalArgumentException _) {
+      // ok
     }
+
+    try {
+      list = SameValuesLongList.create(LongArray.create(1, 2, 3), IntArray.create(1, -1));
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
+    }
+
   }
 
   public void testRemoveFromBeginning() {
@@ -312,6 +325,57 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     CHECK.order(expected, list);
   }
 
+  public void testSetRangeAndRemoveRangeComplex() {
+    int[][] countsArray = {{1, 1, 1, 1, 1}, {1, 2, 3, 4, 5}, {5, 4, 3, 2, 1}, {2, 1, 2, 1, 2}};
+    long[][] valuesArray = {{0, 10, 20, 30, 40}, {-1, 1, -1, 1, -1}, {0, 1, 2, 0, 3}};
+
+    for (int[] counts : countsArray) {
+      int size = 0;
+      LongArray values = new LongArray(size);
+      for (int count : counts) size += count;
+      for (long[] values0 : valuesArray) {
+        values.clear();
+        assert values0.length == counts.length;
+        for (int j = 0; j < counts.length; j++) {
+          values.addAll(LongCollections.repeat(values0[j], counts[j]));
+        }
+        checkSetRangeAndRemoveRange(values);
+      }
+
+    }
+  }
+
+  private int getChangeCount(LongList expected) {
+    int changeCount = 0;
+    for (int i = 1; i < expected.size(); i++) {
+      if (expected.get(i) != expected.get(i - 1)) changeCount++;
+    }
+    return changeCount;
+  }
+
+    private void checkSetRangeAndRemoveRange(LongList values) {
+    int size = values.size();
+    for (int from = 0; from < size; from++) {
+      for(int to = from + 1; to < size; to++) {
+        LongList valuesForSetRange = toSortedUnique(values.subList(max(0, from - 1), min(to + 1, size)));
+        for (int val = 0; val < valuesForSetRange.size(); val++) {
+          list = SameValuesLongList.create(values);
+          list.setRange(from, to, val);
+          LongList expected = concatLists(values.subList(0, from), repeat(val, to - from), values.subList(to, size));
+          CHECK.order(list, expected);
+          assertEquals(getChangeCount(expected), list.getChangeCount());
+        }
+
+        list = SameValuesLongList.create(values);
+        list.removeRange(from, to);
+        LongList expected = concatLists(values.subList(0, from), values.subList(to, size));
+        CHECK.order(list, expected);
+        assertEquals(getChangeCount(expected), list.getChangeCount());
+
+      }
+    }
+  }
+
   public void testSetRangeSimple2() {
     int count = 4;
     LongArray values = LongArray.create(0, 2, 4);
@@ -322,12 +386,17 @@ public class SameValuesLongListTests extends WritableLongListChecker {
     list.addAll(expected);
     CHECK.order(expected, list);
 
-
     int[][] valuesForSet = {{0, 1, 1}, {1, 2, 1}, {4, 9, -1}};
     for (int[] vals : valuesForSet) {
       list.setRange(vals[0], vals[1], vals[2]);
       expected.setRange(vals[0], vals[1], vals[2]);
       CHECK.order(expected, list);
     }
+  }
+
+  public void testRemoveAllSimple() {
+    list.addAll(0, 1, 0, 1, 0, 1);
+    list.removeAll(0);
+    checkCollection(list, 1, 1, 1);
   }
 }

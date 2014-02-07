@@ -545,9 +545,9 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
           mySegmentSize = SEGS_LARGE;
           mySegmentMask = SEGS_LARGE - 1;
           expandSingleSegment(leftward);
+          relatedOffset = leftward ? myLeftOffset : myRightOffset;
           assert added > relatedOffset : leftward + " " + relatedOffset + " " + added;
         }
-        relatedOffset = leftward ? myLeftOffset : myRightOffset;
         int allocateCount = ((added - relatedOffset - 1) >> mySegmentBits) + 1;
         allocateSegments(allocateCount, leftward);
         myCapacity += allocateCount << mySegmentBits;
@@ -601,7 +601,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       }
       setSegment(0, s);
     }
-    checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   private void allocateSegments(int allocateCount, boolean leftward) {
@@ -692,10 +692,10 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
 
   public void setRange(int from, int to, long value) {
     assert !IntegersDebug.CHECK || checkInvariants();
-    for (WritableLongListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.next();
-      ii.set(0, value);
-    }
+
+    int len = to - from;
+    setAll(from, LongCollections.repeat(value, len), from, len);
+
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
@@ -708,8 +708,19 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     if (s.refCount == 1)
       return s;
     LongSegment newseg = myEnv.allocate(mySegmentSize);
-    int L = segmentIndex == 0 ? myLeftOffset : 0;
-    int R = segmentIndex == mySegmentCount - 1 ? myRightOffset : 0;
+    int L;
+    if (segmentIndex == 0) {
+      L = myLeftOffset;
+    } else {
+      L = 0;
+    }
+
+    int R;
+    if (segmentIndex == mySegmentCount - 1) {
+      R = myRightOffset;
+    } else {
+      R = 0;
+    }
     myEnv.copy(s.data, L, newseg.data, L, s.data.length - L - R);
     return setSegment(segmentIndex, newseg);
   }
@@ -741,12 +752,12 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
 
   public void apply(int from, int to, LongFunction function) {
     assert !IntegersDebug.CHECK || checkInvariants();
-    if (from >= to)
-      return;
+
+    int len = to - from;
+    if (len <= 0) return;
+
     checkRange(from, to);
-    for (WritableLongListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.nextValue()));
-    }
+    setAll(from, LongCollections.map(function, this), from, len);
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
@@ -917,23 +928,21 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
         throw new NoSuchElementException(offset + " " + this);
       }
       int off = myOffset - 1 + offset;
-      int si = mySegmentIndex;
       LongSegment seg;
       if (off < 0 || off >= mySegmentSize) {
+        int si = mySegmentIndex;
         if (off < 0) {
           si -= ((-off - 1) >> mySegmentBits) + 1;
         } else {
           si += off >> mySegmentBits;
         }
         off &= mySegmentMask;
-        seg = mySegments.segments[si];
+        seg = modify(si);
       } else {
-        if (mySegment == null) {
-          seg = mySegments.segments[si];
-        } else {
-          seg = mySegment;
+        seg = modify(mySegmentIndex);
+        if (mySegment != null) {
+          mySegment = seg;
         }
-//        seg = mySegment == null ? mySegments.segments[si] : mySegment;
       }
       seg.data[off] = value;
       assert !IntegersDebug.CHECK || checkIterator();

@@ -66,7 +66,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
    * @param counts parallel to {@code values}, each count is the number of times to repeat the corresponding value.
    *               Must be non-negative; {@code 0} means that the value is ignored. Extra counts are ignored.
    * @return SameValuesLongList containing the specified values which are repeated the specified number of times.
-   * @throws IllegalArgumentException if {code counts.size < values.size}
+   * @throws IllegalArgumentException if {@code counts.size < values.size}
    */
   public static SameValuesLongList create(LongSizedIterable values, IntIterable counts) throws IllegalArgumentException {
     SameValuesLongList list = new SameValuesLongList();
@@ -93,6 +93,9 @@ public class SameValuesLongList extends AbstractWritableLongList {
     for (IntLongIterator it : IntLongIterators.pair(counts, values)) {
       int curCount = it.left();
       long curValue = it.right();
+      if (curCount < 0) {
+        throw new IllegalArgumentException("counts.get(" + i + ") < 0");
+      }
       if (curCount != 0) {
         if (pos == 0 || curValue != prevValue) {
           m.addPair(pos, curValue);
@@ -218,7 +221,8 @@ public class SameValuesLongList extends AbstractWritableLongList {
   public void setRange(int from, int to, long value) {
     assert !IntegersDebug.CHECK || checkInvariants();
     if (from >= to) return;
-    if (from < 0 || size() < to) {
+    int size = size();
+    if (from < 0 || size < to) {
       throw new IndexOutOfBoundsException(from + " " + to + " " + this);
     }
 
@@ -238,7 +242,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
       myMap.insertAt(p, from, value);
       p++;
     }
-    if (to < size() && value != nextValue) {
+    if (to < size && value != nextValue) {
       myMap.insertAt(p, to, nextValue);
     }
 
@@ -280,8 +284,8 @@ public class SameValuesLongList extends AbstractWritableLongList {
     int newSize = newValues.size();
 
     myMap.startMutation().
-      replaceKeysAndValues(IntProgression.arithmetic(0, newSize), newValues).
-      commit();
+        replaceKeysAndValues(IntProgression.arithmetic(0, newSize), newValues).
+        commit();
     updateSize(newSize);
   }
 
@@ -365,34 +369,6 @@ public class SameValuesLongList extends AbstractWritableLongList {
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  @Override
-  public boolean removeAll(long value) {
-    boolean modified = false;
-    int removed = 0;
-
-    int lastIdx = myMap.size() - 1;
-    if (myMap.getValueAt(lastIdx) == value) {
-      removed += size() - myMap.getKeyAt(lastIdx);
-      myMap.removeAt(lastIdx);
-    }
-
-    for (int idx = 0; idx < myMap.size() - 1; ) {
-      if (myMap.getValueAt(idx) == value) {
-        modified = true;
-        int count = myMap.getKeyAt(idx + 1) - myMap.getKeyAt(idx);
-        removed += count;
-        myMap.removeAt(idx);
-        myMap.adjustKeys(idx, myMap.size(), -count);
-      } else {
-        idx++;
-      }
-    }
-
-    updateSize(size() - removed);
-    assert !IntegersDebug.CHECK || checkInvariants();
-    return modified;
-  }
-
   @NotNull
   public WritableLongListIterator iterator(int from, int to) {
     if (from > to || from < 0 || to > size()) {
@@ -403,9 +379,6 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   @Override
   public void swap(int index1, int index2) {
-    if (index1 < 0 || index1 >= size() || index2 < 0 || index2 >= size()) {
-      throw new IndexOutOfBoundsException();
-    }
     if (index1 != index2) {
       long t = get(index1);
       long d = get(index2);

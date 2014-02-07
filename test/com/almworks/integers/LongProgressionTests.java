@@ -102,4 +102,9 @@ public class LongProgressionTests extends IntegersFixture {
     }, LongIteratorSpecificationChecker.ValuesType.ARITHMETHIC);
   }
 
+  public void testToNativeArray() {
+    LongList pr = LongProgression.range(20);
+    System.out.println(pr.get(100));
+  }
+
 }

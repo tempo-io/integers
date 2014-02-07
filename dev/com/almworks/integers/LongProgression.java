@@ -126,6 +126,16 @@ public abstract class LongProgression extends AbstractLongList {
       }
       return result;
     }
+
+    @Override
+    public long[] toNativeArray(int startIndex, long[] dest, int destOffset, int length) {
+      long value = get(startIndex);
+      for (int i = 0; i < length; i++) {
+        dest[destOffset++] = value;
+        value += myStep;
+      }
+      return dest;
+    }
   }
 
 

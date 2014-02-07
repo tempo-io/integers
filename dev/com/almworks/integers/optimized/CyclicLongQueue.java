@@ -68,7 +68,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     if (myIterators != null && toRemove > 0) {
       int removalPoint = normalizeOver(myL + toRemove);
       for (PinnedIterator it : myIterators) {
-        if (indexBetweenLandP(it.myHostIdx, removalPoint) || indexBetweenLandP(it.myHostIdx + 1, removalPoint)) {
+        if (it.hasValue() && indexBetweenLandP(it.myHostIdx, removalPoint) || indexBetweenLandP(it.myHostIdx + 1, removalPoint)) {
           throw new IllegalStateException("Iterator " + it + " prevents from removing " + toRemove + " elements");
         }
       }
@@ -198,7 +198,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
   @NotNull
   public PinnedIterator pinnedIterator() {
     if (isEmpty()) throw new NoSuchElementException("queue is empty");
-    return pinnedIterator(-1);
+    return pinnedIterator(0);
   }
 
   /**
@@ -206,7 +206,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
    * @param idx set -1 to have iterator return the first element from the first call to nextValue()
    * */
   public PinnedIterator pinnedIterator(int idx) {
-    PinnedIterator iterator = new PinnedIterator(idx);
+    PinnedIterator iterator = new PinnedIterator(idx - 1);
     attach(iterator);
     return iterator;
   }
@@ -255,8 +255,12 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     }
 
     @Override
-    public PinnedIterator next() {
-      myHostIdx = normalizeOver(myHostIdx + 1);
+    public PinnedIterator next() throws NoSuchElementException {
+      int newHostIdx = normalizeOver(myHostIdx + 1);
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
+      myHostIdx = newHostIdx;
       myAge += 1;
       return this;
     }
@@ -267,7 +271,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
 
     @Override
     public long value() throws NoSuchElementException {
-      if (myAge == 0) throw new NoSuchElementException();
+      if (!hasValue()) throw new NoSuchElementException();
       return myHostArray[myHostIdx];
     }
 
@@ -311,7 +315,8 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     public StringBuilder build() {
       if (myIterators != null) {
         for (PinnedIterator pi : myIterators) {
-          myPiPos.add(normalizeUnder(pi.myHostIdx - myL));
+          int pinnedIdx = normalizeUnder(pi.myHostIdx - myL + (pi.hasValue() ? 0 : 1));
+          myPiPos.add(pinnedIdx);
         }
         myPiPos.sortUnique();
       }

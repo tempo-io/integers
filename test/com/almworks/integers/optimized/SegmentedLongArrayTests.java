@@ -1,6 +1,7 @@
 package com.almworks.integers.optimized;
 
 import com.almworks.integers.*;
+import com.almworks.integers.func.LongFunctions;
 import com.almworks.integers.util.IntegersDebug;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class SegmentedLongArrayTests extends WritableLongListChecker {
+public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLongArray> {
   private TestEnvForSegmentedLongArray myEnv;
   private SegmentedLongArray array;
   private final int segmentSize = 1024;
@@ -25,9 +26,9 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
 
 
   @Override
-  protected List<WritableLongList> createWritableLongListVariants(long... values) {
-    List<WritableLongList> res = new ArrayList<WritableLongList>();
-    SegmentedLongArray array = new SegmentedLongArray();
+  protected List<SegmentedLongArray> createWritableLongListVariants(long... values) {
+    List<SegmentedLongArray> res = new ArrayList<SegmentedLongArray>();
+    array = new SegmentedLongArray();
     array.addAll(values);
     res.add(array);
 
@@ -107,6 +108,51 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
 
     a1.removeRange(0, 10240);
     assertEquals(2, myEnv.freeCount);
+  }
+
+  public void testCloneApply() {
+    int attemptsCount = 10;
+
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      long[] values = generateRandomLongArray(checkedSize, UNORDERED).extractHostArray();
+      LongArray expected = LongArray.copy(values);
+      LongArray expected2 = LongArray.copy(values);
+      expected2.apply(10, 20, LongFunctions.INC);
+      expected2.apply(1025, 1030, LongFunctions.INC);
+      for (SegmentedLongArray ar : createWritableLongListVariants(values)) {
+        SegmentedLongArray clone = ar.clone();
+
+        clone.apply(10, 20, LongFunctions.INC);
+        clone.apply(1025, 1030, LongFunctions.INC);
+
+        CHECK.order(ar, expected);
+        CHECK.order(clone, expected2);
+      }
+    }
+  }
+
+  public void testCloneSetAll() {
+    int attemptsCount = 10;
+
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      long[] values = generateRandomLongArray(checkedSize, UNORDERED).extractHostArray();
+      LongArray expected = LongArray.copy(values);
+      LongArray expected2 = LongArray.copy(values);
+      LongArray setAll1 = generateRandomLongArray(10, UNORDERED);
+      LongArray setAll2 = generateRandomLongArray(5, UNORDERED);
+      expected2.setAll(10, setAll1, 0, 10);
+      expected2.setAll(1025, setAll2, 0, 5);
+
+      for (SegmentedLongArray ar : createWritableLongListVariants(values)) {
+        SegmentedLongArray clone = ar.clone();
+
+        clone.setAll(10, setAll1, 0, 10);
+        clone.setAll(1025, setAll2, 0, 5);
+
+        CHECK.order(ar, expected);
+        CHECK.order(clone, expected2);
+      }
+    }
   }
 
   @Override
@@ -227,9 +273,7 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
   }
 
   public void testCopyClone() {
-    for (int i = 0; i < 10240; i++) {
-      array.add(i);
-    }
+    array.addAll(LongProgression.range(10240));
     myEnv.clear();
     array.addAll(array.clone());
     checkList(array, ap(0, 1, 10240), ap(0, 1, 10240));
@@ -243,7 +287,6 @@ public class SegmentedLongArrayTests extends WritableLongListChecker {
 
     array.insertAll(5000, array.clone(3000, 5000));
     checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 4800), ap(3000, 1, 2000), ap(5000, 1, 5240), ap(0, 1, 10240));
-
   }
 
   public static void segmentedLongArrayChecker(LongList expected, SegmentedLongArray actual) {
