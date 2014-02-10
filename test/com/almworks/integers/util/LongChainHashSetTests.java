@@ -56,7 +56,6 @@ public class LongChainHashSetTests extends WritableLongSetChecker<LongChainHashS
     set.add(11);
     // This one leads to resize
     set.add(12);
-    // This one will be written in place of the removed element
     set.add(13);
     LongArray expected = new LongArray(range(14));
     expected.removeSorted(5);

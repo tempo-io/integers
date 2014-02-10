@@ -300,10 +300,10 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   public String toDebugString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("LongAmortizedSet ").append("<").append(size()).append(">\n");
-    builder.append("myBaseList: ").append(LongCollections.toBoundedString(myBaseList)).append('\n');
-    builder.append("myAdded: ").append(LongCollections.toBoundedString(myAdded)).append('\n');
-    builder.append("myRemoved: ").append(LongCollections.toBoundedString(sortedRemovedIterator()));
+    builder.append("LongAmortizedSet  ").append(size()).append('\n');
+    builder.append("myBaseList:      ").append(LongCollections.toBoundedString(myBaseList)).append('\n');
+    builder.append("myAdded:         ").append(LongCollections.toBoundedString(myAdded)).append('\n');
+    builder.append("myRemoved:       ").append(LongCollections.toBoundedString(sortedRemovedIterator()));
     return builder.toString();
   }
 

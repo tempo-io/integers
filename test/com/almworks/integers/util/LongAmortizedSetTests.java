@@ -23,16 +23,17 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
     ArrayList<LongAmortizedSet> sets = new ArrayList();
     sets.add(LongAmortizedSet.createFromSortedUnique(sortedUniqueList));
 
-    if (sortedUniqueList.size() != 0 && sortedUniqueList.size() < 300) {
+    int size = sortedUniqueList.size();
+    if (size != 0 && size < 300) {
       int numberOfSets = 100;
       LongArray removedVariants = LongArray.create(
-          sortedUniqueList.get(0) - 1, sortedUniqueList.get(0) + 1, MIN, 0, MAX, sortedUniqueList.get(sortedUniqueList.size() - 1));
+          sortedUniqueList.get(0) - 1, sortedUniqueList.get(0) + 1, MIN, 0, MAX, sortedUniqueList.get(size - 1));
       removedVariants.removeAll(sortedUniqueList);
       removedVariants.sortUnique();
 
       for (int attempt = 0; attempt < numberOfSets; attempt++) {
         set = new LongAmortizedSet();
-        LongArray addMask = generateRandomLongArray(sortedUniqueList.size(), UNORDERED, 2);
+        LongArray addMask = generateRandomLongArray(size, UNORDERED, 2);
         LongArray removeMask = generateRandomLongArray(removedVariants.size(), UNORDERED, 2);
         for (int i = 0; i < addMask.size(); i++) {
           if (addMask.get(i) == 0) set.add(sortedUniqueList.get(i));

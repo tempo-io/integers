@@ -49,9 +49,8 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
     set.addAll(range(11));
     set.remove(5);
     set.add(11);
-    // This one leads to resize
     set.add(12);
-    // This one will be written in place of the removed element
+    // This one leads to resize
     set.add(13);
     LongArray expected = new LongArray(range(14));
     expected.removeSorted(5);

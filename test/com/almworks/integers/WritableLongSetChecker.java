@@ -53,7 +53,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   public void testAddRemoveSimple() {
     WritableLongList sourceAdd = LongArray.create(14,7,3,12,6,2,13,8,5,15,4,0,-1,10,-2,20,-6,32);
     WritableLongList sourceRemove = LongArray.create(7,3,6,14,5,8,2,-7,0,15,3,1);
-    WritableLongList expected = new LongArray();// = LongArray.create(-6,-2,-1,4,10,12,13,20,32);
+    WritableLongList expected = new LongArray();
 
     int stateCount = 0;
     LongIterator iiAdd = sourceAdd.iterator();

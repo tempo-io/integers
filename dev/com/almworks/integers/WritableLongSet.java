@@ -37,7 +37,7 @@ public interface WritableLongSet extends LongCollector, LongSet {
 
   /**
    * Adds the specified element to this set if it is not already present.
-   * Returns {@code true} if the element was added, {@code false} otherwise.
+   * Returns {@code true} if the element was added, otherwise {@code false}.
    *
    * @return {@code false} if this set already contains the element.
    * Otherwise {@code true}.
@@ -47,7 +47,7 @@ public interface WritableLongSet extends LongCollector, LongSet {
 
   /**
    * Removes the specified element from this set.
-   * Returns {@code true} if the element was removed, {@code false} otherwise.
+   * Returns {@code true} if the element was removed, otherwise {@code false}.
    *
    * @return {@code true} if this set contained {@code value}. Otherwise {@code false}.
    * If return value is unused, better use {@link WritableLongSet#remove(long)}
