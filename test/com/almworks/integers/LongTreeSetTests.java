@@ -49,11 +49,16 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
     }
   }
 
-  protected List<LongTreeSet> createSetFromSortedUniqueList(LongList sortedList) {
+  protected List<LongTreeSet> createSetFromSortedUniqueList(LongList sortedUniqueList) {
     return Arrays.asList(
-        LongTreeSet.createFromSortedUnique(sortedList),
-        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_ADD),
-        LongTreeSet.createFromSortedUnique(sortedList, sortedList.size(), TO_REMOVE));
+        LongTreeSet.createFromSortedUnique(sortedUniqueList),
+        LongTreeSet.createFromSortedUnique(sortedUniqueList, sortedUniqueList.size(), TO_ADD),
+        LongTreeSet.createFromSortedUnique(sortedUniqueList, sortedUniqueList.size(), TO_REMOVE));
+  }
+
+  @Override
+  protected LongTreeSet create1SetFromSortedUniqueList(LongList sortedUniqueList) {
+    return LongTreeSet.createFromSortedUnique(sortedUniqueList);
   }
 
   public void testRandom2() {

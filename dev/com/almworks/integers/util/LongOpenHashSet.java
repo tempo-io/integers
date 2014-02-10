@@ -5,6 +5,32 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
 
+/**
+ * A hash set of {@code long}'s, implemented using using open
+ * addressing with linear probing for collision resolution.
+ * <br>It makes no guarantees as to the iteration order of the set;
+ * in particular, it does not guarantee that the order will remain constant over time.
+ *
+ * <p><b>Important node.</b> The implementation uses power-of-two tables and linear
+ * probing, which may cause poor performance (many collisions) if hash values are
+ * not properly distributed.
+ * This implementation is based on the finalization step from Austin Appleby's <code>MurmurHash3</code>.
+ *
+ * Differencies from {@link LongChainHashSet} by performance:
+ * <ul>
+ *   <li>{@link #include(long)} and {@link #contains(long)} are more faster if hash values are properly distributed
+ *   <li>{@link #remove(long)} is more slower
+ *   <li>{@link #toArray()} is more slower
+ *   <li>iterating through the set using {@link #iterator()} is more slower
+ * </ul>
+ *
+ * With the specified threshold {@link IntChainHashSet} takes {@code M*(1+2*f)} memory
+ * where {@code M} - memory for {@link IntOpenHashSet}, {@code f} - loadFactor.
+ * Analogically {@link LongOpenHashSet} takes {@code M*(1+3*f)/2} memory.
+ *
+ * @see	    LongChainHashSet
+ * @see	    LongTreeSet
+ */
 public class LongOpenHashSet extends AbstractWritableLongSet implements WritableLongSet {
   public final static int DEFAULT_CAPACITY = 16;
   public final static float DEFAULT_LOAD_FACTOR = 0.75f;

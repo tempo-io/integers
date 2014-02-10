@@ -1,5 +1,7 @@
 package com.almworks.integers;
 
+import static com.almworks.integers.IntegersUtils.appendShortName;
+
 public abstract class AbstractLongSet implements LongSet {
 
   protected abstract void toNativeArrayImpl(long[] dest, int destPos);
@@ -37,14 +39,7 @@ public abstract class AbstractLongSet implements LongSet {
   }
 
   public StringBuilder toString(StringBuilder builder) {
-    String name = getClass().getSimpleName();
-    // LongAmortizedSet -> LAS, LongTreeSet -> LTS
-    for (int i = 0; i < name.length(); i++) {
-      char c = name.charAt(i);
-      if ('A' <= c && c <= 'Z') {
-        builder.append(c);
-      }
-    }
+    appendShortName(builder, this);
     builder.append(" ").append(size()).append(" [");
     String sep = "";
     for  (LongIterator ii : this) {

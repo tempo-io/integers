@@ -21,14 +21,19 @@ public class LongChainHashSetTests extends WritableLongSetChecker<LongChainHashS
   }
 
   @Override
-  protected List<LongChainHashSet> createSetFromSortedUniqueList(LongList sortedList) {
+  protected List<LongChainHashSet> createSetFromSortedUniqueList(LongList sortedUniqueList) {
     List<LongChainHashSet> sets = new ArrayList<LongChainHashSet>();
-    sets.add(LongChainHashSet.createFrom(sortedList));
+    sets.add(LongChainHashSet.createFrom(sortedUniqueList));
 
-    set = LongChainHashSet.createForAdd(sortedList.size(), 0.5f);
-    set.addAll(sortedList);
+    set = LongChainHashSet.createForAdd(sortedUniqueList.size(), 0.5f);
+    set.addAll(sortedUniqueList);
     sets.add(set);
     return sets;
+  }
+
+  @Override
+  protected LongChainHashSet create1SetFromSortedUniqueList(LongList sortedUniqueList) {
+    return LongChainHashSet.createFrom(sortedUniqueList);
   }
 
   public void testCreateForAdd() {

@@ -267,7 +267,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   /**
-   * @return count of elements that is can contains this set will be resized.
+   *  @return maximum number of elements that this set may contain without rehash
    */
   public int getThreshold() {
     return myThreshold - 1;

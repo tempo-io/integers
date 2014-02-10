@@ -21,14 +21,19 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
   }
 
   @Override
-  protected List<LongOpenHashSet> createSetFromSortedUniqueList(LongList sortedList) {
+  protected List<LongOpenHashSet> createSetFromSortedUniqueList(LongList sortedUniqueList) {
     List<LongOpenHashSet> sets = new ArrayList<LongOpenHashSet>();
-    sets.add(LongOpenHashSet.createFrom(sortedList));
+    sets.add(LongOpenHashSet.createFrom(sortedUniqueList));
 
-    set = LongOpenHashSet.createForAdd(sortedList.size(), 0.5f);
-    set.addAll(sortedList);
+    set = LongOpenHashSet.createForAdd(sortedUniqueList.size(), 0.5f);
+    set.addAll(sortedUniqueList);
     sets.add(set);
     return sets;
+  }
+
+  @Override
+  protected LongOpenHashSet create1SetFromSortedUniqueList(LongList sortedUniqueList) {
+    return LongOpenHashSet.createFrom(sortedUniqueList);
   }
 
   public void testCreateForAdd() {
