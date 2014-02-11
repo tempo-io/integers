@@ -41,6 +41,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       {1, 2, 3, 4, 5, 6, 29, -7, 144, 15},
       ap(0, 1, 19),
       ap(0, -1, 10),
+      ap(1, 2, 10)
   };
 
   public enum ValuesType {
@@ -69,7 +70,9 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       @Override
       public long[] generateValues(int size) {
         LongArray array = generateRandomLongArray(size, SortedStatus.SORTED);
-        return array.extractHostArray();
+        array.addAll(array.get(IntProgression.range(0, size, 3)));
+        array.sort();
+        return array.toNativeArray();
       }
 
       @Override
@@ -197,10 +200,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
         fail();
       } catch (NoSuchElementException ex) {}
 
-      try {
-        empty.next();
-        fail();
-      } catch (NoSuchElementException ex) {}
+      checkNextAndCatchNSEE(empty);
     }
   }
 
@@ -218,6 +218,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
         assertTrue(Arrays.toString(values), it.hasValue());
       }
       TestCase.assertFalse(Arrays.toString(values), it.hasNext());
+      checkNextAndCatchNSEE(it);
     }
     for(LongIterator it: getter.get(values)) {
       int i = 0;
@@ -232,10 +233,20 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
         assertEquals(values[i++], it.nextValue());
       }
       assertEquals(values.length, i);
+      checkNextAndCatchNSEE(it);
     }
 
     for(LongIterator it : getter.get(values)) {
       CHECK.order(it, values);
+    }
+  }
+
+  private void checkNextAndCatchNSEE(LongIterator it) {
+    try {
+     it.next();
+     fail();
+    } catch (NoSuchElementException _) {
+      // ok
     }
   }
 }

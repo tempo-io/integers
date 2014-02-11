@@ -37,8 +37,8 @@ public abstract class LongProgression extends AbstractLongList {
   /**
    * Examples: range(3, 10, 3) -> (3, 6, 9); range(3, -10, -4) -> (3, -1, -5, -9)
    * @param start starting value, inclusive
-   * @param stop ending value, exclusive; may be less than {@code start}, then {@code step} must be negative
-   * @param step may be negative, then {@code stop} must be not greater than {@code start}
+   * @param stop ending value, exclusive
+   * @param step step between adjacent values in list
    * @return list containing arithmetic progression.
    * @throws IllegalArgumentException if {@code step == 0}
    */
@@ -65,20 +65,17 @@ public abstract class LongProgression extends AbstractLongList {
   }
 
   /**
-   * Returns the minimum value {@code count} such that {@code start + step * count} is
-   * between start and stop
+   * Returns the minimum value {@code count} such that {@code start + step * count} is between start and stop
    * @param start starting value, inclusive
-   * @param stop ending value, exclusive; may be less than {@code start}, then {@code step} must be negative
-   * @param step may be negative, then {@code stop} must be not greater than {@code start}
-   * @return minimum value {@code count} such that {@code start + step * count} is
-   * between start and stop
-   * @throws IllegalArgumentException {@code if step == 0 || (start < stop && step < 0) || (stop < start && step > 0)}
+   * @param stop ending value, exclusive
+   * @return minimum value {@code count} such that {@code start + step * count} is between start and stop
+   * @throws IllegalArgumentException {@code if step == 0}
    */
   public static int getCount(long start, long stop, long step) {
     if (step == 0) {
       throw new IllegalArgumentException("step = 0");
     }
-    if (start == stop || (start < stop && step < 0) || (stop < start && step > 0)) {
+    if (start == stop || (start < stop == step < 0)) {
       return 0;
     }
     return 1 + (int)((Math.abs(stop - start) - 1) / Math.abs(step));

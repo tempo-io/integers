@@ -16,10 +16,12 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.util.LongAmortizedSet;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static com.almworks.integers.IntProgression.range;
 import static com.almworks.integers.IntegersFixture.SortedStatus.*;
 
 public class LongArrayTests extends WritableLongListChecker<LongArray> {
@@ -79,12 +81,22 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
   }
 
   public void testEqual() {
+    long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
+
     array = LongArray.create(0, 1, 2, 3, 4, 5, 6);
     assertTrue(array.equalOrder(new long[]{0, 1, 2, 3, 4, 5, 6}));
     assertFalse(array.equalOrder(new long[]{0, 1, 2, 3, 4, 5, 20}));
 
-    assertTrue(array.equalSortedValues(LongArray.create(0, 1, 2, 3, 4, 5, 6)));
-    assertFalse(array.equalSortedValues(LongArray.create(0, 1, 2, 3, 4, 5, 20)));
+    assertTrue(array.equalSortedUniqueValues(LongArray.create(0, 1, 2, 3, 4, 5, 6)));
+    assertFalse(array.equalSortedUniqueValues(LongArray.create(0, 1, 2, 3, 4, 5, 20)));
+
+    array = LongArray.create(MIN, MAX);
+    assertTrue(array.equalSortedUniqueValues(LongArray.create(MIN, MAX)));
+    assertFalse(array.equalSortedUniqueValues(LongArray.create(MIN, MAX - 1)));
+    assertFalse(array.equalSortedUniqueValues(LongArray.create(MIN)));
+
+    array = LongArray.create(-MIN, 0, MAX);
+    assertTrue(array.equalSortedUniqueValues(LongArray.create(-MIN, 0, MAX)));
   }
 
   public void testExpand() {
@@ -180,9 +192,9 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
   public void testRetainWithDuplicates() {
     int arraySize = 100, valuesSize = 10;
     for (int attempt = 0; attempt < 20; attempt++) {
-      LongArray array = generateRandomLongArray(arraySize, SORTED, arraySize * 3 / 2);
+      array = generateRandomLongArray(arraySize, SORTED, arraySize * 3 / 2);
       LongArray values = generateRandomLongArray(valuesSize, UNORDERED, arraySize * 3 / 2);
-      values.addAll(values.get(IntProgression.range(0, values.size(), 2)));
+      values.addAll(values.get(range(0, values.size(), 2)));
       values.shuffle(RAND);
       checkRetain(array, values, false);
 
@@ -292,5 +304,33 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
         assertEquals(values[i], actual.get(i));
       }
     }
+  }
+
+  public void testIterator() {
+    array = LongArray.create(0, 1, 2, 3);
+    WritableLongListIterator it = array.iterator();
+    it.next().next();
+    it.remove();
+    System.out.println(it.hasValue());
+    it.next();
+    System.out.println(it.hasValue());
+    System.out.println(it.value());
+  }
+
+  public static int getCount1(long start, long stop, long step) {
+    if (step == 0) {
+      throw new IllegalArgumentException("step = 0");
+    }
+    if (start == stop || (start < stop == step < 0) || (stop < start && step > 0)) {
+      return 0;
+    }
+    return 1 + (int)((Math.abs(stop - start) - 1) / Math.abs(step));
+  }
+
+  public void test2() {
+    LongAmortizedSet set = LongAmortizedSet.createFromSortedUniqueArray(LongArray.create(0, 1, 2, 3));
+    set.addAll(4, 5, 6);
+    set.removeAll(10, 20, 30);
+    System.out.println(set.toDebugString());
   }
 }

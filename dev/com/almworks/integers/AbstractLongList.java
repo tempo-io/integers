@@ -65,24 +65,10 @@ public abstract class AbstractLongList implements LongList {
     return new IndexIterator(from, to);
   }
 
-  /**
-   * Creates and returns a list which is this list indexed by {@code indices}<br>
-   *
-   * Analogy: get(index) returns one value from this list,
-   * get(indices) returns a list with multiple values from this list.
-   * The values are
-   * <pre>[get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]</pre><br>
-   *
-   * One of the possible usages is for MATLAB-like indexing, i.e. vector indexed by vector.
-   *
-   * Also {@link IndexedLongIterator} and {@link IndexedLongListIterator} can be used
-   * to iterate over this list via a custom set of indices.
-   * @return LongList with values located at {@code indices} in this list
-   * @see IndexedLongIterator
-   * @see IndexedLongListIterator
-   * */
   public LongList get(final IntList indices) {
-    if (indices == null) throw new NullPointerException("indices");
+    if (indices == null) {
+      throw new NullPointerException("indices");
+    }
     return new AbstractLongList() {
       @Override
       public int size() {
@@ -287,7 +273,7 @@ public abstract class AbstractLongList implements LongList {
     return get(size() - backwardIndex - 1);
   }
 
-  public boolean equalSortedValues(LongList collection) {
+  public boolean equalSortedUniqueValues(LongList collection) {
     assert isUniqueSorted();
     if (size() != collection.size())
       return false;
@@ -296,7 +282,7 @@ public abstract class AbstractLongList implements LongList {
     for (LongIterator it : collection) {
       long own = ownIt.nextValue();
       long other = it.value();
-      if (other <= prevOther) {
+      if (other < prevOther) {
         assert false : collection; // Not sorted
         return false;
       }

@@ -59,14 +59,14 @@ public interface WritableLongList extends LongList, LongCollector {
 
   /**
    * Removes all appearances of {@code value} from this sorted list.
-   * <br>May be more effective than {@link #removeAll(long)}
+   * <br>May be more effective than {@link #removeAll(long)}.
    * <br>Invoking this method on an unsorted array produces unspecified results.
    * @return true if this array was modified, otherwise false
    */
   boolean removeAllSorted(long value);
 
   /**
-   * Removes from this list all values contained in collection.
+   * Removes from this list all values contained in {@code iterable}.
    * @return true if this list was modified, otherwise false
    */
   boolean removeAll(LongIterable iterable);
@@ -132,8 +132,9 @@ public interface WritableLongList extends LongList, LongCollector {
   void apply(int from, int to, LongFunction function);
 
   /**
-   * Sorts this list. Stability is not guaranteed. Permutation of indices in this array
+   * Sorts this list. Permutation of indices in this array
    * will be reflected in the same permutation of indices in each array of {@code sortAlso}.
+   * Stability is not guaranteed.
    * @param sortAlso lists in which the order is changed as well as this list
    */
   void sort(WritableLongList... sortAlso);

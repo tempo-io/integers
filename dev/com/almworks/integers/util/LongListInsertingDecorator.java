@@ -51,10 +51,13 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
    * which constructs a decorator without any insertions and
    * add elements through {@link #insert(int, long)}. Use this method if you have previously collected the insertions.
    * <br>Examples:
-   * <br>decorator( [2, 8],    [(0, 0), (2, 4), (3, 6)] ) -> [0, 2, 4, 6, 8]
-   * <br>decorator( [2, 8, 9], [(2, 4)] ) -> [2, 8, 4, 9]
-   * <br>decorator( [3, 9],    [(0, 2), (3, 0)] ) -> [2, 3, 9, 0]
-   * <br>decorator( [0, 4],    [(5, 10)] ) -> IllegalArgumentException
+   * <table>
+   * <tr><td>base</td><td>inserted</td><td>decorator</td></tr>
+   * <tr><td>[2, 8]</td><td>[(0, 0), (2, 4), (3, 6)]</td><td>[0, 2, 4, 6, 8]</td></tr>
+   * <tr><td>[2, 8, 9]</td><td>[(2, 4)]</td><td>[2, 8, 4, 9]</td></tr>
+   * <tr><td>[3, 9]</td><td>[(0, 2), (3, 0)]</td><td>[2, 3, 9, 0]</td></tr>
+   * <tr><td>[0, 4]</td><td>[(5, 10)]</td><td>IllegalArgumentException</td></tr>
+   * </table>
    * @param inserted map in which keys represent insertion points and values the inserted values
    * @throws IllegalArgumentException if first key in {@code inserted} is less than 0 or
    * last key is more than {@code base.size() + inserted.size()}
@@ -209,8 +212,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
 
     public LongListIterator next() throws NoSuchElementException {
       super.next();
-      if ((!myInsertedIterator.hasValue() || myInsertedIterator.left() == index() - 1)
-          && myInsertedIterator.hasNext()) {
+      if (myInsertedIterator.hasNext() && myInsertedIterator.left() == getNextIndex() - 2) {
         myInsertedIterator.next();
       }
       advanceToNextBase();
@@ -221,7 +223,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
       if (!hasValue()) {
         throw new NoSuchElementException();
       }
-      if (myInsertedIterator.hasValue() && myInsertedIterator.left() == index()) {
+      if (myInsertedIterator.hasValue() && myInsertedIterator.left() == getNextIndex() - 1) {
         // if current index on inserted value
         return myInsertedIterator.right();
       } else {

@@ -68,14 +68,14 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     if (myIterators != null && toRemove > 0) {
       int removalPoint = normalizeOver(myL + toRemove);
       for (PinnedIterator it : myIterators) {
-        if (it.hasValue() && indexBetweenLandP(it.myHostIdx, removalPoint) || indexBetweenLandP(it.myHostIdx + 1, removalPoint)) {
+        if (it.hasValue() && indexBetweenLAndP(it.myHostIdx, removalPoint) || indexBetweenLAndP(it.myHostIdx + 1, removalPoint)) {
           throw new IllegalStateException("Iterator " + it + " prevents from removing " + toRemove + " elements");
         }
       }
     }
   }
 
-  private boolean indexBetweenLandP(int idx, int p) {
+  private boolean indexBetweenLAndP(int idx, int p) {
     return
         // |-------------myR-----[myL*****p)----|
         myL <= idx && idx < p ||
@@ -244,7 +244,6 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     }
 
     protected void onRealloc(int oldL) {
-      assert myHostIdx >= oldL;
       myHostIdx = normalizeUnder(myHostIdx - oldL);
     }
 
@@ -283,7 +282,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     /** Current index of the iterator's position. */
     public int index() throws NoSuchElementException {
       if (!hasValue()) throw new NoSuchElementException();
-      return myHostIdx >= myL ? myHostIdx - myL : myHostIdx + (myHostArray.length - myL + 1);
+      return myHostIdx >= myL ? myHostIdx - myL : myHostIdx + (myHostArray.length - myL);
     }
 
     @Override

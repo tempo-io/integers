@@ -63,8 +63,26 @@ public interface LongList extends LongSizedIterable {
   long get(int index) throws NoSuchElementException;
 
   /**
-  * @return index of first occurence of value. If not found returns negative value
-  */
+   * Creates and returns a list which is this list indexed by {@code indices}<br>
+   *
+   * Analogy: get(index) returns one value from this list,
+   * get(indices) returns a list with multiple values from this list.
+   * The values are
+   * <pre>[get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]</pre><br>
+   *
+   * One of the possible usages is for MATLAB-like indexing, i.e. vector indexed by vector.
+   *
+   * Also {@link IndexedLongIterator} and {@link IndexedLongListIterator} can be used
+   * to iterate over this list via a custom set of indices.
+   * @return LongList with values located at {@code indices} in this list
+   * @see IndexedLongIterator
+   * @see IndexedLongListIterator
+   * */
+  public LongList get(final IntList indices);
+
+    /**
+    * @return index of first occurence of value. If not found returns negative value
+    */
   int indexOf(long value);
 
   /**

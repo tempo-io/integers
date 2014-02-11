@@ -310,10 +310,6 @@ public class CyclicLongQueueTests extends LongListChecker<CyclicLongQueue> {
         it = queue.pinnedIterator(pinnedIdx);
         checkRemoveAndCatchISE(queue, pinnedIdx + 1);
 
-//        if (startIdx == 0 && pinnedIdx == 14) {
-        if (startIdx == 2 && pinnedIdx == 14) {
-          startIdx += 0;
-        }
         System.out.println(startIdx + " " + pinnedIdx + " " );
         it.next();
         assertEquals("startIdx = " + startIdx, pinnedIdx, it.index());

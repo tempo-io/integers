@@ -237,13 +237,4 @@ public class LongListInsertingDecoratorTests extends LongListChecker<LongListIns
       // ok
     }
   }
-
-  public void test() {
-    myArray.addAll(0, 2, 4, 6);
-    LongListInsertingDecorator list = new LongListInsertingDecorator(myArray);
-    list.insert(1, 1);
-    list.insert(3, 3);
-    list.insert(5, 5);
-    System.out.println(list);
-  }
 }

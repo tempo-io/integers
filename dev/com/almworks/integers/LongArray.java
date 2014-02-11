@@ -397,8 +397,8 @@ public final class LongArray extends AbstractWritableLongList {
 
   /**
    * Removes from this list all elements whose index is contained in the specified {@code IntList indexes}
-   * <br>This method is more effective than {@link LongCollections#removeAllAtSorted(WritableLongList, IntList)}
-   * due to the more efficient use {@link System#arraycopy(Object, int, Object, int, int)}
+   * <p>Unlike {@link LongCollections#removeAllAtSorted(WritableLongList, IntList)}, which in case of LongArray takes
+   * {@code O(N*M)} time, this method requires just {@code O(N + M)}, where N - {@code size()}, M - {@code indices.size()}.
    *
    * @param indices sorted {@code IntIterable}
    * @see com.almworks.integers.LongCollections#removeAllAtSorted(WritableLongList, IntList)
@@ -433,17 +433,22 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Finds positions for inserting elements of sorted {@code src} into this sorted unique array and writes them to {@code points[0]}.
-   * If {@code points == {null}} or {@code points[0].length < src.size()}, a new array will be allocated in {@code points[0]}.
-   * If {@code points[0].length > src.size()}, elements in {@code points[0]} beyond {@code src.size()} will be ignored.
+   * Finds positions for inserting elements of sorted {@code src} into
+   * this sorted unique array and writes them to {@code points[0]}.
    * {@code points[0][idx]} will be equal to {@code -1} if {@code src.get(idx)} is contained in this array,
    * otherwise equal to index in this array where inserting {@code src.get(idx)} keeps this array sorted unique.
    * <br>Examples:
-   * <br>this: [0, 2, 4, 7, 9, 10], src: [0, 4, 8, 8, 9]; return: 1, points: [-1, -1, 4, -1, -1]
-   * <br>this: [0, 2, 4, 7, 9, 10], src: [1, 4, 6, 6, 7, 11, 12]; return: 2, points: [1, -1, 3, -1, -1, 6, 6]
-   * <br>this: [3, 6, 7, 8, 10, 11, 15], src: [0, 2, 8, 12, 15]; return: 3, points: [0, 0, -1, 6, -1]
+   * <table>
+   *   <tr><td>this</td><td>src</td><td>return</td><td>points</td></tr>
+   *   <tr><td>[0, 2, 4, 7, 9, 10]</td><td>[0, 4, 8, 8, 9]</td><td class="right">1</td><td>[-1, -1, 4, -1, -1]</td></tr>
+   *   <tr><td>[0, 2, 4, 7, 9, 10]</td><td>[1, 4, 6, 6, 7, 11, 12]</td><td class="right">2</td><td>[1, -1, 3, -1, -1, 6, 6]</td></tr>
+   *   <tr><td>[3, 6, 7, 8, 10, 11, 15]</td><td>[0, 2, 8, 12, 15]</td><td class="right">3</td><td>[0, 0, -1, 6, -1]</td></tr>
+   * </table>
+   *
    * @param src sorted iterable
-   * @param points container for insertion points array.
+   * @param points container for insertion points array, not null.
+   * If {@code points[0] == null} or {@code points[0].length < src.size()}, a new array will be allocated in {@code points[0]}.
+   * If {@code points[0].length > src.size()}, elements in {@code points[0]} beyond {@code src.size()} will be ignored.
    * @return number of unique elements from {@code src} that are not contained in this array.
    */
   public int getInsertionPoints(LongSizedIterable src, int[][] points) {
@@ -488,7 +493,7 @@ public final class LongArray extends AbstractWritableLongList {
    * {@link LongArray#mergeWithSmall(LongList)} or {@link LongArray#mergeWithSameLength(LongList)}.
    * <p>If this array is smaller than the specified list,
    * it will copy the specified list and merge it with existing contents using {@link LongArray#mergeWithSmall(LongList)}.
-   * */
+   */
   public void merge(LongList src) {
     if (src.isEmpty()) return;
     final int srcSize = src.size(), size = size();
@@ -510,9 +515,10 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * <p>Merges the specified sorted list and this sorted array into this array.
-   * If src or this array are not sorted, result is undefined.
-   * If {@code getCapacity() < src.size() + size()}, will do reallocation.
+   * <p>Merges the specified sorted list and this sorted array into this sorted unique array.
+   * If {@code src} is not sorted or this array is not sorted unique, result is undefined.
+   * {@code src} can contain duplicates.
+   * <p>If {@code getCapacity() < src.size() + size()}, will do reallocation.
    * <p>Complexity: {@code O(eps(N/T, this, src) * N + T * log(N))}, where {@code N = size()} and {@code T = src.size()}.
    * {@code eps} grows as {@code N/T} grows.
    * {@code eps} also depends on how evenly {@code src} values are distributed in this array: it is higher when
@@ -602,7 +608,9 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Merge the specified sorted unique list and sorted this array. If {@code getCapacity() < src.size() + size()}, will do reallocation.<br>
+   * Merge the specified sorted unique list and this sorted unique array.
+   * If {@code getCapacity() < src.size() + size()}, will do reallocation.<br>
+   * If src or this array are not sorted unique, result is undefined.
    * Complexity: {@code O(N + T)}, where {@code N = size()} and {@code T = src.size()}.<br>
    * Prefer to use if {@code size()} and {@code src.size()} are comparable.
    * If {@code src.size()} is much smaller than {@code size()},

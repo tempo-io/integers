@@ -86,7 +86,7 @@ public class LongProgressionTests extends IntegersFixture {
     }
   }
 
-  public void testArithmeticIterator() {
+  public void testArithmeticIteratorSpecification() {
     LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<? extends LongIterator> get(long... values) {

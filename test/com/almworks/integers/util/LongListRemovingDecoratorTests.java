@@ -34,7 +34,6 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
 
   @Override
   protected List<LongListRemovingDecorator> createLongListVariants(long... values) {
-    LongArray expected = LongArray.copy(values);
     List<LongListRemovingDecorator> res = new ArrayList<LongListRemovingDecorator>();
 
     // [...]
