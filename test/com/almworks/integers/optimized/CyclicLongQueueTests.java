@@ -264,8 +264,8 @@ public class CyclicLongQueueTests extends LongListChecker<CyclicLongQueue> {
     clq.removeFirst(5);
     clq.addAll(11, 12, 13);
     clq.pinnedIterator(8);
-    assertEquals("(5*, 6, 7, 8, 9, 10, 11, 12, 13*)", clq.toStringWithPiterators());
     assertEquals(5, clq.peek());
+    assertEquals("(5*, 6, 7, 8, 9, 10, 11, 12, 13*)", clq.toStringWithPiterators());
   }
 
   public void testPiteratorIndex() {
@@ -310,8 +310,8 @@ public class CyclicLongQueueTests extends LongListChecker<CyclicLongQueue> {
         it = queue.pinnedIterator(pinnedIdx);
         checkRemoveAndCatchISE(queue, pinnedIdx + 1);
 
-        System.out.println(startIdx + " " + pinnedIdx + " " );
         it.next();
+        assertEquals(pinnedIdx != mSize - 1, it.hasNext());
         assertEquals("startIdx = " + startIdx, pinnedIdx, it.index());
         queue.addAll(1, 2, 3);
         assertEquals(pinnedIdx, it.index());

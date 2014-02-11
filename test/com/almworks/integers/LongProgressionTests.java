@@ -103,8 +103,22 @@ public class LongProgressionTests extends IntegersFixture {
   }
 
   public void testToNativeArray() {
-    LongList pr = LongProgression.range(20);
-    System.out.println(pr.get(100));
-  }
+    int start = 10, step = 3, count = 31;
+    long[] values = new long[count];
+    for (int i = 0; i < count; i++) values[i] = start + step * i;
 
+    LongProgression list = LongProgression.arithmetic(start, count, step);
+    for (int startIdx = 0; startIdx < count; startIdx++) {
+      for (int endIdx = startIdx + 1; endIdx < count; endIdx++) {
+        long[] expected = LongCollections.repeat(-1, count).toNativeArray();
+        long[] actual = LongCollections.repeat(-1, count).toNativeArray();
+
+        int len = endIdx - startIdx;
+        System.arraycopy(values, startIdx, expected, startIdx, len);
+        list.toNativeArray(startIdx, actual, startIdx, len);
+        CHECK.order(actual, expected);
+      }
+    }
+
+  }
 }

@@ -250,13 +250,13 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     @Override
     public boolean hasNext() {
       int nextIdx = normalizeOver(myHostIdx + 1);
-      return nextIdx < myR || myL > myR && nextIdx >= myL;
+      return nextIdx != myR;
     }
 
     @Override
     public PinnedIterator next() throws NoSuchElementException {
       int newHostIdx = normalizeOver(myHostIdx + 1);
-      if (!hasNext()) {
+      if (newHostIdx == myR) {
         throw new NoSuchElementException();
       }
       myHostIdx = newHostIdx;

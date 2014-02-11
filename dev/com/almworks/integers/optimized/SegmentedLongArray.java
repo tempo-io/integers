@@ -708,19 +708,8 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     if (s.refCount == 1)
       return s;
     LongSegment newseg = myEnv.allocate(mySegmentSize);
-    int L;
-    if (segmentIndex == 0) {
-      L = myLeftOffset;
-    } else {
-      L = 0;
-    }
-
-    int R;
-    if (segmentIndex == mySegmentCount - 1) {
-      R = myRightOffset;
-    } else {
-      R = 0;
-    }
+    int L = segmentIndex == 0 ? myLeftOffset : 0;
+    int R = segmentIndex == mySegmentCount - 1 ? myRightOffset : 0;
     myEnv.copy(s.data, L, newseg.data, L, s.data.length - L - R);
     return setSegment(segmentIndex, newseg);
   }

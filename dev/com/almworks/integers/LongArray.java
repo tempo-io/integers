@@ -439,7 +439,7 @@ public final class LongArray extends AbstractWritableLongList {
    * otherwise equal to index in this array where inserting {@code src.get(idx)} keeps this array sorted unique.
    * <br>Examples:
    * <table>
-   *   <tr><td>this</td><td>src</td><td>return</td><td>points</td></tr>
+   *   <thead><tr><th>this</th><th>src</th><th>return</th><th>points</th></tr></thead>
    *   <tr><td>[0, 2, 4, 7, 9, 10]</td><td>[0, 4, 8, 8, 9]</td><td class="right">1</td><td>[-1, -1, 4, -1, -1]</td></tr>
    *   <tr><td>[0, 2, 4, 7, 9, 10]</td><td>[1, 4, 6, 6, 7, 11, 12]</td><td class="right">2</td><td>[1, -1, 3, -1, -1, 6, 6]</td></tr>
    *   <tr><td>[3, 6, 7, 8, 10, 11, 15]</td><td>[0, 2, 8, 12, 15]</td><td class="right">3</td><td>[0, 0, -1, 6, -1]</td></tr>

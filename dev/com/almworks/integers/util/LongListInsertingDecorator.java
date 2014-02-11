@@ -52,7 +52,7 @@ public class LongListInsertingDecorator extends AbstractLongListDecorator {
    * add elements through {@link #insert(int, long)}. Use this method if you have previously collected the insertions.
    * <br>Examples:
    * <table>
-   * <tr><td>base</td><td>inserted</td><td>decorator</td></tr>
+   * <thead><tr><th>base</th><th>inserted</th><th>decorator</th></tr></thead>
    * <tr><td>[2, 8]</td><td>[(0, 0), (2, 4), (3, 6)]</td><td>[0, 2, 4, 6, 8]</td></tr>
    * <tr><td>[2, 8, 9]</td><td>[(2, 4)]</td><td>[2, 8, 4, 9]</td></tr>
    * <tr><td>[3, 9]</td><td>[(0, 2), (3, 0)]</td><td>[2, 3, 9, 0]</td></tr>

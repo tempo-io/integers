@@ -17,6 +17,7 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
@@ -181,7 +182,7 @@ public abstract class LongListChecker<T extends LongList> extends IntegersFixtur
         for (int startIdx = 0; startIdx < length; startIdx++) {
           for(int endIdx = startIdx + 1; endIdx < length; endIdx++) {
             long[] expected = LongCollections.repeat(-1, length).toNativeArray();
-            long[] actual = LongCollections.repeat(-1, length).toNativeArray();
+            long[] actual = Arrays.copyOf(expected, expected.length);
 
             int len = endIdx - startIdx;
             System.arraycopy(values, startIdx, expected, startIdx, len);

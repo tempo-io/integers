@@ -172,7 +172,7 @@ public abstract class AbstractLongList implements LongList {
   }
 
   /**
-   * @return true if this list is sorted unique, otherwise false
+   * @return true if this list is sorted and does not contain duplicates, otherwise false
    */
   @Override
   public boolean isUniqueSorted() {

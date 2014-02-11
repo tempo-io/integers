@@ -305,32 +305,4 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
       }
     }
   }
-
-  public void testIterator() {
-    array = LongArray.create(0, 1, 2, 3);
-    WritableLongListIterator it = array.iterator();
-    it.next().next();
-    it.remove();
-    System.out.println(it.hasValue());
-    it.next();
-    System.out.println(it.hasValue());
-    System.out.println(it.value());
-  }
-
-  public static int getCount1(long start, long stop, long step) {
-    if (step == 0) {
-      throw new IllegalArgumentException("step = 0");
-    }
-    if (start == stop || (start < stop == step < 0) || (stop < start && step > 0)) {
-      return 0;
-    }
-    return 1 + (int)((Math.abs(stop - start) - 1) / Math.abs(step));
-  }
-
-  public void test2() {
-    LongAmortizedSet set = LongAmortizedSet.createFromSortedUniqueArray(LongArray.create(0, 1, 2, 3));
-    set.addAll(4, 5, 6);
-    set.removeAll(10, 20, 30);
-    System.out.println(set.toDebugString());
-  }
 }
