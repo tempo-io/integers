@@ -65,7 +65,7 @@ abstract class LongSetOperationsIterator extends FindingLongIterator {
 
   private static int right(int i) {  return i*2 + 1; }
 
-  protected void heapify(int i) {
+  protected final void heapify(int i) {
     int l = left(i), r = right(i), least;
     if (l <= heapLength && myIts.get(myHeap[l]).value() < myIts.get(myHeap[i]).value()) {
       least = l;
@@ -81,13 +81,13 @@ abstract class LongSetOperationsIterator extends FindingLongIterator {
     }
   }
 
-  protected void buildHeap() {
+  protected final void buildHeap() {
     for (int i = parent(heapLength); i >= 1; i--) {
       heapify(i);
     }
   }
 
-  protected void outputHeap() {
+  protected final void outputHeap() {
     if (!IntegersDebug.PRINT) return;
     IntegersDebug.print("output:", heapLength, ": ");
     for (int i = 1; i <= heapLength; i++) {

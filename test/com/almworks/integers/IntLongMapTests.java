@@ -16,7 +16,7 @@ public class IntLongMapTests extends WritableIntLongMapChecker<IntLongMap> {
   }
 
   @Override
-  protected List<IntLongMap> createMapFromSortedList(IntList keys, LongList values) {
+  protected List<IntLongMap> createMapFromLists(IntList keys, LongList values) {
     return Arrays.asList(new IntLongMap(new IntArray(keys), new LongArray(values)));
   }
 

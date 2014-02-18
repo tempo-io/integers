@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -71,13 +72,13 @@ public abstract class IntegersFixture extends TestCase {
     assert sortedUniqueExpected.isUniqueSorted();
     assertEquals(sortedUniqueExpected.size(), set.size());
     if (set instanceof LongSortedSet) {
-      LongArray buffer = LongCollections.collectIterables(set.size(), set.iterator());
+      LongArray buffer = LongCollections.collectIterable(set.size(), set.iterator());
       CHECK.order(sortedUniqueExpected, buffer);
 
       buffer = set.toArray();
       CHECK.order(sortedUniqueExpected, buffer);
     } else {
-      LongArray setToIterator = LongCollections.collectIterables(set.size(), set.iterator());
+      LongArray setToIterator = LongCollections.collectIterable(set.size(), set.iterator());
       LongArray setToArray = set.toArray();
       CHECK.order(setToArray, setToIterator);
 
@@ -310,5 +311,19 @@ public abstract class IntegersFixture extends TestCase {
     modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
     field.set(null, newValue);
+  }
+
+  public static LongList asLongs(final IntList list) {
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return list.size();
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        return list.get(index);
+      }
+    };
   }
 }

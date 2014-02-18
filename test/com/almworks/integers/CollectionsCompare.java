@@ -291,7 +291,7 @@ public class CollectionsCompare {
   }
 
   public void order(LongIterator actual, long ... expected) {
-    order(LongCollections.collectIterables(expected.length, actual).toNativeArray(), expected);
+    order(LongCollections.collectIterable(expected.length, actual).toNativeArray(), expected);
   }
 
   public void order(LongIterator actual, LongIterator expected) {

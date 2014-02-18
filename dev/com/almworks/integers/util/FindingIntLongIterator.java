@@ -56,15 +56,15 @@ public abstract class FindingIntLongIterator extends AbstractIntLongIterator {
   @Override
   public IntLongIterator next() {
     if (myIteratorStatus == VALUE_STORED) {
-      myCurrentLeft = myNextLeft;
-      myCurrentRight = myNextRight;
+      myNextLeft = myCurrentLeft;
+      myNextRight = myCurrentRight;
       myIteratorStatus = NO_VALUE;
     } else {
       if (myIteratorStatus == FINISHED || !findNext()) {
         throw new NoSuchElementException();
       }
-      myCurrentLeft = myNextLeft;
-      myCurrentRight = myNextRight;
+      myNextLeft = myCurrentLeft;
+      myNextRight = myCurrentRight;
     }
     myIterated = true;
     return this;
@@ -80,7 +80,7 @@ public abstract class FindingIntLongIterator extends AbstractIntLongIterator {
     if (!hasValue()) {
       throw new NoSuchElementException();
     }
-    return myCurrentLeft;
+    return myNextLeft;
   }
 
   @Override
@@ -88,6 +88,6 @@ public abstract class FindingIntLongIterator extends AbstractIntLongIterator {
     if (!hasValue()) {
       throw new NoSuchElementException();
     }
-    return myCurrentRight;
+    return myNextRight;
   }
 }

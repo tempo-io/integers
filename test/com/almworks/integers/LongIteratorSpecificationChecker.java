@@ -1,10 +1,9 @@
 package com.almworks.integers;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.*;
 import static junit.framework.Assert.fail;
@@ -164,19 +163,20 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
   private void testRemoveException() {
     for(LongIterator it: getter.get(0, 1, 2)) {
       if (!(it instanceof WritableLongListIterator))
-      try {
-        it.next();
-        it.remove();
-        fail();
-      } catch (UnsupportedOperationException ex) {
-        // ok
-      }
+        try {
+          it.next();
+          it.remove();
+          fail();
+        } catch (UnsupportedOperationException ex) {
+          // ok
+        }
     }
   }
 
   private void testSimple() {
     for(LongIterator it: getter.get(0, 1, 2)) {
       assertFalse(it.hasValue());
+      checkValueAndCatchNSEE(it);
       assertTrue(it.hasNext());
 
       it.next();
@@ -192,14 +192,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
   private void testEmpty() {
     for (LongIterator empty: getter.get()) {
-      TestCase.assertFalse(empty.hasValue());
-      TestCase.assertFalse(empty.hasNext());
-
-      try {
-        empty.value();
-        fail();
-      } catch (NoSuchElementException ex) {}
-
+      checkValueAndCatchNSEE(empty);
       checkNextAndCatchNSEE(empty);
     }
   }
@@ -210,26 +203,32 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
   private void checkOrder(long ... values) {
     for(LongIterator it: getter.get(values)) {
-      TestCase.assertFalse(it.hasValue());
+      assertFalse(Arrays.toString(values), it.hasValue());
+      checkValueAndCatchNSEE(it);
       for (int i = 0; i < values.length; i++) {
         assertTrue(Arrays.toString(values), it.hasNext());
         it.next();
         assertEquals(Arrays.toString(values), values[i], it.value());
         assertTrue(Arrays.toString(values), it.hasValue());
       }
-      TestCase.assertFalse(Arrays.toString(values), it.hasNext());
+      assertFalse(Arrays.toString(values), it.hasNext());
       checkNextAndCatchNSEE(it);
     }
     for(LongIterator it: getter.get(values)) {
+      assertFalse(Arrays.toString(values), it.hasValue());
+      checkValueAndCatchNSEE(it);
       int i = 0;
-      for (LongIterator it2: it) {
+      for (LongIterator it2 : it) {
         assertEquals(values[i++], it2.value());
       }
       assertEquals(values.length, i);
     }
     for(LongIterator it: getter.get(values)) {
+      Assert.assertFalse(it.hasValue());
+      checkValueAndCatchNSEE(it);
+
       int i = 0;
-      while(it.hasNext()) {
+      while (it.hasNext()) {
         assertEquals(values[i++], it.nextValue());
       }
       assertEquals(values.length, i);
@@ -237,16 +236,73 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
     }
 
     for(LongIterator it : getter.get(values)) {
+      Assert.assertFalse(it.hasValue());
+      checkValueAndCatchNSEE(it);
       CHECK.order(it, values);
     }
   }
 
-  private void checkNextAndCatchNSEE(LongIterator it) {
+  protected void checkValueAndCatchNSEE(LongIterator it) {
+    assertFalse(it.hasValue());
     try {
-     it.next();
-     fail();
+      it.value();
+      fail();
     } catch (NoSuchElementException _) {
       // ok
+    }
+
+  }
+
+  protected void checkNextAndCatchNSEE(LongIterator it) {
+    Assert.assertFalse(it.hasNext());
+    try {
+      it.next();
+      fail();
+    } catch (NoSuchElementException _) {
+      // ok
+    }
+  }
+
+  public static void checkIteratorThrowsCME(Iterator iterator) {
+    try {
+      iterator.hasNext();
+      TestCase.fail();
+    } catch (ConcurrentModificationException e) {}
+    try {
+      iterator.next();
+      TestCase.fail();
+    } catch (ConcurrentModificationException e) {}
+
+    if (iterator instanceof IntIterator) {
+      IntIterator it = (IntIterator) iterator;
+      try {
+        it.value();
+        TestCase.fail();
+      } catch (ConcurrentModificationException e) {}
+    } else if (iterator instanceof LongIterator) {
+      LongIterator it = (LongIterator) iterator;
+      try {
+        it.hasValue();
+        TestCase.fail();
+      } catch (ConcurrentModificationException e) {}
+      try {
+        it.value();
+        TestCase.fail();
+      } catch (ConcurrentModificationException e) {}
+    } else if (iterator instanceof IntLongIterator) {
+      IntLongIterator it = (IntLongIterator) iterator;
+      try {
+        it.hasValue();
+        TestCase.fail();
+      } catch (ConcurrentModificationException e) {}
+      try {
+        it.left();
+        TestCase.fail();
+      } catch (ConcurrentModificationException e) {}
+      try {
+        it.right();
+        TestCase.fail();
+      } catch (ConcurrentModificationException e) {}
     }
   }
 }

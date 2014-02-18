@@ -5,10 +5,8 @@ import com.almworks.integers.util.LongSizedIterable;
 
 public interface WritableIntLongMap extends IntLongMapI {
 
-  public static final long DEFAULT_VALUE = 0;
-
   /**
-   * Removes all this map's entries.
+   * Removes all entries from this map.
    */
   void clear();
 
@@ -28,25 +26,20 @@ public interface WritableIntLongMap extends IntLongMapI {
 
   /**
    * Associates the specified value with the specified key only if the specified key has no current mapping.
-   * @return {@code true} if size of map changed. Otherwise {@code false}.
+   * @return {@code true} if the size of this map has changed. Otherwise {@code false}.
    */
   boolean putIfAbsent(int key, long value);
 
   /**
-   * Removes the entry for the specified key.
-   * @return {@code true} if size of map changed. Otherwise {@code false}.
-   */
-
-  /**
-   * Remove all values at the given key.
-   * The default value for the key type is returned if the value does not exist in the map.
-   * @return old value for the specified key if this map contained the key. Otherwise return default value.
+   * Removes all values at the given key.
+   * The default value for the key type is returned if the key does not exist in this map.
+   * @return old value for the specified key if this map contained the key. Otherwise returns default value.
    */
   long remove(int key);
 
   /**
-   * Removes the entry for a key only if currently mapped to a given value.
-   * @return {@code true} if size of map changed. Otherwise {@code false}.
+   * Removes the entry for a key only if the key is currently mapped to a given value.
+   * @return {@code true} if the size of this map changed. Otherwise {@code false}.
    */
   boolean remove(int key, long value);
 

@@ -19,15 +19,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction;
-import com.almworks.integers.func.LongFunction;
-import com.almworks.integers.util.FailFastIntLongIterator;
-import com.almworks.integers.util.IntegersDebug;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.NoSuchElementException;
 
 public class IntLongMap extends AbstractWritableIntLongMap {
   private final WritableIntList myKeys;
@@ -224,12 +216,16 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     return failFast(valuesIterator(0));
   }
 
-  public IntList keysToList() {
+  public IntList keysAsList() {
     checkMutatorPresence();
     return myKeys;
   }
 
-  public LongList valuesToList() {
+  /**
+   * Returns values of this map.
+   * Subsequent map modifications will be reflected in the returned list.
+   */
+  public LongList valuesAsList() {
     checkMutatorPresence();
     return myValues;
   }
@@ -248,12 +244,12 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   }
 
   /**
-   * Checks if this map correct: <ul>
+   * Checks if this map is correct: <ul>
    *   <li>sizes of {@link #myKeys} and {@link #myValues} should be equal;
    *   <li>{@link #myKeys} should be sorted unique;
    * </ul>
-   * @return String with information about error in {@link #myKeys} and {@link #myValues} if it exist,
-   * otherwise {@code null}
+   * @return String with the information about an error in {@link #myKeys} and {@link #myValues} if
+   * such an error was found, otherwise {@code null}
    */
   private String checkInvariants() {
     if (myKeys.size() != myValues.size()) {
@@ -261,9 +257,6 @@ public class IntLongMap extends AbstractWritableIntLongMap {
     }
     if (!myKeys.isUniqueSorted()) {
       return "keys should be sorted unique";
-    }
-    if (myValues.size() < 2) {
-      return null;
     }
     return null;
   }
@@ -292,47 +285,12 @@ public class IntLongMap extends AbstractWritableIntLongMap {
       myMutator = this;
     }
 
-    public int getKey(int index) {
-      return myKeys.get(index);
+    public WritableIntList keys() {
+      return myKeys;
     }
 
-    public long getValue(int index) {
-      return myValues.get(index);
-    }
-
-    public void setKey(int index, int key) {
-      myKeys.set(index, key);
-    }
-
-    public void setValue(int index, long val) {
-      myValues.set(index, val);
-    }
-
-    public void insertAt(int idx, int key, long value) {
-      myKeys.insert(idx, key);
-      myValues.insert(idx, value);
-    }
-
-    public void removeAt(int idx) {
-      myKeys.removeAt(idx);
-      myValues.removeAt(idx);
-    }
-
-    public void reverseValues() {
-      myValues.reverse();
-    }
-
-    public ConsistencyViolatingMutator replaceKeysAndValues(IntList keys, LongList values) {
-      myKeys.clear();
-      myValues.clear();
-      myKeys.addAll(keys);
-      myValues.addAll(values);
-      return this;
-    }
-
-    public void addPair(int key, long value) {
-      myKeys.add(key);
-      myValues.add(value);
+    public WritableLongList values() {
+      return myValues;
     }
 
     public void commit() {

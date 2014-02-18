@@ -11,28 +11,7 @@ import static com.almworks.integers.wrappers.IntHppcWrappers.intCursorToIterator
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 
 public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
-  /**
-   * Minimum capacity for the map.
-   */
-  public final static int MIN_CAPACITY = IntLongOpenHashMap.MIN_CAPACITY;
-
-  /**
-   * Default capacity.
-   */
-  public final static int DEFAULT_CAPACITY = IntLongOpenHashMap.DEFAULT_CAPACITY;
-
-  /**
-   * Default load factor.
-   */
-  public final static float DEFAULT_LOAD_FACTOR = IntLongOpenHashMap.DEFAULT_LOAD_FACTOR;
-
-  /**
-   * Default return value
-   */
-  public final static long DEFAULT_RETURN_VALUE= 0;
-
-
-  IntLongOpenHashMap myMap;
+  private final IntLongOpenHashMap myMap;
 
   public IntLongHppcOpenHashMap() {
     myMap = new IntLongOpenHashMap();
@@ -47,9 +26,6 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
   }
 
   public static IntLongHppcOpenHashMap createFrom(IntIterable keys, LongIterable values) {
-//    if (keys.size() != values.size()) {
-//      throw new IllegalArgumentException("Arrays of keys and values must have an identical length.");
-//    }
     int keysSize = (keys instanceof IntSizedIterable) ? ((IntSizedIterable) keys).size() : 0;
     int valuesSize = sizeOfIterable(values, 0);
     if (keysSize * valuesSize != 0) {
@@ -85,6 +61,26 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
     map.putAll(keys, values);
     return map;
   }
+
+  /**
+   * Creates new hashmap with the specified load factor
+   * that is garanteed to not invoke {@code resize} after adding {@code count} elements
+   * @return new hashmap with the specified capacity dependent on {@code count} and {@code loadFactor}
+   */
+  public static IntLongHppcOpenHashMap createForAdd(int count, float loadFactor) {
+    int initialCapacity = (int)(count / loadFactor) + 1;
+    return new IntLongHppcOpenHashMap(initialCapacity, loadFactor);
+  }
+
+  /**
+   * Creates new hashmap with default load factor
+   * @see #createForAdd(int, float)
+   */
+  public static IntLongHppcOpenHashMap createForAdd(int count) {
+    return createForAdd(count, IntLongOpenHashMap.DEFAULT_LOAD_FACTOR);
+  }
+
+
 
   @Override
   public boolean containsKey(int key) {

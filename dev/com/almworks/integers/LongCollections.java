@@ -37,7 +37,7 @@ public class LongCollections {
     if (iterable instanceof LongSizedIterable) {
       LongSizedIterable sized = (LongSizedIterable)iterable;
       int size = sized.size();
-      long[] res = LongCollections.collectIterables(size, sized).extractHostArray();
+      long[] res = LongCollections.collectIterable(size, sized).extractHostArray();
       assert res.length == sized.size();
       return res;
     }
@@ -205,19 +205,19 @@ public class LongCollections {
     final LongArray sorted = new LongArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-      new IntFunction2() {
-        @Override
-        public int invoke(int a, int b) {
-          return LongCollections.compare(sorted.get(a), sorted.get(b));
-        }
-      },
-      new IntProcedure2() {
-        @Override
-        public void invoke(int a, int b) {
-          sorted.swap(a, b);
-          perms.swap(a, b);
-        }
-      });
+        new IntFunction2() {
+          @Override
+          public int invoke(int a, int b) {
+            return LongCollections.compare(sorted.get(a), sorted.get(b));
+          }
+        },
+        new IntProcedure2() {
+          @Override
+          public void invoke(int a, int b) {
+            sorted.swap(a, b);
+            perms.swap(a, b);
+          }
+        });
     int result = findDuplicateSorted(sorted);
     return result == -1 ? -1 : perms.get(result);
   }
@@ -252,12 +252,18 @@ public class LongCollections {
   }
 
   /**
-   * @return <ul>
-   *   <li> {@link IntegersUtils#EMPTY_LONGS} if {@code length == 0}</li>
-   *   <li> copy of the initial {@code length} elements of {@code array} if {@code 0 < length < array.length}</li>
-   *   <li> {@code array} if {@code length == array.length}</li>
-   *   <li> copies {@code array} in the new array with the specified length and return it if {@code length > array.length}</li>
-   * </ul>
+   * @return
+   *   <table>
+   *   <thead><tr><th>if</th><th>returns</th></tr></thead>
+   *   <tbody>
+   *   <tr><td>{@code length == 0}</td><td> {@link IntegersUtils#EMPTY_LONGS}</td></tr>
+   *   <tr><td>{@code 0 < length < array.length}</td><td> copy of the initial {@code length} elements of {@code array}</td></tr>
+   *   <tr><td>{@code 0 < length < array.length}</td><td> a copy of the original array, truncated to {@code length}
+   *   <tr><td>{@code length == array.length}</td><td> {@code array}</td></tr>
+   *   <tr><td>{@code length > array.length}</td><td> New array of the specified length whose values are values of array trailed with zeroes</td></tr>
+   *   </tbody>
+   *   </table>
+   * @see Arrays#copyOf(long[], int)
    */
   public static long[] reallocArray(@Nullable long[] array, int length) {
     assert length >= 0 : length;
@@ -390,7 +396,7 @@ public class LongCollections {
   }
 
   /**
-   * Removes from the specified list all elements whose index is contained in the specified {@code IntList indexes}
+   * Removes from the specified list all elements whose index is contained in the specified {@code IntList indexes}.
    * @param indexes sorted {@code IntList}
    */
   public static void removeAllAtSorted(WritableLongList list, IntList indexes) {
@@ -493,13 +499,13 @@ public class LongCollections {
     if (includeSorted == null || includeSorted.isEmpty()) return LongList.EMPTY;
     if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted;
     LongMinusIterator complement = new LongMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
-    return complement.hasNext() ? collectIterables(includeSorted.size(), complement) : LongList.EMPTY;
+    return complement.hasNext() ? collectIterable(includeSorted.size(), complement) : LongList.EMPTY;
   }
 
   /**
    * @return union of the specified lists
    * @param aSorted sorted unique {@code LongList}
-   * @param bSorted sorted unique {@code LongList}
+   * @param bSorted sorted uniq ue {@code LongList}
    * @return union of the specified lists
    */
   @NotNull
@@ -526,7 +532,7 @@ public class LongCollections {
   public static LongList intersectionSortedUnique(@Nullable LongList aSorted, @Nullable LongList bSorted) {
     if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return LongList.EMPTY;
     LongIterator intersection = new LongIntersectionIterator(aSorted.iterator(), bSorted.iterator());
-    return intersection.hasNext() ? collectIterables(Math.max(aSorted.size(), bSorted.size()), intersection) : LongList.EMPTY;
+    return intersection.hasNext() ? collectIterable(Math.max(aSorted.size(), bSorted.size()), intersection) : LongList.EMPTY;
   }
 
   /**
@@ -583,22 +589,22 @@ public class LongCollections {
    * */
   public static void sortPairs(final WritableLongList primary, final WritableLongList secondary) throws IllegalArgumentException {
     if (primary.size() > secondary.size()) throw new IllegalArgumentException("secondary is shorter than primary: " +
-      primary.size() + " > " + secondary.size());
+        primary.size() + " > " + secondary.size());
     IntegersUtils.quicksort(primary.size(), new IntFunction2() {
-        @Override
-        public int invoke(int i, int j) {
-          int comp = LongCollections.compare(primary.get(i), primary.get(j));
-          if (comp == 0) comp = LongCollections.compare(secondary.get(i), secondary.get(j));
-          return comp;
-        }
-      },
-      new IntProcedure2() {
-        @Override
-        public void invoke(int i, int j) {
-          primary.swap(i, j);
-          secondary.swap(i, j);
-        }
-      });
+          @Override
+          public int invoke(int i, int j) {
+            int comp = LongCollections.compare(primary.get(i), primary.get(j));
+            if (comp == 0) comp = LongCollections.compare(secondary.get(i), secondary.get(j));
+            return comp;
+          }
+        },
+        new IntProcedure2() {
+          @Override
+          public void invoke(int i, int j) {
+            primary.swap(i, j);
+            secondary.swap(i, j);
+          }
+        });
   }
 
   /**
@@ -607,7 +613,11 @@ public class LongCollections {
    * @see #concatLists(LongList...)
    */
   public static LongArray collectIterables(LongIterable ... iterables) {
-    return collectIterables(0, iterables);
+    if (iterables.length == 1) {
+      return collectIterable(0, iterables[0]);
+    } else {
+      return collectIterables(0, iterables);
+    }
   }
 
   public static LongArray collectLists(LongList ... lists) {
@@ -615,7 +625,7 @@ public class LongCollections {
   }
 
   /**
-   * Represent given lists as a single {@link LongList}.
+   * Represents given lists as a single {@link LongList}.
    * Changes in lists propagate to returned list.
    * @see LongListConcatenation
    * @see #collectLists(LongList...)
@@ -641,6 +651,24 @@ public class LongCollections {
         }
         res.addAll(iterable.iterator());
       }
+    }
+    return res;
+  }
+
+  /**
+   * @see #collectIterables(int, LongIterable...)
+   */
+  public static LongArray collectIterable(int capacity, LongIterable iterable) {
+    LongArray res = new LongArray(capacity);
+    if (iterable instanceof LongList) {
+      res.addAll((LongList) iterable);
+    } else if (iterable instanceof LongSet) {
+      res.addAll((LongSet)iterable);
+    } else {
+      if (iterable instanceof LongSizedIterable) {
+        res.ensureCapacity(res.size() + ((LongSizedIterable) iterable).size());
+      }
+      res.addAll(iterable.iterator());
     }
     return res;
   }
@@ -789,8 +817,10 @@ public class LongCollections {
    * Creates array and add there elements from {@code values} whose indices belong to {@code mask},
    * i.e. {@code (mask & (1 << idx)) != 0}.
    * <br>Examples: get([0, 1, 2], 0) -> [], get([0, 1, 2], 1) -> [2], get([0, 1, 2], 5) -> [0, 2]
-   * @param mask {@code 0 <= mask && mask < values.size()}
-   * @return array with elements from {@code values}
+   * @param mask {@code 0 <= mask && mask < (1<<values.size())}
+   *
+   * @return an array consisting of elements from {@code values} whose indices belong to {@code mask},
+   * i.e. {@code (mask & (1 << idx)) != 0}.
    */
   public static LongArray getSubList(LongList values, int mask) {
     assert (mask + 1) <= (1 << values.size()) : mask + " " + (1 << values.size());
@@ -804,7 +834,7 @@ public class LongCollections {
   }
 
   /**
-   * @return size of {@code iterable} if it is instance of {@code LongSizedIterable} otherwise {@code defaultSize}
+   * @return size of {@code iterable} if it is an instance of {@code LongSizedIterable}, otherwise {@code defaultSize}
    */
   public static int sizeOfIterable(LongIterable iterable, int defaultSize) {
     return (iterable instanceof LongSizedIterable) ? ((LongSizedIterable) iterable).size() : defaultSize;

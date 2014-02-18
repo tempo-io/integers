@@ -244,6 +244,7 @@ test/com/almworks/integers/LongNativeArrayIteratorTests.java -text
 test/com/almworks/integers/LongProgressionTests.java -text
 test/com/almworks/integers/LongSubListTests.java -text
 test/com/almworks/integers/LongTreeSetTests.java -text
+test/com/almworks/integers/PairIntLongIteratorTests.java -text
 test/com/almworks/integers/ParallelLongListTests.java -text
 test/com/almworks/integers/SetOperationsChecker.java -text
 test/com/almworks/integers/TwoWayLongMapTests.java -text

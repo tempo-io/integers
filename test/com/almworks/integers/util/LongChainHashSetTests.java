@@ -86,16 +86,4 @@ public class LongChainHashSetTests extends WritableLongSetChecker<LongChainHashS
       }
     }
   }
-
-  public void testasdf() {
-    for(int i = 510; i < 520; i++) {
-      set = LongChainHashSet.createForAdd(i, 0.5f);
-      int th = set.getThreshold();
-      System.out.println(i + " " + th);
-      set.addAll(LongIterators.range(th));
-      System.out.println(set.size() + " " + set.getThreshold());
-      System.out.println();
-    }
-  }
-
 }

@@ -14,8 +14,9 @@ public class IntLongHppcWrappers {
       @Override
       protected boolean findNext() {
         if (!cursor.hasNext()) return false;
-        myCurrentLeft = cursor.next().key;
-        myCurrentRight = cursor.next().value;
+        IntLongCursor cur = cursor.next();
+        myCurrentLeft = cur.key;
+        myCurrentRight = cur.value;
         return true;
       }
     };

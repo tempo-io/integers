@@ -1,8 +1,24 @@
 package com.almworks.integers;
 
+import junit.framework.Assert;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.almworks.integers.LongIterators.limit;
+import static junit.framework.Assert.fail;
+
 public class LongIteratorsTests extends IntegersFixture {
+  protected void checkNextAndCatchNSEE(LongIterator it) {
+    Assert.assertFalse(it.hasNext());
+    try {
+      it.next();
+      fail();
+    } catch (NoSuchElementException _) {
+      // ok
+    }
+  }
 
   public void checkNoValue(LongIterator it) {
     assertFalse(it.hasValue());
@@ -46,15 +62,30 @@ public class LongIteratorsTests extends IntegersFixture {
   }
 
   public void testLimit() throws Exception {
+    LongIterator it = limit(LongArray.create(0, 1, 2), 2);
+    CHECK.order(it, 0, 1);
+
     for (int i = 0; i < 10; i++) {
-      LongIterator it = LongIterators.limit(LongCollections.repeat(5, i * 20), i * 10);
+      it = limit(LongCollections.repeat(5, i * 20), i * 10);
       checkNoValue(it);
       CHECK.order(LongCollections.repeat(5, i * 10).iterator(), it);
 
-      it = LongIterators.limit(LongProgression.arithmetic(0, i * 20, 1).iterator(), i * 10);
+      it = limit(LongProgression.arithmetic(0, i * 20, 1).iterator(), i * 10);
       checkNoValue(it);
       CHECK.order(LongProgression.arithmetic(0, i * 10, 1).iterator(), it);
     }
+  }
+
+  public void testLimitSpecification() {
+    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+      @Override
+      public List<LongIterator> get(long... values) {
+        LongArray valuesArray2 = LongCollections.collectLists(LongArray.create(values), LongArray.create(10, 20));
+        return Arrays.asList(
+            limit(new LongArray(values), values.length),
+            limit(valuesArray2, values.length));
+      }
+    });
   }
 
   public void checkRange(long ... params) {
@@ -77,6 +108,7 @@ public class LongIteratorsTests extends IntegersFixture {
     LongIterator actual = LongIterators.range(start, stop, step);
     checkNoValue(actual);
     CHECK.order(expected.iterator(), actual);
+    checkNextAndCatchNSEE(actual);
   }
 
   public void testRange() {

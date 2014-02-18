@@ -3,6 +3,9 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 
 public interface IntLongMapI extends IntLongIterable {
+
+  public static final long DEFAULT_VALUE = 0;
+
   /**
    * @return true if this map contains key {@code key}. Otherwise false
    */
@@ -20,7 +23,7 @@ public interface IntLongMapI extends IntLongIterable {
   int size();
 
   /**
-   * @return true if this set contains no elements
+   * @return true if this map contains no elements
    */
   boolean isEmpty();
 
@@ -32,7 +35,7 @@ public interface IntLongMapI extends IntLongIterable {
   LongIterator valuesIterator();
 
   /**
-   * @return the value for the specified key
+   * @return the value for the specified key if this map contains key {@code key}. Otherwise {@code DEFAULT_VALUE}.
    */
   long get(int key);
 }

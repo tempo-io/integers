@@ -25,6 +25,7 @@ import java.util.*;
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.map;
+import static com.almworks.integers.LongCollections.sizeOfIterable;
 import static com.almworks.integers.LongCollections.toSorted;
 import static com.almworks.integers.LongProgression.range;
 
@@ -52,14 +53,24 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   }
 
   public void testAddRemoveSimple() {
-    WritableLongList sourceAdd = LongArray.create(14,7,3,12,6,2,13,8,5,15,4,0,-1,10,-2,20,-6,32);
-    WritableLongList sourceRemove = LongArray.create(7,3,6,14,5,8,2,-7,0,15,3,1);
+    WritableLongList sourceAdd = LongArray.create(14, 7, 3,
+        12, 6, 2,
+        13, 8, 5,
+        12, 20, 16,
+        10, 22, 18);
+    WritableLongList sourceRemove = LongArray.create(7, 3, 19,
+        6, 14, -9,
+        5, 8, 100,
+        12, 2, 40
+        -1, 25, Long.MIN_VALUE);
+    assert sourceAdd.size() == sourceRemove.size();
+    int size = sourceAdd.size();
     WritableLongList expected = new LongArray();
 
     int stateCount = 0;
     LongIterator iiAdd = sourceAdd.iterator();
     LongIterator iiRemove = sourceRemove.iterator();
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < size; i++) {
       if (stateCount >= 0) {
         set.add(iiAdd.nextValue());
         expected.add(iiAdd.value());

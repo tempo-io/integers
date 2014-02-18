@@ -98,7 +98,8 @@ public class SameValuesLongList extends AbstractWritableLongList {
       }
       if (curCount != 0) {
         if (pos == 0 || curValue != prevValue) {
-          m.addPair(pos, curValue);
+          m.keys().add(pos);
+          m.values().add(curValue);
           prevValue = curValue;
         }
         pos += curCount;
@@ -279,13 +280,15 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   @Override
   public void sortUnique() {
-    LongArray newValues = new LongArray(myMap.valuesAsList());
-    newValues.sortUnique();
-    int newSize = newValues.size();
+    IntLongMap.ConsistencyViolatingMutator m = myMap.startMutation();
 
-    myMap.startMutation().
-        replaceKeysAndValues(IntProgression.arithmetic(0, newSize), newValues).
-        commit();
+    m.values().sortUnique();
+    int newSize = m.values().size();
+
+    m.keys().clear();
+    m.keys().addAll(IntProgression.arithmetic(0, newSize));
+
+    m.commit();
     updateSize(newSize);
   }
 
@@ -426,16 +429,16 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
     int idx = 1, sz = size();
     IntLongMap.ConsistencyViolatingMutator m = myMap.startMutation();
-    m.reverseValues();
+    m.values().reverse();
 
+    WritableIntList keys = m.keys();
     for (int j = mapSize - 1; idx < j; j--, idx++) {
-      int keySwp = m.getKey(idx);
-      m.setKey(idx, sz - m.getKey(j));
-      m.setKey(j, sz - keySwp);
+      int keySwp = keys.get(idx);
+      keys.set(idx, sz - keys.get(j));
+      keys.set(j, sz - keySwp);
     }
-
     if ((mapSize & 1) == 0) {
-      m.setKey(idx, sz - m.getKey(idx));
+      keys.set(idx, sz - keys.get(idx));
     }
 
     m.commit();

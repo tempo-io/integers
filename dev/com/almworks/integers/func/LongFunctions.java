@@ -45,7 +45,7 @@ public class LongFunctions {
 
     @Override
     public String toString() {
-      return "++";
+      return "+1";
     }
   };
 
@@ -57,7 +57,19 @@ public class LongFunctions {
 
     @Override
     public String toString() {
-      return "--";
+      return "-1";
+    }
+  };
+
+  public static final LongFunction SQR = new LongFunction() {
+    @Override
+    public long invoke(long a) {
+      return a * a;
+    }
+
+    @Override
+    public String toString() {
+      return "^2";
     }
   };
 

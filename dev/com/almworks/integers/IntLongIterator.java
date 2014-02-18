@@ -20,20 +20,20 @@ public interface IntLongIterator extends Iterator<IntLongIterator>, IntLongItera
   boolean hasNext() throws ConcurrentModificationException;
 
   /**
-   * @return false if iterator has never been and
-   * next call to {@link #left()} or {@link #right()} throw NoSuchElementException advanced, otherwise true
+   * @return false if iterator has never been advanced and
+   * next call to {@link #left()} or {@link #right()} would throw NoSuchElementException advanced, otherwise true
    */
   boolean hasValue();
 
   /**
    * @throws NoSuchElementException if iterator has never been advanced
-   * ({@link #next()} have never been called)
+   * ({@link #next()} has never been called)
    */
   int left() throws NoSuchElementException;
 
   /**
    * @throws NoSuchElementException if iterator has never been advanced
-   * ({@link #next()} have never been called)
+   * ({@link #next()} has never been called)
    */
   long right() throws NoSuchElementException;
 
@@ -62,6 +62,7 @@ public interface IntLongIterator extends Iterator<IntLongIterator>, IntLongItera
 
     @Override
     protected void nextImpl() throws NoSuchElementException {
-      }
+      if (!hasNext()) throw new NoSuchElementException();
+    }
   }
 }

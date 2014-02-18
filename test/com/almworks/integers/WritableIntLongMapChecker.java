@@ -1,15 +1,18 @@
 package com.almworks.integers;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntIterators.range;
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 
 public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> extends IntegersFixture {
   protected abstract T createMap();
 
   protected abstract T createMapWithCapacity(int capacity);
 
-  protected abstract List<T> createMapFromSortedList(IntList keys, LongList values);
+  protected abstract List<T> createMapFromLists(IntList keys, LongList values);
 
   protected T map;
 
@@ -38,6 +41,22 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
     }
   }
 
+  public void testConstructors() {
+    // assumed that all constructors checks in createMapFromLists
+    int attemptsCount = 20;
+    int maxSize = 50;
+//    int maxSize = 1000;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      IntArray keys = generateRandomIntArray(maxSize, SORTED_UNIQUE);
+      LongArray values = generateRandomLongArray(keys.size(), UNORDERED);
+      assert keys.size() == values.size();
+
+      for (T map : createMapFromLists(keys, values)) {
+        checkMap(map, keys, values);
+      }
+    }
+  }
+
   public void testSize() {
     // sets
   }
@@ -46,21 +65,49 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
     // sets
   }
 
-  public void testGet() {
-    int size = 20, attempts = 10;
-    for (int attempt = 0; attempt < attempts; attempt++) {
-      IntArray keys = generateRandomIntArray(size, SortedStatus.SORTED_UNIQUE);
-      LongArray values = generateRandomLongArray(keys.size(), IntegersFixture.SortedStatus.UNORDERED);
-
-//      map.putAll(keys, values);
-    }
-  }
-
   public void testClear() {
     // sets
   }
 
-  public void testIterator() {
+  public void testIterators() {
+    // assumed that all constructors checks in createMapFromLists
+    int attemptsCount = 10;
+    int maxSize = 50;
+//    int maxSize = 1000;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      IntArray keys = generateRandomIntArray(maxSize, SORTED_UNIQUE);
+      LongArray values = generateRandomLongArray(maxSize, SORTED_UNIQUE);
+
+      for (T map : createMapFromLists(keys, values)) {
+        int keyForAdd = 0;
+        while (map.containsKey(keyForAdd)) keyForAdd = RAND.nextInt();
+
+        IntIterator keysIt = map.keysIterator();
+        LongIterator valuesIt = map.valuesIterator();
+        IntLongIterator it = map.iterator();
+
+        map.add(keyForAdd, keyForAdd * keyForAdd);
+        LongIteratorSpecificationChecker.checkIteratorThrowsCME(keysIt);
+        LongIteratorSpecificationChecker.checkIteratorThrowsCME(valuesIt);
+        LongIteratorSpecificationChecker.checkIteratorThrowsCME(it);
+        map.remove(keyForAdd);
+
+        IntArray actualKeys = IntCollections.collectIterables(map.size(), map.keysIterator());
+        LongArray actualValues = LongCollections.collectIterable(map.size(), map.valuesIterator());
+        CHECK.unordered(actualKeys, keys);
+        CHECK.unordered(actualValues, values);
+
+        actualKeys.clear();
+        actualValues.clear();
+        for (IntLongIterator iter : map) {
+          actualKeys.add(iter.left());
+          actualValues.add(iter.right());
+        }
+        CHECK.unordered(actualKeys, keys);
+        CHECK.unordered(actualValues, values);
+      }
+
+    }
   }
 
   public void testKeysIterator() {
@@ -70,7 +117,7 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
   public void testValuesIterator() {
     LongArray expected = LongArray.create(1, 1, 2, 2, 3, 3);
     map.putAll(IntArray.create(0, 2, 4, 6, 8, 10), expected);
-    LongArray actual = LongCollections.collectIterables(expected.size(), map.valuesIterator());
+    LongArray actual = LongCollections.collectIterable(expected.size(), map.valuesIterator());
     actual.sort();
     assertEquals(expected, actual);
 
@@ -92,10 +139,6 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
     }
   }
 
-  public void testContainsKeys() {
-    // sets
-  }
-
   public void testPut() {
     int size = 100, attempts = 10, maxVal = 1000;
     for (int attempt = 0; attempt < attempts; attempt++) {
@@ -112,12 +155,45 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
     }
   }
 
-  public void testPutIfAbsent() {
-    // sets - include
+  public void checkMap(IntLongMapI map, IntList keys, LongList values) {
+    assertEquals(keys.size(), map.size());
+    for (int i = 0; i < keys.size(); i++) {
+      assertEquals(values.get(i), map.get(keys.get(i)));
+    }
   }
 
-  public void testAdd() {
-    // sets - add
+  private static LongList getSqrValues(final IntList keys) {
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return keys.size();
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        return keys.get(index) * keys.get(index);
+      }
+    };
+  }
+
+  public void testAddAllRemoveAllSimple() {
+    IntArray keys = new IntArray(IntProgression.arithmetic(1, 10, 2));
+    LongList values = getSqrValues(keys);
+    map.putAll(keys, values);
+    checkMap(map, keys, values);
+
+    keys.addAll(IntProgression.arithmetic(0, 10, 2));
+    values = getSqrValues(keys);
+    map.putAll(keys.toNativeArray(), values.toNativeArray());
+    checkMap(map, keys, values);
+
+    map.removeAll(keys);
+    assertTrue(map.isEmpty());
+
+    keys = generateRandomIntArray(10, UNORDERED);
+    values = getSqrValues(keys);
+    map.putAll(IntLongIterators.pair(keys.iterator(), values.iterator()));
+    checkMap(map, keys, values);
   }
 
   public void testRemoveKey() {
@@ -142,12 +218,46 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
     }
   }
 
-  public void testRemoveKeyValue() {
-    // sets -
+  public void testToTableString() {
+    int[][] keysArray = {{}, {-1}, {0, 1, 2, 3}, {10, 20, 30}, {1, 3, 5, 7, 11, 13}};
+    for (int[] keys : keysArray) {
+      LongArray values = new LongArray(keys.length);
+      for (int key : keys) {
+        values.add(key * key);
+      }
+      for (T map : createMapFromLists(new IntArray(keys), values)) {
+        AbstractWritableIntLongMap map0 = (AbstractWritableIntLongMap) map;
+        String output = map0.toTableString();
+        int idx = 0, commasCount = 0;
+        for (; idx < output.length() && output.charAt(idx) != '\n'; idx++) {
+          if (output.charAt(idx) == ',') commasCount++;
+        }
+        assertEquals(Math.max(0, keys.length - 1), commasCount);
+        assertFalse(idx == output.length());
+        idx++;
+        for (; idx < output.length() && output.charAt(idx) != '\n'; idx++) {
+          if (output.charAt(idx) == ',') commasCount--;
+        }
+        assertEquals(0, commasCount);
+      }
+    }
+
   }
 
-  public void testPutAll() {
+  public void testContainsKeys() {
     // sets
+  }
+
+  public void testPutIfAbsent() {
+    // sets - include
+  }
+
+  public void testAdd() {
+    // sets - add
+  }
+
+  public void testRemoveKeyValue() {
+    // sets -
   }
 
   public void testRemoveAll() {

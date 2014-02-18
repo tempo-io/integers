@@ -287,12 +287,4 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
       }
     }
   }
-
-  public void test() {
-    LongArray ar = LongArray.create(3, 6, 7, 8, 10, 11, 15);
-    LongArray src = LongArray.create(0, 0, -1, 6, -1);
-    int[][] points = {null};
-    System.out.println(ar.getInsertionPoints(src, points));
-    System.out.println(Arrays.toString(points[0]));
-  }
 }

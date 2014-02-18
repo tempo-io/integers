@@ -20,6 +20,9 @@
 package com.almworks.integers;
 
 import com.almworks.integers.optimized.SameValuesIntList;
+import com.almworks.integers.util.IntListConcatenation;
+import com.almworks.integers.util.IntSizedIterable;
+import com.almworks.integers.util.LongListConcatenation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -27,6 +30,26 @@ import java.util.*;
 import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public class IntCollections {
+
+  /**
+   * @param capacity initial capacity for array
+   * @return array with elements from {@code iterables}.
+   */
+  public static IntArray collectIterables(int capacity, IntIterable ... iterables) {
+    IntArray res = new IntArray(capacity);
+    for (IntIterable iterable : iterables) {
+      if (iterable instanceof IntList) {
+        res.addAll((IntList) iterable);
+      } else {
+        if (iterable instanceof IntSizedIterable) {
+          res.ensureCapacity(res.size() + ((IntSizedIterable) iterable).size());
+        }
+        res.addAll(iterable.iterator());
+      }
+    }
+    return res;
+  }
+
   public static IntArray collectLists(IntList ... lists) {
     int capacity = 0;
     for (IntList list : lists) {
@@ -655,5 +678,9 @@ public class IntCollections {
 
   public static IntIterator range(int stop) {
     return range(0, stop, 1);
+  }
+
+  public static IntList concatLists(IntList ... lists) {
+    return IntListConcatenation.concatUnmodifiable(lists);
   }
 }

@@ -62,7 +62,7 @@ public class LongIterators {
 
   /**
    * @return an infinite arithmetic progression beginning with {@code start}, increasing by {@code step}.
-   * Unlike {@link #arithmetic(long, int, long)} it's infinite iterator
+   * Unlike {@link #arithmetic(long, int, long)} this iterator is infinite
    * @see #arithmetic(long, int, long)
    */
   public static LongIterator arithmeticProgression(final long start, final long step) {
@@ -111,8 +111,8 @@ public class LongIterators {
       }
 
       @Override
-      public LongIterator next() {
-        if (count == -1) {
+      public LongIterator next() throws NoSuchElementException {
+        if (count == 0) {
           throw new NoSuchElementException();
         }
         it.next();
@@ -142,10 +142,10 @@ public class LongIterators {
   public static LongIterator arithmetic(long start, final int count, final long step) {
     if (step == 0) throw new IllegalArgumentException("step = 0");
     if (count < 0) throw new IllegalArgumentException("count < 0");
-    final long myPrevValue = start - step;
+    final long myInitialValue = start - step;
     return new AbstractLongIterator() {
       int myCount = count;
-      long myValue = myPrevValue;
+      long myValue = myInitialValue;
       @Override
       public boolean hasNext() throws ConcurrentModificationException {
         return myCount > 0;
@@ -153,7 +153,7 @@ public class LongIterators {
 
       @Override
       public boolean hasValue() {
-        return myValue != myPrevValue;
+        return myValue != myInitialValue;
       }
 
       @Override
@@ -164,6 +164,7 @@ public class LongIterators {
 
       @Override
       public LongIterator next() {
+        if (myCount <= 0) throw new NoSuchElementException();
         myCount--;
         myValue += step;
         return this;
@@ -181,19 +182,19 @@ public class LongIterators {
   /**
    * @see LongProgression#range(long, long, long)
    */
-  public static LongIterator range(final long start, final long stop, final long step) throws IllegalArgumentException {
+  public static LongIterator range(long start, long stop, long step) throws IllegalArgumentException {
     return LongIterators.arithmetic(start, LongProgression.getCount(start, stop, step), step);
   }
 
   /**
-   * @see LongProgression#range(long, long, long)
+   * @see LongProgression#range(long, long)
    */
   public static LongIterator range(long start, long stop) {
     return range(start, stop, 1);
   }
 
   /**
-   * @see LongProgression#range(long, long, long)
+   * @see LongProgression#range(long)
    */
   public static LongIterator range(long to) {
     return range(0, to, 1);
@@ -207,7 +208,7 @@ public class LongIterators {
   /**
    * @param iterables array of sorted unique {@code LongIterable}
    * @return union of iterables.
-   * If {@code iterables == null || iterables.length == 0} return {@link LongIterator#EMPTY}
+   * If {@code iterables == null || iterables.length == 0}, {@link LongIterator#EMPTY} is returned
    * */
   public static LongIterator unionIterator(LongIterable ... iterables) {
     if (iterables == null) return LongIterator.EMPTY;
@@ -222,15 +223,16 @@ public class LongIterators {
   /**
    * @param iterables array of sorted unique {@code LongIterable}
    * @return intersection of iterables.
-   * If {@code iterables == null || iterables.length == 0} return {@link LongIterator#EMPTY}
+   * If {@code iterables == null || iterables.length == 0}, {@link LongIterator#EMPTY} is returned
    * */
-  public static LongIterator intersectionIterator(LongIterable ... iterables) {
+   public static LongIterator intersectionIterator(LongIterable ... iterables) {
     if (iterables == null || iterables.length == 0) return LongIterator.EMPTY;
     return new LongIntersectionIterator(iterables);
   }
 
   /**
-   * Argument in {@code currentModCount} is always ignored.
+   * @param currentModCount A function that returns the current modification count.
+   *                        The function argument has no meaning and should be ignored.
    * @return wrapper around the specified iterator that throws ConcurrentModificationException if
    * {@code currentModCount} changes its value.
    * @throws NullPointerException if {@code iterator} or {@code currentModCount} are null.

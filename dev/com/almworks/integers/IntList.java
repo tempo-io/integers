@@ -134,4 +134,22 @@ public interface IntList extends IntSizedIterable {
   * @return List filled with object wrappers
   */
   List<Integer> toList();
+
+  class Single extends AbstractIntList {
+    private int myValue;
+
+    public Single(int value) {
+      myValue = value;
+    }
+
+    @Override
+    public int size() {
+      return 1;
+    }
+
+    @Override
+    public int get(int index) throws NoSuchElementException {
+      return myValue;
+    }
+  }
 }
