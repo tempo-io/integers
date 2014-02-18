@@ -37,8 +37,8 @@ public abstract class LongProgression extends AbstractLongList {
   /**
    * Examples: range(3, 10, 3) -> (3, 6, 9); range(3, -10, -4) -> (3, -1, -5, -9)
    * @param start starting value, inclusive
-   * @param stop ending value, exclusive
-   * @param step step between adjacent values in list
+   * @param stop ending value, exclusive. Can be less than or equal to {@code start}.
+   * @param step step between adjacent values in list. Can be negative, should not be zero.
    * @return list containing arithmetic progression.
    * @throws IllegalArgumentException if {@code step == 0}
    */
@@ -67,7 +67,8 @@ public abstract class LongProgression extends AbstractLongList {
   /**
    * Returns the minimum value {@code count} such that {@code start + step * count} is between start and stop
    * @param start starting value, inclusive
-   * @param stop ending value, exclusive
+   * @param stop ending value, exclusive. Can be less than or equal to {@code start}.
+   * @param step step between adjacent values in list. Can be negative, should not be zero.
    * @return minimum value {@code count} such that {@code start + step * count} is between start and stop
    * @throws IllegalArgumentException {@code if step == 0}
    */

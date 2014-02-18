@@ -46,7 +46,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
 
     // [...]~
     source = LongArray.copy(values);
-    source.add(-RAND.nextInt());
+    source.add(RAND.nextInt());
     IntArray indices = IntArray.create(values.length);
     prepareSortedIndices(indices);
     resArray = createFromPrepared(source, indices);
@@ -54,7 +54,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
     res.add(resArray);
 
     // ~[...]~
-    source = LongCollections.collectIterables(values.length + 2, new LongIterator.Single(-RAND.nextInt()), source);
+    source = LongCollections.collectIterables(values.length + 2, new LongIterator.Single(RAND.nextInt()), source);
     indices = IntArray.create(0, values.length + 1);
     prepareSortedIndices(indices);
     resArray = createFromPrepared(source, indices);
@@ -74,7 +74,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
     int pos = source.size() / 2;
     if (pos != 0) {
       source = LongArray.copy(values);
-      source.insert(pos, -RAND.nextInt());
+      source.insert(pos, RAND.nextInt());
       indices = IntArray.create(pos);
       prepareSortedIndices(indices);
       resArray = createFromPrepared(source, indices);

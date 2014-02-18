@@ -39,6 +39,7 @@ public class LongListIteratorSpecificationChecker extends LongIteratorSpecificat
 
   private void testIteratorIndex(long... values) {
     for (LongListIterator it : getter.get(values)) {
+      checkValueAndCatchNSEE(it);
       try {
         it.index();
         fail();
@@ -88,11 +89,8 @@ public class LongListIteratorSpecificationChecker extends LongIteratorSpecificat
     }
     long lastVal = values[length - 1];
     for (LongListIterator it : getter.get(values)) {
-      assertFalse(it.hasValue());
-      try {
-        it.value();
-        fail();
-      } catch (NoSuchElementException ex) {}
+      checkValueAndCatchNSEE(it);
+
       it.move(1);
       assertEquals(0, it.index());
       assertEquals(values[0], it.value());
@@ -147,6 +145,7 @@ public class LongListIteratorSpecificationChecker extends LongIteratorSpecificat
 
   private void testIteratorGet(long... values) {
     for (LongListIterator it : getter.get(values)) {
+      checkValueAndCatchNSEE(it);
       for (int idx = 0; idx < values.length; idx++) {
         assertTrue(it.hasNext());
         assertEquals(values[idx], it.nextValue());

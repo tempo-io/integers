@@ -2,11 +2,9 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.LongFunction;
 import com.almworks.integers.func.LongFunctions;
-import com.almworks.integers.optimized.SameValuesLongList;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.*;
 import static com.almworks.integers.LongIterators.range;
@@ -32,23 +30,23 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       for (int j = 0; j < 2; j++) {
 
         list.addAll(0, 1, 2);
-        CHECK.order(LongArray.create(0, 1, 2), list);
+        checkCollection(list, 0, 1, 2);
 
         list.addAll(LongArray.create(3, 4, 5, 6));
-        CHECK.order(LongArray.create(0, 1, 2, 3, 4, 5, 6), list);
+        checkCollection(list, 0, 1, 2, 3, 4, 5, 6);
 
         list.insert(3, 100);
-        CHECK.order(LongArray.create(0, 1, 2, 100, 3, 4, 5, 6), list);
+        checkCollection(list, 0, 1, 2, 100, 3, 4, 5, 6);
 
         list.insertMultiple(1, -1, 3);
-        CHECK.order(LongArray.create(0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6), list);
+        checkCollection(list, 0, -1, -1, -1, 1, 2, 100, 3, 4, 5, 6);
 
         list.clear();
         assertEquals(0, list.size());
         CHECK.order(list);
 
         list.add(0);
-        CHECK.order(list, 0);
+        checkCollection(list, 0);
 
         list.add(0);
         checkCollection(list, 0, 0);
@@ -192,7 +190,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
 
       list.set(0, 10);
       list.setAll(3, LongArray.create(5, 31, 36, 100), 1, 2);
-      CHECK.order(list, LongArray.create(10, 1, 2, 31, 36, 3));
+      checkCollection(list, 10, 1, 2, 31, 36, 3);
     }
   }
 
@@ -355,7 +353,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       it.move(7);
       assertEquals(9, it.value());
       it.remove();
-      CHECK.order(list, 0, 2, 3, 4, 5, 6, 7, 8);
+      checkCollection(list, 0, 2, 3, 4, 5, 6, 7, 8);
     }
   }
 
@@ -497,13 +495,13 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     for (WritableLongList list: empty()) {
       list.addAll(0);
       list.insertAll(1, LongArray.create(2, 4, 6).iterator());
-      CHECK.order(LongArray.create(0,2,4,6), list);
+      checkCollection(list, 0, 2, 4, 6);
 
       list.insertAll(2, LongArray.create(-5, -10, -15));
-      CHECK.order(LongArray.create(0, 2, -5, -10, -15, 4, 6), list);
+      checkCollection(list, 0, 2, -5, -10, -15, 4, 6);
 
       list.insertAll(0, LongArray.create(0, 99, 99, 0), 1, 2);
-      CHECK.order(LongArray.create(99, 99, 0, 2, -5, -10, -15, 4, 6), list);
+      checkCollection(list, 99, 99, 0, 2, -5, -10, -15, 4, 6);
     }
   }
 
@@ -692,7 +690,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
 
         list.addAll(values);
         list.addAll(list);
-        CHECK.order(list, nativeArray);
+        checkCollection(list, nativeArray);
       }
     }
   }
@@ -767,7 +765,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   public void testRemoveRangeSimple() {
     for (WritableLongList list : createWritableLongListVariants(0, 0, 1, 1, 0, 0)) {
       list.removeRange(2, 4);
-      CHECK.order(list, 0, 0, 0, 0);
+      checkCollection(list, 0, 0, 0, 0);
     }
   }
 
@@ -775,7 +773,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     for (WritableLongList list : empty()) {
       list.insertMultiple(0, 2, 2);
       list.setRange(0, 2, Integer.MIN_VALUE);
-      CHECK.order(list, Integer.MIN_VALUE, Integer.MIN_VALUE);
+      checkCollection(list, Integer.MIN_VALUE, Integer.MIN_VALUE);
     }
   }
 }

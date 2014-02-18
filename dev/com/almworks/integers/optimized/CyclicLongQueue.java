@@ -149,7 +149,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
    *          to be removed
    * */
   public int removeFirst(int n) throws IndexOutOfBoundsException, IllegalStateException {
-    if (n < 0) throw new IndexOutOfBoundsException("n=" + n);
+    if (n < 0) throw new IllegalArgumentException("n=" + n);
     n = min(n, size());
     checkIterators(n);
     myL = normalizeOver(myL + n);
@@ -203,7 +203,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
 
   /**
    * Creates {@link #pinnedIterator() pinned iterator} pointing at the element at {@code idx}.
-   * @param idx set -1 to have iterator return the first element from the first call to nextValue()
+   * @param idx set 0 to have iterator return the first element from the first call to nextValue()
    * */
   public PinnedIterator pinnedIterator(int idx) {
     PinnedIterator iterator = new PinnedIterator(idx - 1);
@@ -282,7 +282,7 @@ public class CyclicLongQueue extends AbstractLongList implements LongCollector {
     /** Current index of the iterator's position. */
     public int index() throws NoSuchElementException {
       if (!hasValue()) throw new NoSuchElementException();
-      return myHostIdx >= myL ? myHostIdx - myL : myHostIdx + (myHostArray.length - myL);
+      return normalizeUnder(myHostIdx - myL);
     }
 
     @Override

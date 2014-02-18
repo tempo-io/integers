@@ -118,7 +118,7 @@ public final class IntArray extends AbstractWritableIntList {
     return dest;
   }
 
-  private void ensureCapacity(int expectedSize) {
+  public void ensureCapacity(int expectedSize) {
     myArray = IntCollections.ensureCapacity(myArray, expectedSize);
   }
 

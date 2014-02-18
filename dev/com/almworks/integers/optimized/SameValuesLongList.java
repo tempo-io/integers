@@ -106,7 +106,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
       i++;
     }
     if (i != values.size()) {
-      throw new IllegalArgumentException("values.size(" + values.size() + ") != counts.size(" + i + ")");
+      throw new IllegalArgumentException("values.size [" + values.size() + "] != counts.size[" + i + "]");
     }
     m.commit();
     updateSize(pos);
@@ -279,7 +279,7 @@ public class SameValuesLongList extends AbstractWritableLongList {
 
   @Override
   public void sortUnique() {
-    LongArray newValues = new LongArray(myMap.valuesToList());
+    LongArray newValues = new LongArray(myMap.valuesAsList());
     newValues.sortUnique();
     int newSize = newValues.size();
 

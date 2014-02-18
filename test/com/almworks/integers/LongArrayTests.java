@@ -19,6 +19,7 @@ package com.almworks.integers;
 import com.almworks.integers.util.LongAmortizedSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.IntProgression.range;
@@ -80,25 +81,6 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
     CHECK.order(copiedArray, LongArray.create(10, 20, 30));
   }
 
-  public void testEqual() {
-    long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
-
-    array = LongArray.create(0, 1, 2, 3, 4, 5, 6);
-    assertTrue(array.equalOrder(new long[]{0, 1, 2, 3, 4, 5, 6}));
-    assertFalse(array.equalOrder(new long[]{0, 1, 2, 3, 4, 5, 20}));
-
-    assertTrue(array.equalSortedUniqueValues(LongArray.create(0, 1, 2, 3, 4, 5, 6)));
-    assertFalse(array.equalSortedUniqueValues(LongArray.create(0, 1, 2, 3, 4, 5, 20)));
-
-    array = LongArray.create(MIN, MAX);
-    assertTrue(array.equalSortedUniqueValues(LongArray.create(MIN, MAX)));
-    assertFalse(array.equalSortedUniqueValues(LongArray.create(MIN, MAX - 1)));
-    assertFalse(array.equalSortedUniqueValues(LongArray.create(MIN)));
-
-    array = LongArray.create(-MIN, 0, MAX);
-    assertTrue(array.equalSortedUniqueValues(LongArray.create(-MIN, 0, MAX)));
-  }
-
   public void testExpand() {
     array = new LongArray();
     array = LongArray.create(0, 1, 2, 3);
@@ -144,7 +126,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
     for (int i = 0; i < array.size(); i++) {
       long value = array.get(i);
       if ((isSorted && values.binarySearch(value) >= 0) ||
-        (!isSorted && values.contains(value))) {
+          (!isSorted && values.contains(value))) {
         expected.add(value);
       }
     }
@@ -160,7 +142,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
     checkRetain(LongArray.create(Long.MIN_VALUE), LongArray.create(Long.MIN_VALUE + 1), false);
     checkRetain(LongArray.create(Long.MIN_VALUE), LongArray.create(Long.MIN_VALUE + 1), true);
     checkRetain(LongArray.create(2, 3, 5, 6, 8, 9, 10, 13, 3, 4, 5, 3),
-      LongArray.create(1, 4, 5, 6, 7, 8, 10, 15), false);
+        LongArray.create(1, 4, 5, 6, 7, 8, 10, 15), false);
     checkRetain(LongArray.create(0, 1, 2, 3, 5, 3, 2, 1, -10), LongArray.create(0, 2, -10), false);
 
     checkRetain(LongProgression.arithmetic(0, 20, 1), LongProgression.arithmetic(1, 15, 2), true);
@@ -304,5 +286,13 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
         assertEquals(values[i], actual.get(i));
       }
     }
+  }
+
+  public void test() {
+    LongArray ar = LongArray.create(3, 6, 7, 8, 10, 11, 15);
+    LongArray src = LongArray.create(0, 0, -1, 6, -1);
+    int[][] points = {null};
+    System.out.println(ar.getInsertionPoints(src, points));
+    System.out.println(Arrays.toString(points[0]));
   }
 }

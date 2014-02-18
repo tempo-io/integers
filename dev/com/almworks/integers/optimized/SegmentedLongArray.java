@@ -694,7 +694,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
 
     int len = to - from;
-    setAll(from, LongCollections.repeat(value, len), from, len);
+    setAll(from, LongCollections.repeat(value, len), 0, len);
 
     assert !IntegersDebug.CHECK || checkInvariants();
   }

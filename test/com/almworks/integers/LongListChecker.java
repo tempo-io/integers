@@ -195,4 +195,23 @@ public abstract class LongListChecker<T extends LongList> extends IntegersFixtur
     }
   }
 
+  public void testEqual() {
+    long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
+
+    LongArray array = LongArray.create(0, 1, 2, 3, 4, 5, 6);
+    assertTrue(array.equalOrder(new long[]{0, 1, 2, 3, 4, 5, 6}));
+    assertFalse(array.equalOrder(new long[]{0, 1, 2, 3, 4, 5, 20}));
+
+    assertTrue(array.equalSortedUniqueValues(LongArray.create(0, 1, 2, 3, 4, 5, 6)));
+    assertFalse(array.equalSortedUniqueValues(LongArray.create(0, 1, 2, 3, 4, 5, 20)));
+
+    array = LongArray.create(MIN, MAX);
+    assertTrue(array.equalSortedUniqueValues(LongArray.create(MIN, MAX)));
+    assertFalse(array.equalSortedUniqueValues(LongArray.create(MIN, MAX - 1)));
+    assertFalse(array.equalSortedUniqueValues(LongArray.create(MIN)));
+
+    array = LongArray.create(-MIN, 0, MAX);
+    assertTrue(array.equalSortedUniqueValues(LongArray.create(-MIN, 0, MAX)));
+  }
+
 }

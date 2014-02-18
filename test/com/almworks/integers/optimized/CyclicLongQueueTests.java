@@ -252,7 +252,11 @@ public class CyclicLongQueueTests extends LongListChecker<CyclicLongQueue> {
     assertEquals("[15] (12*, 13, 14, 15, 16, ..., 18*, 19*, ..., 22, 23, 24, 25, 26)", clq.toStringWithPiterators());
 
     clq.pinnedIterator(5);
-    clq.pinnedIterator(10);
+    CyclicLongQueue.PinnedIterator it = clq.pinnedIterator(9);
+    assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 21*, 22, 23, 24, 25, 26)", clq.toStringWithPiterators());
+    it.next();
+    assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 21*, 22, 23, 24, 25, 26)", clq.toStringWithPiterators());
+    it.next();
     assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 22*, 23, 24, 25, 26)", clq.toStringWithPiterators());
 
     clq = new CyclicLongQueue(11);
@@ -335,5 +339,32 @@ public class CyclicLongQueueTests extends LongListChecker<CyclicLongQueue> {
     ii = clq.pinnedIterator().next();
     assertEquals(0, ii.index());
 
+  }
+
+  public void testAddAll() {
+    int attemptsCount = 10;
+    int maxSize = 2048;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      myArray = new CyclicLongQueue();
+      int firstCount = RAND.nextInt(maxSize / 2);
+      int secondCount = firstCount + RAND.nextInt(maxSize / 2);
+      myArray.addAll(LongProgression.range(firstCount));
+      CHECK.order(myArray, LongProgression.range(firstCount));
+      // ensureCapacity
+      myArray.addAll(LongProgression.range(firstCount, secondCount));
+      CHECK.order(myArray, LongProgression.range(secondCount));
+    }
+  }
+
+  public void testRemoveFirst() {
+    myArray.addAll(LongCollections.repeat(1, 15));
+    assertEquals(10, myArray.removeFirst(10));
+    assertEquals(5, myArray.removeFirst(10));
+    myArray.addAll(LongCollections.repeat(2, 20));
+    for (int i = 0; i < 20; i++) {
+      assertEquals(1, myArray.removeFirst(1));
+    }
+    assertEquals(0, myArray.removeFirst(1));
+    assertEquals(0, myArray.removeFirst(5));
   }
 }

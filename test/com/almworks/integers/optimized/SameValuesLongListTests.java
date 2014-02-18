@@ -353,7 +353,7 @@ public class SameValuesLongListTests extends WritableLongListChecker<SameValuesL
     return changeCount;
   }
 
-    private void checkSetRangeAndRemoveRange(LongList values) {
+  private void checkSetRangeAndRemoveRange(LongList values) {
     int size = values.size();
     for (int from = 0; from < size; from++) {
       for(int to = from + 1; to < size; to++) {
@@ -362,14 +362,14 @@ public class SameValuesLongListTests extends WritableLongListChecker<SameValuesL
           list = SameValuesLongList.create(values);
           list.setRange(from, to, val);
           LongList expected = concatLists(values.subList(0, from), repeat(val, to - from), values.subList(to, size));
-          CHECK.order(list, expected);
+          CHECK.order(expected, list);
           assertEquals(getChangeCount(expected), list.getChangeCount());
         }
 
         list = SameValuesLongList.create(values);
         list.removeRange(from, to);
         LongList expected = concatLists(values.subList(0, from), values.subList(to, size));
-        CHECK.order(list, expected);
+        CHECK.order(expected, list);
         assertEquals(getChangeCount(expected), list.getChangeCount());
 
       }
