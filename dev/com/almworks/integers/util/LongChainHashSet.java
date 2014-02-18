@@ -21,6 +21,12 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   static final float DEFAULT_LOAD_FACTOR = 0.75f;
   private int myMask;
 
+
+  /**
+   * No guarantees are made regarding the number of elements that can be added to the created set without rehash.
+   * {@code initialCapacity} influences only the amount of memory initially allocated.
+   * If you need such guarantees, use {@link #createForAdd(int, float)}.
+   */
   public LongChainHashSet(int initialCapacity, float loadFactor) {
     if (initialCapacity < 0)
       throw new IllegalArgumentException("Illegal initial capacity: " +
@@ -41,10 +47,17 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     myMask = headLen - 1;
   }
 
+  /**
+   * Creates new hashset with default load factor
+   * @see #LongChainHashSet(int, float)
+   */
   public LongChainHashSet(int initialCapacity){
     this(initialCapacity, DEFAULT_LOAD_FACTOR);
   }
 
+  /**
+   * Creates new hashset with default load factor and default capacity
+   */
   public LongChainHashSet(){
     this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
   }
@@ -60,7 +73,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
 
   /**
-   * Creates new hashset with the specified loafFactor
+   * Creates new hashset with the specified load factor
    * that is garanteed to not invoke {@code resize} after adding {@code count} elements
    * @return new hashset with the specified capacity dependent on {@code count} and {@code loadFactor}
    */
@@ -70,7 +83,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   /**
-   * Creates new hashset with default {@code loadFactor = 0.75}
+   * Creates new hashset with default load factor
    * @see #createForAdd(int, float)
    */
   public static LongChainHashSet createForAdd(int count) {

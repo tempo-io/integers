@@ -34,8 +34,8 @@ import java.util.BitSet;
  * @see	    LongTreeSet
  */
 public class LongOpenHashSet extends AbstractWritableLongSet implements WritableLongSet {
-  public final static int DEFAULT_CAPACITY = 16;
-  public final static float DEFAULT_LOAD_FACTOR = 0.75f;
+  final static int DEFAULT_CAPACITY = 16;
+  final static float DEFAULT_LOAD_FACTOR = 0.75f;
 
   private long[] myKeys;
   private BitSet myAllocated;
@@ -94,7 +94,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   public static LongOpenHashSet createFrom(long ... keys) {
-    return createFrom(keys == null ? LongIterator.EMPTY : new LongArray(keys));
+    return createFrom(keys == null ? LongList.EMPTY : new LongArray(keys));
   }
 
   protected int hash(long value) {
