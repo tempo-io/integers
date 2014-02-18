@@ -41,7 +41,7 @@ public class LongChainHashSetTests extends WritableLongSetChecker<LongChainHashS
     for (int size = minSize; size <= maxSize; size++) {
       set = LongChainHashSet.createForAdd(size, 1.0f);
       int curThreshold = set.getThreshold();
-      assertTrue(set.getThreshold() >= size);
+      assertTrue(set.getThreshold() + "<" + size, set.getThreshold() >= size);
       LongList expected = range(size);
       set.addAll(expected);
       checkSet(set, expected);
@@ -84,6 +84,17 @@ public class LongChainHashSetTests extends WritableLongSetChecker<LongChainHashS
         set.addAll(values.subList(threshold, th2));
         checkSet(set, values.subList(th1, th2));
       }
+    }
+  }
+
+  public void testasdf() {
+    for(int i = 510; i < 520; i++) {
+      set = LongChainHashSet.createForAdd(i, 0.5f);
+      int th = set.getThreshold();
+      System.out.println(i + " " + th);
+      set.addAll(LongIterators.range(th));
+      System.out.println(set.size() + " " + set.getThreshold());
+      System.out.println();
     }
   }
 

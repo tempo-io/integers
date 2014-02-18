@@ -61,7 +61,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   /**
    * Creates new hashset with the specified loafFactor
-   * that is garanteed to not invoke {@code resize} after adding {@code} count elements
+   * that is garanteed to not invoke {@code resize} after adding {@code count} elements
    * @return new hashset with the specified capacity dependent on {@code count} and {@code loadFactor}
    */
   public static LongChainHashSet createForAdd(int count, float loadFactor) {
@@ -70,6 +70,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   }
 
   /**
+   * Creates new hashset with default {@code loadFactor = 0.75}
    * @see #createForAdd(int, float)
    */
   public static LongChainHashSet createForAdd(int count) {

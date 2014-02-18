@@ -1,8 +1,47 @@
 package com.almworks.integers.util;
 
 import com.almworks.integers.*;
+import com.almworks.integers.func.LongFunctions;
+
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.List;
+
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.LongCollections.arrayCopy;
+import static com.almworks.integers.LongCollections.map;
+import static com.almworks.integers.LongCollections.toSorted;
 
 public class LongSetBuilderTests extends IntegersFixture {
+  protected static final long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
+
+  protected List<LongSetBuilder> createBuildersFromSortedUniqueList(LongList sortedUniqueList) {
+    ArrayList<LongSetBuilder> sets = new ArrayList();
+    LongSetBuilder builder = new LongSetBuilder();
+    builder.addAll(sortedUniqueList);
+    sets.add(builder);
+
+    int size = sortedUniqueList.size();
+    if (size != 0 && size < 300) {
+      int numberOfSets = 100;
+      for (int attempt = 0; attempt < numberOfSets; attempt++) {
+        builder = new LongSetBuilder();
+        LongArray addMask = generateRandomLongArray(size, UNORDERED, 2);
+        for (int i = 0; i < addMask.size(); i++) {
+          if (addMask.get(i) == 0) builder.add(sortedUniqueList.get(i));
+        }
+        builder.mergeTemp();
+
+        for (int i = 0; i < addMask.size(); i++) {
+          if (addMask.get(i) == 1) builder.add(sortedUniqueList.get(i));
+        }
+        sets.add(builder);
+      }
+    }
+    return sets;
+  }
+
   public void testSimple() {
     check(IntegersUtils.EMPTY_LONGS);
     check(interval(0, 0));
@@ -44,7 +83,6 @@ public class LongSetBuilderTests extends IntegersFixture {
     }
     checkSet(builder, v);
   }
-
 
   public void testAddRandom() {
     for (int i = 0; i < 20; i++) { // replace 100 with 20 to make test run faster on build agent
@@ -161,12 +199,79 @@ public class LongSetBuilderTests extends IntegersFixture {
 
     CHECK.order(collection.iterator(), expected.iterator());
   }
-  
+
   public void testTailIterator() {
     LongSetBuilder b = new LongSetBuilder(100);
     b.addAll(ap(1, 2, 50));
     for (int i = 0; i < 99; i++) {
       assertEquals(i + 1 - (i % 2), b.tailIterator(i).nextValue());
+    }
+  }
+
+  public void testSize() {
+    int attemptsCount = 10, addCount = 20, tempSize = 20;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      int stop = 0;
+      LongSetBuilder b = new LongSetBuilder(tempSize);
+      for (int i = 0; i < addCount; i++) {
+        int start = stop;
+        stop = start + RAND.nextInt(tempSize * 2);
+        b.addAll(LongProgression.range(start, stop));
+        assertEquals(stop, b.size());
+      }
+    }
+  }
+
+  public void testContains() {
+    int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
+    for (int attempt = 0; attempt < attempts; attempt++) {
+      LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
+      LongArray arr2 = LongCollections.collectLists(arr, map(LongFunctions.INC, arr), map(LongFunctions.DEC, arr));
+      arr2.sortUnique();
+      LongSetBuilder b = new LongSetBuilder();
+      b.addAll(arr);
+      for (int i = 0; i < arr2.size(); i++) {
+        long value = arr2.get(i);
+        assertEquals(arr.binarySearch(value) >= 0, b.contains(value));
+      }
+      b.mergeTemp();
+      for (int i = 0; i < arr2.size(); i++) {
+        long value = arr2.get(i);
+        assertEquals(arr.binarySearch(value) >= 0, b.contains(value));
+      }
+    }
+  }
+
+  public void testIterator() {
+    LongList expected = LongArray.create(11,12,13,14,15,16);
+    LongSetBuilder b = new LongSetBuilder();
+    b.addAll(expected);
+    LongArray res = new LongArray();
+    for (LongIterator i: b) {
+      res.add(i.value());
+    }
+    CHECK.order(expected, res);
+
+    b.clear(false);
+    CHECK.order(LongIterator.EMPTY, b.iterator());
+    b.add(10);
+    CHECK.order(LongArray.create(10).iterator(), b.iterator());
+  }
+
+  protected void checkBounds(LongArray array) {
+    long upper = array.size() == 0 ? MIN : array.getLast(0);
+    long lower = array.size() == 0 ? MAX : array.get(0);
+
+    for (LongSetBuilder builder : createBuildersFromSortedUniqueList(array)) {
+      assertEquals(builder.toString(), upper, builder.getUpperBound());
+      assertEquals(builder.toString(), lower, builder.getLowerBound());
+    }
+  }
+
+  public void testGetBounds() {
+    LongArray values = LongArray.create(MIN, MIN + 1, 0, 1, 10, MAX - 1, MAX);
+    for (LongArray array : LongCollections.allSubLists(values)) {
+      checkBounds(array);
     }
   }
 

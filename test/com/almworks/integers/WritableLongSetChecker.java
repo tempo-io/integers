@@ -18,13 +18,14 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
 import com.almworks.integers.func.LongFunctions;
-import com.almworks.integers.util.LongChainHashSet;
+import com.almworks.integers.util.LongAmortizedSet;
 
 import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.map;
+import static com.almworks.integers.LongCollections.toSorted;
 import static com.almworks.integers.LongProgression.range;
 
 /**
@@ -86,6 +87,24 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
         for (int i = 0; i < arr2.size(); i++) {
           long value = arr2.get(i);
           assertEquals(arr.binarySearch(value) >= 0, curSet.contains(value));
+        }
+      }
+    }
+  }
+
+  public void testContains2() {
+    int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
+    for (int attempt = 0; attempt < attempts; attempt++) {
+      LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
+      LongArray arr2 = LongCollections.collectLists(arr, map(LongFunctions.INC, arr), map(LongFunctions.DEC, arr));
+      arr2.sortUnique();
+      for (WritableLongSet curSet : createSetFromSortedUniqueList(arr)) {
+        for (int i = 0; i < arr2.size(); i++) {
+          long value = arr2.get(i);
+          boolean contains = arr.binarySearch(value) >= 0;
+          assertEquals(contains, curSet.contains(value));
+          assertEquals(contains, curSet.exclude(value));
+          assertEquals(false, curSet.contains(value));
         }
       }
     }
@@ -369,31 +388,12 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     set.addAll(2, 4, 6, 8);
     LongIterator it = set.iterator();
     set.add(10);
-    catchAllIteratorOperations(it);
+    LongIteratorSpecificationChecker.checkIteratorThrowsCME(it);
 
     it = set.iterator();
     set.remove(5);
     assertFalse(set.contains(5));
-    catchAllIteratorOperations(it);
-  }
-
-  public void catchAllIteratorOperations(LongIterator it) {
-    try {
-      it.hasNext();
-      fail();
-    } catch (ConcurrentModificationException e) {}
-    try {
-      it.next();
-      fail();
-    } catch (ConcurrentModificationException e) {}
-    try {
-      it.hasValue();
-      fail();
-    } catch (ConcurrentModificationException e) {}
-    try {
-      it.value();
-      fail();
-    } catch (ConcurrentModificationException e) {}
+    LongIteratorSpecificationChecker.checkIteratorThrowsCME(it);
   }
 
   public void testIsEmpty() {
@@ -424,7 +424,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
       public LongIterator get(LongArray... arrays) {
         set = create1SetFromSortedUniqueList(arrays[0]);
         set.retain(arrays[1]);
-        return isSorted ? set.iterator() : LongCollections.toSorted(false, set).iterator();
+        return isSorted ? set.iterator() : toSorted(false, set).iterator();
       }
     }, new SetOperationsChecker.IntersectionGetter(isSorted), true, sortedStatus);
   }
@@ -445,30 +445,26 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
 
   public void testIterator() {
     LongList expected = LongArray.create(11,12,13,14,15,16);
-    int count = expected.size();
-    WritableLongList res = new LongArray();
-    set.addAll(expected);
-    try {
-      for (LongIterator i: set) {
-        res.add(i.value());
-        count--;
-        if (count == 0) {
-          set.add(99);
+    for (T createdSet : createSetFromSortedUniqueList(expected)) {
+      LongArray res = new LongArray();
+      int count = expected.size();
+      try {
+        for (LongIterator i: createdSet) {
+          res.add(i.value());
+          count--;
+          if (count == 0) {
+            createdSet.add(99);
+          }
         }
-      }
-      fail();
-    } catch (ConcurrentModificationException e) {}
-    if (set instanceof LongSortedSet) {
-      CHECK.order(expected, res);
-    } else {
-      CHECK.unordered(expected, res);
+        fail();
+      } catch (ConcurrentModificationException e) {}
+      CHECK.order(expected, (createdSet instanceof LongSortedSet) ? res : toSorted(false, res));
+
+      createdSet.clear();
+      CHECK.order(LongIterator.EMPTY, createdSet.iterator());
+      createdSet.add(10);
+      CHECK.order(LongArray.create(10).iterator(), createdSet.iterator());
     }
-
-    set.clear();
-    CHECK.order(LongIterator.EMPTY, set.iterator());
-    set.add(10);
-    CHECK.order(LongArray.create(10).iterator(), set.iterator());
-
   }
 
   public void testIteratorSpecification() {
@@ -489,6 +485,40 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
 
         for (WritableLongSet createdSet : createSetFromSortedUniqueList(new LongArray(values))) {
           res.add(createdSet.iterator());
+        }
+
+        LongArray toRemoveAll = new LongArray();
+        if (Integer.MIN_VALUE < values[0]) {
+          toRemoveAll.addAll(range(values[0] - 3, values[0]));
+        }
+        long lastVal = values[values.length - 1];
+        if (lastVal < Integer.MAX_VALUE) {
+          toRemoveAll.addAll(range(lastVal + 1, lastVal + 4));
+        }
+        long val = (values[0] + lastVal) / 2;
+        while (set.contains(val)) {
+          val++;
+        }
+        toRemoveAll.add(val);
+        toRemoveAll.sortUnique();
+
+        int i = 0;
+        int maxCount = 10;
+        for (int tryCoalesce = 0; tryCoalesce < 2; tryCoalesce++) {
+          for (LongArray toAdd : LongCollections.allSubLists(new LongArray(values))) {
+            for (LongArray toRemove : LongCollections.allSubLists(new LongArray(toRemoveAll))) {
+              T createdSet = create1SetFromSortedUniqueList(new LongArray(values));
+              createdSet.addAll(toAdd);
+              if (tryCoalesce == 1 && createdSet instanceof LongAmortizedSet) {
+                ((LongAmortizedSet) createdSet).coalesce();
+              }
+              createdSet.removeAll(toRemove);
+              res.add(createdSet.iterator());
+            }
+            if (i++ >= maxCount) {
+              break;
+            }
+          }
         }
 
         return res;
@@ -583,18 +613,19 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   }
 
   public void testToNativeArray() {
-    set.addAll(LongIterators.range(20, 40));
-    long[] ar = new long[40];
-    set.toNativeArray(ar, 3);
-    LongArray actual = new LongArray(new LongArray(ar).subList(3, 23));
-    LongList expected = LongProgression.range(20, 40);
-    CHECK.unordered(actual, expected);
+    for (T set : createSetFromSortedUniqueList(LongProgression.range(20, 40))) {
+      long[] ar = new long[40];
+      set.toNativeArray(ar, 3);
+      LongArray actual = new LongArray(new LongArray(ar).subList(3, 23));
+      LongList expected = LongProgression.range(20, 40);
+      CHECK.unordered(actual, expected);
 
-    set.removeAll(LongIterators.range(20, 40, 2));
-    set.toNativeArray(ar, 4);
-    expected = LongProgression.range(21, 40, 2);
-    actual = new LongArray(new LongArray(ar).subList(4, 4 + expected.size()));
-    CHECK.unordered(actual, expected);
+      set.removeAll(LongIterators.range(20, 40, 2));
+      set.toNativeArray(ar, 4);
+      expected = LongProgression.range(21, 40, 2);
+      actual = new LongArray(new LongArray(ar).subList(4, 4 + expected.size()));
+      CHECK.unordered(actual, expected);
+    }
   }
 
   public void testInclude() {

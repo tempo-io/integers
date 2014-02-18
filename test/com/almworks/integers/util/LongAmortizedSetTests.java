@@ -11,6 +11,7 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.*;
 
 public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedSet> {
+
   protected LongAmortizedSet createSet() {
     return createSetWithCapacity(-1);
   }
@@ -49,8 +50,14 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
         for (int i = 0; i < removeMask.size(); i++) {
           if (removeMask.get(i) == 1) set.remove(removedVariants.get(i));
         }
+        sets.add(set);
       }
     }
+
+    set = new LongAmortizedSet(new LongTreeSet(), new LongTreeSet());
+    set.addAll(sortedUniqueList);
+    sets.add(set);
+
     return sets;
   }
 
@@ -133,6 +140,24 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
     set.coalesce();
     // 0, 0, D
     assertTrue(set.isEmpty());
+
+    set = new LongAmortizedSet(20);
+    set.addAll(1, 2, 3);
+    set.coalesce();
+    set.addAll(1, 2, 3);
+    // X, X, 0
+    assertFalse(set.isEmpty());
+
+    set = new LongAmortizedSet(20);
+    set.addAll(1, 2, 3);
+    set.removeAll(4, 5, 6);
+    // 0, X, Y
+    assertFalse(set.isEmpty());
+
+    set.coalesce();
+    set.removeAll(4, 5, 6);
+    // X, 0, Y
+    assertFalse(set.isEmpty());
   }
 
   public void testAddRemove2() {

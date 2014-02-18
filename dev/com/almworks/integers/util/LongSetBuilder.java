@@ -102,7 +102,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
     mySorted.merge(other);
   }
 
-  private void mergeTemp() {
+  void mergeTemp() {
     if (myTemp.isEmpty())
       return;
     modified();
@@ -173,8 +173,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
   }
 
   public boolean contains(long value) {
-    return mySorted.binarySearch(value) >= 0 ||
-        myTemp.contains(value);
+    return mySorted.binarySearch(value) >= 0 || myTemp.contains(value);
   }
 
   public String toDebugString() {
@@ -215,7 +214,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
     if (!mySorted.isEmpty()) {
       val = mySorted.get(mySorted.size() - 1);
     }
-    for (int i = 0; i < myTempLength; i++) {
+    for (int i = 0; i < myTemp.size(); i++) {
       val = Math.max(i, myTemp.get(i));
     }
     return val;
@@ -227,7 +226,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
     if (!mySorted.isEmpty()) {
       val = mySorted.get(0);
     }
-    for (int i = 0; i < myTempLength; i++) {
+    for (int i = 0; i < myTemp.size(); i++) {
       val = Math.min(i, myTemp.get(i));
     }
     return val;

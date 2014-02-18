@@ -30,13 +30,13 @@ public interface LongSortedSet extends LongSet {
   public long getLowerBound();
 
     /**
-     * Writes values from this set to the {@code dest} in the ascending order.<br>
+     * Writes values from this set to {@code dest} in the ascending order.<br>
      * {@inheritDoc}
      */
   long[] toNativeArray(long[] dest, int destPos);
 
   /**
-   * Writes values from this set to {@code dest} in the sorted order
+   * Writes values from this set to {@code dest} in the ascending order.
    * @see {@link #toNativeArray(long[], int)}
    */
   @Override

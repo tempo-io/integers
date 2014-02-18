@@ -13,7 +13,8 @@ import java.util.NoSuchElementException;
  * @author Igor Sereda
  */
 public class LongAmortizedSet extends AbstractWritableLongSet implements WritableLongSortedSet {
-  public static final int DEFAULT_CHUNKSIZE = 512;
+  // Maximum number of elements to be added to LongChainHashSet without rehash with loadFactor = 0.5 and memory for 1024 elements
+  public static final int DEFAULT_CHUNKSIZE = 511;
 
   private LongArray myBaseList;
   private final int myChunkSize;
@@ -26,7 +27,6 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
 
   private int[][] myTempInsertionPoints = {null};
   private LongArray myRemovedTemp = null;
-//  private long[] myRemovedTemp = null;
 
   public LongAmortizedSet(WritableLongSortedSet addedSet, WritableLongSet removedSet) {
     this(0, addedSet, removedSet, DEFAULT_CHUNKSIZE);
@@ -47,7 +47,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   }
 
   public LongAmortizedSet(int capacity) {
-    this(capacity, new LongTreeSet(), LongChainHashSet.createForAdd(DEFAULT_CHUNKSIZE), DEFAULT_CHUNKSIZE);
+    this(capacity, new LongTreeSet(DEFAULT_CHUNKSIZE), LongChainHashSet.createForAdd(DEFAULT_CHUNKSIZE, 0.5f), DEFAULT_CHUNKSIZE);
   }
 
   /**
@@ -57,7 +57,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
    */
   public static LongAmortizedSet createFromSortedUnique(LongIterable iterable, int capacity) {
     LongAmortizedSet res = new LongAmortizedSet();
-    res.myBaseList = LongCollections.collectIterables(capacity, iterable);
+    res.myBaseList = LongCollections.collectIterable(capacity, iterable);
     assert res.myBaseList.isUniqueSorted();
     return res;
   }

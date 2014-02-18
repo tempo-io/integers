@@ -120,7 +120,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
    * To create {@code LongTreeSet} with the specified capacity use
    * {@link com.almworks.integers.LongTreeSet#createFromSortedUnique(LongIterable, int, com.almworks.integers.LongTreeSet.ColoringType)}
    * @return {@code LongTreeSet} with elements from {@code src}.
-   * If {@code src} inherited from {@code LongSizedIterable}, capacity of new set equals to {@code src.size()}.
+   * If {@code src} is a {@code LongSizedIterable}, capacity of new set equals to {@code src.size()}.
    */
   public static LongTreeSet createFromSortedUnique(LongIterable src) {
     return createFromSortedUnique(src,
@@ -431,7 +431,9 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   }
 
   private void initFromSortedUnique(LongIterable src, int capacity, ColoringType coloringType) {
-    LongArray buf = LongCollections.collectIterables(capacity + 1, new LongIterator.Single(NIL_DUMMY_KEY), src);
+    LongArray buf = new LongArray(capacity + 1);
+    buf.add(NIL_DUMMY_KEY);
+    buf.addAll(src);
     int size = buf.size() - 1;
     long[] newKeys = buf.extractHostArray();
     assert LongCollections.isSortedUnique(false, newKeys, 1, size) == 0;

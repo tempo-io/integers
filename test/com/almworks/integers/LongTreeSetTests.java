@@ -50,7 +50,11 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
   }
 
   protected List<LongTreeSet> createSetFromSortedUniqueList(LongList sortedUniqueList) {
-    return Arrays.asList(
+    set = new LongTreeSet();
+    set.addAll(sortedUniqueList);
+    LongTreeSet set2 = new LongTreeSet();
+    set2.addAll(sortedUniqueList.iterator());
+    return Arrays.asList(set, set2,
         LongTreeSet.createFromSortedUnique(sortedUniqueList),
         LongTreeSet.createFromSortedUnique(sortedUniqueList, sortedUniqueList.size(), TO_ADD),
         LongTreeSet.createFromSortedUnique(sortedUniqueList, sortedUniqueList.size(), TO_REMOVE));

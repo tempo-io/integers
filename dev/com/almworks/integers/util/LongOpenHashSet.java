@@ -11,22 +11,24 @@ import java.util.BitSet;
  * <br>It makes no guarantees as to the iteration order of the set;
  * in particular, it does not guarantee that the order will remain constant over time.
  *
- * <p><b>Important node.</b> The implementation uses power-of-two tables and linear
+ * <p><b>Important note.</b> The implementation uses power-of-two tables and linear
  * probing, which may cause poor performance (many collisions) if hash values are
  * not properly distributed.
- * This implementation is based on the finalization step from Austin Appleby's <code>MurmurHash3</code>.
+ * <p>As a hash function, this implementation uses the finalization step from
+ * Austin Appleby's <code>MurmurHash3</code>.
+ * To use a custom hash function, override {@link #hash(long)}.
  *
- * Differencies from {@link LongChainHashSet} by performance:
+ * <p>Differencies from {@link LongChainHashSet} by performance:
  * <ul>
- *   <li>{@link #include(long)} and {@link #contains(long)} are more faster if hash values are properly distributed
- *   <li>{@link #remove(long)} is more slower
- *   <li>{@link #toArray()} is more slower
- *   <li>iterating through the set using {@link #iterator()} is more slower
+ *   <li>{@link #include(long)} and {@link #contains(long)} are faster if hash values are properly distributed
+ *   <li>{@link #remove(long)} is slower
+ *   <li>{@link #toArray()} is slower
+ *   <li>iterating through the set using {@link #iterator()} is slower
  * </ul>
  *
  * With the specified threshold {@link IntChainHashSet} takes {@code M*(1+2*f)} memory
  * where {@code M} - memory for {@link IntOpenHashSet}, {@code f} - loadFactor.
- * Analogically {@link LongOpenHashSet} takes {@code M*(1+3*f)/2} memory.
+ * {@link LongOpenHashSet} takes {@code M*(1+3*f)/2} memory.
  *
  * @see	    LongChainHashSet
  * @see	    LongTreeSet
@@ -212,7 +214,10 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     return mySize;
   }
 
-  int getThreshold() {
+  /**
+   *  @return maximum number of elements that this set may contain without rehash
+   */
+  public int getThreshold() {
     return myThreshold;
   }
 
