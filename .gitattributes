@@ -163,9 +163,10 @@ dev/com/almworks/integers/wrappers/IntHppcWrappers.java -text
 dev/com/almworks/integers/wrappers/IntLongHppcOpenHashMap.java -text
 dev/com/almworks/integers/wrappers/IntLongHppcWrappers.java -text
 dev/com/almworks/integers/wrappers/LongHppcWrappers.java -text
-gen/IntegerCollectionsCodegen.java -text
-gen/SkipImportsRegex.groovy -text
-gen/TypeDescriptor.java -text
+gen/com/almworks/integers/generator/IntegerCollectionsCodegen.java -text
+gen/com/almworks/integers/generator/SkipImportsRegex.groovy -text
+gen/com/almworks/integers/generator/StringSets.java -text
+gen/com/almworks/integers/generator/TypeDescriptor.java -text
 java/com/almworks/integers/EmptyIntLongIterator.java -text
 java/com/almworks/integers/IntegersUtils.java -text
 java/com/almworks/integers/util/IntegersDebug.java -text

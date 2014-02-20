@@ -9,7 +9,7 @@ final getCommandProperty = {String param -> (ant.project.properties[param] in ["
 final isDirty = getCommandProperty("dirty")
 
 // run "gant -DskipSlowChecks" or "gant -DskipSlowChecks=true"
-final isCheckStr = !getCommandProperty("skipSlowChecks") ? "true" : "false"
+final isCheckStr = String.valueOf(!getCommandProperty("skipSlowChecks"))
 
 final almMessage = {Object v -> println " [almworks] " + (isDirty ? "[dirty] ": "") + v; System.out.flush(); System.err.flush() }
 final String antProp(String it) {
@@ -36,7 +36,7 @@ final rel = {String file -> rel2 (gantDir, file) }
 
 ant.property(file: rel("build.properties"))
 
-final Boolean skipGenerate = isDirty || "true".equals(System.getProperty("skipGenerate"));
+final Boolean skipGenerate = isDirty || getCommandProperty("skipGenerate");
 
 final String rootDir = rel("..")
 
@@ -159,13 +159,13 @@ List<String> collectRelFileNames(File dir, String prefix, List<String> acceptedE
 target(name: 'generateJavaCode') {
   depends(['makeGen'])
   almMessage "generateJavaCode"
-  if (!skipGenerate) runGenerator(false)
+  runGenerator(false)
 }
 
 target(name: 'make') {
+  println 'make skip generate: ' + skipGenerate
   depends(['init', 'utils'])
-  if (!isDirty) depends(['generateJavaCode'])
-  if (!skipGenerate) runGenerator(false);
+  if (!skipGenerate) depends(['generateJavaCode'])
   ant.mkdir(dir: generatedClassesDir)
   almMessage "classpath: $libDir/"
   ant.javac(defaultCompileParams + [destdir: generatedClassesDir, classpathref: "libs"]) {

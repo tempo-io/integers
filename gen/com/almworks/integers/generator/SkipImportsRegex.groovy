@@ -1,3 +1,4 @@
+package com.almworks.integers.generator
 /*
  * Copyright 2010 ALM Works Ltd
  *

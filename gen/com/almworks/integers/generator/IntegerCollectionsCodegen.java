@@ -1,4 +1,4 @@
-/*
+package com.almworks.integers.generator;/*
  * Copyright 2010 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,6 @@ public class IntegerCollectionsCodegen {
 
   public static final String javaComments = "/[*]([^*]*?[*])+?/|(?m://.*$)";
   public static final String javaEntityNameExtractor = "(?:public\\s+)?(?:class|enum|interface|(?:@\\s*interface))\\s+((?:\\w|#)+)";
-  public static final String applicabilityStringRegex = "^#APPLY#([" + TypeDescriptor.getAllApplicableString() + "]+)\\s*";
   public static final String skipImportsRegex = SkipImportsRegex.REGEX;
   public static final String skipImportsWhitespaceRegex = SkipImportsRegex.WHITESPACE_REGEX;
   private static final String lineSeparator = String.format("%n");
@@ -80,6 +79,7 @@ public class IntegerCollectionsCodegen {
       printUsage();
       System.exit(RET_VAL_HELP);
     }
+    System.out.println(Arrays.toString(args));
     File srcRoot = new File(args[0]);
     String[] filesList = args[1].split(File.pathSeparator);
     File destRoot = new File(args[2]);
@@ -144,10 +144,16 @@ public class IntegerCollectionsCodegen {
 
     templateStr = insertGeneratedCodeNotice(relPath, templateStr);
 
-    String applicabilityString = getApplicabilityString(templateFile, templateStr);
-    templateStr = templateStr.replaceAll(applicabilityStringRegex, "");
     StringBuilder errors = new StringBuilder();
-    for (TypeDescriptor type : TypeDescriptor.getApplicableTypes(applicabilityString)) {
+
+    boolean isPair = false;
+    for (String s : StringSets.F.getStrings()) {
+      isPair |= (outFileNameTemplate.contains(s));
+    }
+
+    for (TypeDescriptor type : TypeDescriptor.values()) {
+      if (isPair != type.isPair()) continue;
+
       String outFileName = type.apply(outFileNameTemplate);
       String out = type.apply(templateStr);
       File outFile = new File(parent, outFileName + myOutputFileExt);
@@ -190,18 +196,6 @@ public class IntegerCollectionsCodegen {
     String generatedCodeNotice = generatedCodeNoticeTemplate + relPath;
     templateStr = templateStr.substring(0, where) + lineSeparator + lineSeparator + generatedCodeNotice + lineSeparator + templateStr.substring(where);
     return templateStr;
-  }
-
-  private static String getApplicabilityString(File templateFile, String templateStr) {
-    Matcher matcher = Pattern.compile(applicabilityStringRegex).matcher(templateStr);
-    if (!matcher.find()) {
-      return TypeDescriptor.getAllApplicableString();
-    }
-    String ret = matcher.group(1);
-    if(matcher.find()) {
-      System.err.println("More that one applicability string found in '" + templateFile + '\'');
-    }
-    return ret;
   }
 
   /**
@@ -291,7 +285,7 @@ public class IntegerCollectionsCodegen {
     try {
       int lastLineNum = -1;
       @SuppressWarnings({"IOResourceOpenedButNotSafelyClosed"}) // String reader: no need to close
-      BufferedReader br = new BufferedReader(new StringReader(s));
+          BufferedReader br = new BufferedReader(new StringReader(s));
       String last = "";
       for (String cur = ""; cur != null; cur = br.readLine()) {
         ++lastLineNum;
