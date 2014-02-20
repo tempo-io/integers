@@ -3,7 +3,7 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class EmptyIntLongIterator extends AbstractIntLongIterator {
+public class IntLongEmptyIterator extends AbstractIntLongIterator {
   @Override
   public boolean hasNext() throws ConcurrentModificationException {
     return false;

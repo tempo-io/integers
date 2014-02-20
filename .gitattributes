@@ -65,6 +65,7 @@ dev/com/almworks/integers/IntListConcatenation.java -text
 dev/com/almworks/integers/IntListInsertingDecorator.java -text
 dev/com/almworks/integers/IntListIterator.java -text
 dev/com/almworks/integers/IntListRemovingDecorator.java -text
+dev/com/almworks/integers/IntLongEmptyIterator.java -text
 dev/com/almworks/integers/IntLongFailFastIterator.java -text
 dev/com/almworks/integers/IntLongFindingIterator.java -text
 dev/com/almworks/integers/IntLongIterable.java -text
@@ -169,7 +170,6 @@ gen/com/almworks/integers/generator/IntegerCollectionsCodegen.java -text
 gen/com/almworks/integers/generator/SkipImportsRegex.groovy -text
 gen/com/almworks/integers/generator/StringSets.java -text
 gen/com/almworks/integers/generator/TypeDescriptor.java -text
-java/com/almworks/integers/EmptyIntLongIterator.java -text
 java/com/almworks/integers/IntegersDebug.java -text
 java/com/almworks/integers/IntegersUtils.java -text
 java/com/almworks/integers/RemovedIndexIterator.java -text
