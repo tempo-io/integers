@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/WritablePListIterator.tpl
 
 
 package com.almworks.integers;
 
-import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public interface WritableLongListIterator extends LongListIterator {

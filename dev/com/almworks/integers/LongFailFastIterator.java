@@ -16,9 +16,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.AbstractLongIterator;
-import com.almworks.integers.LongIterator;
-
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 

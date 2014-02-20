@@ -1,4 +1,5 @@
-package com.almworks.integers.generator;/*
+package com.almworks.integers.generator;
+/*
  * Copyright 2010 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +16,18 @@ package com.almworks.integers.generator;/*
  */
 
 import com.almworks.util.BadFormatException;
-import com.almworks.util.Pair;
 import com.almworks.util.FileUtil;
+import com.almworks.util.Pair;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
-import java.util.*;
-import java.util.regex.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Inspired by GNU Trove generator.

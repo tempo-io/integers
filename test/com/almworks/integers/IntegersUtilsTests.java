@@ -77,7 +77,7 @@ public class IntegersUtilsTests extends IntegersFixture {
   }
 
   public void testReversePerm() {
-    final IntArray perms = IntArray.copy(new IntProgression.ArithmeticIterator(0, 1, 9));
+    final IntArray perms = IntArray.copy(new IntProgression.ArithmeticIterator(0, 9, 1));
     IntegersUtils.allPermutations(perms.size(), new IntProcedure() {
       {
         testRevPerm(perms);

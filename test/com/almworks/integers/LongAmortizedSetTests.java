@@ -1,6 +1,5 @@
 package com.almworks.integers;
 
-import com.almworks.integers.*;
 import com.almworks.integers.func.LongFunctions;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
     return new LongAmortizedSet();
   }
 
-  protected List<LongAmortizedSet> createSetFromSortedUniqueList(LongList sortedUniqueList) {
+  protected List<LongAmortizedSet> createSets(LongList sortedUniqueList) {
     ArrayList<LongAmortizedSet> sets = new ArrayList();
     sets.add(LongAmortizedSet.createFromSortedUnique(sortedUniqueList));
 
@@ -62,7 +61,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
   }
 
   @Override
-  protected LongAmortizedSet create1SetFromSortedUniqueList(LongList sortedUniqueList) {
+  protected LongAmortizedSet createSet(LongList sortedUniqueList) {
     return LongAmortizedSet.createFromSortedUniqueArray(new LongArray(sortedUniqueList));
   }
 
@@ -218,7 +217,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
       LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
       LongArray arr2 = collectLists(arr, map(LongFunctions.INC, arr), map(LongFunctions.DEC, arr));
       arr2.sortUnique();
-      for (LongAmortizedSet curSet : createSetFromSortedUniqueList(arr)) {
+      for (LongAmortizedSet curSet : createSets(arr)) {
         for (int i = 0; i < arr2.size(); i++) {
           long value = arr2.get(i);
           assertEquals(arr.binarySearch(value) >= 0, curSet.contains(value));

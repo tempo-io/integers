@@ -9,6 +9,25 @@ public interface WritableLongSet extends LongCollector, LongSet {
   void clear();
 
   /**
+   * Adds the specified element to this set if it is not already present.
+   * Returns {@code true} if the element was added, otherwise {@code false}.
+   *
+   * @return {@code false} if this set already contains the element.
+   * Otherwise {@code true}.
+   * If return value is unused, better use {@link WritableLongSet#add(long)}
+   * */
+  boolean include(long value);
+
+  /**
+   * Removes the specified element from this set.
+   * Returns {@code true} if the element was removed, otherwise {@code false}.
+   *
+   * @return {@code true} if this set contained {@code value}. Otherwise {@code false}.
+   * If return value is unused, better use {@link WritableLongSet#remove(long)}
+   * */
+  boolean exclude(long value);
+
+  /**
   * Removes the specified element from this set.
   * */
   void remove(long value);
@@ -34,23 +53,4 @@ public interface WritableLongSet extends LongCollector, LongSet {
    * @see #containsAll(LongIterable)
    * */
   void retain(LongList values);
-
-  /**
-   * Adds the specified element to this set if it is not already present.
-   * Returns {@code true} if the element was added, otherwise {@code false}.
-   *
-   * @return {@code false} if this set already contains the element.
-   * Otherwise {@code true}.
-   * If return value is unused, better use {@link WritableLongSet#add(long)}
-   * */
-  boolean include(long value);
-
-  /**
-   * Removes the specified element from this set.
-   * Returns {@code true} if the element was removed, otherwise {@code false}.
-   *
-   * @return {@code true} if this set contained {@code value}. Otherwise {@code false}.
-   * If return value is unused, better use {@link WritableLongSet#remove(long)}
-   * */
-  boolean exclude(long value);
 }

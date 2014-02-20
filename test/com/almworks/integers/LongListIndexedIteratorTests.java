@@ -22,15 +22,15 @@ import java.util.NoSuchElementException;
 public class LongListIndexedIteratorTests extends IntegersFixture {
   public void testSimpleCase() {
     LongArray list = LongArray.create(2, 3, 9);
-    IntListIterator indexes = IntArray.create(0, 2).iterator();
-    LongListIndexedIterator res = new LongListIndexedIterator(list, indexes);
+    IntListIterator indices = IntArray.create(0, 2).iterator();
+    LongListIndexedIterator res = new LongListIndexedIterator(list, indices);
     CHECK.order(LongArray.create(2, 9).iterator(), res);
   }
 
   public void testListOperationsCase() {
     LongArray list = LongArray.create(1, 2, 3, 4, 5);
-    IntListIterator indexes = IntArray.create(0, 2, 4).iterator();
-    LongListIndexedIterator res = new LongListIndexedIterator(list, indexes);
+    IntListIterator indices = IntArray.create(0, 2, 4).iterator();
+    LongListIndexedIterator res = new LongListIndexedIterator(list, indices);
 
     // check .get
     assertEquals(3, res.get(2));
@@ -58,8 +58,8 @@ public class LongListIndexedIteratorTests extends IntegersFixture {
 
   public void testNoSuchElementExceptionCase() {
     LongArray list = LongArray.create(2, 3, 9);
-    IntListIterator indexes = IntArray.create(0, 2).iterator();
-    LongListIndexedIterator res = new LongListIndexedIterator(list, indexes);
+    IntListIterator indices = IntArray.create(0, 2).iterator();
+    LongListIndexedIterator res = new LongListIndexedIterator(list, indices);
 
     // check for NSEE
     try {

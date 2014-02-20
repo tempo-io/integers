@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/PListConcatenation.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 public class IntListConcatenation extends AbstractIntList {
   private final List<IntList> mySlices = IntegersUtils.arrayList();

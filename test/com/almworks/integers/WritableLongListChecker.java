@@ -1,12 +1,13 @@
 package com.almworks.integers;
 
-import com.almworks.integers.func.LongToLong;
 import com.almworks.integers.func.LongFunctions;
+import com.almworks.integers.func.LongToLong;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.almworks.integers.IntegersFixture.SortedStatus.*;
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongIterators.range;
 
 /**
@@ -16,13 +17,13 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
 
   @Override
   protected List<T> createLongListVariants(long... values) {
-    return createWritableLongListVariants(values);
+    return createWritableLongLists(values);
   }
 
-  abstract protected List<T> createWritableLongListVariants(long... values);
+  abstract protected List<T> createWritableLongLists(long... values);
 
   protected List<T> empty() {
-    return createWritableLongListVariants();
+    return createWritableLongLists();
   }
 
   public void testAdd() {
@@ -53,11 +54,11 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
         list.clear();
         for (int i = 0; i < 100; i++) {
           list.add(i);
-          checkCollection(list, ap(0, 1, i + 1));
+          checkCollection(list, ap(0, i + 1, 1));
         }
         list.addAll(list);
-        checkCollection(list.subList(0, 100), ap(0, 1, 100));
-        checkCollection(list.subList(100, 200), ap(0, 1, 100));
+        checkCollection(list.subList(0, 100), ap(0, 100, 1));
+        checkCollection(list.subList(100, 200), ap(0, 100, 1));
         list.clear();
       }
     }
@@ -70,7 +71,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       values.addAll(expected.get(i) - 1, expected.get(i), expected.get(i) + 1);
     }
     for (WritableLongList list:
-        createWritableLongListVariants(expected.toNativeArray())) {
+        createWritableLongLists(expected.toNativeArray())) {
       for (int i = 0; i < values.size(); i++) {
         long value = values.get(i);
         switch (i % 3) {
@@ -103,7 +104,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   public void testIndexOf() {
-    for (WritableLongList list: createWritableLongListVariants(
+    for (WritableLongList list: createWritableLongLists(
         new LongArray(LongProgression.arithmetic(99, 100, -1)).extractHostArray())) {
       for (int i = 0; i < 100; i++) {
         assertEquals(99 - i, list.indexOf(i));
@@ -116,7 +117,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     for (int attempt = 0; attempt < 10; attempt++) {
       long[] res = generateRandomLongArray(arrayLength, UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
-          createWritableLongListVariants(res)) {
+          createWritableLongLists(res)) {
 
         list.sort();
         long[] expectedNative = Arrays.copyOf(res, res.length);
@@ -132,7 +133,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     for (int attempt = 0; attempt < 10; attempt++) {
       long[] res = generateRandomLongArray(arrayLength, UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
-          createWritableLongListVariants(res)) {
+          createWritableLongLists(res)) {
 
         list.sortUnique();
         long[] expectedNative = Arrays.copyOf(res, res.length);
@@ -146,7 +147,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
 
   public void testRemove() {
     for (WritableLongList list:
-        createWritableLongListVariants(ap(1, 1, 10))) {
+        createWritableLongLists(ap(1, 10, 1))) {
       checkCollection(list, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
       list.remove(5);
       checkCollection(list, 1, 2, 3, 4, 6, 7, 8, 9, 10);
@@ -164,28 +165,28 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   public void testInsertMultiple() {
     for (WritableLongList list: empty()) {
       list.insertMultiple(0, 0, 10);
-      checkCollection(list, ap(0, 0, 10));
+      checkCollection(list, ap(0, 10, 0));
       list.insertMultiple(0, 0, 10);
-      checkCollection(list, ap(0, 0, 20));
+      checkCollection(list, ap(0, 20, 0));
       list.insertMultiple(0, 1, 10);
-      checkCollectionM(list, ap(1, 0, 10), ap(0, 0, 20));
+      checkCollectionM(list, ap(1, 10, 0), ap(0, 20, 0));
       list.insertMultiple(5, 2, 4);
-      checkCollectionM(list, ap(1, 0, 5), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 20));
+      checkCollectionM(list, ap(1, 5, 0), ap(2, 4, 0), ap(1, 5, 0), ap(0, 20, 0));
       list.insertMultiple(34, 0, 4);
-      checkCollectionM(list, ap(1, 0, 5), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 24));
+      checkCollectionM(list, ap(1, 5, 0), ap(2, 4, 0), ap(1, 5, 0), ap(0, 24, 0));
       list.insertMultiple(38, 100, 4);
-      checkCollectionM(list, ap(1, 0, 5), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
+      checkCollectionM(list, ap(1, 5, 0), ap(2, 4, 0), ap(1, 5, 0), ap(0, 24, 0), ap(100, 4, 0));
       list.insertMultiple(5, 1, 1);
-      checkCollectionM(list, ap(1, 0, 6), ap(2, 0, 4), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
+      checkCollectionM(list, ap(1, 6, 0), ap(2, 4, 0), ap(1, 5, 0), ap(0, 24, 0), ap(100, 4, 0));
       list.insertMultiple(6, 2, 1);
-      checkCollectionM(list, ap(1, 0, 6), ap(2, 0, 5), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
+      checkCollectionM(list, ap(1, 6, 0), ap(2, 5, 0), ap(1, 5, 0), ap(0, 24, 0), ap(100, 4, 0));
       list.insertMultiple(6, 3, 1);
-      checkCollectionM(list, ap(1, 0, 6), ap(3, 0, 1), ap(2, 0, 5), ap(1, 0, 5), ap(0, 0, 24), ap(100, 0, 4));
+      checkCollectionM(list, ap(1, 6, 0), ap(3, 1, 0), ap(2, 5, 0), ap(1, 5, 0), ap(0, 24, 0), ap(100, 4, 0));
     }
   }
 
   public void testSet() {
-    for (WritableLongList list: createWritableLongListVariants(0, 1, 2, -1, 1, 3)) {
+    for (WritableLongList list: createWritableLongLists(0, 1, 2, -1, 1, 3)) {
       list.set(0, 10);
       list.setAll(3, LongArray.create(5, 31, 36, 100), 1, 2);
       checkCollection(list, 10, 1, 2, 31, 36, 3);
@@ -193,8 +194,8 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   public void testSetRange() {
-    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 20))) {
-      long[] expected = ap(0, 1, 20);
+    for (WritableLongList list: createWritableLongLists(ap(0, 20, 1))) {
+      long[] expected = ap(0, 20, 1);
       list.setRange(0, 5, -1);
       for (int i = 0; i < 5; i++) {
         expected[i] = -1;
@@ -266,34 +267,34 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   public void testInserts() {
     for (WritableLongList list: empty()) {
       list.insertMultiple(0, 1, 2048);
-      checkList(list, ap(1, 0, 2048));
+      checkList(list, ap(1, 2048, 0));
       list.insert(0, 2);
       list.insert(list.size(), 3);
-      checkList(list, new long[] {2}, ap(1, 0, 2048), new long[] {3});
+      checkList(list, new long[] {2}, ap(1, 2048, 0), new long[] {3});
       list.insertMultiple(1, 2, 2000);
-      checkList(list, ap(2, 0, 2001), ap(1, 0, 2048), new long[]{3});
+      checkList(list, ap(2, 2001, 0), ap(1, 2048, 0), new long[]{3});
       list.clear();
 
       // test shifts reusing whole segments
       list.insertMultiple(0, 1, 1024);
       list.insertMultiple(0, 2, 1024);
-      checkList(list, ap(2, 0, 1024), ap(1, 0, 1024));
+      checkList(list, ap(2, 1024, 0), ap(1, 1024, 0));
       list.insertMultiple(1024, 3, 1024);
-      checkList(list, ap(2, 0, 1024), ap(3, 0, 1024), ap(1, 0, 1024));
+      checkList(list, ap(2, 1024, 0), ap(3, 1024, 0), ap(1, 1024, 0));
       list.insertMultiple(1024, 4, 1024);
-      checkList(list, ap(2, 0, 1024), ap(4, 0, 1024), ap(3, 0, 1024), ap(1, 0, 1024));
+      checkList(list, ap(2, 1024, 0), ap(4, 1024, 0), ap(3, 1024, 0), ap(1, 1024, 0));
       list.clear();
       list.insertMultiple(0, 1, 10240);
-      checkList(list, ap(1, 0, 10240));
+      checkList(list, ap(1, 10240, 0));
       list.insertMultiple(6000, 2, 1024);
-      checkList(list, ap(1, 0, 6000), ap(2, 0, 1024), ap(1, 0, 1024 * 11 - 7024));
+      checkList(list, ap(1, 6000, 0), ap(2, 1024, 0), ap(1, 1024 * 11 - 7024, 0));
       list.insertMultiple(2000, 3, 1024);
-      checkList(list, ap(1, 0, 2000), ap(3, 0, 1024), ap(1, 0, 7024 - 3024), ap(2, 0, 1024), ap(1, 0, 1024 * 12 - 8048));
+      checkList(list, ap(1, 2000, 0), ap(3, 1024, 0), ap(1, 7024 - 3024, 0), ap(2, 1024, 0), ap(1, 1024 * 12 - 8048, 0));
     }
   }
 
   public void testInsertException() {
-    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
+    for (WritableLongList list: createWritableLongLists(ap(0, 10, 1))) {
       try {
         list.insert(-1, 10);
         fail();
@@ -313,9 +314,9 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       list.removeRange(0, 1024);
       list.removeRange(10000 - 2048, 10000 - 1024);
       list.removeRange(0, 10);
-      checkList(list, ap(1034, 1, 7942));
+      checkList(list, ap(1034, 7942, 1));
       list.removeAt(5000);
-      checkList(list, ap(1034, 1, 5000), ap(6035, 1, 2941));
+      checkList(list, ap(1034, 5000, 1), ap(6035, 2941, 1));
     }
   }
 
@@ -334,7 +335,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   public void testIteratorRemove2() {
-    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
+    for (WritableLongList list: createWritableLongLists(ap(0, 10, 1))) {
       WritableLongListIterator it = list.iterator();
       it.next().next().next().next();
       assertEquals(3, it.value());
@@ -345,7 +346,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   public void testIteratorRemove3() {
-    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
+    for (WritableLongList list: createWritableLongLists(ap(0, 10, 1))) {
       WritableLongListIterator it = list.iterator();
       it.next().next();
       it.remove();
@@ -377,11 +378,11 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       ii.move(19);
       ii.removeRange(-9, 1);
       assertFalse(ii.hasValue());
-      checkList(list, ap(0, 1, 100), ap(110, 1, 10), ap(130, 1, 9870));
+      checkList(list, ap(0, 100, 1), ap(110, 10, 1), ap(130, 9870, 1));
       ii.next();
       ii.removeRange(-10, 0);
       assertFalse(ii.hasValue());
-      checkList(list, ap(0, 1, 100), ap(130, 1, 9870));
+      checkList(list, ap(0, 100, 1), ap(130, 9870, 1));
     }
   }
 
@@ -396,7 +397,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
         ii.remove();
         assertFalse(ii.hasValue());
       }
-      checkList(list, ap(0, 1, 8192), ap(9192, 1, 808));
+      checkList(list, ap(0, 8192, 1), ap(9192, 808, 1));
     }
   }
 
@@ -417,7 +418,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   public void testIteratorWrite() {
     long[] values = {1, 1, 1, 2, 2, 3, 3, 3, 3};
     LongArray expected = LongArray.create(values);
-    for (WritableLongList source : createWritableLongListVariants(values)) {
+    for (WritableLongList source : createWritableLongLists(values)) {
       LongArray result = new LongArray();
       for (WritableLongListIterator it : source.write()) {
         result.add(it.value());
@@ -433,7 +434,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     long[] newValues = {2, 5, 5, -1, -1, -1, 4};
     assert values.length == newValues.length;
     for (int i = 0; i < values.length; i++) {
-      for (WritableLongList list : createWritableLongListVariants(values)) {
+      for (WritableLongList list : createWritableLongLists(values)) {
         WritableLongListIterator it = list.iterator();
         it.move(i);
         for (int j = 0; j < values.length; j++) {
@@ -447,9 +448,9 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   public void testSubList() {
     for (WritableLongList list: empty()) {
       list.addAll(range(0, 10000));
-      checkList(list.subList(10, 20), ap(10, 1, 10));
-      checkList(list.subList(10, 10000), ap(10, 1, 9990));
-      checkList(list.subList(9990, 10000), ap(9990, 1, 10));
+      checkList(list.subList(10, 20), ap(10, 10, 1));
+      checkList(list.subList(10, 10000), ap(10, 9990, 1));
+      checkList(list.subList(9990, 10000), ap(9990, 10, 1));
       checkList(list.subList(9990, 9990));
       assertEquals(list, list.subList(0, 10000));
       assertTrue(list == list.subList(0, 10000));
@@ -462,9 +463,9 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       for (int i = 0; i < 10000; i++)
         list.add(i);
       LongList sub = list.subList(1000, 2000);
-      checkList(sub, ap(1000, 1, 1000));
+      checkList(sub, ap(1000, 1000, 1));
       LongList subsub = sub.subList(200, 300);
-      checkList(subsub, ap(1200, 1, 100));
+      checkList(subsub, ap(1200, 100, 1));
     }
   }
 
@@ -474,15 +475,15 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
         list.add(i);
       }
       list.addAll(list);
-      checkList(list, ap(0, 1, 10240), ap(0, 1, 10240));
+      checkList(list, ap(0, 10240, 1), ap(0, 10240, 1));
 
       list.setAll(100, list, 100, 100);
-      checkList(list, ap(0, 1, 10240), ap(0, 1, 10240));
+      checkList(list, ap(0, 10240, 1), ap(0, 10240, 1));
       list.setAll(100, list.subList(200, 300));
-      checkList(list, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 10040), ap(0, 1, 10240));
+      checkList(list, ap(0, 100, 1), ap(200, 100, 1), ap(200, 10040, 1), ap(0, 10240, 1));
 
       list.insertAll(5000, list.subList(3000, 5000));
-      checkList(list, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 4800), ap(3000, 1, 2000), ap(5000, 1, 5240), ap(0, 1, 10240));
+      checkList(list, ap(0, 100, 1), ap(200, 100, 1), ap(200, 4800, 1), ap(3000, 2000, 1), ap(5000, 5240, 1), ap(0, 10240, 1));
     }
   }
 
@@ -492,9 +493,9 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       LongArray src = new LongArray();
       src.addAll(list);
       list.insertAll(2000, src, 100, 10000);
-      checkList(list, ap(0, 1, 2000), ap(100, 1, 10000), ap(2000, 1, 8240));
+      checkList(list, ap(0, 2000, 1), ap(100, 10000, 1), ap(2000, 8240, 1));
       list.setAll(5000, src);
-      checkList(list, ap(0, 1, 2000), ap(100, 1, 3000), ap(0, 1, 10240), ap(5240, 1, 5000));
+      checkList(list, ap(0, 2000, 1), ap(100, 3000, 1), ap(0, 10240, 1), ap(5240, 5000, 1));
     }
   }
 
@@ -530,7 +531,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   private void testReverse(long[] array, long[] expected) {
-    for (WritableLongList list: createWritableLongListVariants(array)) {
+    for (WritableLongList list: createWritableLongLists(array)) {
       list.reverse();
       checkCollection(list, expected);
     }
@@ -555,7 +556,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
 
     // have to use toNativeArray() instead of extractHostArray(), because of in the myArray may be duplicates
     for (WritableLongList list:
-        createWritableLongListVariants(generateRandomLongArray(20, SORTED_UNIQUE, 200).toNativeArray())) {
+        createWritableLongLists(generateRandomLongArray(20, SORTED_UNIQUE, 200).toNativeArray())) {
       list.reverse();
       for (int i = 1; i < list.size(); i++) {
         assertFalse(list.get(i - 1) <= list.get(i));
@@ -587,13 +588,13 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     long[] values = {MIN, -10, -5, 0, 2, 4, 5, 10, MAX};
     for (long[] test: tests) {
       for (long valueToRemove: values) {
-        for (T list : createWritableLongListVariants(test)) {
+        for (T list : createWritableLongLists(test)) {
           list.removeAll(valueToRemove);
           checkRemove(test, valueToRemove, list);
         }
 
         if (LongCollections.isSorted(test)) {
-          for (T list : createWritableLongListVariants(test)) {
+          for (T list : createWritableLongLists(test)) {
             list.removeAllSorted(valueToRemove);
             checkRemove(test, valueToRemove, list);
           }
@@ -604,7 +605,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
 
   public void testExpandException() {
     for (int size = 0; size < 5; size++) {
-      for (WritableLongList list: createWritableLongListVariants(
+      for (WritableLongList list: createWritableLongLists(
           LongCollections.repeat(10, size).toNativeArray())) {
         try {
           list.expand(list.size() + 1, 0);
@@ -661,7 +662,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     for (int attempt = 0; attempt < attempts; attempt++) {
       long[] elements = generateRandomLongArray(arrayLength, UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
-          createWritableLongListVariants(elements)) {
+          createWritableLongLists(elements)) {
         int index = RAND.nextInt(elements.length);
         checkExpand(elements, index, RAND.nextInt(maxExpandCount), list);
       }
@@ -669,8 +670,8 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   public void testApply() {
-    for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
-      long[] expected = ap(0, 1, 10);
+    for (WritableLongList list: createWritableLongLists(ap(0, 10, 1))) {
+      long[] expected = ap(0, 10, 1);
       list.apply(2, 8, new LongToLong() {
         @Override
         public long invoke(long a) {
@@ -704,7 +705,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     int size = 100, maxVal = Integer.MAX_VALUE;
     for (int attempt = 0; attempt < 10; attempt++) {
       long[] array = generateRandomLongArray(size, UNORDERED, maxVal).extractHostArray();
-      for (WritableLongList list: createWritableLongListVariants(array)) {
+      for (WritableLongList list: createWritableLongLists(array)) {
         long[] values = Arrays.copyOf(array, array.length);
         if (!(list instanceof AbstractWritableLongList)) return;
         AbstractWritableLongList abstractList = (AbstractWritableLongList)list;
@@ -731,7 +732,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       LongArray expected = generateRandomLongArray(size, UNORDERED, maxVal);
       long[] array = new long[expected.size() + 1];
       expected.toNativeArray(0, array, 0, expected.size());
-      for (WritableLongList list: createWritableLongListVariants(array)) {
+      for (WritableLongList list: createWritableLongLists(array)) {
         if (!(list instanceof AbstractWritableLongList)) return;
         AbstractWritableLongList abstractList = (AbstractWritableLongList)list;
         abstractList.removeLast();
@@ -768,7 +769,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   public void testRemoveRangeSimple() {
-    for (WritableLongList list : createWritableLongListVariants(0, 0, 1, 1, 0, 0)) {
+    for (WritableLongList list : createWritableLongLists(0, 0, 1, 1, 0, 0)) {
       list.removeRange(2, 4);
       checkCollection(list, 0, 0, 0, 0);
     }

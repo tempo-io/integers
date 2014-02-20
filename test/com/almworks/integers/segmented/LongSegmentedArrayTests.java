@@ -25,7 +25,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
 
 
   @Override
-  protected List<LongSegmentedArray> createWritableLongListVariants(long... values) {
+  protected List<LongSegmentedArray> createWritableLongLists(long... values) {
     List<LongSegmentedArray> res = new ArrayList<LongSegmentedArray>();
     array = new LongSegmentedArray();
     array.addAll(values);
@@ -118,7 +118,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
       LongArray expected2 = LongArray.copy(values);
       expected2.apply(10, 20, LongFunctions.INC);
       expected2.apply(1025, 1030, LongFunctions.INC);
-      for (LongSegmentedArray ar : createWritableLongListVariants(values)) {
+      for (LongSegmentedArray ar : createWritableLongLists(values)) {
         LongSegmentedArray clone = ar.clone();
 
         clone.apply(10, 20, LongFunctions.INC);
@@ -142,7 +142,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
       expected2.setAll(10, setAll1, 0, 10);
       expected2.setAll(1025, setAll2, 0, 5);
 
-      for (LongSegmentedArray ar : createWritableLongListVariants(values)) {
+      for (LongSegmentedArray ar : createWritableLongLists(values)) {
         LongSegmentedArray clone = ar.clone();
 
         clone.setAll(10, setAll1, 0, 10);
@@ -176,12 +176,12 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
 
   public void testInserts2() {
     array.insertMultiple(0, 1, 2048);
-    checkList(array, ap(1, 0, 2048));
+    checkList(array, ap(1, 2048, 0));
     array.insert(0, 2);
     array.insert(array.size(), 3);
-    checkList(array, new long[] {2}, ap(1, 0, 2048), new long[] {3});
+    checkList(array, new long[] {2}, ap(1, 2048, 0), new long[] {3});
     array.insertMultiple(1, 2, 2000);
-    checkList(array, ap(2, 0, 2001), ap(1, 0, 2048), new long[] {3});
+    checkList(array, ap(2, 2001, 0), ap(1, 2048, 0), new long[] {3});
     array.clear();
 
     // test shifts reusing whole segments
@@ -190,28 +190,28 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     assertEquals(0, myEnv.copied);
     array.insertMultiple(0, 2, 1024);
     assertEquals(0, myEnv.copied);
-    checkList(array, ap(2, 0, 1024), ap(1, 0, 1024));
+    checkList(array, ap(2, 1024, 0), ap(1, 1024, 0));
     array.insertMultiple(1024, 3, 1024);
     assertEquals(3, myEnv.allocateCount);
     assertEquals(0, myEnv.copied);
-    checkList(array, ap(2, 0, 1024), ap(3, 0, 1024), ap(1, 0, 1024));
+    checkList(array, ap(2, 1024, 0), ap(3, 1024, 0), ap(1, 1024, 0));
     array.insertMultiple(1024, 4, 1024);
     assertEquals(4, myEnv.allocateCount);
     assertEquals(0, myEnv.copied);
-    checkList(array, ap(2, 0, 1024), ap(4, 0, 1024), ap(3, 0, 1024), ap(1, 0, 1024));
+    checkList(array, ap(2, 1024, 0), ap(4, 1024, 0), ap(3, 1024, 0), ap(1, 1024, 0));
     array.clear();
     array.insertMultiple(0, 1, 10240);
-    checkList(array, ap(1, 0, 10240));
+    checkList(array, ap(1, 10240, 0));
     myEnv.clear();
     array.insertMultiple(6000, 2, 1024);
     assertEquals(1, myEnv.allocateCount);
     assertEquals(6 * 1024 - 6000, myEnv.copied);
-    checkList(array, ap(1, 0, 6000), ap(2, 0, 1024), ap(1, 0, 1024 * 11 - 7024));
+    checkList(array, ap(1, 6000, 0), ap(2, 1024, 0), ap(1, 1024 * 11 - 7024, 0));
     myEnv.clear();
     array.insertMultiple(2000, 3, 1024);
     assertEquals(1, myEnv.allocateCount);
     assertEquals(2000 - 1024, myEnv.copied);
-    checkList(array, ap(1, 0, 2000), ap(3, 0, 1024), ap(1, 0, 7024 - 3024), ap(2, 0, 1024), ap(1, 0, 1024 * 12 - 8048));
+    checkList(array, ap(1, 2000, 0), ap(3, 1024, 0), ap(1, 7024 - 3024, 0), ap(2, 1024, 0), ap(1, 1024 * 12 - 8048, 0));
   }
 
   public void testRemoves2() {
@@ -226,10 +226,10 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     assertEquals(0, myEnv.copied);
     array.removeRange(0, 10);
     assertEquals(0, myEnv.copied);
-    checkList(array, ap(1034, 1, 7942));
+    checkList(array, ap(1034, 7942, 1));
     array.removeAt(5000);
     assertEquals(2941, myEnv.copied);
-    checkList(array, ap(1034, 1, 5000), ap(6035, 1, 2941));
+    checkList(array, ap(1034, 5000, 1), ap(6035, 2941, 1));
   }
 
   @Override
@@ -237,9 +237,9 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     for (int i = 0; i < 10000; i++)
       array.add(i);
     myEnv.clear();
-    checkList(array.subList(10, 20), ap(10, 1, 10));
-    checkList(array.subList(10, 10000), ap(10, 1, 9990));
-    checkList(array.subList(9990, 10000), ap(9990, 1, 10));
+    checkList(array.subList(10, 20), ap(10, 10, 1));
+    checkList(array.subList(10, 10000), ap(10, 9990, 1));
+    checkList(array.subList(9990, 10000), ap(9990, 10, 1));
     checkList(array.subList(9990, 9990));
     assertEquals(array, array.subList(0, 10000));
     assertTrue(array == array.subList(0, 10000));
@@ -254,7 +254,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     }
     myEnv.clear();
     array.addAll(array);
-    checkList(array, ap(0, 1, 10240), ap(0, 1, 10240));
+    checkList(array, ap(0, 10240, 1), ap(0, 10240, 1));
 
 // segments are allocated and instantly freed - see to do in {@link SegmentedIntArray#insertSegmented}
 //    assertEquals(0, myEnv.allocateCount);
@@ -262,12 +262,12 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     assertEquals(0, myEnv.copied);
 
     array.setAll(100, array, 100, 100);
-    checkList(array, ap(0, 1, 10240), ap(0, 1, 10240));
+    checkList(array, ap(0, 10240, 1), ap(0, 10240, 1));
     array.setAll(100, array.subList(200, 300));
-    checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 10040), ap(0, 1, 10240));
+    checkList(array, ap(0, 100, 1), ap(200, 100, 1), ap(200, 10040, 1), ap(0, 10240, 1));
 
     array.insertAll(5000, array.subList(3000, 5000));
-    checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 4800), ap(3000, 1, 2000), ap(5000, 1, 5240), ap(0, 1, 10240));
+    checkList(array, ap(0, 100, 1), ap(200, 100, 1), ap(200, 4800, 1), ap(3000, 2000, 1), ap(5000, 5240, 1), ap(0, 10240, 1));
 
   }
 
@@ -275,17 +275,17 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     array.addAll(LongProgression.range(10240));
     myEnv.clear();
     array.addAll(array.clone());
-    checkList(array, ap(0, 1, 10240), ap(0, 1, 10240));
+    checkList(array, ap(0, 10240, 1), ap(0, 10240, 1));
 
     assertEquals(0, myEnv.copied);
 
     array.setAll(100, array, 100, 100);
-    checkList(array, ap(0, 1, 10240), ap(0, 1, 10240));
+    checkList(array, ap(0, 10240, 1), ap(0, 10240, 1));
     array.setAll(100, array.clone(200, 300));
-    checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 10040), ap(0, 1, 10240));
+    checkList(array, ap(0, 100, 1), ap(200, 100, 1), ap(200, 10040, 1), ap(0, 10240, 1));
 
     array.insertAll(5000, array.clone(3000, 5000));
-    checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 4800), ap(3000, 1, 2000), ap(5000, 1, 5240), ap(0, 1, 10240));
+    checkList(array, ap(0, 100, 1), ap(200, 100, 1), ap(200, 4800, 1), ap(3000, 2000, 1), ap(5000, 5240, 1), ap(0, 10240, 1));
   }
 
   public static void segmentedLongArrayChecker(LongList expected, LongSegmentedArray actual) {
@@ -338,7 +338,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     LongArray values = new LongArray(values0);
     LongArray toAdd = LongArray.create(0, -4, -10, 20);
     LongList expected = LongCollections.concatLists(values, toAdd);
-    for (WritableLongList list : createWritableLongListVariants(values0)) {
+    for (WritableLongList list : createWritableLongLists(values0)) {
       CHECK.order(values, list);
       list.addAll(toAdd);
       CHECK.order(expected, list);
@@ -347,7 +347,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
     LongList valuesList = LongProgression.range(1024);
     values0 = valuesList.toNativeArray();
     long[] expected0 = LongCollections.collectLists(valuesList, new LongList.Single(1025)).extractHostArray();
-    for (WritableLongList list : createWritableLongListVariants(values0)) {
+    for (WritableLongList list : createWritableLongLists(values0)) {
       list.add(1025);
       CHECK.order(list, expected0);
     }
@@ -384,8 +384,8 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
   }
 
   public void testInserts3() {
-    LongArray expected = new LongArray(ap(0, 1, 10));
-    array.addAll(ap(0, 1, 10));
+    LongArray expected = new LongArray(ap(0, 10, 1));
+    array.addAll(ap(0, 10, 1));
     array.insertMultiple(3, 100, 5);
     expected.insertMultiple(3, 100, 5);
 

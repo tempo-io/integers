@@ -1,14 +1,10 @@
 package com.almworks.integers;
 
-import junit.framework.Assert;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.LongIterators.limit;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.fail;
 
 public class LongIteratorsTests extends IntegersFixture {
   public void checkNoValue(LongIterator it) {

@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PCollections.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.ConcurrentModificationException;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
@@ -258,7 +260,7 @@ public class IntCollections {
     return newArray;
   }
 
-  public static int indexOf(int[] ints, int from, int to, int value) {
+  public static int indexOf(int value, int[] ints, int from, int to) {
     for (int i = from; i < to; i++) {
       if (ints[i] == value)
         return i;
@@ -360,18 +362,18 @@ public class IntCollections {
     return diff;
   }
 
-  public static void removeAllAtSorted(WritableIntList list, IntList indexes) {
-    if (!indexes.isSorted()) throw new IllegalArgumentException("Indexes are not sorted: " + indexes);
+  public static void removeAllAtSorted(WritableIntList list, IntList indices) {
+    if (!indices.isSorted()) throw new IllegalArgumentException("Indexes are not sorted: " + indices);
     int rangeStart = -1;
     int rangeFinish = -2;
     int diff = 0;
-    for (IntIterator it : indexes) {
+    for (IntIterator it : indices) {
       int ind = it.value();
       if (rangeFinish < 0) {
         rangeStart = ind;
       } else if (ind != rangeFinish) {
-        assert rangeStart >= 0 : list + " " + indexes + ' ' + it + ' ' + rangeStart + ' ' + rangeFinish;
-        assert ind > rangeFinish : indexes + " " + ind + ' ' + rangeFinish + ' ' + rangeStart;
+        assert rangeStart >= 0 : list + " " + indices + ' ' + it + ' ' + rangeStart + ' ' + rangeFinish;
+        assert ind > rangeFinish : indices + " " + ind + ' ' + rangeFinish + ' ' + rangeStart;
         list.removeRange(rangeStart - diff, rangeFinish - diff);
         diff += rangeFinish - rangeStart;
         rangeStart = ind;

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/func/PFunctions.tpl
 
 
 package com.almworks.integers.func;

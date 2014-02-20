@@ -35,7 +35,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
   }
 
   @Override
-  protected List<LongArray> createWritableLongListVariants(long... values) {
+  protected List<LongArray> createWritableLongLists(long... values) {
     List<LongArray> res = new ArrayList<LongArray>();
     LongArray arr = LongArray.copy(values);
     res.add(arr);
@@ -252,20 +252,20 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
 
   public void testRemoveAllAtSorted() {
     int arSize = 100;
-    int indexesSize = 10;
+    int indicesSize = 10;
     int attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       array = generateRandomLongArray(arSize, UNORDERED);
-      IntArray indexes = generateRandomIntArray(indexesSize, SORTED_UNIQUE, array.size());
+      IntArray indices = generateRandomIntArray(indicesSize, SORTED_UNIQUE, array.size());
       if (attempt % 2 == 0) {
-        indexes.add(indexes.get(indexes.size() / 2) + 1);
-        indexes.sortUnique();
+        indices.add(indices.get(indices.size() / 2) + 1);
+        indices.sortUnique();
       }
       LongArray expected = LongArray.copy(array);
-      for (int i = indexes.size() - 1; i >= 0; i--) {
-        expected.removeAt(indexes.get(i));
+      for (int i = indices.size() - 1; i >= 0; i--) {
+        expected.removeAt(indices.get(i));
       }
-      array.removeAllAtSorted(indexes.iterator());
+      array.removeAllAtSorted(indices.iterator());
       CHECK.order(array, expected);
     }
   }

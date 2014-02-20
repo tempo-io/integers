@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 
-// CODE GENERATED FROM com/almworks/integers/PProgression.tpl
 
 package com.almworks.integers;
 
@@ -44,20 +43,20 @@ public abstract class IntProgression extends AbstractIntList {
   }
 
   public static class Arithmetic extends IntProgression {
-    private final int myInitial;
+    private final int myStart;
     private final int myStep;
     private final int myCount;
 
     public Arithmetic(int initial, int count, int step) {
-      myInitial = initial;
+      myStart = initial;
       myStep = step;
       myCount = count;
     }
 
     public int indexOf(int value) {
-      if (value == myInitial)
+      if (value == myStart)
         return 0;
-      int steps = (value - myInitial) / myStep;
+      int steps = (value - myStart) / myStep;
       if (steps <= 0 || steps >= myCount)
         return -1;
       return value == get((int)steps) ? (int)steps : -1;
@@ -68,20 +67,20 @@ public abstract class IntProgression extends AbstractIntList {
     }
 
     public int get(int index) {
-      return myInitial + myStep * index;
+      return myStart + myStep * index;
     }
 
     @NotNull
     public IntListIterator iterator() {
-      return new ArithmeticIterator(myInitial, myStep, myCount);
+      return new ArithmeticIterator(myStart, myCount, myStep);
     }
 
-    public static int[] fillArray(int initial, int difference, int count) {
+    public static int[] fillArray(int initial, int count, int step) {
       int[] result = new int[count];
       int value = initial;
       for (int i = 0; i < result.length; i++) {
         result[i] = value;
-        value += difference;
+        value += step;
       }
       return result;
     }
@@ -92,10 +91,10 @@ public abstract class IntProgression extends AbstractIntList {
     private final int myInitial;
     private final int myDifference;
 
-    public ArithmeticIterator(int initial, int difference, int count) {
+    public ArithmeticIterator(int initial, int count, int step) {
       super(0, count);
       myInitial = initial;
-      myDifference = difference;
+      myDifference = step;
     }
 
     public int absget(int index) throws NoSuchElementException {

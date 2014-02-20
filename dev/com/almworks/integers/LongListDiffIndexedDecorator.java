@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/DiffIndexedPListDecorator.tpl
 
 
 package com.almworks.integers;
 
-import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
@@ -27,28 +25,28 @@ import java.util.NoSuchElementException;
 
 public class LongListDiffIndexedDecorator extends AbstractLongList {
   private final LongList mySource;
-  private final IntList myIndexes;
+  private final IntList myIndices;
 
-  public LongListDiffIndexedDecorator(LongList source, IntList indexes) {
+  public LongListDiffIndexedDecorator(LongList source, IntList indices) {
     mySource = source;
-    myIndexes = indexes;
+    myIndices = indices;
   }
 
   public int size() {
-    return myIndexes.size();
+    return myIndices.size();
   }
 
   public long get(int index) {
-    return mySource.get(myIndexes.get(index) + index);
+    return mySource.get(myIndices.get(index) + index);
   }
 
   public boolean isEmpty() {
-    return myIndexes.isEmpty();
+    return myIndices.isEmpty();
   }
 
   @NotNull
   public LongListIterator iterator(int from, int to) {
-    IntListIterator indexIterator = myIndexes.iterator(from, to);
+    IntListIterator indexIterator = myIndices.iterator(from, to);
     return new DiffIndexedIterator(from, indexIterator);
   }
 
@@ -57,7 +55,7 @@ public class LongListDiffIndexedDecorator extends AbstractLongList {
   }
 
   public IntList getIndexes() {
-    return myIndexes;
+    return myIndices;
   }
 
   private class DiffIndexedIterator extends AbstractLongIteratorWithFlag implements LongListIterator {

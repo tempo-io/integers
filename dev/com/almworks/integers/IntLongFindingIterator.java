@@ -14,29 +14,25 @@
   * limitations under the License.
   */
 
-// CODE GENERATED FROM com/almworks/integers/util/FindingPIterator.tpl
 
 
 package com.almworks.integers;
-
-import com.almworks.integers.AbstractIntLongIterator;
-import com.almworks.integers.IntLongIterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class IntLongFindingIterator extends AbstractIntLongIterator {
-  protected int myCurrentLeft = 0xDEADBEEF;
-  private int myNextLeft;
-  protected long myCurrentRight = 0xDEADBEEF;
-  private long myNextRight;
+  protected int myNextLeft = 0xDEADBEEF;
+  private int myCurrentLeft;
+  protected long myNextRight = 0xDEADBEEF;
+  private long myCurrentRight;
 
   private static final int NO_CACHED = 0, CACHED = 1, FINISHED = 2;
   private int myIteratorStatus = NO_CACHED;
   private boolean myIterated = false;
 
   /**
-   * In this method {@code myCurrentLeft} and {@code myCurrentRight} must be assigned next value, if they exist.
+   * In this method {@code myNextLeft} and {@code myNextRight} must be assigned next value, if they exist.
    * @return true if this iterator has next value, otherwise - false
    * */
   protected abstract boolean findNext() throws ConcurrentModificationException;
@@ -59,15 +55,15 @@ public abstract class IntLongFindingIterator extends AbstractIntLongIterator {
   @Override
   public IntLongIterator next() {
     if (myIteratorStatus == CACHED) {
-      myNextLeft = myCurrentLeft;
-      myNextRight = myCurrentRight;
+      myCurrentLeft = myNextLeft;
+      myCurrentRight = myNextRight;
       myIteratorStatus = NO_CACHED;
     } else {
       if (myIteratorStatus == FINISHED || !findNext()) {
         throw new NoSuchElementException();
       }
-      myNextLeft = myCurrentLeft;
-      myNextRight = myCurrentRight;
+      myCurrentLeft = myNextLeft;
+      myCurrentRight = myNextRight;
     }
     myIterated = true;
     return this;
@@ -83,7 +79,7 @@ public abstract class IntLongFindingIterator extends AbstractIntLongIterator {
     if (!hasValue()) {
       throw new NoSuchElementException();
     }
-    return myNextLeft;
+    return myCurrentLeft;
   }
 
   @Override
@@ -91,6 +87,6 @@ public abstract class IntLongFindingIterator extends AbstractIntLongIterator {
     if (!hasValue()) {
       throw new NoSuchElementException();
     }
-    return myNextRight;
+    return myCurrentRight;
   }
 }

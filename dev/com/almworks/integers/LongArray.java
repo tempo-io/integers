@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PArray.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import static com.almworks.integers.IntegersUtils.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Random;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
 public final class LongArray extends AbstractWritableLongList {
   /**
@@ -138,7 +141,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   public int indexOf(long value) {
-    return LongCollections.indexOf(myArray, 0, size(), value);
+    return LongCollections.indexOf(value, myArray, 0, size());
   }
 
   public final long get(int index) {
@@ -394,7 +397,7 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   /**
-   * Removes from this list all elements whose index is contained in the specified {@code IntList indexes}
+   * Removes from this list all elements whose index is contained in the specified {@code IntList indices}
    * <p>Unlike {@link LongCollections#removeAllAtSorted(WritableLongList, IntList)}, which in case of LongArray takes
    * {@code O(N*M)} time, this method requires just {@code O(N + M)}, where N - {@code size()}, M - {@code indices.size()}.
    *

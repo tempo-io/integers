@@ -5,9 +5,7 @@ import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
-import static com.almworks.integers.LongCollections.concatLists;
-import static com.almworks.integers.LongCollections.repeat;
-import static com.almworks.integers.LongCollections.toSortedUnique;
+import static com.almworks.integers.LongCollections.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -17,7 +15,7 @@ import static java.lang.Math.min;
 public class LongSameValuesListTests extends WritableLongListChecker<LongSameValuesList> {
 
   @Override
-  protected List<LongSameValuesList> createWritableLongListVariants(long... values) {
+  protected List<LongSameValuesList> createWritableLongLists(long... values) {
     List<LongSameValuesList> res = new ArrayList<LongSameValuesList>();
     LongSameValuesList array = new LongSameValuesList();
     array.addAll(values);
@@ -51,62 +49,62 @@ public class LongSameValuesListTests extends WritableLongListChecker<LongSameVal
   }
 
   public void testRemove2() {
-    list.addAll(ap(0, 0, 10));
-    list.addAll(ap(1, 0, 10));
-    list.addAll(ap(2, 0, 10));
-    list.addAll(ap(3, 0, 10));
-    list.addAll(ap(2, 0, 10));
-    list.addAll(ap(1, 0, 10));
-    list.addAll(ap(0, 0, 10));
+    list.addAll(ap(0, 10, 0));
+    list.addAll(ap(1, 10, 0));
+    list.addAll(ap(2, 10, 0));
+    list.addAll(ap(3, 10, 0));
+    list.addAll(ap(2, 10, 0));
+    list.addAll(ap(1, 10, 0));
+    list.addAll(ap(0, 10, 0));
     assertEquals(6, list.getChangeCount());
-    checkCollectionM(list, ap(0, 0, 10), ap(1, 0, 10), ap(2, 0, 10), ap(3, 0, 10), ap(2, 0, 10), ap(1, 0, 10), ap(0, 0, 10));
+    checkCollectionM(list, ap(0, 10, 0), ap(1, 10, 0), ap(2, 10, 0), ap(3, 10, 0), ap(2, 10, 0), ap(1, 10, 0), ap(0, 10, 0));
     list.removeRange(0, 5);
-    checkCollectionM(list, ap(0, 0, 5), ap(1, 0, 10), ap(2, 0, 10), ap(3, 0, 10), ap(2, 0, 10), ap(1, 0, 10), ap(0, 0, 10));
+    checkCollectionM(list, ap(0, 5, 0), ap(1, 10, 0), ap(2, 10, 0), ap(3, 10, 0), ap(2, 10, 0), ap(1, 10, 0), ap(0, 10, 0));
     list.removeRange(60, 65);
-    checkCollectionM(list, ap(0, 0, 5), ap(1, 0, 10), ap(2, 0, 10), ap(3, 0, 10), ap(2, 0, 10), ap(1, 0, 10), ap(0, 0, 5));
+    checkCollectionM(list, ap(0, 5, 0), ap(1, 10, 0), ap(2, 10, 0), ap(3, 10, 0), ap(2, 10, 0), ap(1, 10, 0), ap(0, 5, 0));
     list.removeAt(10);
-    checkCollectionM(list, ap(0, 0, 5), ap(1, 0, 9), ap(2, 0, 10), ap(3, 0, 10), ap(2, 0, 10), ap(1, 0, 10), ap(0, 0, 5));
+    checkCollectionM(list, ap(0, 5, 0), ap(1, 9, 0), ap(2, 10, 0), ap(3, 10, 0), ap(2, 10, 0), ap(1, 10, 0), ap(0, 5, 0));
     list.removeRange(29, 40);
-    checkCollectionM(list, ap(0, 0, 5), ap(1, 0, 9), ap(2, 0, 10), ap(3, 0, 5), ap(2, 0, 4), ap(1, 0, 10), ap(0, 0, 5));
+    checkCollectionM(list, ap(0, 5, 0), ap(1, 9, 0), ap(2, 10, 0), ap(3, 5, 0), ap(2, 4, 0), ap(1, 10, 0), ap(0, 5, 0));
     list.removeRange(25, 43);
-    checkCollectionM(list, ap(0, 0, 5), ap(1, 0, 9), ap(2, 0, 10), ap(3, 0, 1), ap(0, 0, 5));
+    checkCollectionM(list, ap(0, 5, 0), ap(1, 9, 0), ap(2, 10, 0), ap(3, 1, 0), ap(0, 5, 0));
     list.removeRange(5, 23);
-    checkCollectionM(list, ap(0, 0, 5), ap(2, 0, 1), ap(3, 0, 1), ap(0, 0, 5));
+    checkCollectionM(list, ap(0, 5, 0), ap(2, 1, 0), ap(3, 1, 0), ap(0, 5, 0));
     list.removeRange(4, 8);
-    checkCollectionM(list, ap(0, 0, 8));
+    checkCollectionM(list, ap(0, 8, 0));
     list.removeRange(0, 8);
     checkCollection(list);
   }
 
   public void testRemoveCollapse() {
-    list.addAll(ap(1, 0, 10));
-    list.addAll(ap(2, 0, 10));
-    list.addAll(ap(1, 0, 10));
+    list.addAll(ap(1, 10, 0));
+    list.addAll(ap(2, 10, 0));
+    list.addAll(ap(1, 10, 0));
     list.removeRange(5, 25);
-    checkCollection(list, ap(1, 0, 10));
+    checkCollection(list, ap(1, 10, 0));
     assertEquals(0, list.getChangeCount());
   }
 
   public void testSet() {
-    list.addAll(ap(0, 0, 10));
-    checkCollection(list, ap(0, 0, 10));
+    list.addAll(ap(0, 10, 0));
+    checkCollection(list, ap(0, 10, 0));
     for (int i = 0; i < 10; i++) {
       list.set(i, 100 + i);
-      checkCollectionM(list, ap(100, 1, i + 1), ap(0, 0, 9 -i));
+      checkCollectionM(list, ap(100, i + 1, 1), ap(0, 9 -i, 0));
     }
     list.clear();
-    list.addAll(ap(0, 0, 10));
+    list.addAll(ap(0, 10, 0));
     for (int i = 0; i < 10; i++) {
       list.set(i, 100);
-      checkCollectionM(list, ap(100, 0, i + 1), ap(0, 0, 9 -i));
+      checkCollectionM(list, ap(100, i + 1, 0), ap(0, 9 -i, 0));
       assertEquals(i == 9 ? 0 : 1, list.getChangeCount());
     }
     list.clear();
-    list.addAll(ap(1, 0, 10));
-    list.addAll(ap(2, 0, 10));
-    list.addAll(ap(1, 0, 10));
+    list.addAll(ap(1, 10, 0));
+    list.addAll(ap(2, 10, 0));
+    list.addAll(ap(1, 10, 0));
     list.setRange(5, 25, 1);
-    checkCollection(list, ap(1, 0, 30));
+    checkCollection(list, ap(1, 30, 0));
     assertEquals(0, list.getChangeCount());
 
     list.clear();
@@ -178,13 +176,13 @@ public class LongSameValuesListTests extends WritableLongListChecker<LongSameVal
 //    list.swap(0, 1);
     list.setRange(0, 1, 0);
     assertEquals(1, list.getChangeCount());
-    checkCollection(list.subList(0, s), ap(0, 0, s));
+    checkCollection(list.subList(0, s), ap(0, s, 0));
     list.setRange(1, 2, 0);
     assertEquals(1, list.getChangeCount());
-    checkCollection(list.subList(0, s), ap(0, 0, s));
+    checkCollection(list.subList(0, s), ap(0, s, 0));
     list.swap(0, 1);
-    checkCollection(list.subList(0, s), ap(0, 0, s));
-    checkCollection(list.subList(s, s * 2), ap(1, 0, s));
+    checkCollection(list.subList(0, s), ap(0, s, 0));
+    checkCollection(list.subList(s, s * 2), ap(1, s, 0));
     assertEquals(1, list.getChangeCount());
   }
 
@@ -195,8 +193,8 @@ public class LongSameValuesListTests extends WritableLongListChecker<LongSameVal
       list.add(1);
     }
     list.sort();
-    checkCollection(list.subList(0, 100), ap(0, 0, 100));
-    checkCollection(list.subList(100, 200), ap(1, 0, 100));
+    checkCollection(list.subList(0, 100), ap(0, 100, 0));
+    checkCollection(list.subList(100, 200), ap(1, 100, 0));
     assertEquals(1, list.getChangeCount());
   }
 

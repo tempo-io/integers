@@ -22,27 +22,27 @@ import java.util.NoSuchElementException;
 public class LongIndexedIteratorTests extends IntegersFixture {
   public void testSimpleCase() {
     LongArray list = LongArray.create(2, 3, 9);
-    IntIterator indexes = IntArray.create(0, 2).iterator();
-    LongIndexedIterator res = new LongIndexedIterator(list, indexes);
+    IntIterator indices = IntArray.create(0, 2).iterator();
+    LongIndexedIterator res = new LongIndexedIterator(list, indices);
     CHECK.order(LongArray.create(2, 9).iterator(), res);
 
     list = LongArray.create(1, 2, 3, 4, 5);
-    indexes = IntArray.create(0, 2, 4).iterator();
-    res = new LongIndexedIterator(list, indexes);
+    indices = IntArray.create(0, 2, 4).iterator();
+    res = new LongIndexedIterator(list, indices);
     CHECK.order(LongArray.create(1, 3, 5).iterator(), res);
   }
 
   public void testEmptyCase() {
     LongArray list = LongArray.create(2, 3, 9);
-    IntIterator indexes = IntArray.create().iterator();
-    LongIndexedIterator res = new LongIndexedIterator(list, indexes);
+    IntIterator indices = IntArray.create().iterator();
+    LongIndexedIterator res = new LongIndexedIterator(list, indices);
     CHECK.order(LongArray.create().iterator(), res);
   }
 
   public void testNoSuchElementExceptionCase() {
     LongArray list = LongArray.create(2, 3, 9);
-    IntIterator indexes = IntArray.create(0, 2).iterator();
-    LongIndexedIterator res = new LongIndexedIterator(list, indexes);
+    IntIterator indices = IntArray.create(0, 2).iterator();
+    LongIndexedIterator res = new LongIndexedIterator(list, indices);
 
     while (res.hasNext()) {
       res.nextValue();
@@ -56,7 +56,7 @@ public class LongIndexedIteratorTests extends IntegersFixture {
 
   public void testRandomCase() {
     int arrayLength = 1000;
-    int indexesLength = 100;
+    int indicesLength = 100;
     int maxValue = Integer.MAX_VALUE;
 
     LongArray list = LongArray.create();
@@ -64,12 +64,12 @@ public class LongIndexedIteratorTests extends IntegersFixture {
       list.add((long) RAND.nextInt(maxValue));
     }
     IntArray arrayIndexes = IntArray.create();
-    for ( int i = 0; i < indexesLength; i++) {
+    for ( int i = 0; i < indicesLength; i++) {
       arrayIndexes.add(RAND.nextInt(arrayLength));
     }
 
     LongArray expected = LongArray.create();
-    for ( int i = 0; i < indexesLength; i++) {
+    for ( int i = 0; i < indicesLength; i++) {
       expected.add(list.get(arrayIndexes.get(i)));
     }
 

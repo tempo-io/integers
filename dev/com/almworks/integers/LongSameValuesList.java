@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/optimized/SameValuesPList.tpl
 
 
 package com.almworks.integers;
@@ -24,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-import static com.almworks.integers.IntIterators.range;
 import static com.almworks.integers.IntIterators.repeat;
 
 /**
@@ -148,7 +146,7 @@ public class LongSameValuesList extends AbstractWritableLongList {
     if (index < 0 || index > size)
       throw new IndexOutOfBoundsException(index + " " + this);
     int ki = myMap.findKey(index);
-    // will shift all rightward indexes by +count
+    // will shift all rightward indices by +count
     int shiftFrom = ki >= 0 ? ki : -ki - 1;
     // previous value before this insertion
     long prevValue = prevValueForFindIndex(ki, value);
@@ -204,7 +202,7 @@ public class LongSameValuesList extends AbstractWritableLongList {
       myMap.add(0, 0);
     } else {
       int ki = myMap.findKey(index);
-      // will shift all rightward indexes by +count
+      // will shift all rightward indices by +count
       int shiftFrom = ki >= 0 ? ki + 1 : -ki - 1;
       int sz = myMap.size();
       // we have to adjust first, or insert will fail because keys will conflict
@@ -362,7 +360,7 @@ public class LongSameValuesList extends AbstractWritableLongList {
       removeFrom++;
     }
 
-    // decrement indexes that follow removed range
+    // decrement indices that follow removed range
     myMap.adjustKeys(removeFrom, myMap.size(), -count);
 
     updateSize(size - count);

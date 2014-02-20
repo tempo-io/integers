@@ -35,7 +35,7 @@ public class LongConcatIterator extends LongFindingIterator implements LongItera
 
   protected boolean findNext() {
     if (myCurIterator.hasNext()) {
-      myCurrent = myCurIterator.nextValue();
+      myNext = myCurIterator.nextValue();
       return true;
     }
 
@@ -44,7 +44,7 @@ public class LongConcatIterator extends LongFindingIterator implements LongItera
     }
 
     if (myCurIterator.hasNext()) {
-      myCurrent = myCurIterator.nextValue();
+      myNext = myCurIterator.nextValue();
       return true;
     }
 

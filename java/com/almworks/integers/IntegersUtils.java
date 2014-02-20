@@ -16,9 +16,14 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.*;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntProcedure;
+import com.almworks.integers.func.IntProcedure2;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * Utilities from everywhere on which integer collections depend.
@@ -71,9 +76,9 @@ public final class IntegersUtils {
   /**
    * Performs quicksort. Copied from {@link Arrays#sort(int[])} then corrected.
    * @param length - number of elements to sort
-   * @param order - "comparator". Parameter are indexes of elements to be compared. Will be invoked with parameters
+   * @param order - "comparator". Parameter are indices of elements to be compared. Will be invoked with parameters
    * from 0 to <code>length</code>-1 inclusive.
-   * @param swap - procedure to swap. Parameters are indexes of elements to be swapped. Will be invoked with parameters
+   * @param swap - procedure to swap. Parameters are indices of elements to be swapped. Will be invoked with parameters
    * from 0 to <code>length</code>-1 inclusive.
    */
   // Copied from CollectionUtil
@@ -225,7 +230,7 @@ public final class IntegersUtils {
    * <br/>
    * @param n size of the permutation, must be > 0 (otherwise NegativeArraySizeException is thrown)
    * @param swapWithNext callback that receives an index of a position to swap with its neighbour on the right (swapPos + 1).
-   * It is guaranteed that both of these indexes are in the interval [0, n). Each swap produces a new permutation that differs from the previously generated ones. <br/>
+   * It is guaranteed that both of these indices are in the interval [0, n). Each swap produces a new permutation that differs from the previously generated ones. <br/>
    * */
   public static void allPermutations(int n, IntProcedure swapWithNext) {
     // Direct permutation

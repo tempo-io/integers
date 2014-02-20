@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractPList.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.IntegersUtils.*;
-
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
 public abstract class AbstractLongList implements LongList {
   public boolean isEmpty() {
@@ -175,7 +174,7 @@ public abstract class AbstractLongList implements LongList {
    * @return true if this list is sorted and does not contain duplicates, otherwise false
    */
   @Override
-  public boolean isUniqueSorted() {
+  public boolean isSortedUnique() {
     return isSorted(true);
   }
 
@@ -274,7 +273,7 @@ public abstract class AbstractLongList implements LongList {
   }
 
   public boolean equalSortedUniqueValues(LongList collection) {
-    assert isUniqueSorted();
+    assert isSortedUnique();
     if (size() != collection.size())
       return false;
     LongIterator ownIt = iterator();

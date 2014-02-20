@@ -21,9 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.LongProgression.range;
-import static com.almworks.integers.LongTreeSet.ColoringType.BALANCED;
-import static com.almworks.integers.LongTreeSet.ColoringType.TO_ADD;
-import static com.almworks.integers.LongTreeSet.ColoringType.TO_REMOVE;
+import static com.almworks.integers.LongTreeSet.ColoringType.*;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -49,7 +47,7 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
     }
   }
 
-  protected List<LongTreeSet> createSetFromSortedUniqueList(LongList sortedUniqueList) {
+  protected List<LongTreeSet> createSets(LongList sortedUniqueList) {
     set = new LongTreeSet();
     set.addAll(sortedUniqueList);
     LongTreeSet set2 = new LongTreeSet();
@@ -61,7 +59,7 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
   }
 
   @Override
-  protected LongTreeSet create1SetFromSortedUniqueList(LongList sortedUniqueList) {
+  protected LongTreeSet createSet(LongList sortedUniqueList) {
     return LongTreeSet.createFromSortedUnique(sortedUniqueList);
   }
 

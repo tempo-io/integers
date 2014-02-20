@@ -1,6 +1,6 @@
 package com.almworks.integers;
 
-import static com.almworks.integers.IntLongIterators.*;
+import static com.almworks.integers.IntLongIterators.pair;
 import static com.almworks.integers.IntegersUtils.appendShortName;
 
 public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {

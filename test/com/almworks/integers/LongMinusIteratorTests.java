@@ -1,9 +1,8 @@
 package com.almworks.integers;
 
-import com.almworks.integers.*;
 import junit.framework.TestCase;
 
-import static com.almworks.integers.IntegersFixture.SortedStatus.*;
+import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
 
 public class LongMinusIteratorTests extends TestCase {
   private LongArray create(long... values) {

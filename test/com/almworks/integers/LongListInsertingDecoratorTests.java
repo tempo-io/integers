@@ -203,7 +203,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker<LongListIns
       it.next();
       assertEquals(it.index(), it.value());
     }
-    checkCollection(tst, LongProgression.Arithmetic.fillArray(0, 1, 11));
+    checkCollection(tst, LongProgression.Arithmetic.nativeArray(0, 11, 1));
   }
 
   public void testMapConstructor() {

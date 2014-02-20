@@ -71,7 +71,7 @@ public class LongIntersectionIterator extends LongSetOperationsIterator {
       heapify(TOP);
     }
     // all values are the same as the TOP
-    myCurrent = getTopIterator().value();
+    myNext = getTopIterator().value();
     return true;
   }
 }

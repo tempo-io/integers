@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PList.tpl
 
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersUtils.*;
+  import org.jetbrains.annotations.NotNull;
 
-import org.jetbrains.annotations.NotNull;
+  import java.util.List;
+  import java.util.NoSuchElementException;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+  import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
 public interface LongList extends LongSizedIterable {
   LongList EMPTY = new LongArray(EMPTY_LONGS);
@@ -47,13 +46,6 @@ public interface LongList extends LongSizedIterable {
    * @return true if collection contains value
    */
   boolean contains(long value);
-
-  /**
-   * Creates new native array and stores values there.
-   * <p>
-   * Note: effectively written code should avoid use this method.
-   */
-  long[] toNativeArray();
 
   /**
   * @return the item at index. Valid value of an index is in range [0, size()).
@@ -83,6 +75,13 @@ public interface LongList extends LongSizedIterable {
     * @return index of first occurence of value. If not found returns negative value
     */
   int indexOf(long value);
+
+  /**
+   * Creates new native array and stores values there.
+   * <p>
+   * Note: effectively written code should avoid use this method.
+   */
+  long[] toNativeArray();
 
   /**
    * Writes values to dest.
@@ -122,7 +121,7 @@ public interface LongList extends LongSizedIterable {
   /**
   * @return true if list is sorted in smallest first order and all elements are unique
   */
-  boolean isUniqueSorted();
+  boolean isSortedUnique();
 
   /**
   * @return iterator initially located before first element. Iterator will walk the whole list

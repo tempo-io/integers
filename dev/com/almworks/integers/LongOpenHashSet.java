@@ -44,27 +44,39 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   private int myMask;
   private final long myPerturbation = System.identityHashCode(this);
 
-  public LongOpenHashSet() {
-    this(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR);
-  }
-
-  public LongOpenHashSet(int initialCapacity) {
-    this(initialCapacity, DEFAULT_LOAD_FACTOR);
-  }
-
+  /**
+   * No guarantees are made regarding the number of elements that can be added to the created set without rehash.
+   * {@code initialCapacity} influences only the amount of memory initially allocated.
+   * If you need such guarantees, use {@link #createForAdd(int, float)}.
+   */
   public LongOpenHashSet(int initialCapacity, float loadFactor) {
-      if (initialCapacity < 0)
-        throw new IllegalArgumentException("Illegal initial capacity: " +
-            initialCapacity);
-      if (!(0 < loadFactor && loadFactor < 1))
-        throw new IllegalArgumentException("Illegal load factor: " +
-            loadFactor);
+    if (initialCapacity < 0)
+      throw new IllegalArgumentException("Illegal initial capacity: " +
+          initialCapacity);
+    if (!(0 < loadFactor && loadFactor < 1))
+      throw new IllegalArgumentException("Illegal load factor: " +
+          loadFactor);
 
     int keysLength = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
     assert (keysLength & (keysLength - 1)) == 0;
 
     this.myLoadFactor = loadFactor;
     init(new long[keysLength], new BitSet(keysLength), (int) (keysLength * loadFactor));
+  }
+
+  /**
+   * Creates new hashset with default load factor
+   * @see #LongOpenHashSet(int, float)
+   */
+  public LongOpenHashSet(int initialCapacity) {
+    this(initialCapacity, DEFAULT_LOAD_FACTOR);
+  }
+
+  /**
+   * Creates new hashset with default load factor and default capacity
+   */
+  public LongOpenHashSet() {
+    this(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR);
   }
 
   private void init(long[] keys, BitSet allocated, int threshold) {
@@ -75,11 +87,20 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     assert (myMask & (myMask + 1)) == 0;
   }
 
+  /**
+   * Creates new hashset with the specified load factor
+   * that is garanteed to not invoke {@code resize} after adding {@code count} elements
+   * @return new hashset with the specified capacity dependent on {@code count} and {@code loadFactor}
+   */
   public static LongOpenHashSet createForAdd(int count, float loadFactor) {
     int initialCapacity = (int)(count / loadFactor) + 1;
     return new LongOpenHashSet(initialCapacity, loadFactor);
   }
 
+  /**
+   * Creates new hashset with default load factor
+   * @see #createForAdd(int, float)
+   */
   public static LongOpenHashSet createForAdd(int count) {
     return createForAdd(count, DEFAULT_LOAD_FACTOR);
   }
@@ -238,7 +259,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
         if (curSlot == -1) return false;
         curSlot = myAllocated.nextSetBit(curSlot);
         if (curSlot == -1) return false;
-        myCurrent = myKeys[curSlot];
+        myNext = myKeys[curSlot];
         curSlot++;
         return true;
       }

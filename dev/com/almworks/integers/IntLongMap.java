@@ -7,6 +7,11 @@ public interface IntLongMap extends IntLongIterable {
   long DEFAULT_VALUE = 0;
 
   /**
+   * @return the value for the specified key if this map contains key {@code key}. Otherwise returns default value.
+   */
+  long get(int key);
+
+  /**
    * @return true if this map contains key {@code key}. Otherwise false
    */
   boolean containsKey(int key);
@@ -33,9 +38,4 @@ public interface IntLongMap extends IntLongIterable {
   IntIterator keysIterator();
 
   LongIterator valuesIterator();
-
-  /**
-   * @return the value for the specified key if this map contains key {@code key}. Otherwise returns default value.
-   */
-  long get(int key);
 }

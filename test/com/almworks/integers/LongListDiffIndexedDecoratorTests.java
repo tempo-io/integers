@@ -18,19 +18,19 @@ package com.almworks.integers;
 
 public class LongListDiffIndexedDecoratorTests extends IntegersFixture {
   private static LongArray source = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-  private static IntArray indexes = IntArray.create(0, 0, 0, 2, 2, 2);
+  private static IntArray indices = IntArray.create(0, 0, 0, 2, 2, 2);
   private static LongListDiffIndexedDecorator array;
 
   public void setUp() throws Exception {
     super.setUp();
-    array = new LongListDiffIndexedDecorator(source, indexes);
+    array = new LongListDiffIndexedDecorator(source, indices);
   }
 
   public void testGet() {
     long[] expected = {0, 1, 2, 5, 6, 7};
 
     CHECK.order(array, expected);
-    CHECK.order(indexes.iterator(), array.getIndexes().iterator());
+    CHECK.order(indices.iterator(), array.getIndexes().iterator());
     CHECK.order(source.iterator(), array.getSource().iterator());
 
     for (int i = 0; i < expected.length; i++) {

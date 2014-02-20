@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PArrayIterator.tpl
 
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersUtils.*;
+import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
 public class LongNativeArrayIterator extends AbstractLongListIndexIterator {
   private final long[] myArray;

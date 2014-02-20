@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/PListRemovingDecorator.tpl
 
 
 package com.almworks.integers;
-
-import static com.almworks.integers.IntegersUtils.*;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
+
+import static com.almworks.integers.IntegersUtils.arrayCopy;
 
 /**
  * Removing decorator for a native int list.
@@ -136,11 +135,11 @@ public abstract class AbstractLongListRemovingDecorator extends AbstractLongList
 
   /**
    * For the given list of remove indices (may be empty, unsorted, or contain duplicates), creates a prepared list of remove indices ready to be used by implementations of this class.
-   * @param removeIndexes remove indexes
+   * @param removeIndices remove indices
    * @return
    */
-  protected static IntArray prepareUnsortedIndicesInternal(int... removeIndexes) {
-    int[] correctRemove = arrayCopy(removeIndexes);
+  protected static IntArray prepareUnsortedIndicesInternal(int... removeIndices) {
+    int[] correctRemove = arrayCopy(removeIndices);
     Arrays.sort(correctRemove);
     int dupCount = 0;
     int prev = 0;

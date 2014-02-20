@@ -1,6 +1,5 @@
 package com.almworks.integers;
 
-import com.almworks.integers.*;
 import com.almworks.integers.func.LongFunctions;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ public class LongSetBuilderTests extends IntegersFixture {
         for (int i = 0; i < addMask.size(); i++) {
           if (addMask.get(i) == 0) builder.add(sortedUniqueList.get(i));
         }
-        builder.mergeTemp();
+        builder.coalesce();
 
         for (int i = 0; i < addMask.size(); i++) {
           if (addMask.get(i) == 1) builder.add(sortedUniqueList.get(i));
@@ -199,7 +198,7 @@ public class LongSetBuilderTests extends IntegersFixture {
 
   public void testTailIterator() {
     LongSetBuilder b = new LongSetBuilder(100);
-    b.addAll(ap(1, 2, 50));
+    b.addAll(ap(1, 50, 2));
     for (int i = 0; i < 99; i++) {
       assertEquals(i + 1 - (i % 2), b.tailIterator(i).nextValue());
     }
@@ -231,7 +230,7 @@ public class LongSetBuilderTests extends IntegersFixture {
         long value = arr2.get(i);
         assertEquals(arr.binarySearch(value) >= 0, b.contains(value));
       }
-      b.mergeTemp();
+      b.coalesce();
       for (int i = 0; i < arr2.size(); i++) {
         long value = arr2.get(i);
         assertEquals(arr.binarySearch(value) >= 0, b.contains(value));

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/PSetBuilder.tpl
 
 
 package com.almworks.integers;
@@ -57,7 +56,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
       myTemp = new LongArray(myTempLength);
     }
     if (myTemp.size() == myTempLength)
-      mergeTemp();
+      coalesce();
     assert myTemp.size() < myTempLength;
     myTemp.add(value);
   }
@@ -78,7 +77,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
     int endPos = myTempLength - myTemp.size();
     while (endPos < vSize) {
       myTemp.addAll(values.subList(startPos, endPos));
-      mergeTemp();
+      coalesce();
       startPos = endPos;
       endPos += myTempLength;
     }
@@ -86,7 +85,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
   }
 
   public void mergeFrom(LongSetBuilder other) {
-    other.mergeTemp();
+    other.coalesce();
     if (other.mySorted.isEmpty())
       return;
     mergeFromSortedCollection(other.mySorted);
@@ -97,11 +96,11 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
       throw new IllegalStateException();
     if (other.isEmpty())
       return;
-    mergeTemp();
+    coalesce();
     mySorted.merge(other);
   }
 
-  void mergeTemp() {
+  void coalesce() {
     if (myTemp.isEmpty())
       return;
     modified();
@@ -112,7 +111,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
 
   public LongArray commitToArray() {
     myFinished = true;
-    mergeTemp();
+    coalesce();
     return mySorted;
   }
 
@@ -121,7 +120,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
    * @return sorted list of set elements, which should be used before any further mutation of the builder.
    */
   public LongList toList() {
-    mergeTemp();
+    coalesce();
     if (mySorted.isEmpty()) {
       return LongList.EMPTY;
     }
@@ -130,12 +129,12 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
 
   @Override
   public void toNativeArrayImpl(long[] dest, int destPos) {
-    mergeTemp();
+    coalesce();
     mySorted.toNativeArray(0, dest, destPos, size());
   }
 
   public LongSetBuilder clone() {
-    mergeTemp();
+    coalesce();
     LongSetBuilder r;
     try {
       r = (LongSetBuilder) super.clone();
@@ -167,7 +166,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
   }
 
   public int size() {
-    mergeTemp();
+    coalesce();
     return mySorted.size();
   }
 
@@ -185,7 +184,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
 
   @NotNull
   public LongIterator iterator() {
-    mergeTemp();
+    coalesce();
     return new LongFailFastIterator(mySorted.iterator()) {
       @Override
       protected int getCurrentModCount() {
@@ -195,7 +194,7 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
   }
 
   public LongIterator tailIterator(long value) {
-    mergeTemp();
+    coalesce();
     int baseIndex = mySorted.binarySearch(value);
     if (baseIndex < 0) baseIndex = -baseIndex - 1;
     LongIterator baseIterator = mySorted.iterator(baseIndex, mySorted.size());

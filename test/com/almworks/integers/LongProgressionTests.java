@@ -27,7 +27,7 @@ public class LongProgressionTests extends IntegersFixture {
   }
 
   public void testFillArray() {
-    long[] res = LongProgression.Arithmetic.fillArray(0, 2, 5);
+    long[] res = LongProgression.Arithmetic.nativeArray(0, 5, 2);
     long[] expected = {0, 2, 4, 6, 8};
     CHECK.order(res, expected);
   }

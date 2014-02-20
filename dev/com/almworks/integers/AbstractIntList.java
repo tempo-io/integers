@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractPList.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-import static com.almworks.integers.IntegersUtils.*;
 
-import java.util.Iterator;
 import java.util.List;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public abstract class AbstractIntList implements IntList {
   public boolean isEmpty() {

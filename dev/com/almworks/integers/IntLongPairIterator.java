@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PairIntPIterator.tpl
 
 
 package com.almworks.integers;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
@@ -32,33 +29,33 @@ import java.util.NoSuchElementException;
  * I.e. the remaining values in the other iterator are ignored.
  */
 public class IntLongPairIterator extends AbstractIntLongIteratorWithFlag {
-  private final IntIterator myIt1;
-  private final LongIterator myIt2;
+  private final IntIterator myItLeft;
+  private final LongIterator myItRight;
 
   public IntLongPairIterator(IntIterable first, LongIterable second) {
-    myIt1 = first.iterator();
-    myIt2 = second.iterator();
+    myItLeft = first.iterator();
+    myItRight = second.iterator();
   }
 
   @Override
   protected int leftImpl() {
-    return myIt1.value();
+    return myItLeft.value();
   }
 
   @Override
   protected long rightImpl() {
-    return myIt2.value();
+    return myItRight.value();
   }
 
   @Override
   protected void nextImpl() throws NoSuchElementException {
     if (!hasNext()) throw new NoSuchElementException();
-    myIt1.next();
-    myIt2.next();
+    myItLeft.next();
+    myItRight.next();
   }
 
   @Override
   public boolean hasNext() throws ConcurrentModificationException {
-    return myIt1.hasNext() && myIt2.hasNext();
+    return myItLeft.hasNext() && myItRight.hasNext();
   }
 }

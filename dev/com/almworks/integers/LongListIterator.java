@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PListIterator.tpl
 
 
 package com.almworks.integers;
@@ -25,8 +24,8 @@ import java.util.NoSuchElementException;
 public interface LongListIterator extends LongIterator {
   /**
    * Changes the current position of the iterator.
-   * @param offset the difference between new and old iterator indexes.
-   * Zero won't change iterator state. Positive value will move it to greater indexes, negative - to smaller indexes.
+   * @param offset the difference between new and old iterator indices.
+   * Zero won't change iterator state. Positive value will move it to greater indices, negative - to smaller indices.
    */
   void move(int offset) throws ConcurrentModificationException, NoSuchElementException;
 

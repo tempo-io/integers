@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 
-// CODE GENERATED FROM com/almworks/integers/PProgression.tpl
 
 package com.almworks.integers;
 
@@ -83,20 +82,20 @@ public abstract class LongProgression extends AbstractLongList {
   }
 
   public static class Arithmetic extends LongProgression {
-    private final long myInitial;
+    private final long myStart;
     private final long myStep;
     private final int myCount;
 
-    public Arithmetic(long initial, int count, long step) {
-      myInitial = initial;
+    public Arithmetic(long start, int count, long step) {
+      myStart = start;
       myStep = step;
       myCount = count;
     }
 
     public int indexOf(long value) {
-      if (value == myInitial)
+      if (value == myStart)
         return 0;
-      long steps = (value - myInitial) / myStep;
+      long steps = (value - myStart) / myStep;
       if (steps <= 0 || steps >= myCount)
         return -1;
       return value == get((int)steps) ? (int)steps : -1;
@@ -107,17 +106,17 @@ public abstract class LongProgression extends AbstractLongList {
     }
 
     public long get(int index) {
-      return myInitial + myStep * index;
+      return myStart + myStep * index;
     }
 
     @NotNull
     public LongListIterator iterator() {
-      return new ArithmeticIterator(myInitial, myStep, myCount);
+      return new ArithmeticIterator(myStart, myStep, myCount);
     }
 
-    public static long[] fillArray(long initial, long step, int count) {
+    public static long[] nativeArray(long start, int count, long step) {
       long[] result = new long[count];
-      long value = initial;
+      long value = start;
       for (int i = 0; i < result.length; i++) {
         result[i] = value;
         value += step;
@@ -138,17 +137,17 @@ public abstract class LongProgression extends AbstractLongList {
 
 
   public static class ArithmeticIterator extends AbstractLongListIndexIterator {
-    private final long myInitial;
-    private final long myDifference;
+    private final long myStart;
+    private final long myStep;
 
     public ArithmeticIterator(long start, long step, int count) {
       super(0, count);
-      myInitial = start;
-      myDifference = step;
+      myStart = start;
+      myStep = step;
     }
 
     public long absget(int index) throws NoSuchElementException {
-      return myInitial + index * myDifference;
+      return myStart + index * myStep;
     }
   }
 }

@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/PListRemovingDecorator.tpl
 
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersUtils.*;
-
-import com.almworks.integers.RemovedIndexIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
+
+import static com.almworks.integers.IntegersUtils.arrayCopy;
 
 /**
  * Removing decorator for a native int list.
@@ -134,8 +132,7 @@ public abstract class IntListRemovingDecorator extends AbstractIntListDecorator 
 
   /**
    * For the given list of remove indices (may be empty, unsorted, or contain duplicates), creates a prepared list of remove indices ready to be used by implementations of this class.
-   * @param removeIndexes remove indexes
-   * @return
+   * @param removeIndexes remove indices
    */
   protected static IntArray prepareUnsortedIndicesInternal(int... removeIndexes) {
     int[] correctRemove = arrayCopy(removeIndexes);

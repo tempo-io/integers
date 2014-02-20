@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
-import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.wrappers.IntLongHppcOpenHashMap.createForAdd;
 import static com.almworks.integers.wrappers.IntLongHppcOpenHashMap.createFrom;
 

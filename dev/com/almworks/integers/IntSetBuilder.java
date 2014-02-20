@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/PSetBuilder.tpl
 
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersUtils.*;
 import java.util.NoSuchElementException;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public final class IntSetBuilder implements Cloneable, IntCollector {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;

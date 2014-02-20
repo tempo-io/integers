@@ -67,7 +67,7 @@ public abstract class IntegersFixture extends TestCase {
   }
 
   public static void checkSet(LongSet set, LongList sortedUniqueExpected) {
-    assert sortedUniqueExpected.isUniqueSorted();
+    assert sortedUniqueExpected.isSortedUnique();
     assertEquals(sortedUniqueExpected.size(), set.size());
     if (set instanceof LongSortedSet) {
       LongArray buffer = LongCollections.collectIterable(set.size(), set.iterator());
@@ -95,11 +95,11 @@ public abstract class IntegersFixture extends TestCase {
   }
 
   public static long[] interval(int from, int to) {
-    return from < to ? ap(from, 1, to - from + 1) : ap(from, -1, from - to + 1);
+    return from < to ? ap(from, to - from + 1, 1) : ap(from, from - to + 1, -1);
   }
 
-  public static long[] ap(long start, int step, int count) {
-    return LongProgression.Arithmetic.fillArray(start, step, count);
+  public static long[] ap(long start, int count, int step) {
+    return LongProgression.Arithmetic.nativeArray(start, count, step);
   }
 
   protected void checkCollectionM(LongList collection, long[]... ints) {

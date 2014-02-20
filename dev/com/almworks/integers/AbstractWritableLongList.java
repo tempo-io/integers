@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractWritablePList.tpl
 
 
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.LongToLong;
-// function on indices, hence int
-// function on indices, hence int
 import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
+
+// function on indices, hence int
+// function on indices, hence int
 
   public abstract class AbstractWritableLongList extends AbstractLongList implements WritableLongList {
   private transient int myModCount;

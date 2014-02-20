@@ -1,7 +1,5 @@
 package com.almworks.integers;
 
-import com.almworks.integers.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +19,7 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
   }
 
   @Override
-  protected List<LongOpenHashSet> createSetFromSortedUniqueList(LongList sortedUniqueList) {
+  protected List<LongOpenHashSet> createSets(LongList sortedUniqueList) {
     List<LongOpenHashSet> sets = new ArrayList<LongOpenHashSet>();
     sets.add(LongOpenHashSet.createFrom(sortedUniqueList));
 
@@ -32,7 +30,7 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
   }
 
   @Override
-  protected LongOpenHashSet create1SetFromSortedUniqueList(LongList sortedUniqueList) {
+  protected LongOpenHashSet createSet(LongList sortedUniqueList) {
     return LongOpenHashSet.createFrom(sortedUniqueList);
   }
 

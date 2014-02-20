@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PList.tpl
 
 
 package com.almworks.integers;
-
-import static com.almworks.integers.IntegersUtils.*;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public interface IntList extends IntSizedIterable {
   IntList EMPTY = new IntArray(EMPTY_INTS);

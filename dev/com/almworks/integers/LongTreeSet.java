@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/DynamicPSet.tpl
 
 
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntToInt;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static com.almworks.integers.IntIterators.range;
@@ -39,9 +40,9 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   private int myFront;
   /** Key values. */
   private long[] myKeys;
-  /** Tree structure: contains indexes into key, left, right, black. */
+  /** Tree structure: contains indices into key, left, right, black. */
   private int[] myLeft;
-  /** Tree structure: contains indexes into key, left, right, black. */
+  /** Tree structure: contains indices into key, left, right, black. */
   private int[] myRight;
   /** Node color : false for red, true for black. */
   private BitSet myBlack;

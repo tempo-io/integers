@@ -54,10 +54,10 @@ public class LongUnionIterator extends LongSetOperationsIterator {
     if (heapLength == 0) return false;
     assert heapLength > 0 : "heapLength < 0: " + heapLength;
     LongIterator topIterator = getTopIterator();
-    for (myCurrent = topIterator.value(); topIterator.value() == myCurrent; topIterator = getTopIterator()) {
+    for (myNext = topIterator.value(); topIterator.value() == myNext; topIterator = getTopIterator()) {
       if (topIterator.hasNext()) {
         topIterator.next();
-        assert myCurrent < topIterator.value() : myHeap[TOP] + " " + myCurrent + " " + topIterator.value();
+        assert myNext < topIterator.value() : myHeap[TOP] + " " + myNext + " " + topIterator.value();
       } else {
         IntCollections.swap(myHeap, TOP, heapLength);
         heapLength--;

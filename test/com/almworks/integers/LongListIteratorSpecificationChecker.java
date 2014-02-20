@@ -1,18 +1,8 @@
 package com.almworks.integers;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 
-import static com.almworks.integers.IntegersFixture.generateRandomLongArray;
-import static com.almworks.integers.IntegersFixture.interval;
-import static com.almworks.integers.LongProgression.Arithmetic.fillArray;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import static junit.framework.TestCase.*;
+import static junit.framework.Assert.*;
 import static org.junit.Assert.assertFalse;
 
 public class LongListIteratorSpecificationChecker extends LongIteratorSpecificationChecker<LongListIterator> {

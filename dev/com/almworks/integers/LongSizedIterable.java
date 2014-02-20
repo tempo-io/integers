@@ -1,7 +1,5 @@
 package com.almworks.integers;
 
-import com.almworks.integers.LongIterable;
-
 /**
  * Iterables with size
  * @see com.almworks.integers.LongList

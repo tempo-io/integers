@@ -1,8 +1,5 @@
 package com.almworks.integers;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.*;
@@ -35,9 +32,9 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       {0, 0, 1, 1, 2, 2},
       {-10, 10, 20, 30, -23, 40, 21, 33, 15, 0},
       {1, 2, 3, 4, 5, 6, 29, -7, 144, 15},
-      ap(0, 1, 19),
-      ap(0, -1, 10),
-      ap(1, 2, 10)
+      ap(0, 19, 1),
+      ap(0, 10, -1),
+      ap(1, 10, 2)
   };
 
   public enum ValuesType {
@@ -79,7 +76,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
     SORTED_UNIQUE {
       @Override
       public boolean check(long... values) {
-        return new LongArray(values).isUniqueSorted();
+        return new LongArray(values).isSortedUnique();
       }
 
       @Override
@@ -111,7 +108,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       public long[] generateValues(int size) {
         long start = RAND.nextInt(), step = RAND.nextInt() - MAX / 2;
         int count = RAND.nextInt(size);
-        return LongProgression.Arithmetic.fillArray(start, step, count);
+        return LongProgression.Arithmetic.nativeArray(start, count, step);
       }
 
       @Override

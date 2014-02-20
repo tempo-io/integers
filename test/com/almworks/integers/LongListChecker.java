@@ -38,7 +38,7 @@ public abstract class LongListChecker<T extends LongList> extends IntegersFixtur
       assertEquals(length == 0, arr.isEmpty());
       assertEquals(LongCollections.isSorted(values, 0, length), arr.isSorted());
       boolean res = LongCollections.isSortedUnique(false, values, 0, length) == 0;
-      assertEquals(res, arr.isUniqueSorted());
+      assertEquals(res, arr.isSortedUnique());
       checkCollection(arr, values);
     }
   }

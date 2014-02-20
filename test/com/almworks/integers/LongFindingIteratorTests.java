@@ -29,7 +29,7 @@ public class LongFindingIteratorTests extends IntegersFixture {
       @Override
       protected boolean findNext() {
         if (!innerIt.hasNext()) return false;
-        myCurrent = innerIt.nextValue();
+        myNext = innerIt.nextValue();
         return true;
       }
     };
@@ -45,7 +45,7 @@ public class LongFindingIteratorTests extends IntegersFixture {
           @Override
           protected boolean findNext() {
             if (!innerIt.hasNext()) return false;
-            myCurrent = innerIt.nextValue();
+            myNext = innerIt.nextValue();
             return true;
           }
         });

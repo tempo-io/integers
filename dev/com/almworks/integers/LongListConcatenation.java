@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/PListConcatenation.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * List that allows to access a concatenation of several lists (here called slices) as a list

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PCollections.tpl
 
 
 package com.almworks.integers;
@@ -25,7 +24,10 @@ import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
@@ -55,7 +57,7 @@ public class LongCollections {
   public static LongList toSorted(boolean unique, LongIterable values) {
     if (values instanceof LongList) {
       LongList list = (LongList) values;
-      if ((unique && list.isUniqueSorted()) || (!unique && list.isSorted())) return list;
+      if ((unique && list.isSortedUnique()) || (!unique && list.isSorted())) return list;
     }
     LongArray buf = collectIterable(0, values);
     int bufSize = buf.size();
@@ -96,8 +98,8 @@ public class LongCollections {
     return copy;
   }
 
-  public static boolean isSorted(@Nullable long[] ints) {
-    return ints == null || isSorted(ints, 0, ints.length);
+  public static boolean isSorted(@Nullable long[] array) {
+    return array == null || isSorted(array, 0, array.length);
   }
 
   /**
@@ -110,7 +112,7 @@ public class LongCollections {
   /**
    * Checks if slice of array is sorted and doesn't contain duplicates. Empty slices and slices of length 1 are always sorted and unique.
    * @param checkNotUnique don't stop if head is sorted but duplicate found. If false terminates and returns index where terminated.
-   * @param ints array to check. if null is treated as empty array
+   * @param array array to check. if null is treated as empty array
    * @param offset begin of array slice to be checked
    * @param length of array slice to be checked
    * @return positive no info: element at returned index is less or equal to previous. Check terminated at the index.
@@ -121,15 +123,15 @@ public class LongCollections {
    * @throws ArrayIndexOutOfBoundsException if offset+length is greater than array length
    */
   @SuppressWarnings({"NonBooleanMethodNameMayNotStartWithQuestion"})
-  public static int isSortedUnique(boolean checkNotUnique, @Nullable long[] ints, int offset, int length) {
-    if (ints == null) ints = EMPTY_LONGS;
+  public static int isSortedUnique(boolean checkNotUnique, @Nullable long[] array, int offset, int length) {
+    if (array == null) array = EMPTY_LONGS;
     if (length < 0 || offset < 0) throw new IllegalArgumentException(offset + " " + length);
-    if (ints.length < offset + length) throw new ArrayIndexOutOfBoundsException(offset + "+" + length + ">" + ints.length);
+    if (array.length < offset + length) throw new ArrayIndexOutOfBoundsException(offset + "+" + length + ">" + array.length);
     if (length < 2) return 0;
     int dupCount = 0;
-    long prev = ints[offset];
+    long prev = array[offset];
     for (int i = 1; i < length; i++) {
-      long next = ints[i + offset];
+      long next = array[i + offset];
       if (next < prev) return i;
       else if (next == prev) {
         if (!checkNotUnique) return i;
@@ -282,9 +284,8 @@ public class LongCollections {
    * Returns the index of the first occurrence of {@code value}
    * in the specified array on the specified interval, or -1 if this array does not contain the element.
    * @param from starting index, inclusive
-   * @param to ending index, exclusive
-   * */
-  public static int indexOf(long[] array, int from, int to, long value) {
+   * @param to ending index, exclusive */
+  public static int indexOf(long value, long[] array, int from, int to) {
     for (int i = from; i < to; i++) {
       if (array[i] == value) {
         return i;
@@ -394,21 +395,21 @@ public class LongCollections {
   }
 
   /**
-   * Removes from the specified list all elements whose index is contained in the specified {@code IntList indexes}.
-   * @param indexes sorted {@code IntList}
+   * Removes from the specified list all elements whose index is contained in the specified {@code IntList indices}.
+   * @param indices sorted {@code IntList}
    */
-  public static void removeAllAtSorted(WritableLongList list, IntList indexes) {
-    assert indexes.isSorted() : "Indexes are not sorted: " + indexes;
+  public static void removeAllAtSorted(WritableLongList list, IntList indices) {
+    assert indices.isSorted() : "Indexes are not sorted: " + indices;
     int rangeStart = -1;
     int rangeFinish = -2;
     int diff = 0;
-    for (IntIterator it : indexes) {
+    for (IntIterator it : indices) {
       int ind = it.value();
       if (rangeFinish < 0) {
         rangeStart = ind;
       } else if (ind != rangeFinish) {
-        assert rangeStart >= 0 : list + " " + indexes + ' ' + it + ' ' + rangeStart + ' ' + rangeFinish;
-        assert ind > rangeFinish : indexes + " " + ind + ' ' + rangeFinish + ' ' + rangeStart;
+        assert rangeStart >= 0 : list + " " + indices + ' ' + it + ' ' + rangeStart + ' ' + rangeFinish;
+        assert ind > rangeFinish : indices + " " + ind + ' ' + rangeFinish + ' ' + rangeStart;
         list.removeRange(rangeStart - diff, rangeFinish - diff);
         diff += rangeFinish - rangeStart;
         rangeStart = ind;
@@ -571,7 +572,7 @@ public class LongCollections {
   @NotNull
   public static LongList toSortedUnique(@Nullable LongList list) {
     if (list == null || list.isEmpty()) return LongList.EMPTY;
-    if (list.size() < 33 && list.isUniqueSorted()) return list; // check only small lists
+    if (list.size() < 33 && list.isSortedUnique()) return list; // check only small lists
     LongArray r = new LongArray(list);
     r.sortUnique();
     return r;

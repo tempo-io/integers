@@ -16,10 +16,8 @@
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersFixture.RAND;
-import static com.almworks.integers.IntegersFixture.SortedStatus;
+import static com.almworks.integers.IntegersFixture.*;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
-import static com.almworks.integers.IntegersFixture.generateRandomLongArray;
 import static com.almworks.integers.LongArray.create;
 import static com.almworks.integers.LongCollections.collectIterables;
 
@@ -246,7 +244,7 @@ public class SetOperationsChecker {
   public static class DiffGetter implements SetCreator {
     @Override
     public LongIterable get(LongArray... arrays) {
-      assert arrays[0].isUniqueSorted() && arrays[1].isUniqueSorted();
+      assert arrays[0].isSortedUnique() && arrays[1].isSortedUnique();
       LongArray expected = new LongArray(arrays[0].size());
       expected.addAll(new LongMinusIterator(arrays[0], arrays[1]));
       expected.addAll(new LongMinusIterator(arrays[1], arrays[0]));

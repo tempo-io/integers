@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
-import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.util.TestUtil.assertEquals;
 import static junit.framework.Assert.assertTrue;
 

@@ -12,7 +12,7 @@ public class LongHppcWrappers {
       @Override
       protected boolean findNext() {
         if (!cursor.hasNext()) return false;
-        myCurrent = cursor.next().value;
+        myNext = cursor.next().value;
         return true;
       }
     };

@@ -53,7 +53,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
   public static LongAmortizedSet createFromSortedUnique(LongIterable iterable, int capacity) {
     LongAmortizedSet res = new LongAmortizedSet();
     res.myBaseList = LongCollections.collectIterable(capacity, iterable);
-    assert res.myBaseList.isUniqueSorted();
+    assert res.myBaseList.isSortedUnique();
     return res;
   }
 
@@ -70,7 +70,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
    * @see com.almworks.integers.LongArray#extractHostArray()
    */
   public static LongAmortizedSet createFromSortedUniqueArray(LongArray array) {
-    assert array.isUniqueSorted();
+    assert array.isSortedUnique();
     int size = array.size();
     LongAmortizedSet set = new LongAmortizedSet();
     set.myBaseList = new LongArray(array.extractHostArray(), size);
@@ -203,7 +203,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
     }
   }
 
-  public void coalesce() {
+  void coalesce() {
     myCoalesced = true;
     // todo add method WLL.removeSortedFromSorted(LIterable)
     // todo optimize
@@ -320,13 +320,13 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
           myIterator = myBaseList.iterator();
         } else {
           // myIterated = true -> myNext always exist in myBaseList
-          int baseIndex = myBaseList.binarySearch(myCurrent);
+          int baseIndex = myBaseList.binarySearch(myNext);
           myIterator = myBaseList.iterator(baseIndex + 1, myBaseList.size());
         }
       }
       while (myIterator.hasNext()) {
-        myCurrent = myIterator.nextValue();
-        if (!myRemoved.contains(myCurrent)) return true;
+        myNext = myIterator.nextValue();
+        if (!myRemoved.contains(myNext)) return true;
       }
       return false;
     }

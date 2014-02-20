@@ -16,16 +16,14 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
-import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.LongListRemovingDecorator.createFromPrepared;
 import static com.almworks.integers.LongListRemovingDecorator.prepareSortedIndices;
+import static com.almworks.integers.LongProgression.range;
 
 
 public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemovingDecorator> {
@@ -104,26 +102,26 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
 
   public void testSimpleCreateFromSorted() {
     LongList base = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    WritableIntList indexes = IntArray.create(0, 2, 4, 6, 8);
+    WritableIntList indices = IntArray.create(0, 2, 4, 6, 8);
 
-    prepareSortedIndices(indexes);
-    LongListRemovingDecorator arr = createFromPrepared(base, indexes);
+    prepareSortedIndices(indices);
+    LongListRemovingDecorator arr = createFromPrepared(base, indices);
     CHECK.order(arr.iterator(), 1, 3, 5, 7, 9);
   }
 
   public void testRandomCreateFromSorted() {
     int arrLength = 100;
-    int indexesLength = 50;
+    int indicesLength = 50;
     int maxValue = 1000;
 
     LongArray base = generateRandomLongArray(arrLength, UNORDERED, maxValue);
     for (int test = 0; test < 20; test++) {
-      IntArray indexes = generateRandomIntArray(indexesLength, SORTED_UNIQUE, arrLength);
+      IntArray indices = generateRandomIntArray(indicesLength, SORTED_UNIQUE, arrLength);
       LongArray expected = LongArray.copy(base);
-      expected.removeAllAtSorted(indexes.iterator());
+      expected.removeAllAtSorted(indices.iterator());
 
-      prepareSortedIndices(indexes);
-      LongListRemovingDecorator arr = createFromPrepared(base, indexes);
+      prepareSortedIndices(indices);
+      LongListRemovingDecorator arr = createFromPrepared(base, indices);
       CHECK.order(arr.iterator(), expected.iterator());
     }
   }
@@ -132,9 +130,9 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
     LongArray source = LongArray.create(10,13,15,14,11,12,16,17,18),
       expected = LongArray.create(10,15,14,12,16,18),
       result = new LongArray();
-    IntArray indexes = IntArray.create(1, 4, 7);
-    prepareSortedIndices(indexes);
-    LongListRemovingDecorator tst2 = createFromPrepared(source, indexes);
+    IntArray indices = IntArray.create(1, 4, 7);
+    prepareSortedIndices(indices);
+    LongListRemovingDecorator tst2 = createFromPrepared(source, indices);
     result.addAll(tst2.iterator());
     assertEquals(expected, result);
   }
@@ -142,10 +140,10 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
   public void testIteratorGet() {
     LongArray source = LongArray.create(10, 13, 15, 14, 11, 12, 16, 17, 18),
       expected = LongArray.create(10, 15, 14, 12, 16, 18);
-    IntArray indexes = IntArray.create(1, 4, 7);
-    prepareSortedIndices(indexes);
+    IntArray indices = IntArray.create(1, 4, 7);
+    prepareSortedIndices(indices);
     LongListRemovingDecorator tst2 =
-      createFromPrepared(source, indexes);
+      createFromPrepared(source, indices);
     LongListIterator it = tst2.iterator(), expIt = expected.iterator();
     while (it.hasNext()) {
       assertEquals(it.nextValue(), expIt.nextValue());
@@ -179,9 +177,9 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
 
   public void testSimple() {
     LongArray array = LongArray.create(0, 1, 2, 3, 4, 5, 6);
-    IntArray indexes = IntArray.create(1, 3, 5);
-    prepareSortedIndices(indexes);
-    LongListRemovingDecorator rem = createFromPrepared(array, indexes);
+    IntArray indices = IntArray.create(1, 3, 5);
+    prepareSortedIndices(indices);
+    LongListRemovingDecorator rem = createFromPrepared(array, indices);
 
     LongArray expected = LongArray.create(0, 2, 4, 6);
     CHECK.order(expected, rem);

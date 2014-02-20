@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/DynamicPSet.tpl
 
 
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntToInt;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
-import java.util.*;
+import java.util.BitSet;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
@@ -39,9 +42,9 @@ public class DynamicIntSet {
   private int mySize;
   /** Key values. */
   private int[] myKeys;
-  /** Tree structure: contains indexes into key, left, right, black. */
+  /** Tree structure: contains indices into key, left, right, black. */
   private int[] myLeft;
-  /** Tree structure: contains indexes into key, left, right, black. */
+  /** Tree structure: contains indices into key, left, right, black. */
   private int[] myRight;
   /** Node color : false for red, true for black. */
   private final BitSet myBlack;

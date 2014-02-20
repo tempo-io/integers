@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PArray.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import static com.almworks.integers.IntegersUtils.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Random;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public final class IntArray extends AbstractWritableIntList {
   /**
@@ -106,7 +109,7 @@ public final class IntArray extends AbstractWritableIntList {
   }
 
   public int indexOf(int value) {
-    return IntCollections.indexOf(myArray, 0, size(), value);
+    return IntCollections.indexOf(value, myArray, 0, size());
   }
 
   public final int get(int index) {

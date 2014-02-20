@@ -16,8 +16,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,34 +95,34 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker<Writ
 
   public void testSimpleCreateFromSorted() {
     LongList base = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    WritableIntList indexes = IntArray.create(0, 2, 4, 6, 8);
-    WritableLongListRemovingDecorator arr = WritableLongListRemovingDecorator.createFromSorted(base, indexes);
+    WritableIntList indices = IntArray.create(0, 2, 4, 6, 8);
+    WritableLongListRemovingDecorator arr = WritableLongListRemovingDecorator.createFromSorted(base, indices);
     CHECK.order(arr.iterator(), 1, 3, 5, 7, 9);
   }
 
   public void testSimpleCreateFromSorted2() {
     LongList base = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    WritableIntList indexes = IntArray.create(0, 2, 4, 6, 8);
+    WritableIntList indices = IntArray.create(0, 2, 4, 6, 8);
 
-    LongListRemovingDecorator.prepareSortedIndices(indexes);
-    LongListRemovingDecorator arr = LongListRemovingDecorator.createFromPrepared(base, indexes);
+    LongListRemovingDecorator.prepareSortedIndices(indices);
+    LongListRemovingDecorator arr = LongListRemovingDecorator.createFromPrepared(base, indices);
     CHECK.order(arr.iterator(), 1, 3, 5, 7, 9);
   }
 
   public void testRandomCreateFromSorted() {
     int arrLength = 100;
-    int indexesLength = 50;
+    int indicesLength = 50;
     int maxValue = 1000;
     LongList base = generateRandomLongArray(arrLength, UNORDERED, maxValue);
 
     for (int test = 0; test < 20; test++) {
-      IntArray indexes = generateRandomIntArray(indexesLength, SORTED_UNIQUE, arrLength);
+      IntArray indices = generateRandomIntArray(indicesLength, SORTED_UNIQUE, arrLength);
       LongArray expected = LongArray.copy(base);
-      for (int i = indexes.size() - 1; i >= 0; i--) {
-        int val = indexes.get(i);
+      for (int i = indices.size() - 1; i >= 0; i--) {
+        int val = indices.get(i);
         expected.removeRange(val, val + 1);
       }
-      WritableLongListRemovingDecorator arr = WritableLongListRemovingDecorator.createFromSorted(base, indexes);
+      WritableLongListRemovingDecorator arr = WritableLongListRemovingDecorator.createFromSorted(base, indices);
       CHECK.order(arr.iterator(), expected.iterator());
     }
   }

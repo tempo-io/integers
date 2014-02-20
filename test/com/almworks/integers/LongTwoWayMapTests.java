@@ -94,7 +94,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     }
     keySet.sort();
     compare.order(keySet.toNativeArray(), map.getKeys().toNativeArray());
-    checkMapValsEqualKeysMod(prime0);
+    checkMapValuesEqualKeysMod(prime0);
 
     int[] primes = new int[] { 53, 59, 61, 67, 71 };
     int oldPrime = prime0;
@@ -104,12 +104,12 @@ public class LongTwoWayMapTests extends IntegersFixture {
         assertEquals("key=" + key + " | prime=" + prime, put, key % oldPrime);
       }
       compare.order(keySet.toNativeArray(), map.getKeys().toNativeArray());
-      checkMapValsEqualKeysMod(prime);
+      checkMapValuesEqualKeysMod(prime);
       oldPrime = prime;
     }
   }
 
-  private void checkMapValsEqualKeysMod(int prime) {
+  private void checkMapValuesEqualKeysMod(int prime) {
 /*
     for (IntIterator i = map.getKeys().iterator(); i.hasNext(); ) {
       int key = i.nextValue();
@@ -147,7 +147,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     assertEquals(50, map.put(5, 50));
     assertEquals(80, map.put(8, 80));
     compare.order(map.getKeys().toNativeArray(), 0, 5, 8);
-    compare.order(map.getVals().toNativeArray(), 0, 50, 80);
+    compare.order(map.getValues().toNativeArray(), 0, 50, 80);
 
     map.insertAll(LongArray.create(3, 7, 1, 4, 9, 2, 6), LongArray.create(30, 70, 10, 40, 90, 20, 60));
     compare.order(map.getKeys().toNativeArray(), arithmetic(0, 10).toNativeArray());
@@ -175,9 +175,9 @@ public class LongTwoWayMapTests extends IntegersFixture {
     assertFalse(map.containsAnyKeys(LongArray.create(8, 6, 10, 4)));
 
     for (int i = 0; i < values.size(); i++) {
-      assertTrue(map.containsVal(values.get(i)));
-      assertFalse(map.containsVal(values.get(i) + 1));
-      assertFalse(map.containsVal(values.get(i) - 1));
+      assertTrue(map.containsValue(values.get(i)));
+      assertFalse(map.containsValue(values.get(i) + 1));
+      assertFalse(map.containsValue(values.get(i) - 1));
     }
   }
 
@@ -199,7 +199,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
             vals.add(keys.get(i) % prime);
           }
           map.insertAll(keys, vals);
-          checkMapValsEqualKeysMod(prime);
+          checkMapValuesEqualKeysMod(prime);
           break;
         }
       }
@@ -220,35 +220,35 @@ public class LongTwoWayMapTests extends IntegersFixture {
     }
   }
 
-  public void testTransformValsNotChangingSortedState() {
+  public void testTransformValuesNotChangingSortedState() {
     map.insertAll(new LongArray(arithmetic(0, 10)), apply(MULT, 10));
-    map.transformVals(apply(ADD, 1));
+    map.transformValues(apply(ADD, 1));
     for (int i = 0; i < map.size(); ++i) assertEquals(i*10+1, map.get(i));
-    map.transformVals(new LongToLong() {
+    map.transformValues(new LongToLong() {
       public long invoke(long a) {
         return a - ((a - 1)/10)%2;
       }
     });
     for (int i = 0; i < map.size(); ++i) assertEquals(i * 10 + (1 - (i % 2)), map.get(i));
-    map.transformVals(apply(MULT, 0));
+    map.transformValues(apply(MULT, 0));
     for (int i = 0; i < map.size(); ++i) assertEquals(0, map.get(i));
   }
 
-  public void testTransformValsChangingSortedState() {
+  public void testTransformValuesChangingSortedState() {
     map.insertAll(new LongArray(arithmetic(0, 10)), I);
-    map.transformVals(apply(swap(MOD), 3));
-    checkMapValsEqualKeysMod(3);
+    map.transformValues(apply(swap(MOD), 3));
+    checkMapValuesEqualKeysMod(3);
   }
 
-  public void testTransformValsMany() {
+  public void testTransformValuesMany() {
     int N_KEYS = 1000;
     int prime0 = 239;
     map.insertAll(new LongArray(arithmetic(0, N_KEYS)), apply(swap(MOD), prime0));
-    checkMapValsEqualKeysMod(prime0);
+    checkMapValuesEqualKeysMod(prime0);
     int[] primes = {31, 37, 41, 43, 47};
     for (int pi = 0; pi < primes.length; ++pi) {
       final int prime = primes[pi];
-      map.transformVals(new LongLongToLong() {
+      map.transformValues(new LongLongToLong() {
         @Override
         public long invoke(long key, long val) {
           return (key % prime == 0) ? prime : val;
@@ -272,7 +272,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     map.remove(2);
     assertFalse(map.containsAnyKeys(LongArray.create(1, 2, 3, 5)));
     assertEquals(6, map.size());
-    checkMapValsEqualKeysMod(3);
+    checkMapValuesEqualKeysMod(3);
   }
 
   public void testRemoveRandom() {
@@ -290,7 +290,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
         }
       }
       map.remove(k);
-      checkMapValsEqualKeysMod(prime);
+      checkMapValuesEqualKeysMod(prime);
     }
   }
 
@@ -301,20 +301,20 @@ public class LongTwoWayMapTests extends IntegersFixture {
     assertTrue(notInMap.isEmpty());
     assertFalse(map.containsAnyKeys(toRemove));
     assertEquals(10 - toRemove.size(), map.size());
-    checkMapValsEqualKeysMod(3);
+    checkMapValuesEqualKeysMod(3);
 
     toRemove = LongArray.create(-2, -1, 0, 1, 5, 6, 8, 10);
     notInMap = map.removeAll(toRemove);
     compare.order(notInMap.iterator(), -2, -1, 1, 10);
     compare.order(map.getKeys().iterator(), 7);
-    checkMapValsEqualKeysMod(3);
+    checkMapValuesEqualKeysMod(3);
 
     map.clear();
     map.insertAllRo(arithmetic(0, 10), apply(swap(MOD), 3));
     notInMap = map.removeAll(LongArray.create(7, 9, 8));
     assertTrue(notInMap.isEmpty());
     compare.order(map.getKeys().iterator(), 0, 1, 2, 3, 4, 5, 6);
-    checkMapValsEqualKeysMod(3);
+    checkMapValuesEqualKeysMod(3);
   }
 
   public void testRemoveAllRandom() {
@@ -330,7 +330,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
       LongList notInMap = map.removeAll(toRemove);
       for (int j = 0; j < notInMap.size(); ++j)
         assertTrue(i + " " + j, alreadyRemoved.contains(notInMap.get(j)));
-      checkMapValsEqualKeysMod(PRIME);
+      checkMapValuesEqualKeysMod(PRIME);
       alreadyRemoved.addAll(toRemove);
       assertFalse(map.containsAnyKeys(toRemove));
       assertFalse(map.containsAnyKeys(alreadyRemoved));
@@ -365,7 +365,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     map.transformKeys(apply(ADD, 1));
     checkMapEqivalentTo(compose(apply(swap(MOD), 3), apply(ADD, -2)));
     map.transformKeys(apply(ADD, 1));
-    checkMapValsEqualKeysMod(3);
+    checkMapValuesEqualKeysMod(3);
   }
 
 
@@ -387,26 +387,26 @@ public class LongTwoWayMapTests extends IntegersFixture {
     return list;
   }
 
-  public void testRemoveAllVals() {
+  public void testRemoveAllValues() {
     map.insertAllRo(LongProgression.arithmetic(0, 10), apply(swap(MOD), 3));
     LongList notInMap;
-    notInMap = map.removeAllVals(LongArray.create(2, 0));
+    notInMap = map.removeAllValues(LongArray.create(2, 0));
     compare.empty(notInMap.toNativeArray());
     compare.order(map.getKeys().iterator(), 1, 4, 7);
-    checkMapValsEqualKeysMod(3);
-    map.removeAllVals(LongArray.create(1));
+    checkMapValuesEqualKeysMod(3);
+    map.removeAllValues(LongArray.create(1));
     assertEquals(0, map.size());
 
     map.clear();
     map.insertAllRo(LongProgression.arithmetic(0, 10, 2), apply(swap(MOD), 13));
     // Important: specify one of the values not in the map
-    notInMap = map.removeAllVals(LongArray.create(6, 7, 8, 9, 10));
+    notInMap = map.removeAllValues(LongArray.create(6, 7, 8, 9, 10));
     compare.order(notInMap.iterator(), 7, 9);
     compare.order(map.getKeys().iterator(), 0, 2, 4, 12, 14, 16, 18);
-    checkMapValsEqualKeysMod(13);
+    checkMapValuesEqualKeysMod(13);
   }
 
-  public void testRemoveAllValsMany() {
+  public void testRemoveAllValuesMany() {
     final int N_KEYS = 2000;
     final int PRIME = 43;
     final int N_ATTEMPTS = 10;
@@ -420,17 +420,17 @@ public class LongTwoWayMapTests extends IntegersFixture {
         toRemove.add(v);
         removed.add(v);
       }
-      map.removeAllVals(toRemove);
+      map.removeAllValues(toRemove);
       for (int j = 0; j < removed.size(); ++j) {
         assertFalse(i + "\n" + map.getKeys() + "\n" + toRemove + "\n" + removed.get(j), map.getKeys().contains(removed.get(j)));
       }
-      checkMapValsEqualKeysMod(PRIME);
+      checkMapValuesEqualKeysMod(PRIME);
     }
 
   }
   public void testNonInjectiveFunctionException() {
     map.insertAll(new LongArray(arithmetic(0, 10)), apply(MULT, 10));
-    map.transformVals(apply(ADD, 1));
+    map.transformValues(apply(ADD, 1));
     for (int i = 0; i < map.size(); ++i) assertEquals(i*10+1, map.get(i));
 
     try {

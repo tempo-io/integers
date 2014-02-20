@@ -1,9 +1,5 @@
 package com.almworks.integers;
 
-import com.almworks.integers.IntegersFixture;
-import com.almworks.integers.LongArray;
-import com.almworks.integers.LongObjMap;
-import com.almworks.integers.LongProgression;
 import com.almworks.util.TestUtil;
 import org.jetbrains.annotations.Nullable;
 

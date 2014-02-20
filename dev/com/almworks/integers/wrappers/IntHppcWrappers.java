@@ -1,7 +1,7 @@
 package com.almworks.integers.wrappers;
 
-import com.almworks.integers.IntIterator;
 import com.almworks.integers.FindingIntIterator;
+import com.almworks.integers.IntIterator;
 import com.carrotsearch.hppc.cursors.IntCursor;
 
 import java.util.Iterator;

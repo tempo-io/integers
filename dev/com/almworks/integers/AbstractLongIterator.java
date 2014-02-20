@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractPIterator.tpl
 
 
 package com.almworks.integers;
-
-import java.util.NoSuchElementException;
 
 public abstract class AbstractLongIterator implements LongIterator {
 

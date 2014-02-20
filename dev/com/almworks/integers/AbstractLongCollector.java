@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PCollectorAdapter.tpl
 
 
 package com.almworks.integers;

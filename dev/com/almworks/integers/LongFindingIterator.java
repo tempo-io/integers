@@ -14,28 +14,24 @@
   * limitations under the License.
   */
 
-// CODE GENERATED FROM com/almworks/integers/util/FindingPIterator.tpl
 
 
 package com.almworks.integers;
-
-import com.almworks.integers.AbstractLongIterator;
-import com.almworks.integers.LongIterator;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class LongFindingIterator extends AbstractLongIterator {
-  protected long myCurrent = 0xDEADBEEF;
-  private long myNext;
+  protected long myNext = 0xDEADBEEF;
+  private long myCurrent;
 
   private static final int NO_CACHED = 0, CACHED = 1, FINISHED = 2;
   private int myIteratorStatus = NO_CACHED;
   private boolean myIterated = false;
 
   /**
-   * In this method {@code myCurrent} should be assigned the next value.
-   * @return true if the next value exists and was assigned to {@code myCurrent}, otherwise false
+   * In this method {@code myNext} should be assigned the next value.
+   * @return true if the next value exists and was assigned to {@code myNext}, otherwise false
    * */
   protected abstract boolean findNext() throws ConcurrentModificationException;
 
@@ -56,14 +52,14 @@ public abstract class LongFindingIterator extends AbstractLongIterator {
 
   public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
     if (myIteratorStatus == CACHED) {
-      myNext = myCurrent;
+      myCurrent = myNext;
       myIteratorStatus = NO_CACHED;
     } else {
       if (myIteratorStatus == FINISHED || !findNext()) {
         throw new NoSuchElementException();
       }
       assert myIteratorStatus == NO_CACHED;
-      myNext = myCurrent;
+      myCurrent = myNext;
     }
     myIterated = true;
     return this;
@@ -73,7 +69,7 @@ public abstract class LongFindingIterator extends AbstractLongIterator {
     if (!myIterated) {
       throw new NoSuchElementException();
     }
-    return myNext;
+    return myCurrent;
   }
 
   @Override

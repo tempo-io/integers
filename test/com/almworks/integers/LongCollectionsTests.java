@@ -19,13 +19,12 @@ package com.almworks.integers;
 import com.almworks.integers.segmented.LongSegmentedArray;
 import com.almworks.util.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
-import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
-import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.IntegersFixture.SortedStatus.*;
 import static com.almworks.integers.LongCollections.*;
-import static com.almworks.integers.LongIterators.arithmetic;
 
 public class LongCollectionsTests extends IntegersFixture {
   public static final CollectionsCompare COMPARE = new CollectionsCompare();
@@ -595,7 +594,7 @@ public class LongCollectionsTests extends IntegersFixture {
     System.arraycopy(values, 0, expected, 0, 5);
     CHECK.order(expected, ensureCapacity(values, 20));
 
-    values = LongProgression.Arithmetic.fillArray(0, 1, 20);
+    values = LongProgression.Arithmetic.nativeArray(0, 20, 1);
     assertEquals(values, ensureCapacity(values, 20));
     expected = new long[40];
     System.arraycopy(values, 0, expected, 0, 20);

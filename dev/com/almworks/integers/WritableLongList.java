@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/WritablePList.tpl
 
 
 package com.almworks.integers;
@@ -78,7 +77,7 @@ public interface WritableLongList extends LongList, LongCollector {
   boolean removeAll(long... values);
 
   /**
-   * Insert {@code value} {@code count} times between indexes {@code index, index + 1}
+   * Insert {@code value} {@code count} times between indices {@code index, index + 1}
    * @throws IllegalArgumentException if count < 0
    * */
   void insertMultiple(int index, long value, int count);
@@ -86,12 +85,12 @@ public interface WritableLongList extends LongList, LongCollector {
   void insert(int index, long value);
 
   /**
-   * Insert values from {@code iterator} between indexes {@code index, index + 1}
+   * Insert values from {@code iterator} between indices {@code index, index + 1}
    */
   void insertAll(int index, LongIterator iterator);
 
   /**
-   * Insert values from {@code list} between indexes {@code index, index + 1}
+   * Insert values from {@code list} between indices {@code index, index + 1}
    */
   void insertAll(int index, LongList list);
 

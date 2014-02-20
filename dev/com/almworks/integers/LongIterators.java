@@ -60,6 +60,50 @@ public class LongIterators {
   }
 
   /**
+   * @see LongProgression#arithmetic(long, int, long)
+   * @see #arithmeticProgression(long, long)
+   */
+  public static LongIterator arithmetic(long start, final int count, final long step) {
+    if (step == 0) throw new IllegalArgumentException("step = 0");
+    if (count < 0) throw new IllegalArgumentException("count < 0");
+    final long myInitialValue = start - step;
+    return new AbstractLongIterator() {
+      int myCount = count;
+      long myValue = myInitialValue;
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return myCount > 0;
+      }
+
+      @Override
+      public boolean hasValue() {
+        return myValue != myInitialValue;
+      }
+
+      @Override
+      public long value() throws NoSuchElementException {
+        if (!hasValue()) throw new NoSuchElementException();
+        return myValue;
+      }
+
+      @Override
+      public LongIterator next() {
+        if (myCount <= 0) throw new NoSuchElementException();
+        myCount--;
+        myValue += step;
+        return this;
+      }
+    };
+  }
+
+  /**
+   * @see LongProgression#arithmetic(long, int)
+   */
+  public static LongIterator arithmetic(final long start, final int count) {
+    return arithmetic(start, count, 1);
+  }
+
+  /**
    * @return an infinite arithmetic progression beginning with {@code start}, increasing by {@code step}.
    * Unlike {@link #arithmetic(long, int, long)} this iterator is infinite
    * @see #arithmetic(long, int, long)
@@ -133,50 +177,6 @@ public class LongIterators {
         return it.value();
       }
     };
-  }
-
-  /**
-   * @see LongProgression#arithmetic(long, int, long)
-   * @see #arithmeticProgression(long, long)
-   */
-  public static LongIterator arithmetic(long start, final int count, final long step) {
-    if (step == 0) throw new IllegalArgumentException("step = 0");
-    if (count < 0) throw new IllegalArgumentException("count < 0");
-    final long myInitialValue = start - step;
-    return new AbstractLongIterator() {
-      int myCount = count;
-      long myValue = myInitialValue;
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return myCount > 0;
-      }
-
-      @Override
-      public boolean hasValue() {
-        return myValue != myInitialValue;
-      }
-
-      @Override
-      public long value() throws NoSuchElementException {
-        if (!hasValue()) throw new NoSuchElementException();
-        return myValue;
-      }
-
-      @Override
-      public LongIterator next() {
-        if (myCount <= 0) throw new NoSuchElementException();
-        myCount--;
-        myValue += step;
-        return this;
-      }
-    };
-  }
-
-  /**
-   * @see LongProgression#arithmetic(long, int)
-   */
-  public static LongIterator arithmetic(final long start, final int count) {
-    return arithmetic(start, count, 1);
   }
 
   /**

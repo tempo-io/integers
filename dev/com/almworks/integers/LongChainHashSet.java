@@ -238,7 +238,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
           myCurIndex++;
         }
         if (myCurIndex < myFront) {
-          myCurrent = myKeys[myCurIndex++];
+          myNext = myKeys[myCurIndex++];
           return true;
         }
         return false;

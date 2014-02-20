@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/TwoWayPMap.tpl
 
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.*;
-import org.jetbrains.annotations.*;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.LongLongToLong;
+import com.almworks.integers.func.LongToLong;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +36,7 @@ import java.util.List;
 public class LongTwoWayMap {
   private final LongArray myKeys = new LongArray();
   private final IntArray myIdxMap = new IntArray();
-  private final LongArray myVals = new LongArray();
+  private final LongArray myValues = new LongArray();
 
   public boolean containsKey(long key) {
     return myKeys.binarySearch(key) >= 0;
@@ -84,8 +87,8 @@ public class LongTwoWayMap {
     return null;
   }
 
-  public boolean containsVal(long val) {
-    return myVals.binarySearch(val) >= 0;
+  public boolean containsValue(long val) {
+    return myValues.binarySearch(val) >= 0;
   }
 
   /** Throws {@link IllegalArgumentException} if the map does not contain the mapping for the key.
@@ -93,21 +96,21 @@ public class LongTwoWayMap {
   public long get(long key) throws IllegalArgumentException {
     int i = myKeys.binarySearch(key);
     if (i < 0) throw new IllegalArgumentException("Key " + key + " is not contained in " + this);
-    return myVals.get(myIdxMap.get(i));
+    return myValues.get(myIdxMap.get(i));
   }
 
   public LongList getKeys() {
     return myKeys;
   }
 
-  public LongList getVals() {
-    return myVals;
+  public LongList getValues() {
+    return myValues;
   }
 
   public void clear() {
     myKeys.clear();
     myIdxMap.clear();
-    myVals.clear();
+    myValues.clear();
   }
 
   public int size() {
@@ -118,7 +121,7 @@ public class LongTwoWayMap {
     int n = size();
     List<Entry> l = new ArrayList<Entry>(n);
     for (int i = 0; i < n; ++i) {
-      l.add(new Entry(myKeys.get(i), myVals.get(myIdxMap.get(i))));
+      l.add(new Entry(myKeys.get(i), myValues.get(myIdxMap.get(i))));
     }
     return l;
   }
@@ -136,19 +139,19 @@ public class LongTwoWayMap {
     long ret;
     if (i >= 0) {
       int oldPos = myIdxMap.get(i);
-      ret = myVals.removeAt(oldPos);
-      int newPos = myVals.binarySearch(val);
+      ret = myValues.removeAt(oldPos);
+      int newPos = myValues.binarySearch(val);
       if (newPos < 0) newPos = -newPos - 1;
-      myVals.insert(newPos, val);
+      myValues.insert(newPos, val);
       shiftValueIndexes(oldPos, newPos);
       myIdxMap.set(i, newPos);
     } else {
       ret = val;
       int ki = -i - 1;
       myKeys.insert(ki, key);
-      int vi = myVals.binarySearch(val);
+      int vi = myValues.binarySearch(val);
       if (vi < 0) vi = -vi - 1;
-      myVals.insert(vi, val);
+      myValues.insert(vi, val);
       shiftValueIndexes(myIdxMap.size(), vi);
       myIdxMap.insert(ki, vi);
     }
@@ -172,9 +175,9 @@ public class LongTwoWayMap {
   }
 
   private boolean checkInvariants(String action) {
-    assert myKeys.size() == myIdxMap.size() && myKeys.size() == myVals.size() : action + '\n' + myKeys + '\n' + myIdxMap + '\n' + myVals;
+    assert myKeys.size() == myIdxMap.size() && myKeys.size() == myValues.size() : action + '\n' + myKeys + '\n' + myIdxMap + '\n' + myValues;
     assert myKeys.isSorted() : action + ' ' + myKeys;
-    assert myVals.isSorted() : action + ' ' + myVals;
+    assert myValues.isSorted() : action + ' ' + myValues;
     assert checkIdxMap() : action + ' ' + myIdxMap;
     return true;
   }
@@ -189,14 +192,14 @@ public class LongTwoWayMap {
     insertAll(new LongArray(keys), new LongArray(vals));
   }
 
-  public void insertAllRo(LongList keys, LongToLong keyToVal) {
-    insertAll(new LongArray(keys), keyToVal);
+  public void insertAllRo(LongList keys, LongToLong keyToValue) {
+    insertAll(new LongArray(keys), keyToValue);
   }
 
-  public void insertAll(WritableLongList keys, LongToLong keyToVal) {
+  public void insertAll(WritableLongList keys, LongToLong keyToValue) {
     int m = keys.size();
     LongArray vals = new LongArray(m);
-    for (int i = 0; i < m; ++i) vals.add(keyToVal.invoke(keys.get(i)));
+    for (int i = 0; i < m; ++i) vals.add(keyToValue.invoke(keys.get(i)));
     insertAll(keys, vals);
   }
 
@@ -221,11 +224,11 @@ public class LongTwoWayMap {
     int ins = 0;
     for (int i = 0; i < m; ++i) {
       long val = vals.get(i);
-      ins = myVals.binarySearch(val, ins, n);
+      ins = myValues.binarySearch(val, ins, n);
       if (ins < 0) ins = -ins - 1;
       insPoints.add(ins);
     }
-    // Fix current value indexes
+    // Fix current value indices
     for (int i = 0; i < n; ++i) {
       int pos = myIdxMap.get(i);
       // diff = "how many items will be inserted before i-th value index"
@@ -233,7 +236,7 @@ public class LongTwoWayMap {
       if (diff < 0) diff = -diff - 1;
       myIdxMap.set(i, pos + diff);
     }
-    // Insert values, keys, and value indexes
+    // Insert values, keys, and value indices
     int insDiff = 0;
     for (int i = 0; i < m; ) {
       ins = insPoints.get(i);
@@ -249,7 +252,7 @@ public class LongTwoWayMap {
         myKeys.insert(ki, key);
         myIdxMap.insert(ki, ins + insDiff + (i - s));
       }
-      myVals.insertAll(ins + insDiff, vals.subList(s, i));
+      myValues.insertAll(ins + insDiff, vals.subList(s, i));
       insDiff += i - s;
     }
     assert checkInvariants(keys + "\n" + vals);
@@ -257,23 +260,23 @@ public class LongTwoWayMap {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformVals(@NotNull LongToLong f) {
-    transformVals(Long.MIN_VALUE, f);
+  public void transformValues(@NotNull LongToLong f) {
+    transformValues(Long.MIN_VALUE, f);
   }
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformVals(long valFrom, @NotNull LongToLong f) {
+  public void transformValues(long valFrom, @NotNull LongToLong f) {
     int n = size();
     boolean isSortingBroken = false;
-    long lastVal = Long.MIN_VALUE;
-    int viFrom = myVals.binarySearch(valFrom);
+    long lastValue = Long.MIN_VALUE;
+    int viFrom = myValues.binarySearch(valFrom);
     if (viFrom < 0) viFrom = -viFrom - 1;
     for (int vi = viFrom; vi < n; ++vi) {
-      long val = f.invoke(myVals.get(vi));
-      myVals.set(vi, val);
-      if (val < lastVal) isSortingBroken = true;
-      lastVal = val;
+      long val = f.invoke(myValues.get(vi));
+      myValues.set(vi, val);
+      if (val < lastValue) isSortingBroken = true;
+      lastValue = val;
     }
     if (isSortingBroken) {
       restoreIndexMap(n);
@@ -282,13 +285,13 @@ public class LongTwoWayMap {
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
-  public void transformVals(@NotNull LongLongToLong f) {
+  public void transformValues(@NotNull LongLongToLong f) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
       int vi = myIdxMap.get(ki);
-      myVals.set(vi, f.invoke(myKeys.get(ki), myVals.get(vi)));
+      myValues.set(vi, f.invoke(myKeys.get(ki), myValues.get(vi)));
     }
-    if (!myVals.isSorted()) {
+    if (!myValues.isSorted()) {
       restoreIndexMap(n);
     }
     assert checkInvariants(String.valueOf(f));
@@ -302,14 +305,14 @@ public class LongTwoWayMap {
       new IntIntToInt() {
         @Override
         public int invoke(int i, int j) {
-          return LongCollections.compare(myVals.get(i), myVals.get(j));
+          return LongCollections.compare(myValues.get(i), myValues.get(j));
         }
       },
       // swap
       new IntProcedure2() {
         @Override
         public void invoke(int i, int j) {
-          myVals.swap(i, j);
+          myValues.swap(i, j);
           r.swap(i, j);
         }
       }
@@ -339,7 +342,7 @@ public class LongTwoWayMap {
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
     int dupIdx = LongCollections.findDuplicateSorted(newKeys);
-    if (dupIdx >= 0) throw new NonInjectiveFunctionException(newKeys.get(dupIdx), injection + " is not an injective function: generated duplicate key " + newKeys.get(dupIdx) + ", value: " + myVals.get(newIdxMap.get(dupIdx)));
+    if (dupIdx >= 0) throw new NonInjectiveFunctionException(newKeys.get(dupIdx), injection + " is not an injective function: generated duplicate key " + newKeys.get(dupIdx) + ", value: " + myValues.get(newIdxMap.get(dupIdx)));
     myKeys.clear();
     myIdxMap.clear();
     myKeys.addAll(newKeys);
@@ -374,7 +377,7 @@ public class LongTwoWayMap {
     if (ki >= 0) {
       myKeys.removeAt(ki);
       int vi = myIdxMap.removeAt(ki);
-      long val = myVals.removeAt(vi);
+      long val = myValues.removeAt(vi);
       shiftValueIndexes(vi, myIdxMap.size());
       assert checkInvariants(key + " " + val);
       return val;
@@ -408,34 +411,34 @@ public class LongTwoWayMap {
         myKeys.removeAt(ki);
         int vi = myIdxMap.removeAt(ki);
         visToRemove.add(vi);
-        vsToRemove.add(myVals.get(vi));
+        vsToRemove.add(myValues.get(vi));
       }
     }
 
     sort(vsToRemove, visToRemove);
-    removeValsSorted0(vsToRemove, visToRemove);
+    removeValuesSorted0(vsToRemove, visToRemove);
 
     assert checkInvariants(String.valueOf(keys));
     return notInMap == null ? LongArray.EMPTY : notInMap;
   }
 
-  private void removeValsSorted0(WritableLongList vsToRemove, WritableIntList visToRemove) {
+  private void removeValuesSorted0(WritableLongList vsToRemove, WritableIntList visToRemove) {
     // Fix index map before removing values: we have to shift remaining values back
     int mRem = vsToRemove.size();
     int nLeft = myIdxMap.size();
     for (int i = 0; i < nLeft; ++i) {
       int vi = myIdxMap.get(i);
-      long v = myVals.get(vi);
+      long v = myValues.get(vi);
       int d = vsToRemove.binarySearch(v);
       if (d < 0) d = -d - 1;
       else {
         // Consider the following example:
         // vis:        [0 1 2 3 4]
-        // myVals:      1 2 3 3 3
+        // myValues:      1 2 3 3 3
         // vsToRemove:  ^     ^
         // Here, element with vi = 2 should be shifted 1 position left and with vi = 4 -- 2 positions left.
-        // In other words, we have to scroll through all values being removed that are equal to the current value, v, and decrement current index, vi, by the amount of removed values to the left of v in myVals.
-        // Note that d denotes the leftmost element of vsToRemove that is equal to v (but not necessarily the leftmost equal to v in myVals).
+        // In other words, we have to scroll through all values being removed that are equal to the current value, v, and decrement current index, vi, by the amount of removed values to the left of v in myValues.
+        // Note that d denotes the leftmost element of vsToRemove that is equal to v (but not necessarily the leftmost equal to v in myValues).
         for (int j = d; j < mRem && vsToRemove.get(j) == v; ++j) {
           if (visToRemove.get(j) < vi)
             d += 1;
@@ -446,17 +449,17 @@ public class LongTwoWayMap {
 
     // Remove values
     visToRemove.sort();
-    LongCollections.removeAllAtSorted(myVals, visToRemove);
+    LongCollections.removeAllAtSorted(myValues, visToRemove);
   }
 
   @NotNull
-  public LongList removeAllValsRo(LongList vals) {
-    return removeAllVals(new LongArray(vals));
+  public LongList removeAllValuesRo(LongList vals) {
+    return removeAllValues(new LongArray(vals));
   }
 
   /** @return list of values that have not been removed (not contained in the map) */
   @NotNull
-  public LongList removeAllVals(WritableLongList vals) {
+  public LongList removeAllValues(WritableLongList vals) {
     if (!vals.isSorted()) vals.sort();
     vals.removeDuplicates();
     int m = vals.size();
@@ -475,7 +478,7 @@ public class LongTwoWayMap {
     }
     LongCollections.removeAllAtSorted(myKeys, kisToRemove);
     IntCollections.removeAllAtSorted(myIdxMap, kisToRemove);
-    removeValsSorted0(vsToRemove, visToRemove);
+    removeValuesSorted0(vsToRemove, visToRemove);
 
     assert checkInvariants(String.valueOf(vals));
     return notInMap == null ? LongList.EMPTY : notInMap;
@@ -489,7 +492,7 @@ public class LongTwoWayMap {
       long v = vals.get(i);
       boolean inMap = false;
       do {
-        int nvi = myVals.binarySearch(v, vi, n);
+        int nvi = myValues.binarySearch(v, vi, n);
         if (nvi < 0) break;
         vi = nvi;
         visToRemove.add(vi);
@@ -504,7 +507,7 @@ public class LongTwoWayMap {
 
   @Override
   public String toString() {
-    return "K: " + myKeys + "\nM: " + myIdxMap + "\nV: " + myVals;
+    return "K: " + myKeys + "\nM: " + myIdxMap + "\nV: " + myValues;
   }
 
   public static class Entry {

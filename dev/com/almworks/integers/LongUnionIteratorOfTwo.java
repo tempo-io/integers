@@ -17,20 +17,20 @@ public class LongUnionIteratorOfTwo extends LongFindingIterator {
     if (myItsCount == 0) return false;
     if (myItsCount == 2) {
       if (v[0] < v[1]) {
-        myCurrent = v[0];
+        myNext = v[0];
         advanceIterator(0);
       } else if (v[1] < v[0]) {
-        myCurrent = v[1];
+        myNext = v[1];
         advanceIterator(1);
       } else {
-        myCurrent = v[0];
+        myNext = v[0];
         advanceIterator(0);
         advanceIterator(1);
       }
       maybeMoveIterator1();
       return true;
     } else {
-      myCurrent = myIts[0].value();
+      myNext = myIts[0].value();
       advanceIterator(0);
       return true;
     }

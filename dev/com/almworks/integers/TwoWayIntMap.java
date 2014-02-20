@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/TwoWayPMap.tpl
 
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.*;
-import org.jetbrains.annotations.*;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.IntToInt;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,7 +227,7 @@ public class TwoWayIntMap {
       if (ins < 0) ins = -ins - 1;
       insPoints.add(ins);
     }
-    // Fix current value indexes
+    // Fix current value indices
     for (int i = 0; i < n; ++i) {
       int pos = myIdxMap.get(i);
       // diff = "how many items will be inserted before i-th value index"
@@ -233,7 +235,7 @@ public class TwoWayIntMap {
       if (diff < 0) diff = -diff - 1;
       myIdxMap.set(i, pos + diff);
     }
-    // Insert values, keys, and value indexes
+    // Insert values, keys, and value indices
     int insDiff = 0;
     for (int i = 0; i < m; ) {
       ins = insPoints.get(i);

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.almworks.integers.IntegersFixture.SortedStatus.*;
+import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 
 public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
   private LongCyclicQueue myArray = new LongCyclicQueue(5);
@@ -258,7 +258,7 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
     assertEquals("[15] (12*, 13, 14, 15, 16, 17*, 18*, 19*, ..., 22*, 23, 24, 25, 26)", clq.toStringWithPiterators());
 
     clq = new LongCyclicQueue(11);
-    clq.addAll(ap(0, 1, 11));
+    clq.addAll(ap(0, 11, 1));
     assertEquals("[11] (0, 1, 2, 3, 4, ..., 6, 7, 8, 9, 10)", clq.toStringWithPiterators());
     clq.pinnedIterator(5);
     assertEquals("[11] (0, 1, 2, 3, 4, 5*, 6, 7, 8, 9, 10)", clq.toStringWithPiterators());

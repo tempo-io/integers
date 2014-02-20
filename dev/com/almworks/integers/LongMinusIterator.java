@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/util/SortedPListMinusIterator.tpl
 
 
 package com.almworks.integers;
@@ -33,12 +32,12 @@ public class LongMinusIterator extends LongFindingIterator {
   }
 
   protected boolean findNext() {
-    long last = myCurrent;
+    long last = myNext;
     while (myInclude.hasNext()) {
       long v = myInclude.nextValue();
       assert !hasValue() || v >= last : last + " " + v + " " + myInclude;
       if (accept(v)) {
-        myCurrent = v;
+        myNext = v;
         return true;
       }
       last = v;

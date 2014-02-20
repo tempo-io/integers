@@ -34,7 +34,7 @@ public class LongIntersectionIteratorTests extends IntegersFixture {
     LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<? extends LongIterator> get(final long... values) {
-        if (!new LongArray(values).isUniqueSorted()) {
+        if (!new LongArray(values).isSortedUnique()) {
           throw new IllegalArgumentException();
         }
         List<LongIterator> res = new ArrayList<LongIterator>();

@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/optimized/SameValuesPList.tpl
 
 
 package com.almworks.integers;
 
-import com.almworks.integers.AbstractWritableIntList;
-import com.almworks.integers.IntIntMap;
-import com.almworks.integers.PairIntIntIterator;
-import com.almworks.integers.WritableIntListIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
@@ -89,7 +84,7 @@ public class SameValuesIntList extends AbstractWritableIntList {
     if (index < 0 || index > size)
       throw new IndexOutOfBoundsException(index + " " + this);
     int ki = myMap.findKey(index);
-    // will shift all rightward indexes by +count
+    // will shift all rightward indices by +count
     int shiftFrom = ki >= 0 ? ki : -ki - 1;
     // previous value before this insertion
     int prevValue = prevValueForFindIndex(ki);
@@ -124,7 +119,7 @@ public class SameValuesIntList extends AbstractWritableIntList {
     if (index < 0 || index > size)
       throw new IndexOutOfBoundsException(index + " " + this);
     int ki = myMap.findKey(index);
-    // will shift all rightward indexes by +count
+    // will shift all rightward indices by +count
     int shiftFrom = ki >= 0 ? ki + 1 : -ki - 1;
     int sz = myMap.size();
     // we have to adjust first, or insert will fail because keys will conflict
@@ -276,7 +271,7 @@ public class SameValuesIntList extends AbstractWritableIntList {
       }
     }*/
 
-    // decrement indexes that follow removed range
+    // decrement indices that follow removed range
     myMap.adjustKeys(removeFrom, myMap.size(), -count);
 
     updateSize(size - count);
