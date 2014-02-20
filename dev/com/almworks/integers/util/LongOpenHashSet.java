@@ -57,7 +57,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
       if (initialCapacity < 0)
         throw new IllegalArgumentException("Illegal initial capacity: " +
             initialCapacity);
-      if (!(0 < loadFactor && loadFactor <= 1))
+      if (!(0 < loadFactor && loadFactor < 1))
         throw new IllegalArgumentException("Illegal load factor: " +
             loadFactor);
 

@@ -29,11 +29,9 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
    */
   public LongChainHashSet(int initialCapacity, float loadFactor) {
     if (initialCapacity < 0)
-      throw new IllegalArgumentException("Illegal initial capacity: " +
-          initialCapacity);
-    if (!(0 < loadFactor && loadFactor <= 1))
-      throw new IllegalArgumentException("Illegal load factor: " +
-          loadFactor);
+      throw new IllegalArgumentException("Illegal initial capacity: " + initialCapacity);
+    if (Float.isNaN(loadFactor) || loadFactor < 0)
+      throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
     initialCapacity = Math.max(DEFAULT_INITIAL_CAPACITY, initialCapacity);
 
     int headLen = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
