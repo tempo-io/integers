@@ -14,32 +14,19 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/optimized/PSegments.tpl
+// CODE GENERATED FROM com/almworks/integers/optimized/SegmentedPArrayEnvironment.tpl
 
 
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
-public class LongSegments {
+public interface LongSegmentedArrayEnvironment {
+  LongSegment allocate(int size);
 
-  /**
-   * Holds segments, possibly nulls.
-   */
-  final LongSegment[] segments;
+  LongSegments allocateSegments(int size);
 
-  /**
-   * See {@link LongSegment#refCount}.
-   */
-  int refCount;
+  void free(LongSegment segment);
 
-  public LongSegments(int size) {
-    segments = new LongSegment[size];
-  }
+  void free(LongSegments segments);
 
-  public int getSize() {
-    return segments.length;
-  }
-
-  public String toString() {
-    return "SEGS[" + (segments == null ? -1 : segments.length) + "]@" + refCount;
-  }
+  void copy(long[] source, int sourceOffset, long[] destination, int destinationOffset, int length);
 }

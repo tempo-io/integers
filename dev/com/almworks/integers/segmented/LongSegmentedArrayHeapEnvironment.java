@@ -17,26 +17,26 @@
 // CODE GENERATED FROM com/almworks/integers/optimized/SegmentedPArrayHeapEnvironment.tpl
 
 
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
-public class SegmentedIntArrayHeapEnvironment implements SegmentedIntArrayEnvironment {
-  public static final SegmentedIntArrayEnvironment INSTANCE = new SegmentedIntArrayHeapEnvironment();
+public class LongSegmentedArrayHeapEnvironment implements LongSegmentedArrayEnvironment {
+  public static final LongSegmentedArrayEnvironment INSTANCE = new LongSegmentedArrayHeapEnvironment();
 
-  public IntSegment allocate(int size) {
-    return new IntSegment(size);
+  public LongSegment allocate(int size) {
+    return new LongSegment(size);
   }
 
-  public IntSegments allocateSegments(int size) {
-    return new IntSegments(size);
+  public LongSegments allocateSegments(int size) {
+    return new LongSegments(size);
   }
 
-  public void free(IntSegment segment) {
+  public void free(LongSegment segment) {
   }
 
-  public void free(IntSegments segments) {
+  public void free(LongSegments segments) {
   }
 
-  public final void copy(int[] source, int sourceOffset, int[] destination, int destinationOffset, int length) {
+  public final void copy(long[] source, int sourceOffset, long[] destination, int destinationOffset, int length) {
     System.arraycopy(source, sourceOffset, destination, destinationOffset, length);
   }
 }

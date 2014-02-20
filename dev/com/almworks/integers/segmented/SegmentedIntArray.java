@@ -17,11 +17,11 @@
 // CODE GENERATED FROM com/almworks/integers/optimized/SegmentedPArray.tpl
 
 
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
 import com.almworks.integers.*;
-import com.almworks.integers.func.IntFunction;
-import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -734,7 +734,7 @@ public class SegmentedIntArray extends AbstractWritableIntList implements Clonea
     }
   }
 
-  public void apply(int from, int to, IntFunction function) {
+  public void apply(int from, int to, IntToInt function) {
     assert checkInvariants();
     if (from >= to)
       return;
@@ -745,7 +745,7 @@ public class SegmentedIntArray extends AbstractWritableIntList implements Clonea
     assert checkInvariants();
   }
 
-  public void apply(int from, int to, IntFunction2 function, int secondArgument) {
+  public void apply(int from, int to, IntIntToInt function, int secondArgument) {
     assert checkInvariants();
     if (from >= to)
       return;

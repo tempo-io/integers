@@ -17,7 +17,7 @@
 // CODE GENERATED FROM com/almworks/integers/optimized/PSegment.tpl
 
 
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
 public class LongSegment {
   /**

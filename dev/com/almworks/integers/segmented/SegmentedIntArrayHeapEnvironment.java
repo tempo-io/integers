@@ -17,7 +17,7 @@
 // CODE GENERATED FROM com/almworks/integers/optimized/SegmentedPArrayHeapEnvironment.tpl
 
 
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
 public class SegmentedIntArrayHeapEnvironment implements SegmentedIntArrayEnvironment {
   public static final SegmentedIntArrayEnvironment INSTANCE = new SegmentedIntArrayHeapEnvironment();

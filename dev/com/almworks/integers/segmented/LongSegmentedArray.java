@@ -17,24 +17,23 @@
 // CODE GENERATED FROM com/almworks/integers/optimized/SegmentedPArray.tpl
 
 
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
 import com.almworks.integers.*;
-import com.almworks.integers.func.LongFunction;
-import com.almworks.integers.util.IntegersDebug;
+import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class SegmentedLongArray extends AbstractWritableLongList implements Cloneable {
+public class LongSegmentedArray extends AbstractWritableLongList implements Cloneable {
   private static final int SEGB_INITIAL = 4;
   private static final int SEGS_INITIAL = 1 << SEGB_INITIAL;
   private static final int SEGB_LARGE = 10;
   private static final int SEGS_LARGE = 1 << SEGB_LARGE;
 
-  private final SegmentedLongArrayEnvironment myEnv;
+  private final LongSegmentedArrayEnvironment myEnv;
 
   /**
    * List of segments holding the data. All segments are of equal size.
@@ -115,17 +114,17 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   }
 
 
-  public SegmentedLongArray() {
-    this(SegmentedLongArrayHeapEnvironment.INSTANCE);
+  public LongSegmentedArray() {
+    this(LongSegmentedArrayHeapEnvironment.INSTANCE);
   }
 
-  public SegmentedLongArray(SegmentedLongArrayEnvironment env) {
+  public LongSegmentedArray(LongSegmentedArrayEnvironment env) {
     myEnv = env;
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  public static SegmentedLongArray create(LongList values) {
-    SegmentedLongArray array = new SegmentedLongArray();
+  public static LongSegmentedArray create(LongList values) {
+    LongSegmentedArray array = new LongSegmentedArray();
     array.addAll(values);
     return array;
   }
@@ -235,8 +234,8 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
   public void insertAll(int index, LongList values, int sourceIndex, int count) {
     if (values == null || count <= 0)
       return;
-    if (values instanceof SegmentedLongArray) {
-      insertSegmented(index, (SegmentedLongArray) values, sourceIndex, count);
+    if (values instanceof LongSegmentedArray) {
+      insertSegmented(index, (LongSegmentedArray) values, sourceIndex, count);
     } else if (values instanceof SubList) {
       SubList sublist = (SubList) values;
       if (sourceIndex + count > sublist.size())
@@ -251,8 +250,8 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
     if (values == null || count <= 0)
       return;
-    if (values instanceof SegmentedLongArray) {
-      copySegmented(index, (SegmentedLongArray) values, sourceIndex, count);
+    if (values instanceof LongSegmentedArray) {
+      copySegmented(index, (LongSegmentedArray) values, sourceIndex, count);
     } else if (values instanceof SubList) {
       SubList sublist = (SubList) values;
       if (sourceIndex + count > sublist.size())
@@ -289,18 +288,18 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     return dest;
   }
 
-  public SegmentedLongArray clone() {
+  public LongSegmentedArray clone() {
     return clone(0, size());
   }
 
-  public SegmentedLongArray clone(int from, int to) {
+  public LongSegmentedArray clone(int from, int to) {
     assert !IntegersDebug.CHECK || checkInvariants();
     checkRange(from, to);
     if (from >= to)
-      return new SegmentedLongArray(myEnv);
+      return new LongSegmentedArray(myEnv);
     try {
       assert mySegmentCount > 0 : this;
-      SegmentedLongArray r = (SegmentedLongArray) super.clone();
+      LongSegmentedArray r = (LongSegmentedArray) super.clone();
       r.updateSize(to - from);
 
       int left = myLeftOffset + from;
@@ -352,7 +351,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
   }
 
-  private void insertSegmented(int index, SegmentedLongArray array, int sourceIndex, int count) {
+  private void insertSegmented(int index, LongSegmentedArray array, int sourceIndex, int count) {
     assert !IntegersDebug.CHECK || checkInvariants();
     assert array != null && !array.isEmpty() && count > 0 && count <= array.size() : count + " " + array;
     // todo if segments are copied as whole, we don't need expand to allocate new segments
@@ -361,7 +360,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  private void copySegmented(int targetIndex, SegmentedLongArray array, int sourceIndex, int length) {
+  private void copySegmented(int targetIndex, LongSegmentedArray array, int sourceIndex, int length) {
     int dp = myLeftOffset + targetIndex;
     int di = dp >> mySegmentBits;
     dp &= mySegmentMask;
@@ -739,7 +738,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
   }
 
-  public void apply(int from, int to, LongFunction function) {
+  public void apply(int from, int to, LongToLong function) {
     assert !IntegersDebug.CHECK || checkInvariants();
 
     int len = to - from;
@@ -950,7 +949,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
       int t = myNext - 1 + offsetTo;
       if (f < myFrom || t > myTo)
         throw new NoSuchElementException(offsetFrom + " " + offsetTo + " " + this);
-      SegmentedLongArray.this.removeRange(f, t);
+      LongSegmentedArray.this.removeRange(f, t);
       myNext = f;
       myTo -= (t - f);
       int p = myLeftOffset + myNext;
@@ -996,7 +995,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     }
 
     public String toString() {
-      return myNext + "[" + myFrom + ";" + myTo + ") " + SegmentedLongArray.this;
+      return myNext + "[" + myFrom + ";" + myTo + ") " + LongSegmentedArray.this;
     }
 
     protected void checkMod() {

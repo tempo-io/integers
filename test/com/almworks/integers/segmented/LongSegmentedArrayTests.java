@@ -1,8 +1,7 @@
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
 import com.almworks.integers.*;
 import com.almworks.integers.func.LongFunctions;
-import com.almworks.integers.util.IntegersDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,27 +11,27 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLongArray> {
-  private TestEnvForSegmentedLongArray myEnv;
-  private SegmentedLongArray array;
+public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegmentedArray> {
+  private TestEnvForLongSegmentedArray myEnv;
+  private LongSegmentedArray array;
   private final int segmentSize = 1024;
   private final int checkedSize = segmentSize * 2 - 1;
 
   public void setUp() throws Exception {
     super.setUp();
-    myEnv = new TestEnvForSegmentedLongArray();
-    array = new SegmentedLongArray(myEnv);
+    myEnv = new TestEnvForLongSegmentedArray();
+    array = new LongSegmentedArray(myEnv);
   }
 
 
   @Override
-  protected List<SegmentedLongArray> createWritableLongListVariants(long... values) {
-    List<SegmentedLongArray> res = new ArrayList<SegmentedLongArray>();
-    array = new SegmentedLongArray();
+  protected List<LongSegmentedArray> createWritableLongListVariants(long... values) {
+    List<LongSegmentedArray> res = new ArrayList<LongSegmentedArray>();
+    array = new LongSegmentedArray();
     array.addAll(values);
     res.add(array);
 
-    array = new SegmentedLongArray();
+    array = new LongSegmentedArray();
     array.addAll(LongCollections.repeat(-1, 1025));
     array.clear();
     array.addAll(values);
@@ -40,7 +39,7 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
 
     if (values.length < segmentSize) {
       for (int count = segmentSize - values.length - 1; count < segmentSize - values.length + 1; count++) {
-        array = new SegmentedLongArray();
+        array = new LongSegmentedArray();
         array.addAll(LongCollections.repeat(-1, count));
         array.addAll(values);
         array.removeRange(0, count);
@@ -54,7 +53,7 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
       int ss = segmentSize;
       int[] points = {0, ss/2, ss - 1, ss, ss + ss/2, ss * 2 - 1};
       for (int point: points) {
-        array = new SegmentedLongArray();
+        array = new LongSegmentedArray();
         array.addAll(vals.subList(0, point));
         array.add(RAND.nextLong());
         array.addAll(vals.subList(point, size));
@@ -82,12 +81,12 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
   }
 
   public void testCopy() {
-    SegmentedLongArray a1 = array;
+    LongSegmentedArray a1 = array;
     for (int i = 100000; i > 0; i--) {
       a1.add(i);
     }
     myEnv.clear();
-    SegmentedLongArray a2 = a1.clone();
+    LongSegmentedArray a2 = a1.clone();
     assertEquals(0, myEnv.allocateCount);
     assertEquals(100000, a2.size());
     for (int i = 100000; i > 0; i--) {
@@ -119,8 +118,8 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
       LongArray expected2 = LongArray.copy(values);
       expected2.apply(10, 20, LongFunctions.INC);
       expected2.apply(1025, 1030, LongFunctions.INC);
-      for (SegmentedLongArray ar : createWritableLongListVariants(values)) {
-        SegmentedLongArray clone = ar.clone();
+      for (LongSegmentedArray ar : createWritableLongListVariants(values)) {
+        LongSegmentedArray clone = ar.clone();
 
         clone.apply(10, 20, LongFunctions.INC);
         clone.apply(1025, 1030, LongFunctions.INC);
@@ -143,8 +142,8 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
       expected2.setAll(10, setAll1, 0, 10);
       expected2.setAll(1025, setAll2, 0, 5);
 
-      for (SegmentedLongArray ar : createWritableLongListVariants(values)) {
-        SegmentedLongArray clone = ar.clone();
+      for (LongSegmentedArray ar : createWritableLongListVariants(values)) {
+        LongSegmentedArray clone = ar.clone();
 
         clone.setAll(10, setAll1, 0, 10);
         clone.setAll(1025, setAll2, 0, 5);
@@ -160,7 +159,7 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
     assertEquals(0, array.size());
     array.apply(0, 0, null);
     array.clear();
-    SegmentedLongArray clone = array.clone();
+    LongSegmentedArray clone = array.clone();
     assertEquals(array, clone);
     clone.clear();
     try {
@@ -289,7 +288,7 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
     checkList(array, ap(0, 1, 100), ap(200, 1, 100), ap(200, 1, 4800), ap(3000, 1, 2000), ap(5000, 1, 5240), ap(0, 1, 10240));
   }
 
-  public static void segmentedLongArrayChecker(LongList expected, SegmentedLongArray actual) {
+  public static void segmentedLongArrayChecker(LongList expected, LongSegmentedArray actual) {
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
       long val = expected.get(i);
@@ -406,7 +405,7 @@ public class SegmentedLongArrayTests extends WritableLongListChecker<SegmentedLo
     int[] sizes = {15, 100, 200, 1022, 1025, 2000, 2050};
     for (int size : sizes) {
       LongArray expected = generateRandomLongArray(size, UNORDERED);
-      array = SegmentedLongArray.create(expected);
+      array = LongSegmentedArray.create(expected);
       CHECK.order(expected, array);
     }
   }

@@ -1,6 +1,6 @@
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
-public class TestEnvForSegmentedLongArray implements SegmentedLongArrayEnvironment {
+public class TestEnvForLongSegmentedArray implements LongSegmentedArrayEnvironment {
   private final LongSegment myCache[] = new LongSegment[1024];
   private int myLast = -1;
 

@@ -17,7 +17,7 @@
 // CODE GENERATED FROM com/almworks/integers/optimized/SegmentedPArrayEnvironment.tpl
 
 
-package com.almworks.integers.optimized;
+package com.almworks.integers.segmented;
 
 public interface SegmentedIntArrayEnvironment {
   IntSegment allocate(int size);
