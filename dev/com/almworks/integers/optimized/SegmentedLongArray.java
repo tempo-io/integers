@@ -71,7 +71,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
    * mySegmentSize === 1 << mySegmentBits
    * mySegmentMask === mySegmentSize - 1
    * <p/>
-   * for usage, see {@link #writeLong(int, long)}
+   * for usage, see {@link #writeValue(int, long)}
    */
   private int mySegmentBits = SEGB_INITIAL;
   private int mySegmentSize = SEGS_INITIAL;
@@ -686,7 +686,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
 
   public void set(int index, long value) {
     assert !IntegersDebug.CHECK || checkInvariants();
-    writeLong(myLeftOffset + index, value);
+    writeValue(myLeftOffset + index, value);
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
@@ -699,7 +699,7 @@ public class SegmentedLongArray extends AbstractWritableLongList implements Clon
     assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  private void writeLong(int absIndex, long value) {
+  private void writeValue(int absIndex, long value) {
     modify(absIndex >> mySegmentBits).data[absIndex & mySegmentMask] = value;
   }
 

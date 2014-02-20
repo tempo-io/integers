@@ -53,6 +53,8 @@ public class PairIntLongIterator extends AbstractIntLongIteratorWithFlag {
   @Override
   protected void nextImpl() throws NoSuchElementException {
     if (!hasNext()) throw new NoSuchElementException();
+    myIt1.next();
+    myIt2.next();
   }
 
   @Override

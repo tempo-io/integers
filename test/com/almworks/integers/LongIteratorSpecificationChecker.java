@@ -253,7 +253,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
   protected static void checkNextAndCatchNSEE(LongIterator it) {
     boolean hasValue = it.hasValue();
-    long value = hasValue ? -1 : it.value();
+    long value = hasValue ? it.value() : -1;
     assertFalse(it.hasNext());
     try {
       it.next();
@@ -262,7 +262,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       // ok
     }
     assertEquals(hasValue, it.hasValue());
-    assertEquals(value, hasValue ? -1 : it.value());
+    assertEquals(value, hasValue ? it.value() : -1);
   }
 
   public static void checkIteratorThrowsCME(Iterator iterator) {
