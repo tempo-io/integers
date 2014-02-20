@@ -90,55 +90,5 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
       }
     }
   }
-
-  public void testDeadChain() {
-    LongChainHashSet a = new LongChainHashSet();
-    for (int i = 1150000; i-- != 0;) {
-      a.add(i);
-    }
-    LongChainHashSet b2 = new LongChainHashSet();
-    b2.addAll(a);
-  }
-
-  public void testDeadOpen() {
-    int count = 1150000;
-    for (int i = 0; i < 100; i++) {
-      LongOpenHashSet a = new LongOpenHashSet();
-//    LongOpenHashSet a = LongOpenHashSet.createForAdd(count);
-      a.addAll(LongIterators.limit(randomIterator(), count));
-      System.out.printf("%1.3f, ", a.getAverageSteps());
-    }
-
-    LongOpenHashSet a = new LongOpenHashSet();
-//    LongOpenHashSet a = LongOpenHashSet.createForAdd(count);
-    a.addAll(LongIterators.range(count, 0, -1));
-//    LongOpenHashSet b2 = LongOpenHashSet.createForAdd(count);
-    LongOpenHashSet b2 = new LongOpenHashSet();
-
-//    b2.addAll(a);
-    int i = 0;
-    for (LongIterator it : a) {
-      b2.add(it.value());
-      i++;
-      if (i % 100000 == 0) {
-        System.out.println(i + " " + b2.getAverageSteps());
-      }
-    }
-  }
-
-  public void testHppc() {
-    com.carrotsearch.hppc.LongOpenHashSet set2 = new com.carrotsearch.hppc.LongOpenHashSet();
-    int count = 1150000;
-    for (int i = count; i-- != 0;) {
-      set2.add(i);
-    }
-    com.carrotsearch.hppc.LongOpenHashSet set3 = new com.carrotsearch.hppc.LongOpenHashSet(count);
-    set3.addAll(set2);
-  }
-
-  public void test1() {
-    set = LongOpenHashSet.createForAdd(1150000);
-    System.out.println(set.getThreshold());
-  }
 }
 
