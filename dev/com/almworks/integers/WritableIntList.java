@@ -19,7 +19,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction;
+import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
 public interface WritableIntList extends IntList, IntCollector {
@@ -65,7 +65,7 @@ public interface WritableIntList extends IntList, IntCollector {
 
   void setAll(int index, IntList values, int sourceIndex, int count);
 
-  void apply(int from, int to, IntFunction function);
+  void apply(int from, int to, IntToInt function);
 
   void sort(WritableIntList... sortAlso);
 

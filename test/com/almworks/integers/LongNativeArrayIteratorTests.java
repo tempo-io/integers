@@ -26,7 +26,7 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
   @Override
   protected void setUp() throws Exception {
     long[] nArray = {0, 1, 2, 3, 4, 5};
-    iter = new LongArrayIterator(nArray);
+    iter = new LongNativeArrayIterator(nArray);
     super.setUp();
   }
 
@@ -35,18 +35,18 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
       @Override
       public List<LongIterator> get(long... values) {
         List<LongIterator> res = new ArrayList<LongIterator>();
-        res.add(new LongArrayIterator(values));
+        res.add(new LongNativeArrayIterator(values));
         int length = values.length;
         long[] values2 = LongCollections.ensureCapacity(values, length * 2);
         for (int i = length; i < length * 2; i++) {
           values2[i] = RAND.nextLong();
         }
-        res.add(new LongArrayIterator(values2, 0, length));
+        res.add(new LongNativeArrayIterator(values2, 0, length));
 
         LongArray arr = new LongArray(length * 2);
         arr.addAll(generateRandomLongArray(length, IntegersFixture.SortedStatus.UNORDERED));
         arr.addAll(values);
-        res.add(new LongArrayIterator(arr.extractHostArray(), length, length * 2));
+        res.add(new LongNativeArrayIterator(arr.extractHostArray(), length, length * 2));
 
         return res;
       }
@@ -55,7 +55,7 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
 
   public void testCreate() throws Exception {
     long[] longArray = {0,1,2,3,4};
-    LongIterator iter = LongArrayIterator.create(longArray);
+    LongIterator iter = LongNativeArrayIterator.create(longArray);
     for (int i = 0; i < 5; i++) {
       assertEquals(i, iter.nextValue());
     }
@@ -63,8 +63,8 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
 
   public void testEmpty() {
     long[] longArray = {};
-    LongIterator iter = LongArrayIterator.create(longArray);
-    LongArrayIterator iter2 = new LongArrayIterator(null);
+    LongIterator iter = LongNativeArrayIterator.create(longArray);
+    LongNativeArrayIterator iter2 = new LongNativeArrayIterator(null);
 
     assertFalse(iter.hasNext());
     assertFalse(iter2.hasNext());
@@ -72,7 +72,7 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
 
   public void testAbsget(){
     long[] arr = {1,2,3,4,5};
-    LongArrayIterator a = new LongArrayIterator(arr);
+    LongNativeArrayIterator a = new LongNativeArrayIterator(arr);
     for(int i = 0; i < 5; i++) {
       assertEquals("Not equal", arr[i], a.absget(i));
     }
@@ -80,7 +80,7 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
 
   public void testGetSet() {
     long[] nArray = {0, 1, 2, 3, 4, 5};
-    iter = new LongArrayIterator(nArray);
+    iter = new LongNativeArrayIterator(nArray);
     iter.move(2);
     assertEquals(0, iter.get(-1));
     assertEquals(1, iter.get(0));

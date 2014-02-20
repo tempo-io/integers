@@ -21,7 +21,6 @@ package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.*;
 
-import com.almworks.integers.util.IntSizedIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

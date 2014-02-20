@@ -1,12 +1,10 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.*;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 

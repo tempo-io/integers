@@ -8,7 +8,7 @@ public interface IntLongIterator extends Iterator<IntLongIterator>, IntLongItera
   /**
    * Constant value for empty Iterators
    */
-  IntLongIterator EMPTY = new EmptyIntLongIterator();
+  IntLongIterator EMPTY = new IntLongEmptyIterator();
 
   /**
    * Returns <tt>true</tt> if the iteration has more elements. (In other

@@ -16,9 +16,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.util.IntegersDebug;
-import com.almworks.integers.util.LongMinusIterator;
-
 import static com.almworks.integers.IntegersFixture.RAND;
 import static com.almworks.integers.IntegersFixture.SortedStatus;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;

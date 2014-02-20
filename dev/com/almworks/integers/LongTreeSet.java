@@ -19,9 +19,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction2;
-import com.almworks.integers.util.IntegersDebug;
-import com.almworks.integers.util.LongSizedIterable;
+import com.almworks.integers.func.IntIntToInt;
 
 import java.io.*;
 import java.util.*;
@@ -535,17 +533,17 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   }
 
   public LongIterator iterator() {
-    return failFast(new IndexedLongIterator(new LongArray(myKeys), new LURIterator()));
+    return failFast(new LongIndexedIterator(new LongArray(myKeys), new LURIterator()));
   }
 
   public LongIterator tailIterator(long fromElement) {
-    return failFast(new IndexedLongIterator(new LongArray(myKeys), new LURIterator(fromElement)));
+    return failFast(new LongIndexedIterator(new LongArray(myKeys), new LURIterator(fromElement)));
   }
 
   @Override
   public void removeAll(long... values) {
     modified();
-    removeAll(new LongArrayIterator(values));
+    removeAll(new LongNativeArrayIterator(values));
   }
 
   @Override
@@ -737,7 +735,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
    * </ol>
    * Visitor returns the value of auxiliary function on x.
    * */
-  private void visitULR(int auxInit, IntFunction2 visitor) {
+  private void visitULR(int auxInit, IntIntToInt visitor) {
     int x = myRoot;
     if (x == 0) return;
     int auxVal = auxInit;
@@ -786,7 +784,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
 
     final int[] lastBlackHeight = new int[] {-1};
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int bh) {
         if (x == 0)
@@ -828,7 +826,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
     // 5. Height estimate is not less than any actual path height
     final int heightEstimate = height(size());
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int h) {
         if (myLeft[x] == 0 && myRight[x] == 0) {
@@ -841,7 +839,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
     // any unreachable node should be contained in myRemoved
     final BitSet unremoved = new BitSet(myFront);
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int _) {
         if (x != 0) unremoved.set(x);
@@ -897,7 +895,7 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
 
   final void debugPrintTreeStructure(final PrintStream out) {
     out.println("Legend: x - black node, o - red node, # - NIL");
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int level) {
         out.print(' ');

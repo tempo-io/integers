@@ -16,7 +16,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.LongFunction;
+import com.almworks.integers.func.LongToLong;
 
 import java.util.NoSuchElementException;
 
@@ -80,7 +80,7 @@ public class IntLongIteratorTests extends IntegersFixture {
 
     LongArray values0 = new LongArray(LongProgression.arithmetic(0, 1000, 1));
     LongArray values = new LongArray(values0.toNativeArray());
-    values.apply(0, 1000, new LongFunction() {
+    values.apply(0, 1000, new LongToLong() {
       @Override
       public long invoke(long a) {
         return a * a - a;

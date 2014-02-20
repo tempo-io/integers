@@ -19,9 +19,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntToInt;
 // function on indices, hence int
-import com.almworks.integers.func.IntFunction2;
 // function on indices, hence int
 import com.almworks.integers.func.IntProcedure2;
 import org.jetbrains.annotations.NotNull;
@@ -231,7 +231,7 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
     }
   }
 
-  public void apply(int from, int to, IntFunction function) {
+  public void apply(int from, int to, IntToInt function) {
     for (int i = from; i < to; i++)
       set(i, function.invoke(get(i)));
   }
@@ -242,7 +242,7 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
         assert list.size() == size();
       }
     }
-    IntegersUtils.quicksort(size(), new IntFunction2() {
+    IntegersUtils.quicksort(size(), new IntIntToInt() {
       public int invoke(int a, int b) {
         return IntCollections.compare(get(a), get(b));
       }

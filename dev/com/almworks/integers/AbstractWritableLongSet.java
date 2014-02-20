@@ -1,7 +1,5 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.FailFastLongIterator;
-
 public abstract class AbstractWritableLongSet extends AbstractLongSet implements WritableLongSet {
   protected int myModCount = 0;
 
@@ -55,7 +53,7 @@ public abstract class AbstractWritableLongSet extends AbstractLongSet implements
     if (values.length == 1) {
       remove(values[0]);
     } else {
-      removeAll(new LongArrayIterator(values));
+      removeAll(new LongNativeArrayIterator(values));
     }
   }
 
@@ -108,7 +106,7 @@ public abstract class AbstractWritableLongSet extends AbstractLongSet implements
   }
 
   protected final LongIterator failFast(LongIterator iter) {
-    return new FailFastLongIterator(iter) {
+    return new LongFailFastIterator(iter) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;

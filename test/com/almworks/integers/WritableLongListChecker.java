@@ -1,6 +1,6 @@
 package com.almworks.integers;
 
-import com.almworks.integers.func.LongFunction;
+import com.almworks.integers.func.LongToLong;
 import com.almworks.integers.func.LongFunctions;
 
 import java.util.Arrays;
@@ -671,7 +671,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   public void testApply() {
     for (WritableLongList list: createWritableLongListVariants(ap(0, 1, 10))) {
       long[] expected = ap(0, 1, 10);
-      list.apply(2, 8, new LongFunction() {
+      list.apply(2, 8, new LongToLong() {
         @Override
         public long invoke(long a) {
           return a * a - 1;

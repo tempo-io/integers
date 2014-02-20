@@ -1,7 +1,5 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.*;
-
 import static com.almworks.integers.IntLongIterators.*;
 import static com.almworks.integers.IntegersUtils.appendShortName;
 
@@ -37,7 +35,7 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
   }
 
   protected final IntLongIterator failFast(IntLongIterator iter) {
-    return new FailFastIntLongIterator(iter) {
+    return new IntLongFailFastIterator(iter) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -46,7 +44,7 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
   }
 
   protected final LongIterator failFast(LongIterator iter) {
-    return new FailFastLongIterator(iter) {
+    return new LongFailFastIterator(iter) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;

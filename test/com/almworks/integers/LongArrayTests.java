@@ -16,10 +16,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.util.LongAmortizedSet;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.IntProgression.range;

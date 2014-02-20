@@ -19,9 +19,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.LongFunction;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.LongToLong;
 // function on indices, hence int
-import com.almworks.integers.func.IntFunction2;
 // function on indices, hence int
 import com.almworks.integers.func.IntProcedure2;
 import org.jetbrains.annotations.NotNull;
@@ -165,7 +165,7 @@ import java.util.NoSuchElementException;
 
   public boolean removeAll(long... values) {
     if (values != null && values.length > 0) {
-      return removeAll(new LongArrayIterator(values));
+      return removeAll(new LongNativeArrayIterator(values));
     }
     return false;
   }
@@ -244,7 +244,7 @@ import java.util.NoSuchElementException;
     }
   }
 
-  public void apply(int from, int to, LongFunction function) {
+  public void apply(int from, int to, LongToLong function) {
     for (int i = from; i < to; i++)
       set(i, function.invoke(get(i)));
   }
@@ -259,7 +259,7 @@ import java.util.NoSuchElementException;
         assert list.size() == size();
       }
     }
-    IntegersUtils.quicksort(size(), new IntFunction2() {
+    IntegersUtils.quicksort(size(), new IntIntToInt() {
       public int invoke(int a, int b) {
         return LongCollections.compare(get(a), get(b));
       }
@@ -333,7 +333,7 @@ import java.util.NoSuchElementException;
    * @param update the update function to apply. See {@link com.almworks.integers.func.LongFunctions}
    * @return the updated value
    * */
-  public long update(int idx, long defaultValue, LongFunction update) {
+  public long update(int idx, long defaultValue, LongToLong update) {
     if (size() <= idx) insertMultiple(size(), defaultValue, idx - size() + 1);
     long updated = update.invoke(get(idx));
     set(idx, updated);

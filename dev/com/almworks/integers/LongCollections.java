@@ -19,11 +19,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntProcedure2;
-import com.almworks.integers.func.LongFunction;
-import com.almworks.integers.optimized.CyclicLongQueue;
-import com.almworks.integers.util.*;
+import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -205,7 +203,7 @@ public class LongCollections {
     final LongArray sorted = new LongArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-        new IntFunction2() {
+        new IntIntToInt() {
           @Override
           public int invoke(int a, int b) {
             return LongCollections.compare(sorted.get(a), sorted.get(b));
@@ -590,7 +588,7 @@ public class LongCollections {
   public static void sortPairs(final WritableLongList primary, final WritableLongList secondary) throws IllegalArgumentException {
     if (primary.size() > secondary.size()) throw new IllegalArgumentException("secondary is shorter than primary: " +
         primary.size() + " > " + secondary.size());
-    IntegersUtils.quicksort(primary.size(), new IntFunction2() {
+    IntegersUtils.quicksort(primary.size(), new IntIntToInt() {
           @Override
           public int invoke(int i, int j) {
             int comp = LongCollections.compare(primary.get(i), primary.get(j));
@@ -747,7 +745,7 @@ public class LongCollections {
     headValues.addAllNotMore(it, lim);
     int itSize = headValues.size();
 
-    CyclicLongQueue tailValues = new CyclicLongQueue(lim);
+    LongCyclicQueue tailValues = new LongCyclicQueue(lim);
     for ( int lim2 = lim * 2; it.hasNext() && itSize < lim2; itSize++) {
       tailValues.add(it.nextValue());
     }
@@ -841,7 +839,7 @@ public class LongCollections {
     return (iterable instanceof LongSizedIterable) ? ((LongSizedIterable) iterable).size() : defaultSize;
   }
 
-  public static LongList map(final LongFunction fun, final LongList list) {
+  public static LongList map(final LongToLong fun, final LongList list) {
     return new AbstractLongList() {
       @Override
       public int size() {

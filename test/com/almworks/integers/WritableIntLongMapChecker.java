@@ -155,7 +155,7 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
     }
   }
 
-  public void checkMap(IntLongMapI map, IntList keys, LongList values) {
+  public void checkMap(IntLongMap map, IntList keys, LongList values) {
     assertEquals(keys.size(), map.size());
     for (int i = 0; i < keys.size(); i++) {
       assertEquals(values.get(i), map.get(keys.get(i)));

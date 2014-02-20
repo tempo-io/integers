@@ -21,7 +21,6 @@ package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.*;
 
-import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -72,11 +71,11 @@ public interface LongList extends LongSizedIterable {
    *
    * One of the possible usages is for MATLAB-like indexing, i.e. vector indexed by vector.
    *
-   * Also {@link IndexedLongIterator} and {@link IndexedLongListIterator} can be used
+   * Also {@link LongIndexedIterator} and {@link LongListIndexedIterator} can be used
    * to iterate over this list via a custom set of indices.
    * @return LongList with values located at {@code indices} in this list
-   * @see IndexedLongIterator
-   * @see IndexedLongListIterator
+   * @see LongIndexedIterator
+   * @see LongListIndexedIterator
    * */
   public LongList get(final IntList indices);
 

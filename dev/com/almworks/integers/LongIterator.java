@@ -30,7 +30,7 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
   /**
   * Constant value for empty Iterators
   */
-  WritableLongListIterator EMPTY = new EmptyLongIterator();
+  WritableLongListIterator EMPTY = new LongEmptyIterator();
 
   /**
    * @return {@code true} if next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException

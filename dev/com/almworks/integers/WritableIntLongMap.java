@@ -1,9 +1,6 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.IntSizedIterable;
-import com.almworks.integers.util.LongSizedIterable;
-
-public interface WritableIntLongMap extends IntLongMapI {
+public interface WritableIntLongMap extends IntLongMap {
 
   /**
    * Removes all entries from this map.
@@ -46,7 +43,7 @@ public interface WritableIntLongMap extends IntLongMapI {
   /**
    * Puts all keys from the specified iterable to this map, replacing the values
    * of existing keys, if such keys are present.
-   * @see #putAll(com.almworks.integers.util.IntSizedIterable, com.almworks.integers.util.LongSizedIterable)
+   * @see #putAll(IntSizedIterable, LongSizedIterable)
    */
   void putAll(IntLongIterable entries);
 

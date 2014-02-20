@@ -19,7 +19,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.func.IntIntToInt;
 
 import java.io.*;
 import java.lang.ref.SoftReference;
@@ -311,7 +311,7 @@ public class DynamicIntSet {
    * </ol>
    * Visitor returns the value of auxiliary function on x.
    * */
-  private void visitULR(int auxInit, IntFunction2 visitor) {
+  private void visitULR(int auxInit, IntIntToInt visitor) {
     int x = myRoot;
     int auxVal = auxInit;
     int height = height(mySize);
@@ -351,7 +351,7 @@ public class DynamicIntSet {
     assert (mySize == 1) == isEmpty() : whatWasDoing + " " + mySize + ' ' + myRoot;
 
     final int[] lastBlackHeight = new int[] {-1};
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int bh) {
         if (x == 0)
@@ -393,7 +393,7 @@ public class DynamicIntSet {
 
     // 5. Height estimate is not less than any actual path height
     final int hEst = height(mySize);
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int h) {
         if (myLeft[x] == 0 && myRight[x] == 0) {
@@ -442,7 +442,7 @@ public class DynamicIntSet {
 
   final void debugPrintTreeStructure(final PrintStream out) {
     out.println("Legend: x - black node, o - red node, # - NIL");
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int level) {
         out.print(' ');

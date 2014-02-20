@@ -19,7 +19,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.LongFunction;
+import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 
 public interface WritableLongList extends LongList, LongCollector {
@@ -129,7 +129,7 @@ public interface WritableLongList extends LongList, LongCollector {
    * @param from starting index, inclusive
    * @param to ending index, exclusive
    */
-  void apply(int from, int to, LongFunction function);
+  void apply(int from, int to, LongToLong function);
 
   /**
    * Sorts this list. Permutation of indices in this array

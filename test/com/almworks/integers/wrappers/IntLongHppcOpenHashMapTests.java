@@ -1,14 +1,10 @@
 package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
-import com.almworks.integers.util.LongChainHashSet;
-import com.carrotsearch.hppc.IntLongOpenHashMap;
-import com.carrotsearch.hppc.cursors.IntLongCursor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.wrappers.IntLongHppcOpenHashMap.createForAdd;

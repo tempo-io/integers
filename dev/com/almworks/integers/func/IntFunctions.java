@@ -25,7 +25,7 @@ import com.almworks.integers.IntIterator;
 public class IntFunctions {
   private IntFunctions() {}
 
-  public static final IntFunction NEG = new IntFunction() {
+  public static final IntToInt NEG = new IntToInt() {
     @Override
     public int invoke(int a) {
       return -a;
@@ -37,7 +37,7 @@ public class IntFunctions {
     }
   };
 
-  public static final IntFunction2 ADD = new IntFunction2() {
+  public static final IntIntToInt ADD = new IntIntToInt() {
     @Override
     public int invoke(int a, int b) {
       return a + b;
@@ -49,7 +49,7 @@ public class IntFunctions {
     }
   };
 
-  public static final IntFunction2 MULT = new IntFunction2() {
+  public static final IntIntToInt MULT = new IntIntToInt() {
     @Override
     public int invoke(int a, int b) {
       return a * b;
@@ -61,7 +61,7 @@ public class IntFunctions {
     }
   };
 
-  public static final IntFunction2 MOD = new IntFunction2() {
+  public static final IntIntToInt MOD = new IntIntToInt() {
     @Override
     public int invoke(int a, int b) {
       return a % b;
@@ -73,7 +73,7 @@ public class IntFunctions {
     }
   };
 
-  public static final IntFunction I = new IntFunction() {
+  public static final IntToInt I = new IntToInt() {
     @Override
     public int invoke(int a) {
       return a;
@@ -85,8 +85,8 @@ public class IntFunctions {
     }
   };
 
-  public static IntFunction apply(final IntFunction2 f, final int a) {
-    return new IntFunction() {
+  public static IntToInt apply(final IntIntToInt f, final int a) {
+    return new IntToInt() {
       @Override
       public int invoke(int b) {
         return f.invoke(a, b);
@@ -99,8 +99,8 @@ public class IntFunctions {
     };
   }
 
-  public static IntFunction2 swap(final IntFunction2 f) {
-    return new IntFunction2() {
+  public static IntIntToInt swap(final IntIntToInt f) {
+    return new IntIntToInt() {
       @Override
       public int invoke(int a, int b) {
         return f.invoke(b, a);
@@ -113,8 +113,8 @@ public class IntFunctions {
     };
   }
 
-  public static IntFunction2 ignore1(final IntFunction f) {
-    return new IntFunction2() {
+  public static IntIntToInt ignore1(final IntToInt f) {
+    return new IntIntToInt() {
       @Override
       public int invoke(int a, int b) {
         return f.invoke(b);
@@ -127,8 +127,8 @@ public class IntFunctions {
     };
   }
 
-  public static IntFunction swap(final int v1, final int v2) {
-    return new IntFunction() {
+  public static IntToInt swap(final int v1, final int v2) {
+    return new IntToInt() {
       @Override
       public int invoke(int x) {
         return
@@ -144,8 +144,8 @@ public class IntFunctions {
     };
   }
   
-  public static IntFunction compose(final IntFunction f1, final IntFunction f2) {
-    return new IntFunction() {
+  public static IntToInt compose(final IntToInt f1, final IntToInt f2) {
+    return new IntToInt() {
       @Override
       public int invoke(int a) {
         return f1.invoke(f2.invoke(a));
@@ -159,8 +159,8 @@ public class IntFunctions {
   }
     
   /** Returns a function that returns values from the supplied Iterable. Function argument is ignored. */
-  public static IntFunction sequence(final IntIterable iterable) {
-    return new IntFunction() {
+  public static IntToInt sequence(final IntIterable iterable) {
+    return new IntToInt() {
       IntIterator it = iterable.iterator();
       @Override
       public int invoke(int a) {

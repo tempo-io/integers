@@ -1,7 +1,6 @@
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction;
-import com.almworks.integers.util.*;
+import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
@@ -216,7 +215,7 @@ public class LongIterators {
     switch (iterables.length) {
       case 0: return LongIterator.EMPTY;
       case 1: return iterables[0].iterator();
-      case 2: return new LongUnionIteratorTwo(iterables[0], iterables[1]);
+      case 2: return new LongUnionIteratorOfTwo(iterables[0], iterables[1]);
       default: return new LongUnionIterator(iterables);
     }
   }
@@ -239,11 +238,11 @@ public class LongIterators {
    * @throws NullPointerException if {@code iterator} or {@code currentModCount} are null.
    */
   @NotNull
-  public static LongIterator failFastIterator(LongIterator iterator, final IntFunction currentModCount) throws NullPointerException {
+  public static LongIterator failFastIterator(LongIterator iterator, final IntToInt currentModCount) throws NullPointerException {
     if (iterator == null || currentModCount == null) {
       throw new NullPointerException();
     }
-    return new FailFastLongIterator(iterator) {
+    return new LongFailFastIterator(iterator) {
       @Override
       protected int getCurrentModCount() {
         return currentModCount.invoke(0);

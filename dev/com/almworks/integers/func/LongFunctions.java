@@ -25,7 +25,7 @@ import com.almworks.integers.LongIterator;
 public class LongFunctions {
   private LongFunctions() {}
 
-  public static final LongFunction NEG = new LongFunction() {
+  public static final LongToLong NEG = new LongToLong() {
     @Override
     public long invoke(long a) {
       return -a;
@@ -37,7 +37,7 @@ public class LongFunctions {
     }
   };
 
-  public static final LongFunction INC = new LongFunction() {
+  public static final LongToLong INC = new LongToLong() {
     @Override
     public long invoke(long a) {
       return a + 1;
@@ -49,7 +49,7 @@ public class LongFunctions {
     }
   };
 
-  public static final LongFunction DEC = new LongFunction() {
+  public static final LongToLong DEC = new LongToLong() {
     @Override
     public long invoke(long a) {
       return a - 1;
@@ -61,7 +61,7 @@ public class LongFunctions {
     }
   };
 
-  public static final LongFunction SQR = new LongFunction() {
+  public static final LongToLong SQR = new LongToLong() {
     @Override
     public long invoke(long a) {
       return a * a;
@@ -73,43 +73,7 @@ public class LongFunctions {
     }
   };
 
-  public static final LongFunction2 ADD = new LongFunction2() {
-    @Override
-    public long invoke(long a, long b) {
-      return a + b;
-    }
-
-    @Override
-    public String toString() {
-      return "+";
-    }
-  };
-
-  public static final LongFunction2 MULT = new LongFunction2() {
-    @Override
-    public long invoke(long a, long b) {
-      return a * b;
-    }
-
-    @Override
-    public String toString() {
-      return "*";
-    }
-  };
-
-  public static final LongFunction2 MOD = new LongFunction2() {
-    @Override
-    public long invoke(long a, long b) {
-      return a % b;
-    }
-
-    @Override
-    public String toString() {
-      return "%";
-    }
-  };
-
-  public static final LongFunction I = new LongFunction() {
+  public static final LongToLong I = new LongToLong() {
     @Override
     public long invoke(long a) {
       return a;
@@ -121,8 +85,8 @@ public class LongFunctions {
     }
   };
 
-  public static LongFunction apply(final LongFunction2 f, final long a) {
-    return new LongFunction() {
+  public static LongToLong apply(final LongLongToLong f, final long a) {
+    return new LongToLong() {
       @Override
       public long invoke(long b) {
         return f.invoke(a, b);
@@ -135,36 +99,8 @@ public class LongFunctions {
     };
   }
 
-  public static LongFunction2 swap(final LongFunction2 f) {
-    return new LongFunction2() {
-      @Override
-      public long invoke(long a, long b) {
-        return f.invoke(b, a);
-      }
-
-      @Override
-      public String toString() {
-        return "swap (" + f + ')';
-      }
-    };
-  }
-
-  public static LongFunction2 ignore1(final LongFunction f) {
-    return new LongFunction2() {
-      @Override
-      public long invoke(long a, long b) {
-        return f.invoke(b);
-      }
-
-      @Override
-      public String toString() {
-        return "ingore1 (" + f + ')';
-      }
-    };
-  }
-
-  public static LongFunction swap(final long v1, final long v2) {
-    return new LongFunction() {
+  public static LongToLong swap(final long v1, final long v2) {
+    return new LongToLong() {
       @Override
       public long invoke(long x) {
         return
@@ -180,8 +116,8 @@ public class LongFunctions {
     };
   }
 
-  public static LongFunction compose(final LongFunction f1, final LongFunction f2) {
-    return new LongFunction() {
+  public static LongToLong compose(final LongToLong f1, final LongToLong f2) {
+    return new LongToLong() {
       @Override
       public long invoke(long a) {
         return f1.invoke(f2.invoke(a));
@@ -195,8 +131,8 @@ public class LongFunctions {
   }
 
   /** Returns a function that returns values from the supplied Iterable. Function argument is ignored. */
-  public static LongFunction sequence(final LongIterable iterable) {
-    return new LongFunction() {
+  public static LongToLong sequence(final LongIterable iterable) {
+    return new LongToLong() {
       LongIterator it = iterable.iterator();
       @Override
       public long invoke(long a) {
@@ -206,6 +142,70 @@ public class LongFunctions {
       @Override
       public String toString() {
         return "i => " + iterable;
+      }
+    };
+  }
+
+  public static final LongLongToLong ADD = new LongLongToLong() {
+    @Override
+    public long invoke(long a, long b) {
+      return a + b;
+    }
+
+    @Override
+    public String toString() {
+      return "+";
+    }
+  };
+
+  public static final LongLongToLong MULT = new LongLongToLong() {
+    @Override
+    public long invoke(long a, long b) {
+      return a * b;
+    }
+
+    @Override
+    public String toString() {
+      return "*";
+    }
+  };
+
+  public static final LongLongToLong MOD = new LongLongToLong() {
+    @Override
+    public long invoke(long a, long b) {
+      return a % b;
+    }
+
+    @Override
+    public String toString() {
+      return "%";
+    }
+  };
+
+  public static LongLongToLong swap(final LongLongToLong f) {
+    return new LongLongToLong() {
+      @Override
+      public long invoke(long a, long b) {
+        return f.invoke(b, a);
+      }
+
+      @Override
+      public String toString() {
+        return "swap (" + f + ')';
+      }
+    };
+  }
+
+  public static LongLongToLong ignore1(final LongToLong f) {
+    return new LongLongToLong() {
+      @Override
+      public long invoke(long a, long b) {
+        return f.invoke(b);
+      }
+
+      @Override
+      public String toString() {
+        return "ingore1 (" + f + ')';
       }
     };
   }

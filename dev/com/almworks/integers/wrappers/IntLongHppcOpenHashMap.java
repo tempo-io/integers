@@ -1,8 +1,7 @@
 package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
-import com.almworks.integers.util.IntSizedIterable;
-import com.almworks.integers.util.LongSizedIterable;
+import com.almworks.integers.IntSizedIterable;
 import com.carrotsearch.hppc.IntLongOpenHashMap;
 
 import static com.almworks.integers.LongCollections.sizeOfIterable;

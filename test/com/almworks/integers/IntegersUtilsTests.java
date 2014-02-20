@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
-import com.almworks.integers.util.IntegersDebug;
 
 import java.util.HashSet;
 

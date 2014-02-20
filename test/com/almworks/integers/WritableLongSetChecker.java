@@ -18,14 +18,12 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
 import com.almworks.integers.func.LongFunctions;
-import com.almworks.integers.util.LongAmortizedSet;
 
 import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.map;
-import static com.almworks.integers.LongCollections.sizeOfIterable;
 import static com.almworks.integers.LongCollections.toSorted;
 import static com.almworks.integers.LongProgression.range;
 

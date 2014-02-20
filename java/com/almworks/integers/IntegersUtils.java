@@ -77,11 +77,11 @@ public final class IntegersUtils {
    * from 0 to <code>length</code>-1 inclusive.
    */
   // Copied from CollectionUtil
-  public static void quicksort(int length, IntFunction2 order, IntProcedure2 swap) {
+  public static void quicksort(int length, IntIntToInt order, IntProcedure2 swap) {
     sort1(0, length, order, swap);
   }
 
-  private static void sort1(int off, int len, IntFunction2 order, IntProcedure2 swap) {
+  private static void sort1(int off, int len, IntIntToInt order, IntProcedure2 swap) {
     // Insertion sort on smallest arrays
     if (len < 7) {
       for (int i = off; i < len + off; i++)
@@ -157,7 +157,7 @@ public final class IntegersUtils {
       swap.invoke(a, b);
   }
 
-  private static int med3(int a, int b, int c, IntFunction2 order) {
+  private static int med3(int a, int b, int c, IntIntToInt order) {
     return (order.invoke(a, b) < 0 ? (order.invoke(b, c) < 0 ? b : order.invoke(a, c) < 0 ? c : a) :
       (order.invoke(b, c) > 0 ? b : order.invoke(a, c) > 0 ? c : a));
   }

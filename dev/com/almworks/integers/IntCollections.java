@@ -19,10 +19,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.optimized.SameValuesIntList;
-import com.almworks.integers.util.IntListConcatenation;
-import com.almworks.integers.util.IntSizedIterable;
-import com.almworks.integers.util.LongListConcatenation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;

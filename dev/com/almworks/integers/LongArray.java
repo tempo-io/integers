@@ -19,8 +19,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.util.IntSizedIterable;
-import com.almworks.integers.util.LongSizedIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import static com.almworks.integers.IntegersUtils.*;

@@ -189,11 +189,11 @@ public class TwoWayIntMap {
     insertAll(new IntArray(keys), new IntArray(vals));
   }
 
-  public void insertAllRo(IntList keys, IntFunction keyToVal) {
+  public void insertAllRo(IntList keys, IntToInt keyToVal) {
     insertAll(new IntArray(keys), keyToVal);
   }
 
-  public void insertAll(WritableIntList keys, IntFunction keyToVal) {
+  public void insertAll(WritableIntList keys, IntToInt keyToVal) {
     int m = keys.size();
     IntArray vals = new IntArray(m);
     for (int i = 0; i < m; ++i) vals.add(keyToVal.invoke(keys.get(i)));
@@ -257,13 +257,13 @@ public class TwoWayIntMap {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformVals(@NotNull IntFunction f) {
+  public void transformVals(@NotNull IntToInt f) {
     transformVals(Integer.MIN_VALUE, f);
   }
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformVals(int valFrom, @NotNull IntFunction f) {
+  public void transformVals(int valFrom, @NotNull IntToInt f) {
     int n = size();
     boolean isSortingBroken = false;
     int lastVal = Integer.MIN_VALUE;
@@ -282,7 +282,7 @@ public class TwoWayIntMap {
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
-  public void transformVals(@NotNull IntFunction2 f) {
+  public void transformVals(@NotNull IntIntToInt f) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
       int vi = myIdxMap.get(ki);
@@ -299,7 +299,7 @@ public class TwoWayIntMap {
     final IntArray r = new IntArray(IntProgression.arithmetic(0, n));
     IntegersUtils.quicksort(n,
       // order
-      new IntFunction2() {
+      new IntIntToInt() {
         @Override
         public int invoke(int i, int j) {
           return IntCollections.compare(myVals.get(i), myVals.get(j));
@@ -331,7 +331,7 @@ public class TwoWayIntMap {
   }
 
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
-  public void transformKeys(IntFunction injection) throws NonInjectiveFunctionException {
+  public void transformKeys(IntToInt injection) throws NonInjectiveFunctionException {
     int n = size();
     IntArray newKeys = new IntArray(n);
     for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
@@ -353,7 +353,7 @@ public class TwoWayIntMap {
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
       // compare
-      new IntFunction2() { public int invoke(int a, int b) {
+      new IntIntToInt() { public int invoke(int a, int b) {
         return IntCollections.compare(main.get(a), main.get(b));
       }},
       // swap

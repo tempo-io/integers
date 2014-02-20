@@ -1,10 +1,7 @@
 package com.almworks.integers;
 
-import com.almworks.integers.util.LongSizedIterable;
-import org.jetbrains.annotations.NotNull;
-
 public interface LongSet extends LongSizedIterable {
-  LongSortedSet EMPTY = new EmptyLongSet();
+  LongSortedSet EMPTY = new LongEmptySet();
 
   /**
    * @return true if this set contains element {@code value}. Otherwise false
