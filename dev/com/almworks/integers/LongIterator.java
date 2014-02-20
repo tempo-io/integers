@@ -33,13 +33,14 @@ public interface LongIterator extends LongIterable, Iterator<LongIterator> {
   WritableLongListIterator EMPTY = new EmptyLongIterator();
 
   /**
-   * @return true next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
+   * @return {@code true} if next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
    */
   boolean hasNext() throws ConcurrentModificationException;
 
 
   /**
-   * @return false if iterator has never been advanced, otherwise true
+   * @return {@code false} if this iterator has never been advanced.
+   * In other words, returns {@code false} if the subsequent call to {@link #value()} will throw NoSuchElementException, otherwise {@code true}.
    */
   boolean hasValue();
 

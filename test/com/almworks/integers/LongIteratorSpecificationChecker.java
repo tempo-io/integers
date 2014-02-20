@@ -6,10 +6,6 @@ import junit.framework.TestCase;
 import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.*;
-import static junit.framework.Assert.fail;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 public class LongIteratorSpecificationChecker<I extends LongIterator> {
   public static int MAX = Integer.MAX_VALUE;
@@ -224,7 +220,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       assertEquals(values.length, i);
     }
     for(LongIterator it: getter.get(values)) {
-      Assert.assertFalse(it.hasValue());
+      assertFalse(it.hasValue());
       checkValueAndCatchNSEE(it);
 
       int i = 0;
@@ -236,13 +232,14 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
     }
 
     for(LongIterator it : getter.get(values)) {
-      Assert.assertFalse(it.hasValue());
+      assertFalse(it.hasValue());
       checkValueAndCatchNSEE(it);
       CHECK.order(it, values);
     }
   }
 
   protected void checkValueAndCatchNSEE(LongIterator it) {
+    boolean hasNextBefore = it.hasNext();
     assertFalse(it.hasValue());
     try {
       it.value();
@@ -250,58 +247,60 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
     } catch (NoSuchElementException _) {
       // ok
     }
-
+    assertEquals(hasNextBefore, it.hasNext());
   }
 
-  protected void checkNextAndCatchNSEE(LongIterator it) {
-    Assert.assertFalse(it.hasNext());
+  protected static void checkNextAndCatchNSEE(LongIterator it) {
+    boolean hasNextBefore = it.hasNext();
+    assertFalse(it.hasNext());
     try {
       it.next();
       fail();
     } catch (NoSuchElementException _) {
       // ok
     }
+    assertEquals(hasNextBefore, it.hasNext());
   }
 
   public static void checkIteratorThrowsCME(Iterator iterator) {
     try {
       iterator.hasNext();
-      TestCase.fail();
+      fail();
     } catch (ConcurrentModificationException e) {}
     try {
       iterator.next();
-      TestCase.fail();
+      fail();
     } catch (ConcurrentModificationException e) {}
 
     if (iterator instanceof IntIterator) {
       IntIterator it = (IntIterator) iterator;
       try {
         it.value();
-        TestCase.fail();
+        fail();
       } catch (ConcurrentModificationException e) {}
     } else if (iterator instanceof LongIterator) {
       LongIterator it = (LongIterator) iterator;
       try {
         it.hasValue();
-        TestCase.fail();
+        fail();
       } catch (ConcurrentModificationException e) {}
       try {
         it.value();
-        TestCase.fail();
+        fail();
       } catch (ConcurrentModificationException e) {}
     } else if (iterator instanceof IntLongIterator) {
       IntLongIterator it = (IntLongIterator) iterator;
       try {
         it.hasValue();
-        TestCase.fail();
+        fail();
       } catch (ConcurrentModificationException e) {}
       try {
         it.left();
-        TestCase.fail();
+        fail();
       } catch (ConcurrentModificationException e) {}
       try {
         it.right();
-        TestCase.fail();
+        fail();
       } catch (ConcurrentModificationException e) {}
     }
   }

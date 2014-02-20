@@ -61,9 +61,9 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     WritableLongList sourceRemove = LongArray.create(7, 3, 19,
         6, 14, -9,
         5, 8, 100,
-        12, 2, 40
+        12, 2, 40,
         -1, 25, Long.MIN_VALUE);
-    assert sourceAdd.size() == sourceRemove.size();
+    assert sourceAdd.size() == sourceRemove.size() : sourceAdd.size() + " " + sourceRemove.size();
     int size = sourceAdd.size();
     WritableLongList expected = new LongArray();
 

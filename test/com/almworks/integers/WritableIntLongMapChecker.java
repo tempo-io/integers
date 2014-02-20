@@ -42,7 +42,7 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
   }
 
   public void testConstructors() {
-    // assumed that all constructors checks in createMapFromLists
+    // assumed that method createMapFromLists returns variants with all constructors
     int attemptsCount = 20;
     int maxSize = 50;
 //    int maxSize = 1000;
@@ -70,13 +70,13 @@ public abstract class WritableIntLongMapChecker<T extends WritableIntLongMap> ex
   }
 
   public void testIterators() {
-    // assumed that all constructors checks in createMapFromLists
+    // assumed that method createMapFromLists returns variants with all constructors
     int attemptsCount = 10;
     int maxSize = 50;
 //    int maxSize = 1000;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
       IntArray keys = generateRandomIntArray(maxSize, SORTED_UNIQUE);
-      LongArray values = generateRandomLongArray(maxSize, SORTED_UNIQUE);
+      LongArray values = generateRandomLongArray(keys.size(), UNORDERED);
 
       for (T map : createMapFromLists(keys, values)) {
         int keyForAdd = 0;

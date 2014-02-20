@@ -26,43 +26,43 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class FindingLongIterator extends AbstractLongIterator {
-  protected long myCurrent = Long.MAX_VALUE;
+  protected long myCurrent = 0xDEADBEEF;
   private long myNext;
 
-  private static final int FINISHED = 0, NO_VALUE = 1, VALUE_STORED = 2;
-  private int myIteratorStatus = NO_VALUE;
+  private static final int FINISHED = 0, NO_CACHED = 1, CACHED = 2;
+  private int myIteratorStatus = NO_CACHED;
   private boolean myIterated = false;
 
   /**
-   * In this method in {@code myCurrent} should be assigned the next value.
+   * In this method {@code myCurrent} should be assigned the next value.
    * @return true if the next value exists and was assigned to {@code myCurrent}, otherwise false
    * */
-  protected abstract boolean findNext();
+  protected abstract boolean findNext() throws ConcurrentModificationException;
 
-  public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIteratorStatus == NO_VALUE) {
+  public final boolean hasNext() throws ConcurrentModificationException {
+    if (myIteratorStatus == NO_CACHED) {
       boolean hasNext = findNext();
       if (hasNext) {
-        myIteratorStatus = VALUE_STORED;
+        myIteratorStatus = CACHED;
         return true;
       } else {
         myIteratorStatus = FINISHED;
         return false;
       }
     }
-    assert myIteratorStatus == VALUE_STORED || myIteratorStatus == FINISHED;
-    return myIteratorStatus == VALUE_STORED;
+    assert myIteratorStatus == CACHED || myIteratorStatus == FINISHED;
+    return myIteratorStatus == CACHED;
   }
 
   public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIteratorStatus == VALUE_STORED) {
+    if (myIteratorStatus == CACHED) {
       myNext = myCurrent;
-      myIteratorStatus = NO_VALUE;
+      myIteratorStatus = NO_CACHED;
     } else {
       if (myIteratorStatus == FINISHED || !findNext()) {
         throw new NoSuchElementException();
       }
-      assert myIteratorStatus == NO_VALUE;
+      assert myIteratorStatus == NO_CACHED;
       myNext = myCurrent;
     }
     myIterated = true;

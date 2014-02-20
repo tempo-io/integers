@@ -126,7 +126,10 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     if (keys.length != values.length) {
       throw new IllegalArgumentException();
     }
-    putAllKeys(keys, values);
+    int size = keys.length;
+    for (int i = 0; i < size; i++) {
+      putImpl(keys[i], values[i]);
+    }
   }
 
   @Override
@@ -135,19 +138,11 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     IntIterator keysIt = keys.iterator();
     LongIterator valuesIt = values.iterator();
 
-    putAll(pair(keysIt, valuesIt));
-    putAll(pair(keysIt, LongIterators.repeat(DEFAULT_VALUE)));
-  }
-
-  @Override
-  public void putAllKeys(int[] keys, long[] values) {
-    modified();
-    int size = Math.min(keys.length, values.length);
-    for (int i = 0; i < size; i++) {
-      putImpl(keys[i], values[i]);
+    while (keysIt.hasNext() && valuesIt.hasNext()) {
+      putImpl(keysIt.nextValue(), valuesIt.nextValue());
     }
-    for (int i = size; i < keys.length; i++) {
-      putImpl(keys[i], DEFAULT_VALUE);
+    while (keysIt.hasNext()) {
+      putIfAbsent(keysIt.nextValue(), DEFAULT_VALUE);
     }
   }
 

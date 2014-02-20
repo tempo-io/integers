@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface IntLongMapI extends IntLongIterable {
 
-  public static final long DEFAULT_VALUE = 0;
+  long DEFAULT_VALUE = 0;
 
   /**
    * @return true if this map contains key {@code key}. Otherwise false
@@ -35,7 +35,7 @@ public interface IntLongMapI extends IntLongIterable {
   LongIterator valuesIterator();
 
   /**
-   * @return the value for the specified key if this map contains key {@code key}. Otherwise {@code DEFAULT_VALUE}.
+   * @return the value for the specified key if this map contains key {@code key}. Otherwise returns default value.
    */
   long get(int key);
 }

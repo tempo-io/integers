@@ -31,15 +31,15 @@ public interface WritableIntLongMap extends IntLongMapI {
   boolean putIfAbsent(int key, long value);
 
   /**
-   * Removes all values at the given key.
-   * The default value for the key type is returned if the key does not exist in this map.
+   * Removes value for the given key.
+   * The default value is returned if the key does not exist in this map.
    * @return old value for the specified key if this map contained the key. Otherwise returns default value.
    */
   long remove(int key);
 
   /**
-   * Removes the entry for a key only if the key is currently mapped to a given value.
-   * @return {@code true} if the size of this map changed. Otherwise {@code false}.
+   * Removes the entry for the key only if the key is currently mapped to the given value.
+   * @return {@code true} if the size of this map has changed. Otherwise {@code false}.
    */
   boolean remove(int key, long value);
 
@@ -65,7 +65,7 @@ public interface WritableIntLongMap extends IntLongMapI {
 
   /**
    * Puts all {@code keys} in the map, taking as many {@code values} as needed;
-   * when no values are available, uses {@link #DEFAULT_VALUE}.
+   * when no values are available, uses default value.
    *
    * (1, 2, 3, 4), null -> ([1, 0], [2, 0], [3, 0], [4, 0])
    * (1, 2, 3, 4), () -> ([1, 0], [2, 0], [3, 0], [4, 0])
@@ -74,11 +74,6 @@ public interface WritableIntLongMap extends IntLongMapI {
    * (1, 2, 3, 4), (1, 2, 3, 4, 6, 7, 8) -> ([1, 1], [2, 2], [3, 3], [4, 4])
    */
   void putAllKeys(IntIterable keys, LongIterable values);
-
-  /**
-   * @see #putAllKeys(IntIterable, LongIterable)
-   */
-  void putAllKeys(int[] keys, long ... values);
 
   void removeAll(int... keys);
 

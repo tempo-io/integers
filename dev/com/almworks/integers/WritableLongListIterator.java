@@ -25,22 +25,35 @@ import java.util.NoSuchElementException;
 public interface WritableLongListIterator extends LongListIterator {
 
   /**
-   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   * @throws IllegalStateException if {@link #remove} or {@link #removeRange} was previously called without subsequent advance.
    */
   long value() throws NoSuchElementException, IllegalStateException;
 
   /**
-   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   * @return false if iterator has never been advanced or
+   * just removed throw {@link #remove()} or {@link #removeRange(int, int)}, otherwise true
+   * */
+
+  /**
+   * @return {@code false} if this iterator has never been advanced or the current value has been removed via 
+   * {@link #remove()} or {@link #removeRange(int, int)}.
+   * In other words, returns {@code false} if the subsequent call to {@link #value()} will throw NoSuchElementException, otherwise {@code true}.
+   */
+  @Override
+  boolean hasValue();
+
+  /**
+   * @throws IllegalStateException if {@link #remove} or {@link #removeRange} was previously called without subsequent advance.
    */
   void move(int offset) throws NoSuchElementException, IllegalStateException;
 
   /**
-   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   * @throws IllegalStateException if {@link #remove} or {@link #removeRange} was previously called without subsequent advance.
    */
   long get(int offset) throws NoSuchElementException, IllegalStateException;
 
   /**
-   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   * @throws IllegalStateException if {@link #remove} or {@link #removeRange} was previously called without subsequent advance.
    */
   int index() throws NoSuchElementException, IllegalStateException;
 
@@ -48,14 +61,14 @@ public interface WritableLongListIterator extends LongListIterator {
    * Will set the value in the list at a position relative to the current position.
    * <p>
    * set(0, X) will set the value at {@link #index()}, set(-1, X) will set the value at index()-1, etc
-   * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+   * @throws IllegalStateException if {@link #remove} or {@link #removeRange} was previously called without subsequent advance.
    */
   void set(int offset, long value) throws NoSuchElementException, IllegalStateException;
 
   /**
    * Removes a number of items from the collection. Boundaries fromOffset and toOffset are relative to current
    * position, element at toOffset will not be removed (if there's any).
-   * <p>After calling this method, subsequent calls to any methods except hasNext(), next(), and nextValue()
+   * <p>After calling this method, subsequent calls to any methods except hasValue(), hasNext(), next(), and nextValue()
    * would throw IllegalStateException until iterator is advanced.
    * Example: removeRange(-1,2) will remove the current element, elements at index()-1 and at index()+1,
    * and the iterator will point at the element at index()+2 after it is advanced.
@@ -65,7 +78,7 @@ public interface WritableLongListIterator extends LongListIterator {
 
   /**
   * Removes an element at the current iterator position.
-  * <p>After calling this method, subsequent calls to any methods except hasNext(), next(), and nextValue()
+  * <p>After calling this method, subsequent calls to any methods except hasValue(), hasNext(), next(), and nextValue()
   * would throw IllegalStateException until iterator is advanced.
   * After calling this method and subsequent advance, iterator would point at element which is next to removed one.
   * @throws NoSuchElementException if iterator has never been advanced.

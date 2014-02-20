@@ -106,7 +106,7 @@ public final class LongArray extends AbstractWritableLongList {
    */
   public static LongArray copy(@Nullable LongIterable iterable) {
     if (iterable == null) return new LongArray();
-    return LongCollections.collectIterables(iterable);
+    return LongCollections.collectIterable(0, iterable);
   }
 
   /**

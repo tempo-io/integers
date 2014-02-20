@@ -75,7 +75,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   protected long putImpl(int key, long value) {
     checkMutatorPresence();
     int idx = findKey(key);
-    long oldValue = 0;
+    long oldValue = DEFAULT_VALUE;
     if (idx >= 0) {
       oldValue = getValueAt(idx);
       setAt(idx, key, value);
@@ -132,9 +132,8 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   protected long removeImpl(int key) {
     checkMutatorPresence();
     int idx = findKey(key);
-    // todo update default value
     if (idx < 0) {
-      return 0;
+      return DEFAULT_VALUE;
     } else {
       long oldValue = getValueAt(idx);
       removeAt(idx);
@@ -182,6 +181,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   }
 
   public IntLongIterator iterator() {
+    checkMutatorPresence();
     return failFast(iterator(0));
   }
 
@@ -191,6 +191,7 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   }
 
   public IntListIterator keysIterator(int from) {
+    checkMutatorPresence();
     return keysIterator(from, size());
   }
 
@@ -200,10 +201,12 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   }
 
   public IntIterator keysIterator() {
+    checkMutatorPresence();
     return failFast(keysIterator(0));
   }
 
   public LongIterator valuesIterator(int from) {
+    checkMutatorPresence();
     return valuesIterator(from, size());
   }
 
@@ -213,9 +216,14 @@ public class IntLongMap extends AbstractWritableIntLongMap {
   }
 
   public LongIterator valuesIterator() {
+    checkMutatorPresence();
     return failFast(valuesIterator(0));
   }
 
+  /**
+   * Returns keys of this map.
+   * Subsequent map modifications will be reflected in the returned list.
+   */
   public IntList keysAsList() {
     checkMutatorPresence();
     return myKeys;

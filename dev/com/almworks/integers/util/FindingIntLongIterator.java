@@ -26,39 +26,42 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public abstract class FindingIntLongIterator extends AbstractIntLongIterator {
-  protected int myCurrentLeft, myNextLeft;
-  protected long myCurrentRight, myNextRight;
-  private static final int FINISHED = 0, NO_VALUE = 1, VALUE_STORED = 2;
-  private int myIteratorStatus = NO_VALUE;
+  protected int myCurrentLeft = 0xDEADBEEF;
+  private int myNextLeft;
+  protected long myCurrentRight = 0xDEADBEEF;
+  private long myNextRight;
+
+  private static final int FINISHED = 0, NO_CACHED = 1, CACHED = 2;
+  private int myIteratorStatus = NO_CACHED;
   private boolean myIterated = false;
 
   /**
-   * In this method in {@code myNextLeft} and {@code myNextRight} must be assigned next value, if it exist.
+   * In this method {@code myCurrentLeft} and {@code myCurrentRight} must be assigned next value, if they exist.
    * @return true if this iterator has next value, otherwise - false
    * */
-  protected abstract boolean findNext();
+  protected abstract boolean findNext() throws ConcurrentModificationException;
 
   public final boolean hasNext() throws ConcurrentModificationException, NoSuchElementException {
-    if (myIteratorStatus == NO_VALUE) {
+    if (myIteratorStatus == NO_CACHED) {
       boolean hasNext = findNext();
       if (hasNext) {
-        myIteratorStatus = VALUE_STORED;
+        myIteratorStatus = CACHED;
         return true;
       } else {
         myIteratorStatus = FINISHED;
         return false;
       }
     }
-    return myIteratorStatus == VALUE_STORED;
+    return myIteratorStatus == CACHED;
   }
 
 
   @Override
   public IntLongIterator next() {
-    if (myIteratorStatus == VALUE_STORED) {
+    if (myIteratorStatus == CACHED) {
       myNextLeft = myCurrentLeft;
       myNextRight = myCurrentRight;
-      myIteratorStatus = NO_VALUE;
+      myIteratorStatus = NO_CACHED;
     } else {
       if (myIteratorStatus == FINISHED || !findNext()) {
         throw new NoSuchElementException();

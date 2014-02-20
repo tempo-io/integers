@@ -7,19 +7,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.LongIterators.limit;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.fail;
 
 public class LongIteratorsTests extends IntegersFixture {
-  protected void checkNextAndCatchNSEE(LongIterator it) {
-    Assert.assertFalse(it.hasNext());
-    try {
-      it.next();
-      fail();
-    } catch (NoSuchElementException _) {
-      // ok
-    }
-  }
-
   public void checkNoValue(LongIterator it) {
     assertFalse(it.hasValue());
     try {
@@ -74,6 +65,9 @@ public class LongIteratorsTests extends IntegersFixture {
       checkNoValue(it);
       CHECK.order(LongProgression.arithmetic(0, i * 10, 1).iterator(), it);
     }
+    assertFalse(limit(LongIterator.EMPTY, 0).hasValue());
+    assertFalse(limit(LongIterator.EMPTY, -1).hasValue());
+    assertFalse(limit(LongIterator.EMPTY, -10).hasValue());
   }
 
   public void testLimitSpecification() {
@@ -108,7 +102,7 @@ public class LongIteratorsTests extends IntegersFixture {
     LongIterator actual = LongIterators.range(start, stop, step);
     checkNoValue(actual);
     CHECK.order(expected.iterator(), actual);
-    checkNextAndCatchNSEE(actual);
+    LongIteratorSpecificationChecker.checkNextAndCatchNSEE(actual);
   }
 
   public void testRange() {

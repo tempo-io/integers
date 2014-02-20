@@ -4,6 +4,7 @@ import com.almworks.integers.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
+import java.util.Random;
 
 /**
  * A hash set of {@code long}'s, implemented using using open
@@ -43,6 +44,8 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   private int myThreshold;
   private int mySize = 0;
   private int myMask;
+  private final long myPerturbation = System.identityHashCode(this);
+  public LongArray stats = new LongArray();
 
   public LongOpenHashSet() {
     this(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR);
@@ -98,7 +101,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   }
 
   protected int hash(long value) {
-    return IntegersUtils.hash(value);
+    return IntegersUtils.hash(value ^ myPerturbation);
   }
 
   private int index(int hash, int mask) {
@@ -117,9 +120,11 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     for (LongIterator it: iterator()) {
       long value = it.value();
       int slot = index(hash(value), mask);
+      int slot0 = slot;
       while (alocatedNew.get(slot)) {
         slot = index(slot + 1, mask);
       }
+      stats.add(Math.abs(slot0 - slot));
       keysNew[slot] = value;
       alocatedNew.set(slot);
     }
@@ -137,14 +142,24 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
 
   private boolean include1(long value) {
     int slot = index(hash(value), myMask);
+    int slot0 = slot;
     while (myAllocated.get(slot)) {
       if (value == myKeys[slot]) return false;
       slot = index(slot + 1, myMask);
     }
+    stats.add(Math.abs(slot0 - slot));
     myKeys[slot] = value;
     myAllocated.set(slot);
     mySize++;
     return true;
+  }
+
+  public double getAverageSteps() {
+    long aver = 0;
+    for (int i = 0; i < stats.size(); i++) {
+      aver += stats.get(i);
+    }
+    return (double) aver / stats.size();
   }
 
   /**

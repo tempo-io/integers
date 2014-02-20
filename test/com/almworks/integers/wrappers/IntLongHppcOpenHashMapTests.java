@@ -1,12 +1,17 @@
 package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
+import com.almworks.integers.util.LongChainHashSet;
+import com.carrotsearch.hppc.IntLongOpenHashMap;
+import com.carrotsearch.hppc.cursors.IntLongCursor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.LongProgression.range;
+import static com.almworks.integers.wrappers.IntLongHppcOpenHashMap.createForAdd;
 import static com.almworks.integers.wrappers.IntLongHppcOpenHashMap.createFrom;
 
 public class IntLongHppcOpenHashMapTests extends WritableIntLongMapChecker<IntLongHppcOpenHashMap> {
@@ -43,18 +48,49 @@ public class IntLongHppcOpenHashMapTests extends WritableIntLongMapChecker<IntLo
     map.putAll(keys.subList(countToAdd, keys.size()), values.subList(countToAdd, values.size()));
     res.add(map);
 
+    map = new IntLongHppcOpenHashMap();
+    map.putAllKeys(keys.iterator(), values.iterator());
+    int size = 10;
+    map.putAllKeys(keys, LongCollections.concatLists(values, generateRandomLongArray(size, UNORDERED)));
+
     return res;
   }
 
-  public void testToString() {
-    int size = 10, maxVal = 1000;
-    for (int i = 0; i < 10; i++) {
-      IntArray keys = generateRandomIntArray(size, UNORDERED, maxVal);
-      LongArray values = generateRandomLongArray(size, UNORDERED, maxVal);
-      for (IntLongHppcOpenHashMap map : createMapFromLists(keys, values)) {
-        System.out.println(map.toString());
+  public void testCreateForAdd() {
+    int minSize = 16, maxSize = 515;
+    float[] loadFactors = {0.1f, 0.3f, 0.5f, 0.75f, 1.0f};
+    for (float loadFactor : loadFactors) {
+      for (int size = minSize; size <= maxSize; size++) {
+        map = createForAdd(size, loadFactor);
+        int innerKeysSize = map.myMap.keys.length;
+
+        IntList keys = IntProgression.range(size);
+        LongProgression values = LongProgression.range(size);
+
+        map.putAllKeys(keys.iterator(), values.iterator());
+        checkMap(map, keys, values);
+        assertEquals(innerKeysSize, map.myMap.keys.length);
       }
     }
   }
 
+  public void testIterator() {
+    for (IntLongHppcOpenHashMap map : createMapFromLists(IntProgression.range(10), LongProgression.range(10))) {
+      System.out.println();
+      IntIterator it = map.keysIterator();
+      for (int i = 0; i < 5; i++) {
+        System.out.print(it.nextValue() + " ");
+      }
+      System.out.println();
+
+      IntLongOpenHashMap hppcMap = map.myMap;
+      for(int i = 10; i < 30; i++) {
+        hppcMap.put(i, i);
+      }
+      while (it.hasNext()) {
+        System.out.print(it.nextValue() + " ");
+      }
+      System.out.println();
+    }
+  }
 }

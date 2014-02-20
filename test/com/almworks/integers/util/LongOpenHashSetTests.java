@@ -37,9 +37,18 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
   }
 
   public void testCreateForAdd() {
-    int maxSize = 128;
-    for (int size = 0; size <= maxSize; size++) {
-      assertTrue(LongOpenHashSet.createForAdd(size).getThreshold() >= size);
+    int minSize = 16, maxSize = 266;
+    float[] loadFactors = {0.1f, 0.3f, 0.5f, 0.75f, 1.0f};
+    for (float loadFactor : loadFactors) {
+      for (int size = minSize; size <= maxSize; size++) {
+        set = LongOpenHashSet.createForAdd(size, loadFactor);
+        int curThreshold = set.getThreshold();
+        assertTrue(set.getThreshold() + "<" + size + "; load factor = " + loadFactor, set.getThreshold() >= size);
+        LongList expected = range(size);
+        set.addAll(expected);
+        checkSet(set, expected);
+        assertEquals(curThreshold, set.getThreshold());
+      }
     }
   }
 
@@ -80,6 +89,56 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
         checkSet(set, values.subList(th1, th2));
       }
     }
+  }
+
+  public void testDeadChain() {
+    LongChainHashSet a = new LongChainHashSet();
+    for (int i = 1150000; i-- != 0;) {
+      a.add(i);
+    }
+    LongChainHashSet b2 = new LongChainHashSet();
+    b2.addAll(a);
+  }
+
+  public void testDeadOpen() {
+    int count = 1150000;
+    for (int i = 0; i < 100; i++) {
+      LongOpenHashSet a = new LongOpenHashSet();
+//    LongOpenHashSet a = LongOpenHashSet.createForAdd(count);
+      a.addAll(LongIterators.limit(randomIterator(), count));
+      System.out.printf("%1.3f, ", a.getAverageSteps());
+    }
+
+    LongOpenHashSet a = new LongOpenHashSet();
+//    LongOpenHashSet a = LongOpenHashSet.createForAdd(count);
+    a.addAll(LongIterators.range(count, 0, -1));
+//    LongOpenHashSet b2 = LongOpenHashSet.createForAdd(count);
+    LongOpenHashSet b2 = new LongOpenHashSet();
+
+//    b2.addAll(a);
+    int i = 0;
+    for (LongIterator it : a) {
+      b2.add(it.value());
+      i++;
+      if (i % 100000 == 0) {
+        System.out.println(i + " " + b2.getAverageSteps());
+      }
+    }
+  }
+
+  public void testHppc() {
+    com.carrotsearch.hppc.LongOpenHashSet set2 = new com.carrotsearch.hppc.LongOpenHashSet();
+    int count = 1150000;
+    for (int i = count; i-- != 0;) {
+      set2.add(i);
+    }
+    com.carrotsearch.hppc.LongOpenHashSet set3 = new com.carrotsearch.hppc.LongOpenHashSet(count);
+    set3.addAll(set2);
+  }
+
+  public void test1() {
+    set = LongOpenHashSet.createForAdd(1150000);
+    System.out.println(set.getThreshold());
   }
 }
 

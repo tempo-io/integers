@@ -11,7 +11,7 @@ import static com.almworks.integers.wrappers.IntHppcWrappers.intCursorToIterator
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 
 public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
-  private final IntLongOpenHashMap myMap;
+  protected final IntLongOpenHashMap myMap;
 
   public IntLongHppcOpenHashMap() {
     myMap = new IntLongOpenHashMap();
@@ -79,8 +79,6 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
   public static IntLongHppcOpenHashMap createForAdd(int count) {
     return createForAdd(count, IntLongOpenHashMap.DEFAULT_LOAD_FACTOR);
   }
-
-
 
   @Override
   public boolean containsKey(int key) {
@@ -181,8 +179,6 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
   public int lslot() {
     return myMap.lslot();
   }
-
-
 
   @Override
   protected long removeImpl(int key) {

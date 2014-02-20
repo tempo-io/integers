@@ -185,9 +185,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   }
 
   public void testSet() {
-    for (WritableLongList list:
-        createWritableLongListVariants(0, 1, 2, -1, 1, 3)) {
-
+    for (WritableLongList list: createWritableLongListVariants(0, 1, 2, -1, 1, 3)) {
       list.set(0, 10);
       list.setAll(3, LongArray.create(5, 31, 36, 100), 1, 2);
       checkCollection(list, 10, 1, 2, 31, 36, 3);
@@ -244,6 +242,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
         ii.set(0, 999);
         assertEquals(999, ii.get(0));
         ii.remove();
+        assertFalse(ii.hasValue());
         x--;
       }
     }
@@ -327,6 +326,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       for (WritableLongListIterator it : list.write()) {
         if (it.value() == 4) {
           it.remove();
+          assertFalse(it.hasValue());
         }
       }
       CHECK.order(expected, list);
@@ -339,6 +339,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       it.next().next().next().next();
       assertEquals(3, it.value());
       it.remove();
+      assertFalse(it.hasValue());
       assertEquals(4, it.nextValue());
     }
   }
@@ -348,11 +349,13 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       WritableLongListIterator it = list.iterator();
       it.next().next();
       it.remove();
+      assertFalse(it.hasValue());
       assertEquals(2, it.nextValue());
 
       it.move(7);
       assertEquals(9, it.value());
       it.remove();
+      assertFalse(it.hasValue());
       checkCollection(list, 0, 2, 3, 4, 5, 6, 7, 8);
     }
   }
@@ -365,6 +368,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       for (int i = 0; i < 10; i++)
         ii.nextValue();
       ii.removeRange(-9, 1);
+      assertFalse(ii.hasValue());
       try {
         ii.removeRange(-9, 1);
         fail();
@@ -372,9 +376,11 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       ii.next();
       ii.move(19);
       ii.removeRange(-9, 1);
+      assertFalse(ii.hasValue());
       checkList(list, ap(0, 1, 100), ap(110, 1, 10), ap(130, 1, 9870));
       ii.next();
       ii.removeRange(-10, 0);
+      assertFalse(ii.hasValue());
       checkList(list, ap(0, 1, 100), ap(130, 1, 9870));
     }
   }
@@ -388,6 +394,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       while (ii.hasNext()) {
         ii.nextValue();
         ii.remove();
+        assertFalse(ii.hasValue());
       }
       checkList(list, ap(0, 1, 8192), ap(9192, 1, 808));
     }
@@ -525,9 +532,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
   private void testReverse(long[] array, long[] expected) {
     for (WritableLongList list: createWritableLongListVariants(array)) {
       list.reverse();
-      for (WritableLongList referenceLst: createWritableLongListVariants(expected)) {
-        CHECK.order(referenceLst, list);
-      }
+      checkCollection(list, expected);
     }
   }
 

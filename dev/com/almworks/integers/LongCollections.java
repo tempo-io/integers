@@ -41,7 +41,7 @@ public class LongCollections {
       assert res.length == sized.size();
       return res;
     }
-    return collectIterables(iterable).toNativeArray();
+    return collectIterable(0, iterable).toNativeArray();
   }
 
   public static long[] toSortedNativeArray(LongIterable iterable) {
@@ -59,7 +59,7 @@ public class LongCollections {
       LongList list = (LongList) values;
       if ((unique && list.isUniqueSorted()) || (!unique && list.isSorted())) return list;
     }
-    LongArray buf = collectIterables(values);
+    LongArray buf = collectIterable(0, values);
     int bufSize = buf.size();
     if (bufSize == 0) return LongList.EMPTY;
     long[] array = buf.extractHostArray();
@@ -252,12 +252,12 @@ public class LongCollections {
   }
 
   /**
+   * Unlike {@link Arrays#copyOf(long[], int)} returns the specified array if {@code array.length == length}
    * @return
    *   <table>
    *   <thead><tr><th>if</th><th>returns</th></tr></thead>
    *   <tbody>
    *   <tr><td>{@code length == 0}</td><td> {@link IntegersUtils#EMPTY_LONGS}</td></tr>
-   *   <tr><td>{@code 0 < length < array.length}</td><td> copy of the initial {@code length} elements of {@code array}</td></tr>
    *   <tr><td>{@code 0 < length < array.length}</td><td> a copy of the original array, truncated to {@code length}
    *   <tr><td>{@code length == array.length}</td><td> {@code array}</td></tr>
    *   <tr><td>{@code length > array.length}</td><td> New array of the specified length whose values are values of array trailed with zeroes</td></tr>
@@ -364,7 +364,7 @@ public class LongCollections {
    * @param b sorted unique {@code LongList}
    * @return union of {@code a} and {@code b} without elements that are contained both in {@code a} and {@code b}
    */
-  public static LongList diffSortedUniqueLists(LongList a, LongList b) {
+  public static LongArray diffSortedUniqueLists(LongList a, LongList b) {
     int ia = 0;
     int sza = a.size();
     int ib = 0;
@@ -505,7 +505,7 @@ public class LongCollections {
   /**
    * @return union of the specified lists
    * @param aSorted sorted unique {@code LongList}
-   * @param bSorted sorted uniq ue {@code LongList}
+   * @param bSorted sorted unique {@code LongList}
    * @return union of the specified lists
    */
   @NotNull
@@ -666,7 +666,7 @@ public class LongCollections {
       res.addAll((LongSet)iterable);
     } else {
       if (iterable instanceof LongSizedIterable) {
-        res.ensureCapacity(res.size() + ((LongSizedIterable) iterable).size());
+        res.ensureCapacity(((LongSizedIterable) iterable).size());
       }
       res.addAll(iterable.iterator());
     }
@@ -814,16 +814,17 @@ public class LongCollections {
   }
 
   /**
-   * Creates array and add there elements from {@code values} whose indices belong to {@code mask},
+   * Creates array and adds there elements from {@code values} whose indices belong to {@code mask},
    * i.e. {@code (mask & (1 << idx)) != 0}.
    * <br>Examples: get([0, 1, 2], 0) -> [], get([0, 1, 2], 1) -> [2], get([0, 1, 2], 5) -> [0, 2]
-   * @param mask {@code 0 <= mask && mask < (1<<values.size())}
+   * @param mask {@code 0 <= mask && mask < 2^values.size())}
    *
    * @return an array consisting of elements from {@code values} whose indices belong to {@code mask},
    * i.e. {@code (mask & (1 << idx)) != 0}.
    */
   public static LongArray getSubList(LongList values, int mask) {
     assert (mask + 1) <= (1 << values.size()) : mask + " " + (1 << values.size());
+    assert values.size() < 31 : values.size() + " >= " + 31;
     LongArray res = new LongArray();
     for (int i = 0; i < values.size(); i++) {
       if ((mask & (1 << i)) != 0) {

@@ -38,14 +38,17 @@ public class LongChainHashSetTests extends WritableLongSetChecker<LongChainHashS
 
   public void testCreateForAdd() {
     int minSize = 16, maxSize = 266;
+    float[] loadFactors = {0.1f, 0.3f, 0.5f, 0.75f, 1.0f};
+    for (float loadFactor : loadFactors) {
     for (int size = minSize; size <= maxSize; size++) {
-      set = LongChainHashSet.createForAdd(size, 1.0f);
+      set = LongChainHashSet.createForAdd(size, loadFactor);
       int curThreshold = set.getThreshold();
-      assertTrue(set.getThreshold() + "<" + size, set.getThreshold() >= size);
+      assertTrue(set.getThreshold() + "<" + size + "; load factor = " + loadFactor, set.getThreshold() >= size);
       LongList expected = range(size);
       set.addAll(expected);
       checkSet(set, expected);
       assertEquals(curThreshold, set.getThreshold());
+    }
     }
   }
 

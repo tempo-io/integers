@@ -146,31 +146,18 @@ public class LongCollectionsTests extends IntegersFixture {
     return Pair.create(trueIntersection, withExtra);
   }
 
-  public void testDiffSortedLists() throws Exception {
+  public void testDiffSortedUniqueListsSimple() throws Exception {
     CHECK.order(diffSortedUniqueLists(LongList.EMPTY, LongList.EMPTY));
     CHECK.order(diffSortedUniqueLists(LongArray.create(0, 3, 4, 7), LongArray.create(1, 2, 3, 4, 6, 8)), 0, 1, 2, 6, 7, 8);
-
-    for (int i = 0; i < 10; ++i) {
-      LongArray[] arrays = getListsAndDiff(5 + RAND.nextInt(100), 5 + RAND.nextInt(100));
-      CHECK.order(diffSortedUniqueLists(arrays[0], arrays[1]), arrays[2]);
-    }
   }
 
-  private LongArray[] getListsAndDiff(int... sizes) {
-    assert sizes.length == 2;
-    // ar[2] = diff
-    LongArray[] ar = new LongArray[3];
-    for (int i = 0; i < 2; i++) {
-      ar[i] = generateRandomLongArray(sizes[0], SortedStatus.SORTED_UNIQUE, sizes[0] * 10);
-    }
-    ar[2] = new LongArray();
-    for (int i = 0; i < 2; i++) {
-      LongArray notAr = LongArray.copy(ar[1 - i]);
-      notAr.removeAll(ar[i]);
-      ar[2].addAll(notAr);
-    }
-    ar[2].sortUnique();
-    return ar;
+  public void testDiffSortedUniqueLists() {
+    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+      @Override
+      public LongIterator get(LongArray... arrays) {
+        return LongCollections.diffSortedUniqueLists(arrays[0], arrays[1]).iterator();
+      }
+    }, new SetOperationsChecker.diffGetter(), true, SORTED_UNIQUE);
   }
 
   public void testAsLongList() {

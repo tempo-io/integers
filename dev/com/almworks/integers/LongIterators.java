@@ -100,10 +100,11 @@ public class LongIterators {
   /**
    * @return iterator that can be iterated not more than {@code lim} times.
    */
-  public static LongIterator limit(final LongIterable iterable, final int lim) {
+  public static LongIterator limit(final LongIterable iterable, int lim) {
+    final int lim0 = Math.max(lim, 0);
     return new AbstractLongIterator() {
       LongIterator it = iterable.iterator();
-      int count = Math.max(0, lim);
+      int count = lim0;
 
       @Override
       public boolean hasNext() throws ConcurrentModificationException {
@@ -122,7 +123,7 @@ public class LongIterators {
 
       @Override
       public boolean hasValue() {
-        return count != lim;
+        return count != lim0;
       }
 
       @Override

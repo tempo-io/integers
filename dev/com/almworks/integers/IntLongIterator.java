@@ -20,8 +20,8 @@ public interface IntLongIterator extends Iterator<IntLongIterator>, IntLongItera
   boolean hasNext() throws ConcurrentModificationException;
 
   /**
-   * @return false if iterator has never been advanced and
-   * next call to {@link #left()} or {@link #right()} would throw NoSuchElementException advanced, otherwise true
+   * @return {@code false} if this iterator has never been advanced.
+   * In other words, returns {@code false} if the subsequent call to {@link #left()} or {@link #right()} will throw NoSuchElementException, otherwise {@code true}.
    */
   boolean hasValue();
 

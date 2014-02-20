@@ -240,8 +240,20 @@ public class SetOperationsChecker {
 
   public static class MinusGetter implements SetCreator {
     public LongIterable get(LongArray ... arrays) {
-      LongArray expected = new LongArray(arrays[0]);
+      LongArray expected = LongArray.copy(arrays[0]);
       expected.removeAll(arrays[1]);
+      return expected;
+    }
+  }
+
+  public static class diffGetter implements SetCreator {
+    @Override
+    public LongIterable get(LongArray... arrays) {
+      assert arrays[0].isUniqueSorted() && arrays[1].isUniqueSorted();
+      LongArray expected = new LongArray(arrays[0].size());
+      expected.addAll(new LongMinusIterator(arrays[0], arrays[1]));
+      expected.addAll(new LongMinusIterator(arrays[1], arrays[0]));
+      expected.sortUnique();
       return expected;
     }
   }

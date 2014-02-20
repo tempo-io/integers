@@ -19,26 +19,27 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.NoSuchElementException;
 
 /**
  * Iterator for iterating through two specified iterators created from iterables.
- * Invocation of the {@link #next()} invokes {@code next()} in the both inner iterators.
- * {@link #left()} and {@link #right()} returns {@code value()} of the corresponding inner iterators.
+ * Invocation of {@link #next()} invokes {@code next()} in both inner iterators.
+ * {@link #left()} and {@link #right()} return {@code value()} of the corresponding inner iterators.
  * {@link #hasNext()} returns false if any of the inner iterators returns false.
- * I.e. the remaining values in the other iterator is ignored.
+ * I.e. the remaining values in the other iterator are ignored.
  */
 public class PairIntLongIterator implements IntLongIterator {
   private final IntIterator myIt1;
   private final LongIterator myIt2;
-  private static final int NO_VALUE = 0, HAS_VALUE = 1, BROKEN = 2;
-  private int myIteratorStatus = NO_VALUE;
 
   public PairIntLongIterator(IntIterable first, LongIterable second) {
     myIt1 = first.iterator();
     myIt2 = second.iterator();
   }
 
+  @NotNull
   public IntLongIterator iterator() {
     return this;
   }
@@ -47,31 +48,25 @@ public class PairIntLongIterator implements IntLongIterator {
     return (myIt1.hasNext() && myIt2.hasNext());
   }
 
-  public PairIntLongIterator next() {
-    if (myIteratorStatus == BROKEN) {
-      throw new NoSuchElementException();
-    }
-    myIteratorStatus = BROKEN;
+  public PairIntLongIterator next() throws NoSuchElementException, IllegalStateException {
+    if (!hasNext()) throw new NoSuchElementException();
     myIt1.next();
     myIt2.next();
-    myIteratorStatus = HAS_VALUE;
     return this;
   }
 
   public int left() {
-    if (!hasValue())
-      throw new NoSuchElementException();
+    if (!hasValue()) throw new NoSuchElementException();
     return myIt1.value();
   }
 
   public long right() {
-    if (!hasValue())
-      throw new NoSuchElementException();
+    if (!hasValue()) throw new NoSuchElementException();
     return myIt2.value();
   }
 
   public boolean hasValue() {
-    return myIteratorStatus == HAS_VALUE;
+    return myIt2.hasValue();
   }
 
   public void remove() throws UnsupportedOperationException {
