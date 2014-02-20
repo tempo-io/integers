@@ -163,7 +163,6 @@ target(name: 'generateJavaCode') {
 }
 
 target(name: 'make') {
-  println 'make skip generate: ' + skipGenerate
   depends(['init', 'utils'])
   if (!skipGenerate) depends(['generateJavaCode'])
   ant.mkdir(dir: generatedClassesDir)

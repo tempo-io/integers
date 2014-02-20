@@ -31,7 +31,7 @@ public abstract class FindingIntLongIterator extends AbstractIntLongIterator {
   protected long myCurrentRight = 0xDEADBEEF;
   private long myNextRight;
 
-  private static final int FINISHED = 0, NO_CACHED = 1, CACHED = 2;
+  private static final int NO_CACHED = 0, CACHED = 1, FINISHED = 2;
   private int myIteratorStatus = NO_CACHED;
   private boolean myIterated = false;
 

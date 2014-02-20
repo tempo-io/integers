@@ -246,7 +246,7 @@ public class SetOperationsChecker {
     }
   }
 
-  public static class diffGetter implements SetCreator {
+  public static class DiffGetter implements SetCreator {
     @Override
     public LongIterable get(LongArray... arrays) {
       assert arrays[0].isUniqueSorted() && arrays[1].isUniqueSorted();

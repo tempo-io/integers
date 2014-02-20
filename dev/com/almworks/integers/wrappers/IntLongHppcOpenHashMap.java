@@ -100,7 +100,6 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
 
   public LongIterator valuesIterator() {
     return failFast(cursorToLongIterator(myMap.values().iterator()));
-//    longIterator(myMap.values().iterator());
   }
 
   @Override

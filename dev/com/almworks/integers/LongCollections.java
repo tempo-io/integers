@@ -817,7 +817,7 @@ public class LongCollections {
    * Creates array and adds there elements from {@code values} whose indices belong to {@code mask},
    * i.e. {@code (mask & (1 << idx)) != 0}.
    * <br>Examples: get([0, 1, 2], 0) -> [], get([0, 1, 2], 1) -> [2], get([0, 1, 2], 5) -> [0, 2]
-   * @param mask {@code 0 <= mask && mask < 2^values.size())}
+   * @param mask {@code 0 <= mask && mask < 2^values.size()}
    *
    * @return an array consisting of elements from {@code values} whose indices belong to {@code mask},
    * i.e. {@code (mask & (1 << idx)) != 0}.

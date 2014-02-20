@@ -25,19 +25,17 @@ import java.util.NoSuchElementException;
 public interface WritableLongListIterator extends LongListIterator {
 
   /**
+   * {@inheritDoc}
    * @throws IllegalStateException if {@link #remove} or {@link #removeRange} was previously called without subsequent advance.
    */
   long value() throws NoSuchElementException, IllegalStateException;
 
   /**
-   * @return false if iterator has never been advanced or
-   * just removed throw {@link #remove()} or {@link #removeRange(int, int)}, otherwise true
-   * */
-
-  /**
    * @return {@code false} if this iterator has never been advanced or the current value has been removed via 
    * {@link #remove()} or {@link #removeRange(int, int)}.
-   * In other words, returns {@code false} if the subsequent call to {@link #value()} will throw NoSuchElementException, otherwise {@code true}.
+   * In other words, returns {@code false} if the subsequent call to {@link #value()} will throw
+   * NoSuchElementException or IllegalStateException, otherwise {@code true}.
+   * @see #value()
    */
   @Override
   boolean hasValue();

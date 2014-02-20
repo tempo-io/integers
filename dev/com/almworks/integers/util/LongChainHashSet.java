@@ -40,7 +40,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     assert (headLen & (headLen - 1)) == 0 : headLen;
 
     this.myLoadFactor = loadFactor;
-    myThreshold = (int)(headLen * loadFactor);
+    myThreshold = (int)(headLen * loadFactor) + 1;
     myHead = new int[headLen];
     myKeys = new long[myThreshold];
     myNext = new int[myThreshold];

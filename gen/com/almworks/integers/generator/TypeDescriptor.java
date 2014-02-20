@@ -24,19 +24,19 @@ import static com.almworks.integers.generator.StringSets.*;
  * Contains substitutions for specific integer types.
  */
 public enum TypeDescriptor {
-  INT(false, StringSets.INT),
-  LONG(false, StringSets.LONG),
-  INT_INT(  true,  StringSets.INT, StringSets.INT),
-  INT_LONG( true,  StringSets.INT, StringSets.LONG),
-  LONG_INT( true, StringSets.LONG, StringSets.INT),
-  LONG_LONG(true, StringSets.LONG, StringSets.LONG),
+  INT(StringSets.INT),
+  LONG(StringSets.LONG),
+  INT_INT(StringSets.INT, StringSets.INT),
+  INT_LONG(StringSets.INT, StringSets.LONG),
+  LONG_INT(StringSets.LONG, StringSets.INT),
+  LONG_LONG(StringSets.LONG, StringSets.LONG),
   ;
 
   Map<String, String> myReplacements = new HashMap();
   private boolean myIsPair;
 
-  TypeDescriptor(boolean pair, StringSets... stringSets) {
-    myIsPair = pair;
+  TypeDescriptor(StringSets... stringSets) {
+    myIsPair = stringSets.length == 2;
     String[] curFrom = E.getStrings();
     String[] curTo = stringSets[0].getStrings();
     for (int i = 0; i < curFrom.length; i++) {
@@ -59,7 +59,6 @@ public enum TypeDescriptor {
   String apply(String template) {
     String out = template;
     for (Map.Entry<String, String> entry : myReplacements.entrySet()) {
-      System.out.println(entry.getKey() + " " + entry.getValue());
       out = Pattern.compile(entry.getKey()).matcher(out).replaceAll(entry.getValue());
     }
     return out;

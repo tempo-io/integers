@@ -73,24 +73,4 @@ public class IntLongHppcOpenHashMapTests extends WritableIntLongMapChecker<IntLo
       }
     }
   }
-
-  public void testIterator() {
-    for (IntLongHppcOpenHashMap map : createMapFromLists(IntProgression.range(10), LongProgression.range(10))) {
-      System.out.println();
-      IntIterator it = map.keysIterator();
-      for (int i = 0; i < 5; i++) {
-        System.out.print(it.nextValue() + " ");
-      }
-      System.out.println();
-
-      IntLongOpenHashMap hppcMap = map.myMap;
-      for(int i = 10; i < 30; i++) {
-        hppcMap.put(i, i);
-      }
-      while (it.hasNext()) {
-        System.out.print(it.nextValue() + " ");
-      }
-      System.out.println();
-    }
-  }
 }

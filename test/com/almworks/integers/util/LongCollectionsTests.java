@@ -157,7 +157,7 @@ public class LongCollectionsTests extends IntegersFixture {
       public LongIterator get(LongArray... arrays) {
         return LongCollections.diffSortedUniqueLists(arrays[0], arrays[1]).iterator();
       }
-    }, new SetOperationsChecker.diffGetter(), true, SORTED_UNIQUE);
+    }, new SetOperationsChecker.DiffGetter(), true, SORTED_UNIQUE);
   }
 
   public void testAsLongList() {

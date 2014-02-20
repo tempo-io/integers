@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.*;
+import static junit.framework.Assert.assertEquals;
 
 public class LongIteratorSpecificationChecker<I extends LongIterator> {
   public static int MAX = Integer.MAX_VALUE;
@@ -251,7 +252,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
   }
 
   protected static void checkNextAndCatchNSEE(LongIterator it) {
-    boolean hasNextBefore = it.hasNext();
+    boolean hasValue = it.hasValue();
+    long value = hasValue ? -1 : it.value();
     assertFalse(it.hasNext());
     try {
       it.next();
@@ -259,7 +261,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
     } catch (NoSuchElementException _) {
       // ok
     }
-    assertEquals(hasNextBefore, it.hasNext());
+    assertEquals(hasValue, it.hasValue());
+    assertEquals(value, hasValue ? -1 : it.value());
   }
 
   public static void checkIteratorThrowsCME(Iterator iterator) {

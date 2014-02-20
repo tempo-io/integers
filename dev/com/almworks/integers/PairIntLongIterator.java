@@ -21,16 +21,17 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 /**
- * Iterator for iterating through two specified iterators created from iterables.
+ * Iterator for iterating through two specified iterables.
  * Invocation of {@link #next()} invokes {@code next()} in both inner iterators.
  * {@link #left()} and {@link #right()} return {@code value()} of the corresponding inner iterators.
  * {@link #hasNext()} returns false if any of the inner iterators returns false.
  * I.e. the remaining values in the other iterator are ignored.
  */
-public class PairIntLongIterator implements IntLongIterator {
+public class PairIntLongIterator extends AbstractIntLongIteratorWithFlag {
   private final IntIterator myIt1;
   private final LongIterator myIt2;
 
@@ -39,37 +40,23 @@ public class PairIntLongIterator implements IntLongIterator {
     myIt2 = second.iterator();
   }
 
-  @NotNull
-  public IntLongIterator iterator() {
-    return this;
-  }
-
-  public boolean hasNext() {
-    return (myIt1.hasNext() && myIt2.hasNext());
-  }
-
-  public PairIntLongIterator next() throws NoSuchElementException, IllegalStateException {
-    if (!hasNext()) throw new NoSuchElementException();
-    myIt1.next();
-    myIt2.next();
-    return this;
-  }
-
-  public int left() {
-    if (!hasValue()) throw new NoSuchElementException();
+  @Override
+  protected int leftImpl() {
     return myIt1.value();
   }
 
-  public long right() {
-    if (!hasValue()) throw new NoSuchElementException();
+  @Override
+  protected long rightImpl() {
     return myIt2.value();
   }
 
-  public boolean hasValue() {
-    return myIt2.hasValue();
+  @Override
+  protected void nextImpl() throws NoSuchElementException {
+    if (!hasNext()) throw new NoSuchElementException();
   }
 
-  public void remove() throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
+  @Override
+  public boolean hasNext() throws ConcurrentModificationException {
+    return myIt1.hasNext() && myIt2.hasNext();
   }
 }
