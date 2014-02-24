@@ -1,6 +1,5 @@
-package com.almworks.integers.generator;
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +13,8 @@ package com.almworks.integers.generator;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.almworks.integers.generator;
 
 import com.almworks.util.BadFormatException;
 import com.almworks.util.FileUtil;
