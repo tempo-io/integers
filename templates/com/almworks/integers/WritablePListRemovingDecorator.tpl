@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+
+package com.almworks.integers;
 
 /**
- * Removing decorator for a list of native ints that modifies the list of removed indices with which it works.
+ * Decorator on the specified list that allows to remove indices on the fly rather than decorating the already happened removals.
+ * @see #E#ListRemovingDecorator
  * @author igor baltiyskiy
  */
-public class Modifying#E#ListRemovingDecorator extends #E#ListRemovingDecorator {
+public class Writable#E#ListRemovingDecorator extends Abstract#E#ListRemovingDecorator {
   private final WritableIntList myRemovedSorted;
 
-  public Modifying#E#ListRemovingDecorator(#E#List base) {
+  public Writable#E#ListRemovingDecorator(#E#List base) {
     this(base, new IntArray());
   }
 
@@ -33,7 +34,7 @@ public class Modifying#E#ListRemovingDecorator extends #E#ListRemovingDecorator 
     return myRemovedSorted;
   }
 
-  private Modifying#E#ListRemovingDecorator(#E#List base, WritableIntList removed) {
+  private Writable#E#ListRemovingDecorator(#E#List base, WritableIntList removed) {
     super(base);
     myRemovedSorted = removed;
   }
@@ -43,9 +44,9 @@ public class Modifying#E#ListRemovingDecorator extends #E#ListRemovingDecorator 
    * @param base the decorated list
    * @param sortedRemoveIndexes collection passed for further use in decorator, don't reuse, don't prepare
    */
-  public static Modifying#E#ListRemovingDecorator createFromSorted(#E#List base, WritableIntList sortedRemoveIndexes) {
+  public static Writable#E#ListRemovingDecorator createFromSorted(#E#List base, WritableIntList sortedRemoveIndexes) {
     prepareSortedIndicesInternal(sortedRemoveIndexes);
-    return new Modifying#E#ListRemovingDecorator(base, sortedRemoveIndexes);
+    return new Writable#E#ListRemovingDecorator(base, sortedRemoveIndexes);
   }
 
   public void removeAt(int index) {
@@ -63,10 +64,10 @@ public class Modifying#E#ListRemovingDecorator extends #E#ListRemovingDecorator 
    * @param removeIndexes list of indices to remove. It is copied internally, so after the method returns, the contents of the list are neither read nor written by the created object.
    * @return
    */
-  public static Modifying#E#ListRemovingDecorator createFromUnsorted(#E#List base, int... removeIndexes) {
+  public static Writable#E#ListRemovingDecorator createFromUnsorted(#E#List base, int... removeIndexes) {
     if (removeIndexes == null || removeIndexes.length == 0)
-      return new Modifying#E#ListRemovingDecorator(base);
-    return new Modifying#E#ListRemovingDecorator(base, prepareUnsortedIndicesInternal(removeIndexes));
+      return new Writable#E#ListRemovingDecorator(base);
+    return new Writable#E#ListRemovingDecorator(base, prepareUnsortedIndicesInternal(removeIndexes));
   }
 
 }

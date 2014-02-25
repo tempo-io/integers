@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,39 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+
+package com.almworks.integers;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
+public class #E#ListDiffIndexedDecorator extends Abstract#E#List {
   private final #E#List mySource;
-  private final IntList myIndexes;
+  private final IntList myIndices;
 
-  public DiffIndexed#E#ListDecorator(#E#List source, IntList indexes) {
+  public #E#ListDiffIndexedDecorator(#E#List source, IntList indices) {
     mySource = source;
-    myIndexes = indexes;
+    myIndices = indices;
   }
 
   public int size() {
-    return myIndexes.size();
+    return myIndices.size();
   }
 
   public #e# get(int index) {
-    return mySource.get(myIndexes.get(index) + index);
+    return mySource.get(myIndices.get(index) + index);
   }
 
   public boolean isEmpty() {
-    return myIndexes.isEmpty();
+    return myIndices.isEmpty();
   }
 
   @NotNull
   public #E#ListIterator iterator(int from, int to) {
-    IntListIterator indexIterator = myIndexes.iterator(from, to);
+    IntListIterator indexIterator = myIndices.iterator(from, to);
     return new DiffIndexedIterator(from, indexIterator);
   }
 
@@ -54,12 +55,11 @@ public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
   }
 
   public IntList getIndexes() {
-    return myIndexes;
+    return myIndices;
   }
 
-  private class DiffIndexedIterator extends Abstract#E#Iterator implements #E#ListIterator {
+  private class DiffIndexedIterator extends Abstract#E#IteratorWithFlag implements #E#ListIterator {
     private int myNext;
-    private boolean myIterated;
     private final IntListIterator myIndexIterator;
 
     public DiffIndexedIterator(int from, IntListIterator indexIterator) {
@@ -86,15 +86,14 @@ public class DiffIndexed#E#ListDecorator extends Abstract#E#List {
       return myIndexIterator.hasNext();
     }
 
-    public #E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    @Override
+    protected void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
       myIndexIterator.next();
       myNext++;
-      myIterated = true;
-      return this;
     }
 
-    public #e# value() throws IllegalStateException {
-      if (!myIterated) throw new NoSuchElementException();
+    @Override
+    protected #e# valueImpl() throws NoSuchElementException {
       int index = myIndexIterator.value() + myNext - 1;
       return mySource.get(index);
     }

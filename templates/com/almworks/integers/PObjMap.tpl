@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.#E#Array;
-import com.almworks.integers.IntegersUtils;
+
+package com.almworks.integers;
+
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,7 +63,7 @@ public class #E#ObjMap<E> implements Iterable<#E#ObjMap.Entry<E>> {
   /**
    * Puts the element for the specified key.
    *
-   * @return if the key was already present in the map, returns the previously stored value. Otherwise, returns null.
+   * @return the previously stored value if the key was already present in the map. Otherwise, null.
    */
   @Nullable
   public E put(#e# key, @NonNls @Nullable E value) {
@@ -149,6 +149,23 @@ public class #E#ObjMap<E> implements Iterable<#E#ObjMap.Entry<E>> {
     return new #E#MapIterator();
   }
 
+  /**
+   * Returns a unique sorted {@link #E#List} view of the keys contained in this map.
+   * The collection is backed by the map, so changes to the map are
+   * reflected in the keySet. Unlike {@link java.util.Map#keySet()},
+   * {@link #E#ObjMap#keySet()} returns read-only list.
+   *
+   * @return #E#List of the values contained in this map
+   * */
+  public #E#List keySet() {
+    return myKeys;
+  }
+
+  public int size() {
+    assert myKeys.size() == myValues.size();
+    return myKeys.size();
+  }
+
   @Override
   public String toString() {
     return "#E#ObjMap " + toList().toString();
@@ -188,9 +205,6 @@ public class #E#ObjMap<E> implements Iterable<#E#ObjMap.Entry<E>> {
       }
     }
 
-    /**
-     * @see ListIterator#remove
-     */
     @Override
     public void remove() {
       if(myLastRetPos == -1) {

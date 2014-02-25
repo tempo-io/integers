@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.Abstract#E#List;
-import com.almworks.integers.#E#Iterator;
-import com.almworks.integers.#E#List;
-import com.almworks.integers.#E#ListIterator;
-import com.almworks.integers.IntegersUtils;
+
+package com.almworks.integers;
+
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
+/**
+ * List that allows to access a concatenation of several lists (here called slices) as a list
+ * as if they go one after the other.
+ * <br>Changes in lists propagate to this list — added / removed values are immediately visible through this list.
+ * <br>Because of that, {@link #get(int)}, {@link #indexOf(#e#)}, {@link #size()}, {@link #isEmpty()} are O(n).
+ * <br>Slices can be added during the lifetime of the list.
+ */
 public class #E#ListConcatenation extends Abstract#E#List {
   private final List<#E#List> mySlices = IntegersUtils.arrayList();
 
@@ -36,7 +40,7 @@ public class #E#ListConcatenation extends Abstract#E#List {
     mySlices.addAll(Arrays.asList(collections));
   }
 
-  public #e#[] toArray(int sourceOffset, #e#[] dest, int destOffset, int length) {
+  public #e#[] toNativeArray(int sourceOffset, #e#[] dest, int destOffset, int length) {
     int slices = mySlices.size();
     for (int i = 0; i < slices && length > 0; i++) {
       #E#List list = mySlices.get(i);
@@ -45,7 +49,7 @@ public class #E#ListConcatenation extends Abstract#E#List {
         sourceOffset -= size;
       } else {
         int x = Math.min(size - sourceOffset, length);
-        list.toArray(sourceOffset, dest, destOffset, x);
+        list.toNativeArray(sourceOffset, dest, destOffset, x);
         destOffset += x;
         sourceOffset = 0;
         length -= x;

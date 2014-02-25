@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class Empty#E#Iterator extends Abstract#E#Iterator implements Writable#E#ListIterator {
+public class #E#EmptyIterator extends Abstract#E#Iterator implements Writable#E#ListIterator {
   public void set(int offset, #e# value) throws NoSuchElementException {
     throw new NoSuchElementException();
   }
@@ -41,12 +43,18 @@ public class Empty#E#Iterator extends Abstract#E#Iterator implements Writable#E#
     throw new NoSuchElementException();
   }
 
+  public boolean hasValue() {
+    return false;
+  }
+
   public #e# value() throws NoSuchElementException {
     throw new NoSuchElementException();
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
-    throw new NoSuchElementException();
+    if (offset != 0) {
+      throw new NoSuchElementException();
+    }
   }
 
   public #e# get(int offset) throws NoSuchElementException {

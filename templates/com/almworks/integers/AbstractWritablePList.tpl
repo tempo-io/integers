@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
-import com.almworks.integers.func.#E#Function;
-// function on indices, hence int
-import com.almworks.integers.func.IntFunction2;
-// function on indices, hence int
+import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.#E#To#E#;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class AbstractWritable#E#List extends Abstract#E#List implements Writable#E#List {
+// function on indices, hence int
+// function on indices, hence int
+
+  public abstract class AbstractWritable#E#List extends Abstract#E#List implements Writable#E#List {
   private transient int myModCount;
   private int mySize;
 
@@ -82,9 +85,10 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     }
   }
 
-  public void addAll(#E#Iterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
+  public void addAll(#E#Iterable iterable) {
+    for (#E#Iterator it : iterable) {
+      add(it.value());
+    }
   }
 
   public void addAll(#e#... values) {
@@ -112,33 +116,35 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     return value;
   }
 
-  public void removeAll(#e# value) {
+  // todo more effective - we do extra copies
+  public boolean removeAll(#e# value) {
+    boolean modified = false;
     for (Writable#E#ListIterator ii : write()) {
       if (ii.value() == value) {
         ii.remove();
+        modified = true;
       }
     }
+    return modified;
   }
 
-  /**
-   * Removes all appearances of value if this collection is sorted
-   */
-  public void removeAllSorted(#e# value) {
+  public boolean removeAllSorted(#e# value) {
     int from = binarySearch(value);
     if (from >= 0) {
       int to;
       if (value < #EW#.MAX_VALUE) {
-        to = binarySearch((#e#)(value + 1), from + 1, size());
+        to = binarySearch(value + 1, from + 1, size());
         if (to < 0)
           to = -to - 1;
       } else to = size();
       assert to > from : from + " " + to;
       removeRange(from, to);
+      return true;
     }
+    return false;
   }
 
   /**
-   * Removes all values contained in collection.
    * <p/>
    * Method 1: iterate through this, lookup collection
    * Cost 1: N*cost(lookup(R))
@@ -149,15 +155,19 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
    * <p/>
    * // todo something effective
    */
-  public void removeAll(#E#List collection) {
-    for (#E#Iterator ii : collection)
-      removeAll(ii.value());
+  public boolean removeAll(#E#Iterable iterable) {
+    boolean modified = false;
+    for (#E#Iterator ii : iterable) {
+      modified |= removeAll(ii.value());
+    }
+    return modified;
   }
 
-  public void removeAll(#e#... values) {
+  public boolean removeAll(#e#... values) {
     if (values != null && values.length > 0) {
-      removeAll(new #E#Array(values));
+      return removeAll(new #E#NativeArrayIterator(values));
     }
+    return false;
   }
 
   public void clear() {
@@ -209,6 +219,12 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     if (count <= 0) return;
     int sz = size();
     checkAddedCount(index, count, sz);
+    if (values == this || values instanceof SubList && ((SubList) values).getParent() == this) {
+      for (int i = 0, sourceIndex = sourceOffset; i < count; i++, sourceIndex++) {
+        set(index + i, values.get(sourceIndex));
+      }
+      return;
+    }
     transfer(values.iterator(sourceOffset, sourceOffset + count), iterator(index, sz), count);
   }
 
@@ -228,18 +244,22 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
     }
   }
 
-  public void apply(int from, int to, #E#Function function) {
+  public void apply(int from, int to, #E#To#E# function) {
     for (int i = from; i < to; i++)
       set(i, function.invoke(get(i)));
   }
 
-  public void sort(final Writable#E#List ... sortAlso) {
+  /**
+   * Sorts this list using quicksort copied from {@link java.util.Arrays#sort(int[])} then corrected
+   * @param sortAlso lists in which the order is changed as well as this list
+   */
+  public void sort(final Writable#E#List... sortAlso) {
     if (sortAlso != null) {
       for (Writable#E#List list : sortAlso) {
         assert list.size() == size();
       }
     }
-    IntegersUtils.quicksort(size(), new IntFunction2() {
+    IntegersUtils.quicksort(size(), new IntIntToInt() {
       public int invoke(int a, int b) {
         return #E#Collections.compare(get(a), get(b));
       }
@@ -252,6 +272,11 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
           }
       }
     });
+  }
+
+  public void sortUnique() {
+    sort();
+    removeDuplicates();
   }
 
   public void swap(int index1, int index2) {
@@ -280,8 +305,11 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
   }
 
   public void insertMultiple(int index, #e# value, int count) {
-    if (count <= 0)
-      return;
+    if (count < 0) throw new IllegalArgumentException();
+    if (index < 0 || index > size())
+      throw new IndexOutOfBoundsException(index + " " + this);
+    if (count == 0) return;
+
     expand(index, count);
     setRange(index, index + count, value);
   }
@@ -295,7 +323,21 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
 
   public void reverse() {
     int j = size() - 1;
-    for (int i = 0; i < j; i++, j--) swap(i,j);
+    for (int i = 0; i < j; i++, j--) {
+      swap(i,j);
+    }
+  }
+
+  /** Updates the value in this list at the specified index; if list is currently shorter, it is first appended
+   * with {@code defaultValue} up to {@code idx}.
+   * @param update the update function to apply. See {@link com.almworks.integers.func.#E#Functions}
+   * @return the updated value
+   * */
+  public #e# update(int idx, #e# defaultValue, #E#To#E# update) {
+    if (size() <= idx) insertMultiple(size(), defaultValue, idx - size() + 1);
+    #e# updated = update.invoke(get(idx));
+    set(idx, updated);
+    return updated;
   }
 
   protected class WritableIndexIterator extends IndexIterator implements Writable#E#ListIterator {
@@ -336,6 +378,11 @@ public abstract class AbstractWritable#E#List extends Abstract#E#List implements
       if (isJustRemoved())
         throw new IllegalStateException();
       return super.value();
+    }
+
+    public boolean hasValue() throws ConcurrentModificationException {
+      checkMod();
+      return super.hasValue();
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {

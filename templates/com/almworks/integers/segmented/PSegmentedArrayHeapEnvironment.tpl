@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.optimized;
 
-public class Segmented#E#ArrayHeapEnvironment implements Segmented#E#ArrayEnvironment {
-  public static final Segmented#E#ArrayEnvironment INSTANCE = new Segmented#E#ArrayHeapEnvironment();
+
+package com.almworks.integers.segmented;
+
+public class #E#SegmentedArrayHeapEnvironment implements #E#SegmentedArrayEnvironment {
+  public static final #E#SegmentedArrayEnvironment INSTANCE = new #E#SegmentedArrayHeapEnvironment();
 
   public #E#Segment allocate(int size) {
     return new #E#Segment(size);

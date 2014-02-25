@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
 import org.jetbrains.annotations.Nullable;
@@ -27,11 +29,11 @@ import org.jetbrains.annotations.Nullable;
  * three lists, {a1,a2,a3}, {b1,b2,b3}, {c1,c2,c3},
  * would be stored as {a1,b1,c1,a2,b2,c2,a3,b3,c3}
  */
-public class Parallel#E#List {
+public class #E#ParallelList {
   private final Writable#E#List myStorage;
   private final int myListCount;
 
-  public Parallel#E#List(Writable#E#List storage, int listCount) {
+  public #E#ParallelList(Writable#E#List storage, int listCount) {
     if (storage == null)
       throw new NullPointerException();
     if (!storage.isEmpty())
@@ -61,10 +63,11 @@ public class Parallel#E#List {
   public void get(int offset, #e#[] dst) {
     if (dst == null || dst.length < getListCount())
       throw new IllegalArgumentException();
-    myStorage.toArray(offset * getListCount(), dst, 0, getListCount());
+    myStorage.toNativeArray(offset * getListCount(), dst, 0, getListCount());
   }
 
   public void set(int offset, int list, #e# value) {
+    assert 0 <= list && list < getListCount();
     myStorage.set(offset * getListCount() + list, value);
   }
 
@@ -78,8 +81,8 @@ public class Parallel#E#List {
     myStorage.insertAll(offset * getListCount(), new #E#Array(values));
   }
 
-  public Iterator iterator(int offset) {
-    return new Iterator(myStorage.iterator(offset * getListCount()));
+  public Iterator iterator(int from) {
+    return new Iterator(myStorage.iterator(from * getListCount()));
   }
 
   public Iterator iterator(int from, int to) {
@@ -136,7 +139,7 @@ public class Parallel#E#List {
 
     public #e# get(int offset, int list) {
       if (list < 0 || list >= getListCount()) throw new IllegalArgumentException();
-      return myIt.get(getListCount() * (offset - 1) + list);
+      return myIt.get(getListCount() * (offset - 1) + list + 1);
     }
 
     public void removeRange(int from, int to) {
@@ -146,6 +149,7 @@ public class Parallel#E#List {
     }
 
     public void set(int offset, int list, #e# value) {
+      assert 0 <= list && list < getListCount();
       myIt.set(getListCount() * (offset - 1) + list + 1, value);
     }
 
@@ -165,7 +169,7 @@ public class Parallel#E#List {
     }
 
     public int size() {
-      return Parallel#E#List.this.size();
+      return #E#ParallelList.this.size();
     }
 
     public #e# get(int index) {

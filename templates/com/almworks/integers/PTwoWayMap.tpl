@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
-import com.almworks.integers.func.*;
-import org.jetbrains.annotations.*;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.#E##E#To#E#;
+import com.almworks.integers.func.#E#To#E#;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +33,10 @@ import java.util.List;
  * Keys and values are sorted, and it is possible to retrieve either value by key or key by value. However, mappings are still added only by key. <br/>
  * The mapping is stored in a separate list in the following way: if {@code (k, v)} is a stored pair, then {@code v = vals[idxMap[i]]}, where {@code k = keys[i]}.
  * */
-public class TwoWay#E#Map {
+public class #E#TwoWayMap {
   private final #E#Array myKeys = new #E#Array();
   private final IntArray myIdxMap = new IntArray();
-  private final #E#Array myVals = new #E#Array();
+  private final #E#Array myValues = new #E#Array();
 
   public boolean containsKey(#e# key) {
     return myKeys.binarySearch(key) >= 0;
@@ -45,7 +51,7 @@ public class TwoWay#E#Map {
   }
 
   public boolean containsKeys(#E#List keys, boolean all) {
-    #EW# key;
+    #E# key;
     if (keys.isSorted()) {
       key = containsKeysSorted(keys, all);
     } else {
@@ -56,7 +62,7 @@ public class TwoWay#E#Map {
 
   /** @return returns the first key from <tt>keys</tt> that (is contained in the map if <tt>shouldContain</tt> and is not contained in the map otherwise) if such key exists, otherwise <tt>null</tt>. */
   @Nullable
-  private #EW# containsKeysSorted(#E#List keys, boolean shouldContain) {
+  private #E# containsKeysSorted(#E#List keys, boolean shouldContain) {
     for (int i = 0,
       m = keys.size(),
       pos = 0,
@@ -73,7 +79,7 @@ public class TwoWay#E#Map {
 
   /** @return returns the first key from <tt>keys</tt> that (is contained in the map if <tt>shouldContain</tt> and is not contained in the map otherwise) if such key exists, otherwise <tt>null</tt>. */
   @Nullable
-  private #EW# containsKeysUnsorted(#E#List keys, boolean shouldContain) {
+  private #E# containsKeysUnsorted(#E#List keys, boolean shouldContain) {
     for (int i = 0, iEnd = keys.size(); i < iEnd; ++i) {
       #e# key = keys.get(i);
       if (containsKey(key) != shouldContain) return key;
@@ -81,8 +87,8 @@ public class TwoWay#E#Map {
     return null;
   }
 
-  public boolean containsVal(#e# val) {
-    return myVals.binarySearch(val) >= 0;
+  public boolean containsValue(#e# val) {
+    return myValues.binarySearch(val) >= 0;
   }
 
   /** Throws {@link IllegalArgumentException} if the map does not contain the mapping for the key.
@@ -90,21 +96,21 @@ public class TwoWay#E#Map {
   public #e# get(#e# key) throws IllegalArgumentException {
     int i = myKeys.binarySearch(key);
     if (i < 0) throw new IllegalArgumentException("Key " + key + " is not contained in " + this);
-    return myVals.get(myIdxMap.get(i));
+    return myValues.get(myIdxMap.get(i));
   }
 
   public #E#List getKeys() {
     return myKeys;
   }
 
-  public #E#List getVals() {
-    return myVals;
+  public #E#List getValues() {
+    return myValues;
   }
 
   public void clear() {
     myKeys.clear();
     myIdxMap.clear();
-    myVals.clear();
+    myValues.clear();
   }
 
   public int size() {
@@ -115,7 +121,7 @@ public class TwoWay#E#Map {
     int n = size();
     List<Entry> l = new ArrayList<Entry>(n);
     for (int i = 0; i < n; ++i) {
-      l.add(new Entry(myKeys.get(i), myVals.get(myIdxMap.get(i))));
+      l.add(new Entry(myKeys.get(i), myValues.get(myIdxMap.get(i))));
     }
     return l;
   }
@@ -133,19 +139,19 @@ public class TwoWay#E#Map {
     #e# ret;
     if (i >= 0) {
       int oldPos = myIdxMap.get(i);
-      ret = myVals.removeAt(oldPos);
-      int newPos = myVals.binarySearch(val);
+      ret = myValues.removeAt(oldPos);
+      int newPos = myValues.binarySearch(val);
       if (newPos < 0) newPos = -newPos - 1;
-      myVals.insert(newPos, val);
+      myValues.insert(newPos, val);
       shiftValueIndexes(oldPos, newPos);
       myIdxMap.set(i, newPos);
     } else {
       ret = val;
       int ki = -i - 1;
       myKeys.insert(ki, key);
-      int vi = myVals.binarySearch(val);
+      int vi = myValues.binarySearch(val);
       if (vi < 0) vi = -vi - 1;
-      myVals.insert(vi, val);
+      myValues.insert(vi, val);
       shiftValueIndexes(myIdxMap.size(), vi);
       myIdxMap.insert(ki, vi);
     }
@@ -169,9 +175,9 @@ public class TwoWay#E#Map {
   }
 
   private boolean checkInvariants(String action) {
-    assert myKeys.size() == myIdxMap.size() && myKeys.size() == myVals.size() : action + '\n' + myKeys + '\n' + myIdxMap + '\n' + myVals;
+    assert myKeys.size() == myIdxMap.size() && myKeys.size() == myValues.size() : action + '\n' + myKeys + '\n' + myIdxMap + '\n' + myValues;
     assert myKeys.isSorted() : action + ' ' + myKeys;
-    assert myVals.isSorted() : action + ' ' + myVals;
+    assert myValues.isSorted() : action + ' ' + myValues;
     assert checkIdxMap() : action + ' ' + myIdxMap;
     return true;
   }
@@ -186,14 +192,14 @@ public class TwoWay#E#Map {
     insertAll(new #E#Array(keys), new #E#Array(vals));
   }
 
-  public void insertAllRo(#E#List keys, #E#Function keyToVal) {
-    insertAll(new #E#Array(keys), keyToVal);
+  public void insertAllRo(#E#List keys, #E#To#E# keyToValue) {
+    insertAll(new #E#Array(keys), keyToValue);
   }
 
-  public void insertAll(Writable#E#List keys, #E#Function keyToVal) {
+  public void insertAll(Writable#E#List keys, #E#To#E# keyToValue) {
     int m = keys.size();
     #E#Array vals = new #E#Array(m);
-    for (int i = 0; i < m; ++i) vals.add(keyToVal.invoke(keys.get(i)));
+    for (int i = 0; i < m; ++i) vals.add(keyToValue.invoke(keys.get(i)));
     insertAll(keys, vals);
   }
 
@@ -208,7 +214,7 @@ public class TwoWay#E#Map {
     int n = myIdxMap.size();
 
     if (vals.size() != m) throw new IllegalArgumentException("Sizes of keys and values lists are not equal: " + m + " keys, but " + vals.size() + " values");
-    #EW# violatingKey = containsKeysUnsorted(keys, false);
+    #E# violatingKey = containsKeysUnsorted(keys, false);
     if (violatingKey != null) throw new IllegalArgumentException("Cannot insert multiple mappings because key " + violatingKey + " is already contained");
     int duplicateKeyIdx = #E#Collections.findDuplicate(keys);
     if (duplicateKeyIdx >= 0) throw new IllegalArgumentException("Duplicate key " + keys.get(duplicateKeyIdx));
@@ -218,11 +224,11 @@ public class TwoWay#E#Map {
     int ins = 0;
     for (int i = 0; i < m; ++i) {
       #e# val = vals.get(i);
-      ins = myVals.binarySearch(val, ins, n);
+      ins = myValues.binarySearch(val, ins, n);
       if (ins < 0) ins = -ins - 1;
       insPoints.add(ins);
     }
-    // Fix current value indexes
+    // Fix current value indices
     for (int i = 0; i < n; ++i) {
       int pos = myIdxMap.get(i);
       // diff = "how many items will be inserted before i-th value index"
@@ -230,7 +236,7 @@ public class TwoWay#E#Map {
       if (diff < 0) diff = -diff - 1;
       myIdxMap.set(i, pos + diff);
     }
-    // Insert values, keys, and value indexes
+    // Insert values, keys, and value indices
     int insDiff = 0;
     for (int i = 0; i < m; ) {
       ins = insPoints.get(i);
@@ -240,13 +246,13 @@ public class TwoWay#E#Map {
         int ki = myKeys.binarySearch(key);
         if (ki >= 0) {
           assert false : key;
-          throw new IllegalArgumentException("TwoWay#E#Map is broken");
+          throw new IllegalArgumentException("#E#TwoWayMap is broken");
         }
         ki = -ki - 1;
         myKeys.insert(ki, key);
         myIdxMap.insert(ki, ins + insDiff + (i - s));
       }
-      myVals.insertAll(ins + insDiff, vals.subList(s, i));
+      myValues.insertAll(ins + insDiff, vals.subList(s, i));
       insDiff += i - s;
     }
     assert checkInvariants(keys + "\n" + vals);
@@ -254,23 +260,23 @@ public class TwoWay#E#Map {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformVals(@NotNull #E#Function f) {
-    transformVals(#EW#.MIN_VALUE, f);
+  public void transformValues(@NotNull #E#To#E# f) {
+    transformValues(#EW#.MIN_VALUE, f);
   }
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformVals(#e# valFrom, @NotNull #E#Function f) {
+  public void transformValues(#e# valFrom, @NotNull #E#To#E# f) {
     int n = size();
     boolean isSortingBroken = false;
-    #e# lastVal = #EW#.MIN_VALUE;
-    int viFrom = myVals.binarySearch(valFrom);
+    #e# lastValue = #EW#.MIN_VALUE;
+    int viFrom = myValues.binarySearch(valFrom);
     if (viFrom < 0) viFrom = -viFrom - 1;
     for (int vi = viFrom; vi < n; ++vi) {
-      #e# val = f.invoke(myVals.get(vi));
-      myVals.set(vi, val);
-      if (val < lastVal) isSortingBroken = true;
-      lastVal = val;
+      #e# val = f.invoke(myValues.get(vi));
+      myValues.set(vi, val);
+      if (val < lastValue) isSortingBroken = true;
+      lastValue = val;
     }
     if (isSortingBroken) {
       restoreIndexMap(n);
@@ -279,13 +285,13 @@ public class TwoWay#E#Map {
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
-  public void transformVals(@NotNull #E#Function2 f) {
+  public void transformValues(@NotNull #E##E#To#E# f) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
       int vi = myIdxMap.get(ki);
-      myVals.set(vi, f.invoke(myKeys.get(ki), myVals.get(vi)));
+      myValues.set(vi, f.invoke(myKeys.get(ki), myValues.get(vi)));
     }
-    if (!myVals.isSorted()) {
+    if (!myValues.isSorted()) {
       restoreIndexMap(n);
     }
     assert checkInvariants(String.valueOf(f));
@@ -296,17 +302,17 @@ public class TwoWay#E#Map {
     final IntArray r = new IntArray(IntProgression.arithmetic(0, n));
     IntegersUtils.quicksort(n,
       // order
-      new IntFunction2() {
+      new IntIntToInt() {
         @Override
         public int invoke(int i, int j) {
-          return #E#Collections.compare(myVals.get(i), myVals.get(j));
+          return #E#Collections.compare(myValues.get(i), myValues.get(j));
         }
       },
       // swap
       new IntProcedure2() {
         @Override
         public void invoke(int i, int j) {
-          myVals.swap(i, j);
+          myValues.swap(i, j);
           r.swap(i, j);
         }
       }
@@ -328,7 +334,7 @@ public class TwoWay#E#Map {
   }
 
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
-  public void transformKeys(#E#Function injection) throws NonInjectiveFunctionException {
+  public void transformKeys(#E#To#E# injection) throws NonInjectiveFunctionException {
     int n = size();
     #E#Array newKeys = new #E#Array(n);
     for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
@@ -336,7 +342,7 @@ public class TwoWay#E#Map {
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
     int dupIdx = #E#Collections.findDuplicateSorted(newKeys);
-    if (dupIdx >= 0) throw new NonInjectiveFunctionException(newKeys.get(dupIdx), injection + " is not an injective function: generated duplicate key " + newKeys.get(dupIdx) + ", value: " + myVals.get(newIdxMap.get(dupIdx)));
+    if (dupIdx >= 0) throw new NonInjectiveFunctionException(newKeys.get(dupIdx), injection + " is not an injective function: generated duplicate key " + newKeys.get(dupIdx) + ", value: " + myValues.get(newIdxMap.get(dupIdx)));
     myKeys.clear();
     myIdxMap.clear();
     myKeys.addAll(newKeys);
@@ -350,7 +356,7 @@ public class TwoWay#E#Map {
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
       // compare
-      new IntFunction2() { public int invoke(int a, int b) {
+      new IntIntToInt() { public int invoke(int a, int b) {
         return #E#Collections.compare(main.get(a), main.get(b));
       }},
       // swap
@@ -371,7 +377,7 @@ public class TwoWay#E#Map {
     if (ki >= 0) {
       myKeys.removeAt(ki);
       int vi = myIdxMap.removeAt(ki);
-      #e# val = myVals.removeAt(vi);
+      #e# val = myValues.removeAt(vi);
       shiftValueIndexes(vi, myIdxMap.size());
       assert checkInvariants(key + " " + val);
       return val;
@@ -405,34 +411,34 @@ public class TwoWay#E#Map {
         myKeys.removeAt(ki);
         int vi = myIdxMap.removeAt(ki);
         visToRemove.add(vi);
-        vsToRemove.add(myVals.get(vi));
+        vsToRemove.add(myValues.get(vi));
       }
     }
 
     sort(vsToRemove, visToRemove);
-    removeValsSorted0(vsToRemove, visToRemove);
+    removeValuesSorted0(vsToRemove, visToRemove);
 
     assert checkInvariants(String.valueOf(keys));
     return notInMap == null ? #E#Array.EMPTY : notInMap;
   }
 
-  private void removeValsSorted0(Writable#E#List vsToRemove, WritableIntList visToRemove) {
+  private void removeValuesSorted0(Writable#E#List vsToRemove, WritableIntList visToRemove) {
     // Fix index map before removing values: we have to shift remaining values back
     int mRem = vsToRemove.size();
     int nLeft = myIdxMap.size();
     for (int i = 0; i < nLeft; ++i) {
       int vi = myIdxMap.get(i);
-      #e# v = myVals.get(vi);
+      #e# v = myValues.get(vi);
       int d = vsToRemove.binarySearch(v);
       if (d < 0) d = -d - 1;
       else {
         // Consider the following example:
         // vis:        [0 1 2 3 4]
-        // myVals:      1 2 3 3 3
+        // myValues:      1 2 3 3 3
         // vsToRemove:  ^     ^
         // Here, element with vi = 2 should be shifted 1 position left and with vi = 4 -- 2 positions left.
-        // In other words, we have to scroll through all values being removed that are equal to the current value, v, and decrement current index, vi, by the amount of removed values to the left of v in myVals.
-        // Note that d denotes the leftmost element of vsToRemove that is equal to v (but not necessarily the leftmost equal to v in myVals).
+        // In other words, we have to scroll through all values being removed that are equal to the current value, v, and decrement current index, vi, by the amount of removed values to the left of v in myValues.
+        // Note that d denotes the leftmost element of vsToRemove that is equal to v (but not necessarily the leftmost equal to v in myValues).
         for (int j = d; j < mRem && vsToRemove.get(j) == v; ++j) {
           if (visToRemove.get(j) < vi)
             d += 1;
@@ -443,17 +449,17 @@ public class TwoWay#E#Map {
 
     // Remove values
     visToRemove.sort();
-    #E#Collections.removeAllAtSorted(myVals, visToRemove);
+    #E#Collections.removeAllAtSorted(myValues, visToRemove);
   }
 
   @NotNull
-  public #E#List removeAllValsRo(#E#List vals) {
-    return removeAllVals(new #E#Array(vals));
+  public #E#List removeAllValuesRo(#E#List vals) {
+    return removeAllValues(new #E#Array(vals));
   }
 
   /** @return list of values that have not been removed (not contained in the map) */
   @NotNull
-  public #E#List removeAllVals(Writable#E#List vals) {
+  public #E#List removeAllValues(Writable#E#List vals) {
     if (!vals.isSorted()) vals.sort();
     vals.removeDuplicates();
     int m = vals.size();
@@ -472,7 +478,7 @@ public class TwoWay#E#Map {
     }
     #E#Collections.removeAllAtSorted(myKeys, kisToRemove);
     IntCollections.removeAllAtSorted(myIdxMap, kisToRemove);
-    removeValsSorted0(vsToRemove, visToRemove);
+    removeValuesSorted0(vsToRemove, visToRemove);
 
     assert checkInvariants(String.valueOf(vals));
     return notInMap == null ? #E#List.EMPTY : notInMap;
@@ -486,7 +492,7 @@ public class TwoWay#E#Map {
       #e# v = vals.get(i);
       boolean inMap = false;
       do {
-        int nvi = myVals.binarySearch(v, vi, n);
+        int nvi = myValues.binarySearch(v, vi, n);
         if (nvi < 0) break;
         vi = nvi;
         visToRemove.add(vi);
@@ -501,7 +507,7 @@ public class TwoWay#E#Map {
 
   @Override
   public String toString() {
-    return "K: " + myKeys + "\nM: " + myIdxMap + "\nV: " + myVals;
+    return "K: " + myKeys + "\nM: " + myIdxMap + "\nV: " + myValues;
   }
 
   public static class Entry {

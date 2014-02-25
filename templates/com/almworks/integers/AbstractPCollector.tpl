@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
-public abstract class #E#CollectorAdapter implements #E#Collector {
+public abstract class Abstract#E#Collector implements #E#Collector {
   public void addAll(#E#List values) {
     addAll(values.iterator());
   }
 
-  public void addAll(#E#Iterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
+  public void addAll(#E#Iterable iterable) {
+    for (#E#Iterator it : iterable) {
+      add(it.value());
+    }
   }
 
   public void addAll(#e#... values) {

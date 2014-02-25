@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
 import java.util.NoSuchElementException;
 
-public class List#E#Map {
+public class #E#ParallelListMap {
   private final #E#List myKeys;
   private final #E#List myValues;
 
-  private final Parallel#E#List myMap;
+  private final #E#ParallelList myMap;
 
-  public List#E#Map() {
+  public #E#ParallelListMap() {
     this(new #E#Array());
   }
 
-  public List#E#Map(Writable#E#List storage) {
+  public #E#ParallelListMap(Writable#E#List storage) {
     if (storage == null)
       throw new NullPointerException();
     if (!storage.isEmpty())
       throw new IllegalArgumentException();
-    myMap = new Parallel#E#List(storage, 2);
+    myMap = new #E#ParallelList(storage, 2);
     myKeys = myMap.createListAccessor(0);
     myValues = myMap.createListAccessor(1);
   }
@@ -155,16 +157,10 @@ public class List#E#Map {
    * Modifies all keys within range by adding increment to each key.
    */
   public void adjustKeys(int from, int to, #e# increment) {
-    if (from >= to) {
-      return;
-    }
-    if (from < 0) {
-      throw new IndexOutOfBoundsException(from + " " + this);
-    }
+    if (from >= to) return;
+    if (from < 0) throw new IndexOutOfBoundsException(from + " " + this);
     int sz = size();
-    if (to > sz) {
-      throw new IndexOutOfBoundsException(to + " " + this);
-    }
+    if (to > sz) throw new IndexOutOfBoundsException(to + " " + this);
     if (from > 0) {
       #e# b = (#e#)(getKey(from) + increment);
       if (getKey(from- 1) >= b)
@@ -175,7 +171,7 @@ public class List#E#Map {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
-    for (Parallel#E#List.Iterator ii = myMap.iterator(from, to); ii.hasNext();) {
+    for (#E#ParallelList.Iterator ii = myMap.iterator(from, to); ii.hasNext();) {
       ii.next(null);
       ii.set(0, 0, (#e#)(ii.get(0, 0) + increment));
     }
@@ -194,7 +190,7 @@ public class List#E#Map {
   }
 
   public class Iterator {
-    private final Parallel#E#List.Iterator ii;
+    private final #E#ParallelList.Iterator ii;
     private final #e#[] myKeyValue = new #e#[2];
     private boolean myEntry;
 

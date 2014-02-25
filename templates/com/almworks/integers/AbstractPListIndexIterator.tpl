@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
@@ -26,6 +28,7 @@ public abstract class Abstract#E#ListIndexIterator extends Abstract#E#Iterator i
 
   protected Abstract#E#ListIndexIterator(int from, int to) {
     if (from > to) throw new IllegalArgumentException(from + " > " + to);
+    if (from < 0) throw new IllegalArgumentException("from < 0");
     myFrom = from;
     myTo = to;
     myNext = myFrom;
@@ -43,8 +46,13 @@ public abstract class Abstract#E#ListIndexIterator extends Abstract#E#Iterator i
     return this;
   }
 
+  public boolean hasValue() {
+    return myFrom < myNext;
+  }
+
   public #e# value() throws NoSuchElementException {
-    if (myNext <= myFrom) throw new NoSuchElementException();
+    if (!hasValue())
+      throw new NoSuchElementException();
     return absget(myNext-1);
   }
 

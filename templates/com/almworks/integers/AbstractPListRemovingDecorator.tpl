@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.*;
-import static com.almworks.integers.IntegersUtils.*;
+
+package com.almworks.integers;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
+import static com.almworks.integers.IntegersUtils.arrayCopy;
+
 /**
  * Removing decorator for a native int list.
  */
-public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator {
-  protected #E#ListRemovingDecorator(#E#List base) {
+public abstract class Abstract#E#ListRemovingDecorator extends Abstract#E#ListDecorator {
+  protected Abstract#E#ListRemovingDecorator(#E#List base) {
     super(base);
   }
 
@@ -61,6 +63,9 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
     return true;
   }
 
+  /**
+   * @return count of elements, removed before {@code index}
+   */
   protected final int removedBefore(int index) {
     int idx = getRemovedPrepared().binarySearch(index + 1);
     if (idx < 0)
@@ -78,7 +83,7 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
   }
 
   public #E#Iterator removedValueIterator() {
-    return new Indexed#E#ListIterator(base(), removedIndexIterator());
+    return new #E#ListIndexedIterator(base(), removedIndexIterator());
   }
 
   public int getRemoveCount() {
@@ -117,7 +122,7 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
    */
   protected static void prepareSortedIndicesInternal(WritableIntList indices) {
     int i = 1;
-    int last = Integer.MIN_VALUE;
+    int last = 0;
     // todo apply "-i" when sortedRemoveIndexes are collected
     for (WritableIntListIterator ii = indices.iterator(1); ii.hasNext();) {
       int value = ii.nextValue();
@@ -130,11 +135,11 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
 
   /**
    * For the given list of remove indices (may be empty, unsorted, or contain duplicates), creates a prepared list of remove indices ready to be used by implementations of this class.
-   * @param removeIndexes remove indexes
+   * @param removeIndices remove indices
    * @return
    */
-  protected static IntArray prepareUnsortedIndicesInternal(int... removeIndexes) {
-    int[] correctRemove = arrayCopy(removeIndexes);
+  protected static IntArray prepareUnsortedIndicesInternal(int... removeIndices) {
+    int[] correctRemove = arrayCopy(removeIndices);
     Arrays.sort(correctRemove);
     int dupCount = 0;
     int prev = 0;
@@ -150,39 +155,58 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
   }
 
   private class LocalIterator extends Abstract#E#ListIndexIterator {
-    private int myNextRemoved;
     private #E#ListIterator myBaseIterator;
-    private #e# myValue;
+    private int myNextRemovedIndex;
 
     private LocalIterator(int from, int to) {
       super(from, to);
-      myNextRemoved = removedBefore(from);
-      myBaseIterator = base().iterator(from + myNextRemoved);
+      int count = removedBefore(from);
+      // super iterator checks borders, so we can suppose that from and to are correct.
+      myBaseIterator = base().iterator();
+      int offset = from + count;
+      if (offset != 0) {
+        myBaseIterator.move(offset);
+      }
+      updateMyNextRemovedIndex(count);
+    }
+
+    /**
+     * Converts {@code count} in removed indices to the corresponding position in myBaseList
+     * and sets the obtained value to the myNextRemovedIndex
+     */
+    private void updateMyNextRemovedIndex(int count) {
+      assert count >= 0;
+      if (count < getRemoveCount()) {
+        myNextRemovedIndex = getRemovedPrepared().get(count) + count;
+      } else {
+        myNextRemovedIndex = -1;
+      }
     }
 
     public #E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      if (getNextIndex() >= getTo())
-        throw new NoSuchElementException();
-      setNext(getNextIndex() + 1);
-      myValue = myBaseIterator.nextValue();
-      IntList removedPrepared = getRemovedPrepared();
-      int rs = removedPrepared.size();
-      if (myNextRemoved < rs) {
-        int nr = removedPrepared.binarySearch(getNextIndex() + 1, myNextRemoved, rs);
-        if (nr < 0)
-          nr = -nr - 1;
-        if (nr > myNextRemoved) {
-          myBaseIterator.move(nr - myNextRemoved);
-          myNextRemoved = nr;
-        }
+      super.next();
+      myBaseIterator.next();
+      if (myBaseIterator.index() == myNextRemovedIndex) {
+        updateBaseIterator();
       }
       return this;
     }
 
+    /**
+     * Updates position of myBaseIterator in accordance with this iterator position.
+     */
+    private void updateBaseIterator() {
+      int count = removedBefore(index());
+      int offset = index() + count - (myBaseIterator.hasValue() ? myBaseIterator.index() : -1);
+      myBaseIterator.move(offset);
+      updateMyNextRemovedIndex(count);
+    }
+
     public #e# value() {
-      if (getNextIndex() <= getFrom())
+      if (!hasValue()) {
         throw new NoSuchElementException();
-      return myValue;
+      }
+      return myBaseIterator.value();
     }
 
     public boolean hasNext() {
@@ -190,19 +214,18 @@ public abstract class #E#ListRemovingDecorator extends Abstract#E#ListDecorator 
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
-      // todo more effective move?
       super.move(count);
       if (count != 0) {
-        myNextRemoved = removedBefore(getNextIndex());
-        myBaseIterator = base().iterator(getNextIndex() + myNextRemoved);
+        updateBaseIterator();
       }
     }
 
     protected #e# absget(int index) {
-      if (index == getNextIndex())
-        return myBaseIterator.get(1);
-      else
-        return #E#ListRemovingDecorator.this.get(index);
+      if (index == index()) {
+        return value();
+      } else {
+        return Abstract#E#ListRemovingDecorator.this.get(index);
+      }
     }
   }
 }

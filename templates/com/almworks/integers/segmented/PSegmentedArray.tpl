@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.optimized;
+
+
+package com.almworks.integers.segmented;
 
 import com.almworks.integers.*;
-import com.almworks.integers.func.#E#Function;
-import com.almworks.integers.func.#E#Function2;
+import com.almworks.integers.func.#E#To#E#;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class Segmented#E#Array extends AbstractWritable#E#List implements Cloneable {
+public class #E#SegmentedArray extends AbstractWritable#E#List implements Cloneable {
   private static final int SEGB_INITIAL = 4;
   private static final int SEGS_INITIAL = 1 << SEGB_INITIAL;
   private static final int SEGB_LARGE = 10;
   private static final int SEGS_LARGE = 1 << SEGB_LARGE;
 
-  private final Segmented#E#ArrayEnvironment myEnv;
+  private final #E#SegmentedArrayEnvironment myEnv;
 
   /**
    * List of segments holding the data. All segments are of equal size.
@@ -68,7 +69,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
    * mySegmentSize === 1 << mySegmentBits
    * mySegmentMask === mySegmentSize - 1
    * <p/>
-   * for usage, see {@link #write#E#(int, #e#)}
+   * for usage, see {@link #writeValue(int, #e#)}
    */
   private int mySegmentBits = SEGB_INITIAL;
   private int mySegmentSize = SEGS_INITIAL;
@@ -85,13 +86,13 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     assert mySegments != null || size == 0 : size + " " + mySegments;
     assert mySegments == null || mySegments.segments != null : mySegments;
     assert
-      mySegmentCount >= 0 && (mySegmentCount == 0 || mySegmentCount <= mySegments.segments.length) :
-      mySegmentCount + " " + mySegments;
+        mySegmentCount >= 0 && (mySegmentCount == 0 || mySegmentCount <= mySegments.segments.length) :
+        mySegmentCount + " " + mySegments;
     assert myCapacity == mySegmentCount << mySegmentBits : mySegmentBits + " " + mySegmentCount + " " + myCapacity;
     assert size <= myCapacity : size + " " + myCapacity;
     assert
-      size + myLeftOffset + myRightOffset == myCapacity :
-      size + " " + myLeftOffset + " " + myRightOffset + " " + myCapacity;
+        size + myLeftOffset + myRightOffset == myCapacity :
+        size + " " + myLeftOffset + " " + myRightOffset + " " + myCapacity;
     if (mySegments != null) {
       assert mySegments.refCount > 0 : mySegments;
       if (mySegments.segments != null) {
@@ -112,17 +113,23 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   }
 
 
-  public Segmented#E#Array() {
-    this(Segmented#E#ArrayHeapEnvironment.INSTANCE);
+  public #E#SegmentedArray() {
+    this(#E#SegmentedArrayHeapEnvironment.INSTANCE);
   }
 
-  public Segmented#E#Array(Segmented#E#ArrayEnvironment env) {
+  public #E#SegmentedArray(#E#SegmentedArrayEnvironment env) {
     myEnv = env;
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
+  }
+
+  public static #E#SegmentedArray create(#E#List values) {
+    #E#SegmentedArray array = new #E#SegmentedArray();
+    array.addAll(values);
+    return array;
   }
 
   public #e# get(int index) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     try {
       index += myLeftOffset;
       #E#Segment s = mySegments.segments[index >> mySegmentBits];
@@ -136,21 +143,11 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   }
 
   public void add(#e# value) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     int p = size();
     increaseSize(1, false);
-    write#E#(myLeftOffset + p, value);
-    assert checkInvariants();
-  }
-
-  public void insert(int index, #e# value) {
-    assert checkInvariants();
-    int sz = size();
-    if (index < 0 || index > sz)
-      throw new IndexOutOfBoundsException(index + " " + this);
-    increaseSize(1, index < (sz >> 1));
-    write#E#(myLeftOffset + index, value);
-    assert checkInvariants();
+    set(p, value);
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   @NotNull
@@ -163,27 +160,38 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   }
 
   public void expand(int index, int count) {
-    assert checkInvariants();
-    if (count <= 0)
+    if (count < 0) {
+      throw new IllegalArgumentException();
+    }
+    if (index < 0 || index > size())
+      throw new IndexOutOfBoundsException(index + " " + this);
+    assert !IntegersDebug.CHECK || checkInvariants();
+    if (count == 0) {
       return;
+    }
     doExpand(index, count);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   public void insertMultiple(int index, #e# value, int count) {
-    assert checkInvariants();
-    if (count <= 0)
-      return;
+    assert !IntegersDebug.CHECK || checkInvariants();
+    if (count < 0) throw new IllegalArgumentException();
+    int sz = size();
+    if (index < 0 || index > sz)
+      throw new IndexOutOfBoundsException(index + " " + this);
+    if (count == 0) return;
+
     doExpand(index, count);
-    for (Writable#E#ListIterator ii = iterator(index, index + count); ii.hasNext();) {
-      ii.next();
-      ii.set(0, value);
+    if (count == 1) {
+      set(index, value);
+    } else {
+      setRange(index, index + count, value);
     }
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   public void removeRange(int from, int to) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     if (to <= from)
       return;
     checkRange(from, to);
@@ -200,11 +208,11 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       shiftLeft(myLeftOffset + to, myLeftOffset + sz, count);
     }
     decreaseSize(count, leftward);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   public #e# removeAt(int index) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     #e# value = get(index);
     int sz = size();
     boolean leftward = index < (sz >> 1);
@@ -214,7 +222,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       shiftLeft(myLeftOffset + index + 1, myLeftOffset + sz, 1);
     }
     decreaseSize(1, leftward);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     return value;
   }
 
@@ -225,8 +233,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   public void insertAll(int index, #E#List values, int sourceIndex, int count) {
     if (values == null || count <= 0)
       return;
-    if (values instanceof Segmented#E#Array) {
-      insertSegmented(index, (Segmented#E#Array) values, sourceIndex, count);
+    if (values instanceof #E#SegmentedArray) {
+      insertSegmented(index, (#E#SegmentedArray) values, sourceIndex, count);
     } else if (values instanceof SubList) {
       SubList sublist = (SubList) values;
       if (sourceIndex + count > sublist.size())
@@ -238,11 +246,11 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   }
 
   public void setAll(int index, #E#List values, int sourceIndex, int count) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     if (values == null || count <= 0)
       return;
-    if (values instanceof Segmented#E#Array) {
-      copySegmented(index, (Segmented#E#Array) values, sourceIndex, count);
+    if (values instanceof #E#SegmentedArray) {
+      copySegmented(index, (#E#SegmentedArray) values, sourceIndex, count);
     } else if (values instanceof SubList) {
       SubList sublist = (SubList) values;
       if (sourceIndex + count > sublist.size())
@@ -251,13 +259,13 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     } else {
       copyList(index, values, sourceIndex, count);
     }
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  public #e#[] toArray(int startIndex, #e#[] dest, int destOffset, int length) {
+  public #e#[] toNativeArray(int startIndex, #e#[] dest, int destOffset, int length) {
     if (length <= 0)
       return dest;
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     if (startIndex < 0 || startIndex + length > size())
       throw new IndexOutOfBoundsException(startIndex + " " + length + " " + this);
     int sp = myLeftOffset + startIndex;
@@ -279,18 +287,18 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     return dest;
   }
 
-  public Segmented#E#Array clone() {
+  public #E#SegmentedArray clone() {
     return clone(0, size());
   }
 
-  public Segmented#E#Array clone(int from, int to) {
-    assert checkInvariants();
+  public #E#SegmentedArray clone(int from, int to) {
+    assert !IntegersDebug.CHECK || checkInvariants();
     checkRange(from, to);
     if (from >= to)
-      return new Segmented#E#Array(myEnv);
+      return new #E#SegmentedArray(myEnv);
     try {
       assert mySegmentCount > 0 : this;
-      Segmented#E#Array r = (Segmented#E#Array) super.clone();
+      #E#SegmentedArray r = (#E#SegmentedArray) super.clone();
       r.updateSize(to - from);
 
       int left = myLeftOffset + from;
@@ -312,8 +320,8 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
         r.use(r.mySegments.segments[i]);
       }
       r.myRightOffset = r.myCapacity - r.size() - r.myLeftOffset;
-      assert checkInvariants();
-      assert r.checkInvariants();
+      assert !IntegersDebug.CHECK || checkInvariants();
+      assert !IntegersDebug.CHECK || r.checkInvariants();
       return r;
     } catch (CloneNotSupportedException e) {
       throw new Error(e);
@@ -321,11 +329,11 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   }
 
   private void insertList(int index, #E#List list, int sourceIndex, int count) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     assert list != null && !list.isEmpty() && count > 0 && count <= list.size();
     doExpand(index, count);
     copyList(index, list, sourceIndex, count);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   private void copyList(int targetIndex, #E#List list, int sourceIndex, int count) {
@@ -335,23 +343,23 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     for (int i = 0; i < count;) {
       #E#Segment seg = modify(di);
       int len = Math.min(count - i, mySegmentSize - dp);
-      list.toArray(sourceIndex + i, seg.data, dp, len);
+      list.toNativeArray(sourceIndex + i, seg.data, dp, len);
       i += len;
       dp = 0;
       di++;
     }
   }
 
-  private void insertSegmented(int index, Segmented#E#Array array, int sourceIndex, int count) {
-    assert checkInvariants();
+  private void insertSegmented(int index, #E#SegmentedArray array, int sourceIndex, int count) {
+    assert !IntegersDebug.CHECK || checkInvariants();
     assert array != null && !array.isEmpty() && count > 0 && count <= array.size() : count + " " + array;
     // todo if segments are copied as whole, we don't need expand to allocate new segments
     doExpand(index, count);
     copySegmented(index, array, sourceIndex, count);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  private void copySegmented(int targetIndex, Segmented#E#Array array, int sourceIndex, int length) {
+  private void copySegmented(int targetIndex, #E#SegmentedArray array, int sourceIndex, int length) {
     int dp = myLeftOffset + targetIndex;
     int di = dp >> mySegmentBits;
     dp &= mySegmentMask;
@@ -416,10 +424,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     int leftAllocate = count <= myLeftOffset ? 0 : ((count - myLeftOffset - 1) >> mySegmentBits) + 1;
 
     // number of blocks to be allocated when shifting right
-    // todo use another field for right offset?
-    int si = (myLeftOffset + sz) & mySegmentMask;
-    int rightOffset = si == 0 ? 0 : mySegmentSize - si;
-    int rightAllocate = count <= rightOffset ? 0 : ((count - rightOffset - 1) >> mySegmentBits) + 1;
+    int rightAllocate = count <= myRightOffset ? 0 : ((count - myRightOffset - 1) >> mySegmentBits) + 1;
 
     // number of blocks to be affected (moving ints)
     int fromBlock = (from + myLeftOffset) >> mySegmentBits;
@@ -523,8 +528,9 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     updateSize(sz - count);
   }
 
+  // todo refactor, simplify method increaseSize and add checkInvariants() in method expandSingleSegment().
   private void increaseSize(int added, boolean leftward) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     int relatedOffset = leftward ? myLeftOffset : myRightOffset;
     int sz = size();
     if (added > relatedOffset) {
@@ -537,6 +543,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
           mySegmentSize = SEGS_LARGE;
           mySegmentMask = SEGS_LARGE - 1;
           expandSingleSegment(leftward);
+          relatedOffset = leftward ? myLeftOffset : myRightOffset;
           assert added > relatedOffset : leftward + " " + relatedOffset + " " + added;
         }
         int allocateCount = ((added - relatedOffset - 1) >> mySegmentBits) + 1;
@@ -551,7 +558,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     } else {
       myRightOffset = myCapacity - sz - myLeftOffset;
     }
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   private void ensureFreeSpaceSmall(int required, boolean leftward) {
@@ -592,6 +599,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       }
       setSegment(0, s);
     }
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   private void allocateSegments(int allocateCount, boolean leftward) {
@@ -656,7 +664,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
   }
 
   public void clear() {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     if (mySegments != null) {
       for (int i = 0; i < mySegments.segments.length; i++) {
         unuse(mySegments.segments[i]);
@@ -671,25 +679,25 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     myCapacity = 0;
     myLeftOffset = 0;
     myRightOffset = 0;
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   public void set(int index, #e# value) {
-    assert checkInvariants();
-    write#E#(myLeftOffset + index, value);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
+    writeValue(myLeftOffset + index, value);
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   public void setRange(int from, int to, #e# value) {
-    assert checkInvariants();
-    for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.next();
-      ii.set(0, value);
-    }
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
+
+    int len = to - from;
+    setAll(from, #E#Collections.repeat(value, len), 0, len);
+
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  private void write#E#(int absIndex, #e# value) {
+  private void writeValue(int absIndex, #e# value) {
     modify(absIndex >> mySegmentBits).data[absIndex & mySegmentMask] = value;
   }
 
@@ -729,26 +737,15 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
   }
 
-  public void apply(int from, int to, #E#Function function) {
-    assert checkInvariants();
-    if (from >= to)
-      return;
-    checkRange(from, to);
-    for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.nextValue()));
-    }
-    assert checkInvariants();
-  }
+  public void apply(int from, int to, #E#To#E# function) {
+    assert !IntegersDebug.CHECK || checkInvariants();
 
-  public void apply(int from, int to, #E#Function2 function, #e# secondArgument) {
-    assert checkInvariants();
-    if (from >= to)
-      return;
+    int len = to - from;
+    if (len <= 0) return;
+
     checkRange(from, to);
-    for (Writable#E#ListIterator ii = iterator(from, to); ii.hasNext();) {
-      ii.set(0, function.invoke(ii.nextValue(), secondArgument));
-    }
-    assert checkInvariants();
+    setAll(from, #E#Collections.map(function, this), from, len);
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   private void checkRange(int from, int to) {
@@ -765,12 +762,12 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     return super.binarySearch(value, from, to);
   }
 
-  // todo more effective
+  // todo more effective sort
   public void sort(Writable#E#List... sortAlso) {
     super.sort(sortAlso);
   }
 
-  // todo more effective
+  // todo more effective swap
   public void swap(int index1, int index2) {
     super.swap(index1, index2);
   }
@@ -784,7 +781,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     private #e# myCurrent;
 
     /**
-     * The segment of the current value
+     * The segment of the next value
      */
     private int mySegmentIndex;
     private #E#Segment mySegment;
@@ -803,51 +800,62 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       int left = from + myLeftOffset;
       mySegmentIndex = left >> mySegmentBits;
       myOffset = (left & mySegmentMask);
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
     }
 
     public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
       checkMod();
-      if (myNext < 0)
+      if (myNext < 0) {
         throw new IllegalStateException();
+      }
+      if (offset == 0) {
+        return;
+      }
       int p = myNext - 1 + offset;
-      if (p < myFrom || p >= myTo)
+      if (p < myFrom || p >= myTo) {
         throw new NoSuchElementException(offset + " " + this);
-      myOffset = myOffset - 1 + offset;
-      adjustOffset();
-      if (mySegment == null)
+      }
+      updateOffset(myOffset - 1 + offset);
+      if (mySegment == null) {
         mySegment = mySegments.segments[mySegmentIndex];
+      }
+      myCurrent = mySegment.data[myOffset];
       myNext = p + 1;
-      myOffset++;
-      adjustOffset();
-      assert checkIterator();
+      updateOffset(myOffset + 1);
+      assert !IntegersDebug.CHECK || checkIterator();
     }
 
     public Writable#E#ListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
       checkMod();
       if (myNext < 0)
         myNext = -myNext-1;
       if (myNext < myFrom || myNext >= myTo)
         throw new NoSuchElementException(String.valueOf(this));
-      if (mySegment == null)
+      if (mySegment == null) {
         mySegment = mySegments.segments[mySegmentIndex];
+      }
       myCurrent = mySegment.data[myOffset];
       myNext++;
-      myOffset++;
-      adjustOffset();
-      assert checkIterator();
+      updateOffset(myOffset + 1);
+      assert !IntegersDebug.CHECK || checkIterator();
       return this;
+    }
+
+    public boolean hasValue() {
+      return myFrom < myNext;
     }
 
     public #e# value() throws NoSuchElementException {
       if (myNext < 0) throw new IllegalStateException();
-      if (myNext <= myFrom) throw new NoSuchElementException();
+      if (!hasValue()) throw new NoSuchElementException();
       return myCurrent;
     }
 
-    private void adjustOffset() {
+    // update myOffset, mySegment, mySegmentIndex
+    private void updateOffset(int newOffset) {
+      myOffset = newOffset;
       if (myOffset < 0 || myOffset >= mySegmentSize) {
         mySegment = null;
         if (myOffset < 0) {
@@ -864,7 +872,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public #e# get(int relativeOffset) throws IndexOutOfBoundsException, NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -897,33 +905,38 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
     }
 
     public void set(int offset, #e# value) throws NoSuchElementException, IndexOutOfBoundsException {
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
       checkMod();
-      if (myNext < 0)
+      if (myNext < 0) {
         throw new IllegalStateException();
+      }
       int idx = myNext - 1 + offset;
-      if (idx < myFrom || idx >= myTo)
+      if (idx < myFrom || idx >= myTo) {
         throw new NoSuchElementException(offset + " " + this);
+      }
       int off = myOffset - 1 + offset;
-      int si = mySegmentIndex;
       #E#Segment seg;
       if (off < 0 || off >= mySegmentSize) {
+        int si = mySegmentIndex;
         if (off < 0) {
           si -= ((-off - 1) >> mySegmentBits) + 1;
         } else {
           si += off >> mySegmentBits;
         }
         off &= mySegmentMask;
-        seg = mySegments.segments[si];
+        seg = modify(si);
       } else {
-        seg = mySegment == null ? mySegments.segments[si] : mySegment;
+        seg = modify(mySegmentIndex);
+        if (mySegment != null) {
+          mySegment = seg;
+        }
       }
       seg.data[off] = value;
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
     }
 
     public void removeRange(int offsetFrom, int offsetTo) throws NoSuchElementException {
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
       if (myNext < 0)
         throw new IllegalStateException();
       if (offsetFrom >= offsetTo) {
@@ -935,7 +948,7 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       int t = myNext - 1 + offsetTo;
       if (f < myFrom || t > myTo)
         throw new NoSuchElementException(offsetFrom + " " + offsetTo + " " + this);
-      Segmented#E#Array.this.removeRange(f, t);
+      #E#SegmentedArray.this.removeRange(f, t);
       myNext = f;
       myTo -= (t - f);
       int p = myLeftOffset + myNext;
@@ -944,12 +957,12 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
       myOffset = p & mySegmentMask;
       myIterationModCount = modCount();
       myNext = -myNext-1;
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
     }
 
     @Override
     public void remove() throws NoSuchElementException, ConcurrentModificationException {
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
       checkMod();
       if (myNext < 0)
         throw new IllegalStateException();
@@ -973,20 +986,15 @@ public class Segmented#E#Array extends AbstractWritable#E#List implements Clonea
         }
       } else {
         // shift to left
-        myOffset--;
-        if (myOffset < 0) {
-          mySegmentIndex--;
-          mySegment = null;
-          myOffset = mySegmentSize - 1;
-        }
+        updateOffset(myOffset - 1);
       }
       myIterationModCount = modCount();
       myNext = -myNext-1;
-      assert checkIterator();
+      assert !IntegersDebug.CHECK || checkIterator();
     }
 
     public String toString() {
-      return myNext + "[" + myFrom + ";" + myTo + ") " + Segmented#E#Array.this;
+      return myNext + "[" + myFrom + ";" + myTo + ") " + #E#SegmentedArray.this;
     }
 
     protected void checkMod() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,50 +14,56 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntFunction2;
+import com.almworks.integers.func.IntIntToInt;
 
-import java.io.*;
-import java.lang.ref.SoftReference;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import static com.almworks.integers.IntIterators.range;
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 
 /** A red-black tree implementation of a set. Single-thread access only. <br/>
  * Use if you are frequently adding and querying. */
-public class Dynamic#E#Set implements #E#Iterable {
+public class #E#TreeSet extends AbstractWritable#E#Set implements Writable#E#SortedSet {
   /** Dummy key for NIL. */
   private static final #e# NIL_DUMMY_KEY = #EW#.MIN_VALUE;
-  private static final #e#[] EMPTY_KEYS = new #e#[] { #EW#.MIN_VALUE };
+  private static final #e#[] EMPTY_KEYS = new #e#[] { NIL_DUMMY_KEY };
   private static final int[] EMPTY_INDEXES = new int[] { 0 };
-  /** Index into the backing arrays of the last entry plus 1. It is the insertion point when {@code myRemoved == null}. */
+  /** Index into the backing arrays of the last entry + 1 (for the NIL). */
   private int myFront;
   /** Key values. */
   private #e#[] myKeys;
-  /** Tree structure: contains indexes into key, left, right, black. */
+  /** Tree structure: contains indices into key, left, right, black. */
   private int[] myLeft;
-  /** Tree structure: contains indexes into key, left, right, black. */
+  /** Tree structure: contains indices into key, left, right, black. */
   private int[] myRight;
   /** Node color : false for red, true for black. */
-  private final BitSet myBlack;
+  private BitSet myBlack;
   /** List of removed nodes. Null if no internal nodes are removed */
   private BitSet myRemoved;
   /** Index into key, left, right, black that denotes the current root node. */
   private int myRoot;
 
-  private int myModCount = 0;
-
-  private static final int SHRINK_FACTOR = 6; //testing. actual should be less, say, 3
-  private static final int SHRINK_MIN_LENGTH = 4; //8
+  private static final int SHRINK_FACTOR = 3; // for testing try 6
+  private static final int SHRINK_MIN_LENGTH = 8; // for testing try 4
   // used in fromSorted#E#Iterable(). A new myKeys array is created in this method, and its size is
   // the size of the given #E#Iterable multiplied by this constant (additional space for new elements to be added later).
-  private static final int EXPAND_FACTOR = 2;
+
+  int myMaxSize = -1;
+  int myCountedHeight = -1;
+
+  private int[] myStackCache = IntegersUtils.EMPTY_INTS;
 
   /**
-   * This enum is used in {@link Dynamic#E#Set#compactify(com.almworks.integers.Dynamic#E#Set.ColoringType)} and
-   * {@link Dynamic#E#Set#fromSortedList(#E#List, com.almworks.integers.Dynamic#E#Set.ColoringType)}
+   * This enum is used in {@link #E#TreeSet#compactify(#E#TreeSet.ColoringType)} and
+   * {@link #E#TreeSet#initFromSortedUnique(#E#Iterable, int, com.almworks.integers.#E#TreeSet.ColoringType)}
    * methods to determine the way the new tree will be colored.
    */
   public enum ColoringType {
@@ -73,22 +79,51 @@ public class Dynamic#E#Set implements #E#Iterable {
     public abstract int redLevelsDensity();
   }
 
-  private SoftReference<int[]> myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
-
-  public Dynamic#E#Set() {
+  public #E#TreeSet() {
     myBlack = new BitSet();
+    myRemoved = new BitSet();
     init();
   }
 
-  public Dynamic#E#Set(int initialCapacity) {
+  /**
+   * Constructs an empty <tt>#E#TreeSet</tt> with the specified initial capacity.
+   * */
+  public #E#TreeSet(int initialCapacity) {
+    if (initialCapacity < 0) throw new IllegalArgumentException();
     initialCapacity += 1;
     myBlack = new BitSet(initialCapacity);
+    myRemoved = new BitSet(initialCapacity);
     init();
     myKeys = new #e#[initialCapacity];
     myLeft = new int[initialCapacity];
     myRight = new int[initialCapacity];
     myKeys[0] = NIL_DUMMY_KEY;
-    myBlack.set(0);
+  }
+
+  /**
+   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
+   *                     if the last one is unfilled.
+   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
+   *   <br>BALANCED colors every 4th non-last level red;
+   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+   * @return new {@code #E#TreeSet} with elements from {@code src} with the specified capacity and coloring type.
+   */
+  public static #E#TreeSet createFromSortedUnique(#E#Iterable src, int capacity, ColoringType coloringType) {
+    if (capacity < 0) throw new IllegalArgumentException();
+    #E#TreeSet res = new #E#TreeSet();
+    res.initFromSortedUnique(src, capacity, coloringType);
+    return res;
+  }
+
+  /**
+   * To create {@code #E#TreeSet} with the specified capacity use
+   * {@link com.almworks.integers.#E#TreeSet#createFromSortedUnique(#E#Iterable, int, com.almworks.integers.#E#TreeSet.ColoringType)}
+   * @return {@code #E#TreeSet} with elements from {@code src}.
+   * If {@code src} is a {@code #E#SizedIterable}, capacity of new set equals to {@code src.size()}.
+   */
+  public static #E#TreeSet createFromSortedUnique(#E#Iterable src) {
+    return createFromSortedUnique(src,
+        #E#Collections.sizeOfIterable(src, 0), ColoringType.BALANCED);
   }
 
   private void init() {
@@ -98,40 +133,23 @@ public class Dynamic#E#Set implements #E#Iterable {
     myBlack.set(0);
     myRoot = 0;
     myFront = 1;
-    myRemoved = null;
-    myStackCache = new SoftReference<int[]>(IntegersUtils.EMPTY_INTS);
-  }
-
-  private void initNode(int x, #e# key) {
-    myKeys[x] = key;
-    myLeft[x] = 0;
-    myRight[x] = 0;
-    myBlack.clear(x);
-    if (myRemoved != null)
-      if (myRemoved.cardinality() == 1)
-        myRemoved = null;
-      else
-        myRemoved.clear(x);
+    myRemoved.clear();
+    myStackCache = IntegersUtils.EMPTY_INTS;
   }
 
   public void clear() {
+    modified();
     myBlack.clear();
     init();
-    modified();
-    assert checkRedBlackTreeInvariants("clear");
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("clear");
   }
 
-  private void modified() {
-    myModCount++;
-  }
-
-  /** @return {@link #EW##MIN_VALUE} in case the set is empty */
-  public #e# getMax() {
+  public #e# getUpperBound() {
     return myKeys[traverseToEnd(myRight)];
   }
 
-  /** @return {@link #EW##MIN_VALUE} in case the set is empty */
-  public #e# getMin() {
+  public #e# getLowerBound() {
+    if (isEmpty()) return #EW#.MAX_VALUE;
     return myKeys[traverseToEnd(myLeft)];
   }
 
@@ -154,49 +172,70 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   public int size() {
-    return myRemoved == null ? myFront - 1 : myFront - 1 - myRemoved.cardinality();
+    return myFront - 1 - myRemoved.cardinality();
   }
 
+  @Override
   public boolean isEmpty() {
     boolean ret = myRoot == 0;
     assert (size() == 0) == ret : size() + " " + myRoot;
     return ret;
   }
 
+  // todo optimize, if keys small, it's cheaper create new #E#Array and use fromSortedList(..)
+  // K* log(S + K) -> K*log(K) + (S + K)
+  @Override
   public void addAll(#E#List keys) {
+    addAll((#E#SizedIterable)keys);
+  }
+
+  public void addAll(#E#SizedIterable keys) {
     modified();
     int[] ps = prepareAdd(keys.size());
     for (#E#Iterator ii : keys) {
-      add0(ii.value(), ps);
+      include0(ii.value(), ps);
     }
   }
 
-  public void addAll(Dynamic#E#Set keys) {
+  @Override
+  public void addAll(#e#... values) {
     modified();
-    int[] ps = prepareAdd(keys.size());
-    for (#E#Iterator ii : keys) {
-      add0(ii.value(), ps);
+    if (values != null && values.length != 0) {
+      if (values.length == 1) {
+        add(values[0]);
+      } else {
+        addAll(new #E#Array(values));
+      }
     }
   }
 
-  public void addAll(#e#... keys) {
+
+  // todo optimize - we can don't check myStackCache on the every adding
+  @Override
+  public void addAll(#E#Iterable iterable) {
     modified();
-    int[] ps = prepareAdd(keys.length);
-    for (#e# key : keys) {
-      add0(key, ps);
+    for (#E#Iterator it : iterable) {
+      include0(it.value());
     }
   }
 
-  public boolean add(#e# key) {
-    modified();
-    return add0(key, prepareAdd(1));
+  /**
+   * @return false if set already contains key
+   * */
+  protected boolean include0(#e# key) {
+    return include0(key, prepareAdd(1));
   }
 
-  private boolean add0(#e# key, int[] ps) {
+  private boolean include0(#e# key, int[] ps) {
     int x = myRoot;
+    // we need these zeros for the balancing,
+    // where we need to know the parent and the grandparent of the node being balanced;
+    // since we start from the root, its parent and grandparent are zeros
+    ps[0] = 0;
+    ps[1] = 0;
     // Parents stack top + 1
-    int psi = 0;
-    // actually, k is always overwritten if it is used (psi > 0), but compiler does not know that
+    int psi = 2;
+    // actually, k is always overwritten if it is used (psi > 2), but compiler does not know that
     #e# k = 0;
     while (x != 0) {
       k = myKeys[x];
@@ -204,16 +243,29 @@ public class Dynamic#E#Set implements #E#Iterable {
       ps[psi++] = x;
       x = key < k ? myLeft[x] : myRight[x];
     }
-    // Initialize the node
-    x = myRemoved == null ? myFront++ : myRemoved.nextSetBit(0);
-    initNode(x, key);
+    x = createNode(key);
+
     // x is RED already (myBlack.get(x) == false), so no modifications to myBlack
     // Insert into the tree
-    if (psi == 0) myRoot = x;
+    if (psi == 2) myRoot = x;
     else (key < k ? myLeft : myRight)[ps[psi - 1]] = x;
     balanceAfterAdd(x, ps, psi, key);
-    assert checkRedBlackTreeInvariants("add key:" + key);
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("add key:" + key);
     return true;
+  }
+
+  private int createNode(#e# key) {
+    int x;
+    if (myRemoved.isEmpty()) {
+      x = myFront++;
+    } else {
+      x = myRemoved.nextSetBit(0);
+      myRemoved.clear(x);
+    }
+    myKeys[x] = key;
+    myLeft[x] = myRight[x] = 0;
+    myBlack.clear(x);
+    return x;
   }
 
   /**
@@ -224,15 +276,20 @@ public class Dynamic#E#Set implements #E#Iterable {
    * */
   private void balanceAfterAdd(int x, int[] ps, int psi, #e# debugKey) {
     // parent
-    int p = getLastOrNil(ps, --psi);
+    int p = ps[--psi];
     // grandparent
-    int pp = getLastOrNil(ps, --psi);
+    int pp = ps[--psi];
     while (!myBlack.get(p)) {
-      assert checkChildParent(p, pp, debugKey);
-      assert checkChildParent(x, p, debugKey);
-      boolean branch1IsLeft = p == myLeft[pp];
-      int[] branch1 = branch1IsLeft ? myLeft : myRight;
-      int[] branch2 = branch1IsLeft ? myRight : myLeft;
+      assert !IntegersDebug.CHECK || checkChildParent(p, pp, debugKey);
+      assert !IntegersDebug.CHECK || checkChildParent(x, p, debugKey);
+      int[] branch1, branch2;
+      if (p == myLeft[pp]) {
+        branch1 = myLeft;
+        branch2 = myRight;
+      } else {
+        branch1 = myRight;
+        branch2 = myLeft;
+      }
       // Uncle (parent's sibling)
       int u = branch2[pp];
       if (!myBlack.get(u)) {
@@ -240,8 +297,8 @@ public class Dynamic#E#Set implements #E#Iterable {
         myBlack.set(u);
         myBlack.clear(pp);
         x = pp;
-        p = getLastOrNil(ps, --psi);
-        pp = getLastOrNil(ps, --psi);
+        p = ps[--psi];
+        pp = ps[--psi];
       } else {
         if (x == branch2[p]) {
           // Rotate takes x and makes it a branch1-parent of p
@@ -253,7 +310,8 @@ public class Dynamic#E#Set implements #E#Iterable {
         }
         myBlack.set(p);
         myBlack.clear(pp);
-        int ppp = getLastOrNil(ps, --psi);
+        // We're not outside the array, because for that we need pp == 0, what are we rotating then?
+        int ppp = ps[--psi];
         // Takes pp (which is now red) and makes it a branch-2 children of p (which is now black); note that branch-1 children of p is x, which is red and both children are black
         rotate(pp, ppp, branch2, branch1);
       }
@@ -264,10 +322,6 @@ public class Dynamic#E#Set implements #E#Iterable {
   private boolean checkChildParent(int child, int parent, #e# debugKey) {
     assert myLeft[parent] == child || myRight[parent] == child : debugMegaPrint("add " + debugKey + "\nproblem with child " + child, parent);
     return true;
-  }
-
-  private static int getLastOrNil(int[] a, int i) {
-    return i < 0 ? 0 : a[i];
   }
 
   /**
@@ -293,98 +347,154 @@ public class Dynamic#E#Set implements #E#Iterable {
   }
 
   private void maybeGrow(int n) {
+    int oldSz = myKeys.length;
     int futureSize = size() + n + 1;
-    myKeys = #E#Collections.ensureCapacity(myKeys, futureSize);
-    myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
-    myRight = IntCollections.ensureCapacity(myRight, futureSize);
+    if (futureSize > myKeys.length) {
+      // length of myKeys, myLeft, myRight are always the same
+      myKeys = #E#Collections.ensureCapacity(myKeys, futureSize);
+      myLeft = IntCollections.ensureCapacity(myLeft, futureSize);
+      myRight = IntCollections.ensureCapacity(myRight, futureSize);
+    }
+    if (IntegersDebug.PRINT) IntegersDebug.format("%20s %4d -> %4d  %H  %s\n", "grow", oldSz, myKeys.length, this, last4MethodNames());
+  }
+
+  private static String last4MethodNames() {
+    if (!IntegersDebug.PRINT) return "";
+    List<StackTraceElement> frame = Arrays.asList(new Exception().getStackTrace());
+    StringBuilder sb = new StringBuilder();
+    String sep = "";
+    for (StackTraceElement e : frame.subList(2, Math.min(frame.size(), 6))) {
+      sb.append(sep).append(e.getMethodName().replace(".*\\.(.*?)", "$1")).append("@").append(e.getLineNumber());
+      sep = ", ";
+    }
+    return sb.toString();
   }
 
   /**
-   *
    * @param n difference between future size and actual size
-   * @return
    */
   private int[] fetchStackCache(int n) {
-    int fh = estimateFutureHeight(n);
-    int[] cache = myStackCache.get();
-    if (cache != null && cache.length >= fh) return cache;
-    cache = new int[fh];
-    myStackCache = new SoftReference<int[]>(cache);
-    return cache;
-  }
-
-  /** Returns a number higher than the height after adding n elements.*/
-  private int estimateFutureHeight(int n) {
-    return height(size() + n) + 1;
+    // 2 is for the add(): sometimes we need to know the grandparent
+    int fh = height(size() + n) + 2;
+    if (myStackCache.length < fh) {
+      myStackCache = new int[fh];
+    }
+    return myStackCache;
   }
 
   /** Estimate tree height: it can be shown that it's <= 2*log_2(N + 1) (not counting the root) */
   private int height(int n) {
+    if (n < myMaxSize) return myCountedHeight;
+    myMaxSize = 1;
+
     int lg2 = 0;
-    while (n > 1) {
+    while (myMaxSize <= n) {
       lg2++;
-      n >>= 1;
+      myMaxSize <<= 1;
     }
-    return lg2 << 1;
+    myCountedHeight = lg2 << 1;
+    return myCountedHeight;
   }
 
   /**
-   * This method rebuilds this Dynamic#E#Set.
-   * After running this method, this object will use memory which is needed to hold size() elements.
-   * (Usually it uses more memory before this method is ran)
+   * This method rebuilds this #E#TreeSet, after that it will use just the amount of memory needed to hold size() elements.
+   * (Usually it uses more memory before this method is run)
    * This method builds a new tree based on the same keyset.
    * All levels of the new tree are filled, except, probably, the last one.
-   * Levels are filled firstly with all possible left children, and only then
-   * with right children, all starting from the left side.
-   * To follow rb-restrictions, if there's an unfilled level,
-   * it's made completely red and pre-last is made completely black.
+   * Tree is built by levels top-down, within one level first all left children are added, then all right children.
+   * To keep black-height on all paths the same, if there's an unfilled level,
+   * it's made completely red and the penultimate level is made completely black.
    * All the other levels are made black, except every 4-th level, starting from level 2,
    * which are made red. This type of coloring guarantees a balance between average times taken
    * by subsequent add and remove operations.
    */
-  public void compactify() {
+  void compactify() {
+    int oldCapa = myKeys.length;
     compactify(ColoringType.BALANCED);
+    if (IntegersDebug.PRINT) IntegersDebug.format("%20s %4d -> %4d  %H  %s", "compactify", oldCapa, myKeys.length, this, last4MethodNames());
   }
 
   /**
-   * This method is similar to {@link com.almworks.integers.Dynamic#E#Set#compactify()},
+   * This method is similar to {@link #E#TreeSet#compactify()},
    * except the way the internal levels are colored.
-   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
-   *                     if the last one is unfilled.
-   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.Dynamic#E#Set#compactify()};
-   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
+   * @param coloringType the way the internal levels are colored.
+   *                     Internal levels are all levels except the last one (two if the last one is not full.)
+   *   <ul><li>{@link ColoringType#TO_REMOVE} colors every 2nd non-last levels red, theoretically making subsequent removals faster.
+   *       <li>{@link ColoringType#BALANCED} colors every 4th non-last levels red, similar to {@link #E#TreeSet#compactify()}.
+   *       <li>{@link ColoringType#TO_ADD} colors all non-last levels black, theoretically making subsequent additions faster.
+   *   </ul>
    */
-  public void compactify(ColoringType coloringType) {
+  void compactify(ColoringType coloringType) {
     modified();
-    fromSorted#E#Iterable(this, size(), coloringType);
-    assert checkRedsAmount(coloringType);
+    initFromSortedUnique(this, size(), coloringType);
   }
 
-  private void fromSorted#E#Iterable(#E#Iterable src, int srcSize, ColoringType coloringType) {
-    #e#[] newKeys;
-    if (srcSize == 0)
-      newKeys = EMPTY_KEYS;
-    else {
-      int arraySize = (coloringType == ColoringType.TO_ADD) ? srcSize * EXPAND_FACTOR : srcSize+1;
-      newKeys = new #e#[Math.max(SHRINK_MIN_LENGTH, arraySize)];
-      int i = 0;
-      newKeys[0] = #EW#.MIN_VALUE;
-      for (#E#Iterator ii : src) {
-        newKeys[++i] = ii.value();
-        assert (i==1 || newKeys[i] >= newKeys[i-1]) : newKeys;
-      }
-    }
-    fromPreparedArray(newKeys, srcSize, coloringType);
-    assert checkRedBlackTreeInvariants("fromSorted#E#Iterable");
+  private void initFromSortedUnique(#E#Iterable src, int capacity, ColoringType coloringType) {
+    #E#Array buf = new #E#Array(capacity + 1);
+    buf.add(NIL_DUMMY_KEY);
+    buf.addAll(src);
+    int size = buf.size() - 1;
+    #e#[] newKeys = buf.extractHostArray();
+    assert #E#Collections.isSortedUnique(false, newKeys, 1, size) == 0;
+    initFromPreparedArray(newKeys, size, coloringType);
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("initFromSortedUnique");
   }
 
+  //   An idea of another BALANCED coloring that is a good tradeoff between TO_ADD and TO_REMOVE.
+  // We don't do rotations in add() if the parent is black;
+  // we don't do rotations in remove() if the removed node is red.
+  //
+  // Obviously, the probability of both events depends on the ratio of red nodes to all nodes,
+  // and in first case it should be minimal (TO_ADD gives 0),
+  // whereas in the second case in should be maximal (TO_REMOVE gives 2/3 + Θ(1/N));
+  //
+  // also, if we do inverse operations (remove() in the first case, add() in the second),
+  // it's quite clear that the probability of rotations will reach the maximum with these colorings,
+  // so as we take a somewhat-in-between ratio, this probability goes down.
+  //
+  // The consequence is that a good BALANCED setting will be the one that colors roughly half of the nodes red.
+  //
+  // Let's consider the full tree case first.
+  // It's obvious that if we color the last level red, the ratio will be 1/2 + Θ(1/N).
+  //
+  // Now, if the last level is not fully packed, let's do it this way:
+  // If more than 7/8 of the last level is filled, then we color just the last level.
+  // The ratio in this case has lower bound 7/16 or ~44%.
+  // Otherwise, color the level two levels higher (it contains 1/4 of what the last level would contain, if it had been fully packed.)
+  // If it's not enough, add level four levels higher, and so on.
+  // So we check if the number of nodes on the last level, d, falls into these segments:
+  //
+  // | if d > 7/8 = 1/2 + 3/4*1/2      | color 1 level (the last one) | ratio: 44..50% |
+  // | otherwise, if d > 1/2 + 3/4*1/4 | 2 levels                     | ratio: 47..56% |
+  // | otherwise, if d > 1/2 + 3/4*1/8 | 3 levels                     | ratio: 48..53% |
+  // ...
+  // We can just use a simple formula to get the amount of levels, starting from the last one, that need to be colored red:
+  // k = floor(log_2(n)); d = n - (2^k - 1); [amount of levels] = - floor(4/3*log_2(d/(2^k) - 1/2))
+  // And then just color these amount of lower levels.
   /**
    * @param newKeys array which will become the new myKeys
    * @param usedSize a number of actual elements in newKeys
+   * @param coloringType a type of coloring new tree
+   *
+   * <br>For ADD, we want to maximize the amount of black nodes. We can color all levels except the last if it not completely filled.
+   * <br>For REMOVED, we want to maximize the amount of red nodes. An easy way to do this is to color the whole levels,
+   * making each second level red. (We don't implement the more optimal but harder approach.) We start with the
+   * last level, which we color red, and go bottom-up, which is the optimal way if we color each second level red;
+   * let's see why.
+   * If the tree is not full (N != 2^K - 1), we must color the last level red to keep black heights equal on all
+   * paths.
+   * Otherwise, let us assume that level numbering starts with 0, which is the black root. So, the last level
+   * will have number K-1. There are two cases.
+   * K is odd: if we color red each second level starting from the last one, the first colored level will have
+   * number 2, and we'll have 2^2 + 2^4 + ... + 2^{K - 1} red nodes (2/3 of the whole tree); if we did otherwise
+   * (color from level 1), we'd have 2^1 + 2^3 + ... + 2^{K - 2} red nodes, which is 2 times less.
+   * K is even: color levels from the last level up to the level number 1, it is better than coloring from level
+   * number 2: 2^1 + 2^3 + ... + 2^{K - 1} > 2^2 + ... + 2^{K - 2}.
    */
-  private void fromPreparedArray(#e#[] newKeys, int usedSize, ColoringType coloringType) {
-    myBlack.clear();
+  private void initFromPreparedArray(#e#[] newKeys, int usedSize, ColoringType coloringType) {
+    myBlack = new BitSet(usedSize);
+    myRemoved = new BitSet(usedSize);
+
     init();
     myKeys = newKeys;
     myFront = usedSize+1;
@@ -393,104 +503,85 @@ public class Dynamic#E#Set implements #E#Iterable {
     myLeft = new int[myKeys.length];
     myRight = new int[myKeys.length];
 
-    int levels = log(2, usedSize);
-    int top = (int)Math.pow(2, levels);
-    int redLevelsDensity = coloringType.redLevelsDensity();
-    // Definitoin: last pair is any pair of nodes which belong to one parent and don't have children.
-    // If the last level contains only left children, then, due to the way the last level is filled,
-    // last pairs (if there are any) belong entirely to pre-last level, and therefore are black.
-    // Otherwise they belong entirely to the last level and are red.
-    boolean lastPairsAreBlack;
-    if (top != usedSize + 1)
-      lastPairsAreBlack = (usedSize < 3*top/4);
-    else
-      lastPairsAreBlack = (coloringType == ColoringType.TO_ADD) || (levels + redLevelsDensity - 2) % redLevelsDensity != 0;
-    // an index of the first internal level which will be colored red. (zero means no internal levels will be red)
-    int startingCounter = (coloringType == ColoringType.TO_ADD) ? 0 : 2;
-    myRoot = rearrangeStep(1, usedSize, startingCounter, redLevelsDensity, lastPairsAreBlack);
+    int levels = log(2, usedSize), step = coloringType.redLevelsDensity();
+    boolean[] levelsColoring = new boolean[levels];
+
+    // coloring of levels: (1 - black, 0 - red)
+    // TO_ADD:      1...1111110 (or 1...1111111 if last level completely filled)
+    // TO_REMOVE:   1...0101010
+    // TO_BALANCED: 1...0111011101110
+    Arrays.fill(levelsColoring, true);
+    if (coloringType == ColoringType.TO_ADD) {
+      // if last level completely filled (usedSize = 2^k - 1) and cT = TO_ADD color is black otherwise red
+      levelsColoring[levels - 1] = (usedSize & (usedSize + 1)) == 0;
+    } else {
+      for (IntIterator it: range(levels - 1, 0, -step)) {
+        levelsColoring[it.value()] = false;
+      }
+    }
+    myRoot = rearrangeStep(1, usedSize, 0, levelsColoring);
   }
 
-  private int rearrangeStep(int offset, int length, int colorCounter, int maxCounter, boolean lpab) {
-    int halfLength = length/2;
+  private int rearrangeStep(int offset, int length, int curLevel, boolean[] levelsColoring) {
+    if (length == 0) return 0;
+    int halfLength = length / 2;
     int index = offset + halfLength;
-    if (length == 1)
-      myBlack.set(index, lpab);
-    else if (length == 2) {
-      myBlack.set(index);
-      myLeft[index] = offset;
-    } else {
-      // calculating the node color
-      boolean isBlack = true;
-      if (colorCounter == 1) {
-        isBlack = false;
-        colorCounter = maxCounter;
-      } else if (colorCounter > 1)
-        colorCounter--;
+    myBlack.set(index, levelsColoring[curLevel]);
 
-      if (length == 3 && !lpab)
-        myBlack.set(index);
-      else
-        myBlack.set(index, isBlack);
-      myLeft[index] = rearrangeStep(offset, halfLength, colorCounter, maxCounter, lpab);
-      myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, colorCounter, maxCounter, lpab);
-    }
+    myLeft[index] = rearrangeStep(offset, halfLength, curLevel + 1, levelsColoring);
+    myRight[index] = rearrangeStep(index + 1, length - halfLength - 1, curLevel + 1, levelsColoring);
     return index;
   }
 
-  /**
-   * Builds a new Dynamic#E#Set based on values of src. src isn't used internally, its contents are copied.
-   */
-  public static Dynamic#E#Set fromSortedList(#E#List src) {
-    return fromSortedList0(src, ColoringType.BALANCED);
-  }
-
-  /**
-   * This method is similar to {@link com.almworks.integers.Dynamic#E#Set#fromSortedList(#E#List)},
-   * except the way the internal levels are colored.
-   * @param coloringType the way the internal levels are colored. Internal levels are all levels except the last two
-   *                     if the last one is unfilled.
-   *   <br>TO_REMOVE colors every 2th non-last level red, theoretically making subsequent removals faster;
-   *   <br>BALANCED colors every 4th non-last level red, similar to {@link com.almworks.integers.Dynamic#E#Set#fromSortedList(#E#List)};
-   *   <br>TO_ADD colors all non-last level black, theoretically making subsequent additions faster;
-   */
-  public static Dynamic#E#Set fromSortedList(#E#List src, ColoringType coloringType) {
-    return fromSortedList0(src, coloringType);
-  }
-
-  private static Dynamic#E#Set fromSortedList0(#E#List src, ColoringType coloringType) {
-    Dynamic#E#Set res = new Dynamic#E#Set();
-    res.fromSorted#E#Iterable(src, src.size(), coloringType);
-    assert res.checkRedsAmount(coloringType);
-    return res;
-  }
-
   public #E#Iterator iterator() {
-    return new KeysIterator();
+    return failFast(new #E#IndexedIterator(new #E#Array(myKeys), new LURIterator()));
   }
 
-  public void removeAll(#E#Iterable keys) {
+  public #E#Iterator tailIterator(#e# fromElement) {
+    return failFast(new #E#IndexedIterator(new #E#Array(myKeys), new LURIterator(fromElement)));
+  }
+
+  @Override
+  public void removeAll(#e#... values) {
     modified();
-    int[] parentsStack = fetchStackCache(0);
-    for (#E#Iterator i : keys) {
-      remove0(i.value(), parentsStack);
+    removeAll(new #E#NativeArrayIterator(values));
+  }
+
+  @Override
+  public void removeAll(#E#Iterator iterator) {
+    modified();
+    int[] parentStack = fetchStackCache(0);
+    for (#E#Iterator it: iterator) {
+      exclude0(it.value(), parentStack);
     }
     maybeShrink();
   }
 
-  public void removeAll(#e#... keys) {
-    modified();
-    int[] parentsStack = fetchStackCache(0);
-    for (#e# key : keys) {
-      remove0(key, parentsStack);
-    }
-    maybeShrink();
-  }
-
-  public boolean remove(#e# key) {
-    modified();
-    boolean ret = remove0(key, fetchStackCache(0));
+  protected boolean exclude0(#e# key) {
+    boolean ret = exclude0(key, fetchStackCache(0));
     maybeShrink();
     return ret;
+  }
+
+  public void retain(#E#List values) {
+    #E#Array res = new #E#Array();
+    for (#E#Iterator it: values.iterator()) {
+      #e# value = it.value();
+      if (contains(value)) res.add(value);
+    }
+    clear();
+    res.sortUnique();
+    initFromSortedUnique(res, res.size(), ColoringType.BALANCED);
+  }
+
+  /**
+   * Retains this set with the specified set
+   * */
+  public void retain(#E#SortedSet set) {
+    #E#Array array = toArray();
+    array.retainSorted(set.toArray());
+    clear();
+    initFromSortedUnique(array, array.size(), ColoringType.BALANCED);
   }
 
   private void maybeShrink() {
@@ -499,21 +590,22 @@ public class Dynamic#E#Set implements #E#Iterable {
       compactify();
   }
 
-  private boolean remove0(#e# key, int[] parentsStack) {
+  private boolean exclude0(#e# key, int[] parentsStack) {
     if (isEmpty()) return false;
 
-    int xsi = -1;
+    int xsi = 0;
+    parentsStack[0] = 0;
 
     //searching for an index Z which contains the key.
     int z = myRoot;
-    while (myKeys[z] != key) {
+    while (myKeys[z] != key || z == 0) {
       if (z == 0)
         return false;
       parentsStack[++xsi] = z;
       z = key < myKeys[z] ? myLeft[z] : myRight[z];
     }
 
-    // searching for an index Y which will be actually cleared.
+    // picking the node which will be actually cleared following z in the LUR order.
     int y = z;
     if (myLeft[z] != 0 && myRight[z] != 0) {
       parentsStack[++xsi] = y;
@@ -526,23 +618,25 @@ public class Dynamic#E#Set implements #E#Iterable {
     if (z != y) myKeys[z] = myKeys[y];
 
     // Child of Y. Y can't have 2 children.
-    int x = (myLeft[y] != 0) ? myLeft[y] : myRight[y];
+    int x = myLeft[y];
+    if (x == 0) x = myRight[y];
 
-    if (y == myRoot) myRoot = x;
-    else {
+    // removing y from tree
+    if (y == myRoot) {
+      myRoot = x;
+    } else {
       int parentOfY = parentsStack[xsi];
       if (myLeft[parentOfY] == y)
         myLeft[parentOfY] = x;
       else myRight[parentOfY] = x;
     }
-    free(y);
 
     if (myBlack.get(y)) {
       balanceAfterRemove(x, parentsStack, xsi);
-      myBlack.clear(y);
     }
+    free(y);
 
-    assert checkRedBlackTreeInvariants("remove key:" + key);
+    assert !IntegersDebug.CHECK || checkRedBlackTreeInvariants("remove key:" + key);
     return true;
   }
 
@@ -550,10 +644,10 @@ public class Dynamic#E#Set implements #E#Iterable {
     myKeys[y] = 0;
     myLeft[y] = 0;
     myRight[y] = 0;
-    if (y == myFront-1)
+    myBlack.clear(y);
+    if (y == myFront - 1) {
       myFront--;
-    else {
-      if (myRemoved == null) myRemoved = new BitSet(y+1);
+    } else {
       myRemoved.set(y);
     }
   }
@@ -563,7 +657,7 @@ public class Dynamic#E#Set implements #E#Iterable {
     int parentOfX, w;
     while (x != myRoot && myBlack.get(x)) {
       parentOfX = parentsStack[xsi];
-      if (myLeft[parentOfX] == x) {
+      if (x == myLeft[parentOfX]) {
         mainBranch = myLeft;
         otherBranch = myRight;
       } else {
@@ -571,15 +665,21 @@ public class Dynamic#E#Set implements #E#Iterable {
         otherBranch = myLeft;
       }
       w = otherBranch[parentOfX];
+
+      if (IntegersDebug.PRINT) {
+        IntegersDebug.println("balance", "x =", keyOrNil(x), "w =", keyOrNil(w));
+      }
+
       if (!myBlack.get(w)) {
-        // then loop is also finished
+        // the loop is also finished after the current iteration for any branch we take
         myBlack.set(w);
         myBlack.clear(parentOfX);
-        rotate(parentOfX, getLastOrNil(parentsStack, xsi-1), mainBranch, otherBranch);
+        rotate(parentOfX, parentsStack[xsi-1], mainBranch, otherBranch);
         parentsStack[xsi] = w;
         parentsStack[++xsi] = parentOfX;
         w = otherBranch[parentOfX];
       }
+      // now w always black
       if (myBlack.get(mainBranch[w]) && myBlack.get(otherBranch[w])) {
         myBlack.clear(w);
         x = parentOfX;
@@ -592,33 +692,36 @@ public class Dynamic#E#Set implements #E#Iterable {
           w = otherBranch[parentOfX];
         }
         myBlack.set(w, myBlack.get(parentOfX));
+        // now otherBranch[w] always red
         myBlack.set(parentOfX);
         myBlack.set(otherBranch[w]);
-        rotate(parentOfX, getLastOrNil(parentsStack, xsi-1), mainBranch, otherBranch);
+        rotate(parentOfX, parentsStack[xsi - 1], mainBranch, otherBranch);
         x = myRoot;
       }
     }
     myBlack.set(x);
   }
 
-  public #E#Array toSorted#E#Array() {
-    #e#[] arr = new #e#[size()];
-    int i = 0;
-    for (IntIterator it : new LURIterator()) {
-      arr[i++] = myKeys[it.value()];
-    }
-    return new #E#Array(arr);
+  private String keyOrNil(int x) {
+    return myKeys[x] == NIL_DUMMY_KEY ? "NIL" : String.valueOf(myKeys[x]);
   }
 
   @Override
-  public String toString() {
+  protected void toNativeArrayImpl(#e#[] dest, int destPos) {
+    int i = destPos;
+    for (IntIterator it : new LURIterator()) {
+      dest[i++] = myKeys[it.value()];
+    }
+  }
+
+  public String toDebugString() {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     debugPrintTreeStructure(new PrintStream(baos));
     try {
       return baos.toString("US-ASCII");
     } catch (UnsupportedEncodingException e) {
       assert false: e;
-      return "Dynamic#E#Set";
+      return "#E#TreeSet";
     }
   }
 
@@ -633,7 +736,7 @@ public class Dynamic#E#Set implements #E#Iterable {
    * </ol>
    * Visitor returns the value of auxiliary function on x.
    * */
-  private void visitULR(int auxInit, IntFunction2 visitor) {
+  private void visitULR(int auxInit, IntIntToInt visitor) {
     int x = myRoot;
     if (x == 0) return;
     int auxVal = auxInit;
@@ -675,14 +778,14 @@ public class Dynamic#E#Set implements #E#Iterable {
     assert (size() == 0) == isEmpty() : whatWasDoing + " " + myFront + ' ' + myRoot;
 
     // unnecessary requirements, though following them makes the structure more clear.
-    assert myKeys[0] == #EW#.MIN_VALUE : whatWasDoing + "\n" + myKeys[0];
+    assert myKeys[0] == NIL_DUMMY_KEY : whatWasDoing + "\n" + myKeys[0];
     assert myLeft[0] == 0  : whatWasDoing + "\n" + myLeft[0];
     assert myRight[0] == 0 : whatWasDoing + "\n" + myRight[0];
     assert myBlack.get(0) : whatWasDoing;
 
 
     final int[] lastBlackHeight = new int[] {-1};
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int bh) {
         if (x == 0)
@@ -723,13 +826,13 @@ public class Dynamic#E#Set implements #E#Iterable {
     assert myBlack.get(myRoot) : debugMegaPrint(whatWasDoing, myRoot);
 
     // 5. Height estimate is not less than any actual path height
-    final int hEst = height(size());
-    visitULR(0, new IntFunction2() {
+    final int heightEstimate = height(size());
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int h) {
         if (myLeft[x] == 0 && myRight[x] == 0) {
           // we're at the bottom
-          assert hEst >= h : whatWasDoing + "\n" + h + ' ' + hEst + ' ' + size() + ' ' + myFront;
+          assert heightEstimate >= h : whatWasDoing + "\n" + h + ' ' + heightEstimate + ' ' + size() + ' ' + myFront;
         }
         return h + 1;
       }
@@ -737,14 +840,14 @@ public class Dynamic#E#Set implements #E#Iterable {
 
     // any unreachable node should be contained in myRemoved
     final BitSet unremoved = new BitSet(myFront);
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int _) {
         if (x != 0) unremoved.set(x);
         return _;
       }
     });
-    if (myRemoved == null)
+    if (myRemoved.isEmpty())
       assert unremoved.cardinality() == size() : whatWasDoing + "\n" + size() + ' ' + unremoved.cardinality() + '\n' + unremoved + '\n' + dumpArrays(0);
     else {
       assert myRemoved.length() <= myFront : myFront + "\n" + myRemoved + "\n" + debugMegaPrint(whatWasDoing, 0);
@@ -767,8 +870,8 @@ public class Dynamic#E#Set implements #E#Iterable {
     StringBuilder sb = new StringBuilder();
     if (problematicNode > 0) sb = debugPrintNode(problematicNode, sb);
     int idWidth = max(log(10, myFront), 4);
-    #e# longestKey = max(abs(getMax()), abs(getMin()));
-    int keyWidth = max(log(10, longestKey), 3);
+    #e# #e#estKey = max(abs(getUpperBound()), abs(getLowerBound()));
+    int keyWidth = max(log(10, #e#estKey), 3);
     sb.append(String.format("%" + idWidth + "s | %" + keyWidth + "s | %" + idWidth + "s | %" + idWidth + "s\n", "id", "key", "left", "right"));
     String idFormat = "%" + idWidth + "d";
     String keyFormat = "%" + keyWidth + "d";
@@ -793,7 +896,7 @@ public class Dynamic#E#Set implements #E#Iterable {
 
   final void debugPrintTreeStructure(final PrintStream out) {
     out.println("Legend: x - black node, o - red node, # - NIL");
-    visitULR(0, new IntFunction2() {
+    visitULR(0, new IntIntToInt() {
       @Override
       public int invoke(int x, int level) {
         out.print(' ');
@@ -806,86 +909,54 @@ public class Dynamic#E#Set implements #E#Iterable {
     });
   }
 
-  /**
-   Calculates the expected amount of red nodes in a tree of a size sz after it is compactified with coloringType.
-   */
-  static int redsExpected(int sz, ColoringType coloringType) {
-    int result = 0;
-    if (coloringType == ColoringType.BALANCED || coloringType == ColoringType.TO_REMOVE) {
-      int redLevelsDensity = coloringType.redLevelsDensity();
-      int internalLevels = log(2, sz);
-      if (Math.pow(2,internalLevels) != sz + 1)
-        internalLevels = internalLevels - 2;
-      int internalRedLevels = (internalLevels+redLevelsDensity-2)/redLevelsDensity;
-      while (internalRedLevels > 0) {
-        int levelHeight = (internalRedLevels-1)*redLevelsDensity + 2;
-        result += Math.pow(2, levelHeight-1);
-        internalRedLevels--;
-      }
-    }
-    int top = (int)Math.pow(2, log(2, sz));
-    if (top != sz+1)
-      result += sz - top/2 + 1;
-    return result;
-  }
-
-  private boolean checkRedsAmount(ColoringType coloringType) {
-    int sz = size();
-    int expected = redsExpected(sz, coloringType);
-    int actual = sz - myBlack.cardinality() + 1;
-    assert expected == actual : sz + " " + actual + " " + expected;
-    System.out.println("size: " + sz + ", reds: " + actual);
-    return true;
-  }
-
-  private class KeysIterator extends Abstract#E#Iterator {
-    private LURIterator myIterator = new LURIterator();
-    private final int myModCountAtCreation = myModCount;
-
-    @Override
-    public boolean hasNext() throws ConcurrentModificationException {
-      checkMod();
-      return myIterator.hasNext();
-    }
-
-    public #E#Iterator next() throws ConcurrentModificationException, NoSuchElementException {
-      checkMod();
-      myIterator.next();
-      return this;
-    }
-
-    public #e# value() throws IllegalStateException {
-      checkMod();
-      return myKeys[myIterator.value()];
-    }
-
-    private void checkMod() {
-      if (myModCountAtCreation != myModCount)
-        throw new ConcurrentModificationException(myModCountAtCreation + " " + myModCount);
-    }
-  }
-
   private class LURIterator extends AbstractIntIterator {
     private int myValue;
     private int x = myRoot;
-    private final int[] xs;
-    private int xsi;
+    private final int[] ps;
+    private int psi;
+    private boolean myIterated = false;
 
     public LURIterator() {
-      xs = new int[height(size())];
+      int[] cache = myStackCache;
+      if (cache == null || cache.length < height(size())) {
+        ps = new int[height(size())];
+      } else {
+        ps = cache;
+        myStackCache = IntegersUtils.EMPTY_INTS;
+      }
+    }
+
+    public LURIterator(#e# key) {
+      this();
+      if (myRoot == 0) return;
+
+      // Parents stack top + 1
+      psi = 0;
+      #e# curKey;
+      while (x != 0) {
+        curKey = myKeys[x];
+        if (key <= curKey) {
+          ps[psi++] = x;
+          x = myLeft[x];
+        } else {
+          x = myRight[x];
+        }
+      }
     }
 
     public boolean hasNext() throws ConcurrentModificationException {
-      return x != 0 || xsi > 0;
+      return x != 0 || psi > 0;
     }
 
     public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
       if (!hasNext()) throw new NoSuchElementException();
-      if (x == 0) x = xs[--xsi];
-      else {
+      myIterated = true;
+      if (x == 0) {
+        x = ps[--psi];
+      }  else {
         int l = myLeft[x];
         while (l != 0) {
-          xs[xsi++] = x;
+          ps[psi++] = x;
           x = l;
           l = myLeft[x];
         }
@@ -895,8 +966,12 @@ public class Dynamic#E#Set implements #E#Iterable {
       return this;
     }
 
-    public int value() throws IllegalStateException {
-      if (x == myRoot) throw new IllegalStateException();
+    public boolean hasValue() {
+      return myIterated;
+    }
+
+    public int value() throws NoSuchElementException {
+      if (!hasValue()) throw new NoSuchElementException();
       return myValue;
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,28 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.#E#Iterator;
-import com.almworks.integers.#E#Iterable;
+
+package com.almworks.integers;
 
 /**
  * Iterates through two sorted #e# lists in O(N+M), providing values that exist in the
  * first list and do not exist in the second
  */
-public class Sorted#E#ListMinusIterator extends Finding#E#Iterator {
+public class #E#MinusIterator extends #E#FindingIterator {
   private final #E#Iterator myInclude;
   private final #E#Iterator myExclude;
 
-  private #e# myNext = #EW#.MIN_VALUE;
-  private #e# myLastExclude = #EW#.MIN_VALUE;
-  private boolean myExcludeIterated;
-
-  public Sorted#E#ListMinusIterator(#E#Iterator include, #E#Iterator exclude) {
-    myInclude = include;
-    myExclude = exclude;
-  }
-
-  public static Sorted#E#ListMinusIterator create(#E#Iterable include, #E#Iterable exclude) {
-    return new Sorted#E#ListMinusIterator(include.iterator(), exclude.iterator());
+  public #E#MinusIterator(#E#Iterable include, #E#Iterable exclude) {
+    myInclude = include.iterator();
+    myExclude = exclude.iterator();
   }
 
   protected boolean findNext() {
     #e# last = myNext;
     while (myInclude.hasNext()) {
       #e# v = myInclude.nextValue();
-      assert v >= last : last + " " + v + " " + myInclude;
+      assert !hasValue() || v >= last : last + " " + v + " " + myInclude;
       if (accept(v)) {
         myNext = v;
         return true;
@@ -55,26 +46,26 @@ public class Sorted#E#ListMinusIterator extends Finding#E#Iterator {
   }
 
   private boolean accept(#e# v) {
-    if (myExcludeIterated) {
-      if (v == myLastExclude)
-        return false;
-      if (v < myLastExclude)
+    #e# excludeValue = #EW#.MIN_VALUE;
+    if (myExclude.hasValue()) {
+      excludeValue = myExclude.value();
+      if (v < excludeValue) {
         return true;
+      } else if ( v == excludeValue) {
+        return false;
+      }
     }
     while (myExclude.hasNext()) {
-      #e# n = myExclude.nextValue();
-      assert n >= myLastExclude : myLastExclude + " " + n + " " + myExclude;
-      myLastExclude = n;
-      myExcludeIterated = true;
-      if (v == myLastExclude)
-        return false;
-      if (v < myLastExclude)
+      myExclude.next();
+      assert myExclude.value() >= excludeValue : excludeValue + " " + myExclude.value() + "  " + myExclude;
+      excludeValue = myExclude.value();
+      if (v < excludeValue) {
         return true;
+      } else if ( v == excludeValue) {
+        return false;
+      }
     }
     return true;
   }
 
-  protected #e# getNext() {
-    return myNext;
-  }
 }

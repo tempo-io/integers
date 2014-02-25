@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,103 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.optimized;
 
-import com.almworks.integers.AbstractWritable#E#List;
-import com.almworks.integers.Int#E#Map;
-import com.almworks.integers.PairInt#E#Iterator;
-import com.almworks.integers.Writable#E#ListIterator;
+
+package com.almworks.integers;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
+import static com.almworks.integers.IntIterators.repeat;
+
 /**
  * This list is memory-optimized to contain values where each value is
  * likely to be the same as the previous one. Values are stored as
  * a map index_where_value_starts=>value.
- * <p/>
- * Starting value is 0, that is, if map is empty, all values are 0.
  */
-public class SameValues#E#List extends AbstractWritable#E#List {
+public class #E#SameValuesList extends AbstractWritable#E#List {
   /**
    * Maps index to the value that starts at that index
    */
-  private final Int#E#Map myMap;
+  private Int#E#ListMap myMap;
 
-  public SameValues#E#List() {
-    this(new Int#E#Map());
+  public #E#SameValuesList() {
+    this(new Int#E#ListMap());
   }
 
-  public SameValues#E#List(Int#E#Map hostMap) {
-    assert hostMap.isEmpty() : hostMap;
+  public #E#SameValuesList(Int#E#ListMap hostMap) {
+    if (!hostMap.isEmpty()) {
+      throw new IllegalArgumentException("hostMap must be empty");
+    }
     myMap = hostMap;
   }
 
+  // todo optimize set, setAll:
+  // https://code.google.com/p/integers/issues/detail?id=62
+
+  /**
+   * Creates #E#SameValuesList containing the specified values which are repeated the specified number of times.
+   * Counts must be non-negative. Extra counts are ignored.
+   * Examples:
+   * <br>{@code create([0, 1, 2], [1, 2, 3]) -> (0, 1, 1, 2, 2, 2)};
+   * <br>{@code create([0, 1, 2], [1, 0, 3, 5]) -> (0, 2, 2, 2)};
+   * <br>{@code create([0, 3, 3], [1, 2, 1]) -> (0, 3, 3, 3)};
+   * @param values values to be repeated
+   * @param counts parallel to {@code values}, each count is the number of times to repeat the corresponding value.
+   *               Must be non-negative; {@code 0} means that the value is ignored. Extra counts are ignored.
+   * @return #E#SameValuesList containing the specified values which are repeated the specified number of times.
+   * @throws IllegalArgumentException if {@code counts.size < values.size}
+   */
+  public static #E#SameValuesList create(#E#SizedIterable values, IntIterable counts) throws IllegalArgumentException {
+    #E#SameValuesList list = new #E#SameValuesList();
+    if (values.size() != 0) {
+      list.init(values, counts);
+    }
+    return list;
+  }
+
+  /**
+   * @return #E#SameValuesList containing the specified values
+   * @see #create(com.almworks.integers.#E#SizedIterable, com.almworks.integers.IntIterable)
+   */
+  public static #E#SameValuesList create(#E#SizedIterable values) throws IllegalArgumentException {
+    return create(values, repeat(1));
+  }
+
+  public void init(#E#SizedIterable values, IntIterable counts) throws IllegalArgumentException {
+    assert size() == 0;
+
+    Int#E#ListMap.ConsistencyViolatingMutator m = myMap.startMutation();
+    int pos = 0, i = 0;
+    #e# prevValue = 0;
+    for (Int#E#Iterator it : Int#E#Iterators.pair(counts, values)) {
+      int curCount = it.left();
+      #e# curValue = it.right();
+      if (curCount < 0) {
+        throw new IllegalArgumentException("counts.get(" + i + ") < 0");
+      }
+      if (curCount != 0) {
+        if (pos == 0 || curValue != prevValue) {
+          m.keys().add(pos);
+          m.values().add(curValue);
+          prevValue = curValue;
+        }
+        pos += curCount;
+      }
+      i++;
+    }
+    if (i != values.size()) {
+      throw new IllegalArgumentException("values.size [" + values.size() + "] != counts.size[" + i + "]");
+    }
+    m.commit();
+    updateSize(pos);
+    assert !IntegersDebug.CHECK || checkInvariants();
+  }
+
   public #e# get(int index) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     if (index < 0 || index >= size())
       throw new IndexOutOfBoundsException(index + " " + this);
     int ki = myMap.findKey(index);
@@ -56,10 +118,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
   }
 
   private #e# valueForFind(int ki) {
-    if (ki == -1) {
-      // no earlier index
-      return 0;
-    } else if (ki < 0) {
+    if (ki < 0) {
       // take previous index
       ki = -ki - 2;
     }
@@ -67,29 +126,30 @@ public class SameValues#E#List extends AbstractWritable#E#List {
   }
 
   public void add(#e# value) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
     int sz = size();
     int msz = myMap.size();
-    #e# lastValue = msz == 0 ? 0 : myMap.getValueAt(msz - 1);
+    #e# lastValue = msz == 0 ? value + 1 : myMap.getValueAt(msz - 1);
     if (value != lastValue) {
       myMap.insertAt(msz, sz, value);
     }
     updateSize(sz + 1);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   public void insertMultiple(int index, #e# value, int count) {
-    assert checkInvariants();
-    if (count <= 0)
-      return;
+    assert !IntegersDebug.CHECK || checkInvariants();
+    if (count < 0) throw new IllegalArgumentException();
+    if (count == 0) return;
+
     int size = size();
     if (index < 0 || index > size)
       throw new IndexOutOfBoundsException(index + " " + this);
     int ki = myMap.findKey(index);
-    // will shift all rightward indexes by +count
+    // will shift all rightward indices by +count
     int shiftFrom = ki >= 0 ? ki : -ki - 1;
     // previous value before this insertion
-    #e# prevValue = prevValueForFindIndex(ki);
+    #e# prevValue = prevValueForFindIndex(ki, value);
     int sz = myMap.size();
     // we have to adjust first, or insert will fail because keys will conflict
     if (shiftFrom < sz) {
@@ -110,41 +170,61 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       }
     }
     updateSize(size + count);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
+  /**
+   * Increases the list size and shifts all values to the right of {@code index}.
+   * If {@code 0 <= index} and {@code index < size()}, the resulting "hole"
+   * in the range {@code [index; index + count)} contains {@code count} values equal to {@code get(index)}.
+   * If {@code index == size()} method works as if {@code index == size() - 1}.
+   * Invoking {@code expand(0, count)} when this list is empty will add {@code count} zeros.
+   *
+   * @param index where to insert the "hole", index must be >= 0 and <= size()
+   * @param count how much size increase is needed, must be >= 0
+   *
+   * @throws IndexOutOfBoundsException when index < 0 or index > size
+   * @throws IllegalArgumentException when count < 0
+   */
   public void expand(int index, int count) {
-    assert checkInvariants();
-    if (count <= 0)
-      return;
+    assert !IntegersDebug.CHECK || checkInvariants();
+    if (count < 0) {
+      throw new IllegalArgumentException();
+    }
     int size = size();
-    if (index < 0 || index > size)
+    if (index < 0 || index > size) {
       throw new IndexOutOfBoundsException(index + " " + this);
-    int ki = myMap.findKey(index);
-    // will shift all rightward indexes by +count
-    int shiftFrom = ki >= 0 ? ki + 1 : -ki - 1;
-    int sz = myMap.size();
-    // we have to adjust first, or insert will fail because keys will conflict
-    if (shiftFrom < sz) {
-      myMap.adjustKeys(shiftFrom, sz, count);
+    }
+    if (count == 0) {
+      return;
+    }
+    if (size == 0) {
+      myMap.add(0, 0);
+    } else {
+      int ki = myMap.findKey(index);
+      // will shift all rightward indices by +count
+      int shiftFrom = ki >= 0 ? ki + 1 : -ki - 1;
+      int sz = myMap.size();
+      // we have to adjust first, or insert will fail because keys will conflict
+      if (shiftFrom < sz) {
+        myMap.adjustKeys(shiftFrom, sz, count);
+      }
     }
     updateSize(size + count);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-
   public void setRange(int from, int to, #e# value) {
-    assert checkInvariants();
-
-    if (from >= to)
-      return;
+    assert !IntegersDebug.CHECK || checkInvariants();
+    if (from >= to) return;
     int size = size();
-    if (from < 0 || to > size)
+    if (from < 0 || size < to) {
       throw new IndexOutOfBoundsException(from + " " + to + " " + this);
+    }
 
     int fi = myMap.findKey(from);
     int removeFrom = fi >= 0 ? fi : -fi - 1;
-    #e# prevValue = prevValueForFindIndex(fi);
+    #e# prevValue = prevValueForFindIndex(fi, value);
     int ti = myMap.findKey(to, removeFrom);
     int removeTo = ti >= 0 ? ti + 1 : -ti - 1;
     #e# nextValue = valueForFind(ti);
@@ -155,64 +235,86 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
     int p = removeFrom;
     if (value != prevValue) {
-      if (p != 0 || value != 0) {
-        myMap.insertAt(p, from, value);
-        p++;
-      }
+      myMap.insertAt(p, from, value);
+      p++;
     }
-
     if (to < size && value != nextValue) {
       myMap.insertAt(p, to, nextValue);
     }
 
     modified();
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
-  private #e# prevValueForFindIndex(int findIndex) {
-    return findIndex == -1 || findIndex == 0 ? 0 : myMap.getValueAt(findIndex < 0 ? -findIndex - 2 : findIndex - 1);
+  private #e# prevValueForFindIndex(int findIndex, #e# value) {
+    return findIndex == -1 || findIndex == 0 ? value + 1 : myMap.getValueAt(findIndex < 0 ? -findIndex - 2 : findIndex - 1);
   }
 
   private boolean checkInvariants() {
     assert myMap != null;
     int size = size();
-    assert size >= 0 : size;
-    #e# lastValue = 0;
-    int lastKey = -1;
-    for (int i = 0; i < myMap.size(); i++) {
-      int key = myMap.getKey(i);
-      #e# value = myMap.getValueAt(i);
-      assert key > lastKey : i + " " + lastKey + " " + key;
-      assert value != lastValue : i + " " + value;
-      assert key < size : i + " " + key + " " + size;
-      lastKey = key;
-      lastValue = value;
+    if (myMap.size() == 0) {
+      assert size == 0;
+    } else {
+      assert size > 0 : size;
+      assert myMap.size() > 0;
+      #e# lastValue = myMap.getValueAt(0) - 1;
+      int lastKey = -1;
+      for (int i = 0; i < myMap.size(); i++) {
+        int key = myMap.getKeyAt(i);
+        #e# value = myMap.getValueAt(i);
+        assert key > lastKey : i + " " + lastKey + " " + key;
+        assert value != lastValue : i + " " + value;
+        assert key < size : i + " " + key + " " + size;
+        lastKey = key;
+        lastValue = value;
+      }
     }
     return true;
   }
 
+  @Override
+  public void sortUnique() {
+    Int#E#ListMap.ConsistencyViolatingMutator m = myMap.startMutation();
+
+    m.values().sortUnique();
+    int newSize = m.values().size();
+
+    m.keys().clear();
+    m.keys().addAll(IntProgression.arithmetic(0, newSize));
+
+    m.commit();
+    updateSize(newSize);
+  }
+
+  @Override
+  public void sort(final Writable#E#List... sortAlso) {
+    final #E#Array values = new #E#Array(this.iterator());
+    values.sort(sortAlso);
+    myMap.clear();
+    updateSize(0);
+    init(values, repeat(1));
+  }
 
   /**
    * Remove range from the list, keeping optimal structure
    */
   public void removeRange(int from, int to) {
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
 
     if (from >= to)
       return;
     int size = size();
-    if (from < 0 || to > size)
+    if (from < 0 || to > size) {
       throw new IndexOutOfBoundsException(from + " " + to + " " + this);
+    }
     int count = to - from;
 
     // fi will hold search result for "from", could be negative
     int fi = myMap.findKey(from);
 
     // removeFrom is the "insertion point" for "from" - pairs may be removed starting from that place.
-    int removeFrom = fi;
-    if (removeFrom < 0) {
-      removeFrom = -removeFrom - 1;
-    }
+    int removeFrom = fi >= 0 ? fi : -fi - 1;
 
     // whether to set new boundary (if the end of removed range falls in the middle of current range
     boolean set = false;
@@ -222,7 +324,6 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
     // exclusive high boundary for removing pairs from map
     int removeTo;
-
     if (to == size) {
       // remove all leftover pairs, don't set anything
       removeTo = myMap.size();
@@ -230,27 +331,20 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       // ti will hold search result for "to", could be negative
       // search starts at "removeFrom", because to > from
       int ti = myMap.findKey(to, removeFrom);
-
       if (ti >= 0) {
         // exact boundary is found: don't set new boundary, remove everything up to this boundary
         removeTo = ti;
       } else {
-        if (ti == -1) {
-          // removal within leading zeroes
-          removeTo = 0;
-        } else {
-          // will remove all up to the last boundary
-          // removeTo is guaranteed to be less than myMap.size()
-          removeTo = -ti - 2;
-          followingValue = myMap.getValueAt(removeTo);
+        removeTo = -ti - 2;
+      }
+      // compare preceding and following values: if they are equal, don't set boundary - just remove
 
-          // compare preceding and following values: if they are equal, don't set boundary - just remove
-          #e# prevValue = prevValueForFindIndex(fi);
-          if (followingValue != prevValue)
-            set = true;
-          else
-            removeTo++;
-        }
+      followingValue = myMap.getValueAt(removeTo);
+      #e# prevValue = prevValueForFindIndex(fi, followingValue);
+      if (followingValue != prevValue) {
+        set = true;
+      } else {
+        removeTo++;
       }
     }
 
@@ -265,26 +359,33 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       myMap.setAt(removeFrom, from, followingValue);
       removeFrom++;
     }
-    /*else if (removeFrom < myMap.size()) {
-      // check if we can collapse adjacent pairs with the same value
-      int v = myMap.getValueAt(removeFrom);
-      if (removeFrom == 0 && v == 0 || removeFrom > 0 && myMap.getValueAt(removeFrom - 1) == v) {
-        myMap.removeAt(removeFrom);
-      }
-    }*/
 
-    // decrement indexes that follow removed range
+    // decrement indices that follow removed range
     myMap.adjustKeys(removeFrom, myMap.size(), -count);
 
     updateSize(size - count);
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
 
   @NotNull
   public Writable#E#ListIterator iterator(int from, int to) {
-    if (from > to || from < 0 || to > size())
+    if (from > to || from < 0 || to > size()) {
       throw new IndexOutOfBoundsException(from + " " + to + " " + this);
+    }
     return new SameValuesIterator(from, to);
+  }
+
+  @Override
+  public void swap(int index1, int index2) {
+    if (index1 != index2) {
+      #e# t = get(index1);
+      #e# d = get(index2);
+      if (t == d) {
+        return;
+      }
+      set(index1, d);
+      set(index2, t);
+    }
   }
 
   public void clear() {
@@ -292,8 +393,12 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     updateSize(0);
   }
 
+  /**
+   * @return count of changes between adjacent indices in this list.
+   * <br>example: () -> 0, (1,0,1) -> 2; (1,1,1) -> 0; (1,1,1,2) -> 1
+   */
   public int getChangeCount() {
-    return myMap.size();
+    return isEmpty() ? 0: myMap.size() - 1;
   }
 
   public int getNextDifferentValueIndex(int curIndex) {
@@ -302,103 +407,41 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     int ki = myMap.findKey(curIndex);
     // find key ki for the index from which start the values equal to a[curIndex]
     if(ki < 0) ki = -ki - 2;
-   // return index for the next differing value increasing the found key or -1 if the key todo[sank] text
+    // increase the found key to get the next different value
     ++ki;
-    return ki < myMap.size() ? myMap.getKey(ki) : -1;
+    return ki < myMap.size() ? myMap.getKeyAt(ki) : size();
   }
 
-  /**
-   * Due to the leading-zeros optimization, a list starting with zeros and ending with nonzeros
-   * might be allocated in less amount of memory compared to its reversion.
-   * Hence, calling this method on such lists might result in additional (possibly huge) memory allocation.
-   */
   public void reverse() {
-    int sz = size();
-    int msz = myMap.size();
-    if (msz == 0) return;
-    int i = 0;
-    int keySwp;
-    #e# valSwp;
+    // example
+    // keys:   (0, 2, 3, 6)  -> (0, 4, 7, 8); size = 10
+    // values: (4, 1, 2, 3)  -> (3, 2, 1, 4)
 
-    // Shorthands used in comments:
-    // k[i] - myMap.myKeys.get(i) before reversion.
-    // k'[i] - myMap.myKeys.get(i) after reversion.
-    // v[i], v'[i] - respectively, myMap.myValues
-
-    Int#E#Map.ConsistencyViolatingMutator m = myMap.startMutation();
-
-    // Initial adjustments section.
-    //
-    // SameValues#E#List is designed in such a way, that, if it starts with zeros,
-    // then normally k[0] != 0 && v[0] != 0, i.e starting zeros are omitted in myMap.
-    // Hence, 4 variants are possible:
-    //   a) List starts with zeros and ends with zeros:
-    //     No adjustments needed, main loop will do all the work.
-    //   b) List starts with zeros and ends with non-zeros:
-    //     A list will have to be expanded by one element. k[] will be expanded
-    //     with sz, and main loop will still work correctly.
-    //   c) List starts with non-zeros and ends with zeros:
-    //     A list will have to be shrinked by one element.
-    //     After main loop is finished, a last element will contain unnecesary data,
-    //     which is to be removed.
-    //   d) List starts with non-zeros and ends with non-zeros:
-    //     First element won't be used in a loop, edge values will be swapped outside the loop.
-    if (m.getValue(msz - 1) != 0) {
-      if (m.getKey(0) != 0) {
-        // Case b.
-        m.insertAt(msz, sz, 0);
-        msz++;
-      } else {
-        // Case d.
-        i++;
-        valSwp = m.getValue(0);
-        m.setValue(0, m.getValue(msz - 1));
-        m.setValue(msz - 1, valSwp);
-      }
-    }
-    int j = msz - 1;
-
-    // Main loop section.
-    //
-    // Given the values of i, j after the initial adjustment, it can be shown by induction on x that
-    // k'[i+x] == sz - k[j-x].
-    // for any non-negative x such that i + x < j - x.
-    // To prove it, note that k'[i+x+1]-k'[i+x] is the length of the (i+x)-th block in the reversed array,
-    // but it is also (j-(i+x)-1)-th block in the initial array, and its length is k[j-(i+x)]-k[j-(i+x)-1];
-    // equaling these expressions gives the expression above.
-    // Similarly, k'[j-x] == sz - k[i+x], so the loop modifies k[] "simultaneously" from both ends.
-    //
-    // Also, loop performs a simple reversion of v[].
-    // Note that v[] are taken with shifted index, j-1 instead of j.
-    // This way, v[msz-1] is not engaged in the reversion here.
-    // Depending on a case, there are different explanations:
-    //   a) v[msz-1] is 0, and only v[0 .. msz-2] should be engaged.
-    //   b) It's inserted manually and is 0, and only native values should be reversed.
-    //   c) It will be removed, and only v[0 .. msz-2] should be engaged.
-    //   d) It should be swapped with v[0], but in this case v[0] is skipped in a loop,
-    //     so they are swapped in initial adjustments section separately.
-    for (; i < j; i++, j--) {
-      keySwp = m.getKey(i);
-      m.setKey(i, sz - m.getKey(j));
-      m.setKey(j, sz - keySwp);
-
-      valSwp = m.getValue(i);
-      m.setValue(i, m.getValue(j - 1));
-      m.setValue(j - 1, valSwp);
+    int mapSize = myMap.size();
+    if (mapSize < 2) {
+      return;
     }
 
-    if (i == j) m.setKey(i, sz - m.getKey(i));
+    int idx = 1, sz = size();
+    Int#E#ListMap.ConsistencyViolatingMutator m = myMap.startMutation();
+    m.values().reverse();
 
-    // Case c.
-    if (m.getKey(msz - 1) == sz) m.removeAt(msz - 1);
-    
+    WritableIntList keys = m.keys();
+    for (int j = mapSize - 1; idx < j; j--, idx++) {
+      int keySwp = keys.get(idx);
+      keys.set(idx, sz - keys.get(j));
+      keys.set(j, sz - keySwp);
+    }
+    if ((mapSize & 1) == 0) {
+      keys.set(idx, sz - keys.get(idx));
+    }
+
     m.commit();
-    assert checkInvariants();
+    assert !IntegersDebug.CHECK || checkInvariants();
   }
-
 
   private final class SameValuesIterator extends WritableIndexIterator {
-    private PairInt#E#Iterator myIterator;
+    private Int#E#Iterator myIterator;
     private #e# myValue;
     private int myNextChangeIndex;
 
@@ -409,16 +452,16 @@ public class SameValues#E#List extends AbstractWritable#E#List {
 
     protected void sync() {
       super.sync();
-      int p = myMap.findKey(getNextIndex());
+      int p = hasValue() ? myMap.findKey(index()) : myMap.findKey(getNextIndex());
       if (p == -1) {
-        myValue = 0;
-        myIterator = myMap.iterator();
+        assert myMap.isEmpty();
+        myIterator = Int#E#Iterator.EMPTY;
       } else {
-        if (p < 0)
+        if (p < 0) {
           p = -p - 2;
-        myIterator = myMap.iterator(p);
-        myIterator.next();
-        myValue = myIterator.value2();
+        }
+        myIterator = myMap.iterator(p).next();
+        myValue = myIterator.right();
       }
       advanceToNextChange();
     }
@@ -426,7 +469,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     private void advanceToNextChange() {
       if (myIterator.hasNext()) {
         myIterator.next();
-        myNextChangeIndex = myIterator.value1();
+        myNextChangeIndex = myIterator.left();
       } else myNextChangeIndex = size();
     }
 
@@ -436,7 +479,7 @@ public class SameValues#E#List extends AbstractWritable#E#List {
       if (getNextIndex() >= getTo())
         throw new NoSuchElementException();
       if (getNextIndex() == myNextChangeIndex) {
-        myValue = myIterator.value2();
+        myValue = myIterator.right();
         advanceToNextChange();
       }
       setNext(getNextIndex() + 1);
@@ -446,15 +489,16 @@ public class SameValues#E#List extends AbstractWritable#E#List {
     public #e# value() throws NoSuchElementException {
       if (isJustRemoved())
         throw new IllegalStateException();
-      if (getNextIndex() <= getFrom())
+      if (!hasValue())
         throw new NoSuchElementException();
       return myValue;
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
       super.move(count);
-      if (count != 0)
+      if (count != 0) {
         sync();
+      }
     }
   }
 }

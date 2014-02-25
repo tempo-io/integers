@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,67 +14,64 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.#E#Iterator;
-import com.almworks.integers.#E#Iterable;
+package com.almworks.integers;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Iterates through two sorted int lists in O(N+M), providing values that exist in
- * both lists
+ * Iterates through a list of unique #e# lists in O(N * log(K)), where K - number of lists, N - average size,
+ * providing unique sorted values that exist in every list
+ *
+ * @author Eugene Vagin
  */
-public class Sorted#E#ListIntersectionIterator extends Finding#E#Iterator {
-  private final #E#Iterator myFirst;
-  private final #E#Iterator mySecond;
+public class #E#IntersectionIterator extends #E#SetOperationsIterator {
 
-  private #e# myNext = #EW#.MIN_VALUE;
-  private #e# myLastSecond = #EW#.MIN_VALUE;
-  private boolean mySecondIterated;
-
-  public Sorted#E#ListIntersectionIterator(#E#Iterator first, #E#Iterator second) {
-    myFirst = first;
-    mySecond = second;
+  public #E#IntersectionIterator(#E#Iterable... iterables) {
+    super(#e#IterablesToIterators(Arrays.asList(iterables)));
   }
 
-  public static Sorted#E#ListIntersectionIterator create(#E#Iterable include, #E#Iterable exclude) {
-    return new Sorted#E#ListIntersectionIterator(include.iterator(), exclude.iterator());
+  public #E#IntersectionIterator(List<? extends #E#Iterable> iterables) {
+    super(#e#IterablesToIterators(iterables));
+  }
+
+  private boolean equalValues() {
+    #e# topValue = getTopIterator().value();
+    for (int i = parent(heapLength) + TOP; i <= heapLength; i++) {
+      if (topValue != myIts.get(myHeap[i]).value()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected boolean findNext() {
-    #e# last = myNext;
-    while (myFirst.hasNext()) {
-      #e# v = myFirst.nextValue();
-      assert v >= last : last + " " + v + " " + myFirst;
-      if (accept(v)) {
-        myNext = v;
-        return true;
+    if (myIts.size() == 0) {
+      return false;
+    }
+    for (int i = 0, n = myIts.size(); i < n; i++) {
+      if (myIts.get(i).hasNext()) {
+        myIts.get(i).next();
+        myHeap[i + TOP] = i;
+      } else {
+        return false;
       }
-      last = v;
     }
-    return false;
-  }
+    buildHeap();
+    if (IntegersDebug.PRINT) outputHeap();
 
-  private boolean accept(#e# v) {
-    if (mySecondIterated) {
-      if (v == myLastSecond)
-        return true;
-      if (v < myLastSecond)
-        return false;
-    }
-    while (mySecond.hasNext()) {
-      #e# n = mySecond.nextValue();
-      assert n >= myLastSecond : myLastSecond + " " + n + " " + mySecond;
-      myLastSecond = n;
-      mySecondIterated = true;
-      if (v == myLastSecond)
-        return true;
-      if (v < myLastSecond)
-        return false;
-    }
-    return false;
-  }
+    while (!equalValues()) {
+      #E#Iterator topIterator = getTopIterator();
+      if (!topIterator.hasNext()) return false;
 
-  protected #e# getNext() {
-    return myNext;
+      #e# prev = topIterator.value();
+      topIterator.next();
+      assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
+      heapify(TOP);
+    }
+    // all values are the same as the TOP
+    myNext = getTopIterator().value();
+    return true;
   }
 }

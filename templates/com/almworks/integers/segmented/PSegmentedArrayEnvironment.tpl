@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.optimized;
 
-public interface Segmented#E#ArrayEnvironment {
+
+package com.almworks.integers.segmented;
+
+public interface #E#SegmentedArrayEnvironment {
   #E#Segment allocate(int size);
 
   #E#Segments allocateSegments(int size);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.*;
+
+package com.almworks.integers;
 
 /**
- * Removing int list decorator that does not alter the given list of removed indices.
+ * Removing {@code #E#List} decorator that does not alter the given list of removed indices.
+ * @see Writable#E#ListRemovingDecorator
  * @author igor baltiyskiy
  */
-public class Readonly#E#ListRemovingDecorator extends #E#ListRemovingDecorator {
+public class #E#ListRemovingDecorator extends Abstract#E#ListRemovingDecorator {
   private IntList myRemovedSorted;
 
-  protected Readonly#E#ListRemovingDecorator(#E#List base) {
+  protected #E#ListRemovingDecorator(#E#List base) {
     super(base);
+    myRemovedSorted = IntList.EMPTY;
   }
 
-  private Readonly#E#ListRemovingDecorator(#E#List base, IntList preparedIndices) {
+  private #E#ListRemovingDecorator(#E#List base, IntList preparedIndices) {
     super(base);
     myRemovedSorted = preparedIndices;
   }
@@ -38,12 +40,9 @@ public class Readonly#E#ListRemovingDecorator extends #E#ListRemovingDecorator {
    * Indices must be prepared for use by the removing decorator.
    * @see #prepareSortedIndices
    * @see #prepareUnsortedIndices
-   * @param base
-   * @param preparedIndices
-   * @return
    */
-  public static Readonly#E#ListRemovingDecorator createFromPrepared(#E#List base, IntList preparedIndices) {
-    return new Readonly#E#ListRemovingDecorator(base, preparedIndices);
+  public static #E#ListRemovingDecorator createFromPrepared(#E#List base, IntList preparedIndices) {
+    return new #E#ListRemovingDecorator(base, preparedIndices);
   }
 
   /**

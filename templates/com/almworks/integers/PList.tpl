@@ -1,5 +1,5 @@
-/*
- * Copyright 2010 ALM Works Ltd
+  /*
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersUtils.*;
-import org.jetbrains.annotations.NotNull;
+  import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+  import java.util.List;
+  import java.util.NoSuchElementException;
 
-public interface #E#List extends #E#Iterable {
+  import static com.almworks.integers.IntegersUtils.EMPTY_#EC#S;
+
+public interface #E#List extends #E#SizedIterable {
   #E#List EMPTY = new #E#Array(EMPTY_#EC#S);
 
   /**
@@ -45,6 +48,35 @@ public interface #E#List extends #E#Iterable {
   boolean contains(#e# value);
 
   /**
+  * @return the item at index. Valid value of an index is in range [0, size()).
+  * Note: May not be efficient (up to O(N)). Efficient algorithm should use iterator to iterate collection.
+  */
+  #e# get(int index) throws NoSuchElementException;
+
+  /**
+   * Creates and returns a list which is this list indexed by {@code indices}<br>
+   *
+   * Analogy: get(index) returns one value from this list,
+   * get(indices) returns a list with multiple values from this list.
+   * The values are
+   * <pre>[get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]</pre><br>
+   *
+   * One of the possible usages is for MATLAB-like indexing, i.e. vector indexed by vector.
+   *
+   * Also {@link #E#IndexedIterator} and {@link #E#ListIndexedIterator} can be used
+   * to iterate over this list via a custom set of indices.
+   * @return #E#List with values located at {@code indices} in this list
+   * @see #E#IndexedIterator
+   * @see #E#ListIndexedIterator
+   * */
+  public #E#List get(final IntList indices);
+
+    /**
+    * @return index of first occurence of value. If not found returns negative value
+    */
+  int indexOf(#e# value);
+
+  /**
    * Creates new native array and stores values there.
    * <p>
    * Note: effectively written code should avoid use this method.
@@ -52,21 +84,10 @@ public interface #E#List extends #E#Iterable {
   #e#[] toNativeArray();
 
   /**
-  * @return the item at index. Valid value of an index is in range [0, size()).
-  * Note: May not be efficient (up to O(N)). Efficient algorithm should use iterator to iterate collection.
-  */
-  #e# get(int index) throws NoSuchElementException;
-
-  /**
-  * @return index of first occurence of value. If not found returns negative value
-  */
-  int indexOf(#e# value);
-
-  /**
    * Writes values to dest.
    * @return dest
    */
-  #e#[] toArray(int startIndex, #e#[] dest, int destOffset, int length);
+  #e#[] toNativeArray(int startIndex, #e#[] dest, int destOffset, int length);
 
   /**
    * Returns a sub-list, backed by this list. If the list changes, changes
@@ -100,7 +121,7 @@ public interface #E#List extends #E#Iterable {
   /**
   * @return true if list is sorted in smallest first order and all elements are unique
   */
-  boolean isUniqueSorted();
+  boolean isSortedUnique();
 
   /**
   * @return iterator initially located before first element. Iterator will walk the whole list
@@ -127,12 +148,30 @@ public interface #E#List extends #E#Iterable {
    * <li>{@code j > i and a[i] != a[j]},</li>
    * </ul>
    * where {@code a} represents the list.
-   * @return Index of the next different value or -1 if all values starting from the specified index are the same.
+   * @return Index of the next different value or {@link #size()} if all values starting from the specified index are the same.
    */
   int getNextDifferentValueIndex(int curIndex);
 
   /**
   * @return List filled with object wrappers
   */
-  List<#EW#> toList();
+  List<#E#> toList();
+
+  class Single extends Abstract#E#List {
+    private #e# myValue;
+
+    public Single(#e# value) {
+      myValue = value;
+    }
+
+    @Override
+    public int size() {
+      return 1;
+    }
+
+    @Override
+    public #e# get(int index) throws NoSuchElementException {
+      return myValue;
+    }
+  }
 }

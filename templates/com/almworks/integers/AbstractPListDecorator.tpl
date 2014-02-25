@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.almworks.integers.util;
 
-import com.almworks.integers.Abstract#E#List;
-import com.almworks.integers.#E#List;
+
+package com.almworks.integers;
 
 public abstract class Abstract#E#ListDecorator extends Abstract#E#List {
   private final #E#List myBase;

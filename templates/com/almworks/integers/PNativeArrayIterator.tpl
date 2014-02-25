@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersUtils.*;
+import static com.almworks.integers.IntegersUtils.EMPTY_#EC#S;
 
-public class #E#ArrayIterator extends Abstract#E#ListIndexIterator {
+public class #E#NativeArrayIterator extends Abstract#E#ListIndexIterator {
   private final #e#[] myArray;
 
-  public #E#ArrayIterator(#e#[] array, int from, int to) {
+  public #E#NativeArrayIterator(#e#[] array, int from, int to) {
     super(Math.max(0, from), array == null ? 0 : Math.min(array.length, to));
     myArray = array == null ? EMPTY_#EC#S : array;
   }
 
-  public #E#ArrayIterator(#e#[] array) {
+  public #E#NativeArrayIterator(#e#[] array) {
     this(array, 0, Integer.MAX_VALUE);
   }
 
   public static #E#Iterator create(#e#... values) {
     if (values == null || values.length == 0)
       return EMPTY;
-    return new #E#ArrayIterator(values);
+    return new #E#NativeArrayIterator(values);
   }
 
   protected #e# absget(int index) {
