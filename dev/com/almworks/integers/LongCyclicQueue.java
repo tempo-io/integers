@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PCyclicQueue.tpl
+
+
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.almworks.integers.IntCollections.range;
+import static com.almworks.integers.IntIterators.range;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 

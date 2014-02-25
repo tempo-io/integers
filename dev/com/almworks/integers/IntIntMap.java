@@ -14,226 +14,47 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PQMap.tpl
 
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-public class IntIntMap {
-  private final WritableIntList myKeys;
-  private final WritableIntList myValues;
-  @Nullable private ConsistencyViolatingMutator myMutator;
+public interface IntIntMap extends IntIntIterable {
 
-  public IntIntMap(WritableIntList keys, WritableIntList values) {
-    myKeys = keys;
-    myValues = values;
-  }
-
-  public IntIntMap() {
-    this(new IntArray(), new IntArray());
-  }
-
-  public boolean isEmpty() {
-    return size() == 0;
-  }
-
-  public int size() {
-    assert myKeys.size() == myValues.size();
-    return myKeys.size();
-  }
-
-  public void clear() {
-    checkMutatorPresence();
-    myKeys.clear();
-    myValues.clear();
-  }
-
-  public int findKey(int key) {
-    checkMutatorPresence();
-    return findKey(key, 0);
-  }
-
-  public int getValueAt(int index) {
-    checkMutatorPresence();
-    return myValues.get(index);
-  }
-
-  public void insertAt(int index, int key, int value) {
-    checkMutatorPresence();
-    assert index >= 0 && index <= size() : index + " " + this;
-    assert
-      index == 0 || myKeys.get(index - 1) < key : index + " " + key + " " + myKeys.get(index - 1);
-    assert index == size() || myKeys.get(index) > key : index + " " + key + " " + myKeys.get(index);
-    doInsert(index, key, value);
-  }
-
-  private void doInsert(int idx, int key, int value) {
-    checkMutatorPresence();
-    myKeys.insert(idx, key);
-    myValues.insert(idx, value);
-  }
-
-  public void adjustKeys(int from, int to, int increment) {
-    checkMutatorPresence();
-    if (from >= to) return;
-    if (from < 0) throw new IndexOutOfBoundsException(from + " " + this);
-    int sz = size();
-    if (to > sz) throw new IndexOutOfBoundsException(to + " " + this);
-    if (from > 0) {
-      int b = getKey(from) + increment;
-      if (getKey(from- 1) >= b)
-        throw new IllegalArgumentException(from + " " + to + " " + increment + " " + myKeys.get(from - 1) + " " + b);
-    }
-    if (to < sz) {
-      int b = getKey(to - 1) + increment;
-      if (getKey(to) <= b)
-        throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
-    }
-    for (WritableIntListIterator it = myKeys.iterator(from, to); it.hasNext();) it.set(0, it.nextValue() + increment);
-  }
-
-  public void setKey(int index, int key) {
-    checkMutatorPresence();
-    checkIndex(index);
-    checkSetKeyAt(index, key);
-    myKeys.set(index, key);
-  }
-
-  public void removeRange(int from, int to) {
-    checkMutatorPresence();
-    myKeys.removeRange(from, to);
-    myValues.removeRange(from, to);
-  }
-
-  public int getKey(int index) {
-    checkMutatorPresence();
-    return myKeys.get(index);
-  }
-
-  public int findKey(int key, int from) {
-    checkMutatorPresence();
-    int size = myKeys.size();
-    assert from == size || from == 0 || myKeys.get(from - 1) < key : key + " " + from + " " + this;
-    return myKeys.binarySearch(key, from, size);
-  }
-
-  public void setAt(int index, int key, int value) {
-    checkMutatorPresence();
-    checkIndex(index);
-    checkSetKeyAt(index, key);
-    myKeys.set(index, key);
-    myValues.set(index, value);
-  }
-
-  public PairIntIntIterator iterator() {
-    checkMutatorPresence();
-    return iterator(0, size());
-  }
-
-  public PairIntIntIterator iterator(int from) {
-    checkMutatorPresence();
-    return iterator(from, size());
-  }
-
-  public PairIntIntIterator iterator(int from, int to) {
-    checkMutatorPresence();
-    return new PairIntIntIterator(myKeys.iterator(from, to), myValues.iterator(from, to));
-  }
-
-  public boolean containsKey(int key) {
-    checkMutatorPresence();
-    return findKey(key) >= 0;
-  }
-
-  public IntListIterator keysIterator(int from, int to) {
-    checkMutatorPresence();
-    return myKeys.iterator(from, to);
-  }
-
-  public IntIterator valuesIterator(int from, int to) {
-    checkMutatorPresence();
-    return myValues.iterator(from, to);
-  }
-
-  private void checkIndex(int index) {
-    if (index < 0 || index >= size()) throw new IndexOutOfBoundsException(index + " " + this);
-  }
-
-  private void checkSetKeyAt(int index, int key) {
-    if (index > 0 && myKeys.get(index - 1) >= key) throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index - 1) + " " + this);
-    if (index + 1 < size() && myKeys.get(index + 1) <= key) throw new IllegalArgumentException(index + " " + key + " " + myKeys.get(index + 1) + " " + this);
-  }
-
-  private boolean checkInvariants() {
-    if (myKeys.size() > 0) {
-      if (!myKeys.isSorted()) return false;
-      if (myValues.get(0) == 0) return false;
-    }
-    int currValue;
-    int lastValue = 0;
-    for (IntIterator ii : myValues) {
-      currValue = ii.value();
-      if (currValue == lastValue) return false;
-      lastValue = currValue;
-    }
-    return myKeys.size() == myValues.size();
-  }
-
-  private void checkMutatorPresence() throws IllegalStateException {
-    if (myMutator != null) throw new IllegalStateException();
-  }
+  int DEFAULT_VALUE = 0;
 
   /**
-   * Enters this {@code IntIntMap} into a mode in which consistency-breaking mutations are allowed.
-   *
-   * <p>While in this mode, usage of all of this {@code IntIntMap}'s methods
-   * (except {@code size()} and {@code empty()}) would throw IllegalStateException.
-   * Instead of them, {@code myMutator}'s methods should be used.<br>
-   * {@code myMutator.commit()} brings this {@code IntIntMap} back to its normal state.</p>
-   * @throws IllegalStateException if this {@code IntIntMap} is already in mutation state.
+   * @return the value for the specified key if this map contains key {@code key}. Otherwise returns default value.
    */
-  public ConsistencyViolatingMutator startMutation() throws IllegalStateException {
-    return new ConsistencyViolatingMutator();
-  }
+  int get(int key);
 
-  public class ConsistencyViolatingMutator {
+  /**
+   * @return true if this map contains key {@code key}. Otherwise false
+   */
+  boolean containsKey(int key);
 
-    public ConsistencyViolatingMutator() {
-      if (myMutator != null) throw new IllegalStateException();
-      myMutator = this;
-    }
+  /**
+   * @return true if this map contains all of the elements produced by {@code keys}.
+   * Otherwise false
+   */
+  boolean containsKeys(IntIterable keys);
 
-    public void setKey(int index, int key) {
-      myKeys.set(index, key);
-    }
+  /**
+   * @return the number of keys/values in this map(its cardinality)
+   */
+  int size();
 
-    public int getKey(int index) {
-      return myKeys.get(index);
-    }
+  /**
+   * @return true if this map contains no elements
+   */
+  boolean isEmpty();
 
-    public void setValue(int index, int val) {
-      myValues.set(index, val);
-    }
+  @NotNull
+  IntIntIterator iterator();
 
-    public int getValue(int index) {
-      return myValues.get(index);
-    }
+  IntIterator keysIterator();
 
-    public void insertAt(int idx, int key, int value) {
-      myKeys.insert(idx, key);
-      myValues.insert(idx, value);
-    }
-
-    public void removeAt(int idx) {
-      myKeys.removeAt(idx);
-      myValues.removeAt(idx);
-    }
-
-    public void commit() {
-      assert checkInvariants();
-      IntIntMap.this.myMutator = null;
-    }
-  }
-
+  IntIterator valuesIterator();
 }

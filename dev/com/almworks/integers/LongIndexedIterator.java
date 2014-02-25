@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PIndexedIterator.tpl
+
+
 
 
 package com.almworks.integers;

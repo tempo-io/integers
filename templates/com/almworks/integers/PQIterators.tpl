@@ -52,21 +52,20 @@ public class #E##F#Iterators {
   }
 
   public static #E#Iterator leftProjection(final #E##F#Iterator pairs) {
-    return new Abstract#E#Iterator() {
+    return new Abstract#E#IteratorWithFlag() {
       @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return pairs.hasNext();
-      }
-
-      @Override
-      public #e# value() throws NoSuchElementException {
+      public #e# valueImpl() {
         return pairs.left();
       }
 
       @Override
-      public #E#Iterator next() {
+      public void nextImpl() {
         pairs.next();
-        return this;
+      }
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return pairs.hasNext();
       }
     };
   }

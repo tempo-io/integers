@@ -14,196 +14,61 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PListRemovingDecorator.tpl
+
+
 
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.ConcurrentModificationException;
-import java.util.NoSuchElementException;
-
-import static com.almworks.integers.IntegersUtils.arrayCopy;
-
 /**
- * Removing decorator for a native int list.
+ * Removing {@code IntList} decorator that does not alter the given list of removed indices.
+ * @see WritableIntListRemovingDecorator
+ * @author igor baltiyskiy
  */
-public abstract class IntListRemovingDecorator extends AbstractIntListDecorator {
+public class IntListRemovingDecorator extends AbstractIntListRemovingDecorator {
+  private IntList myRemovedSorted;
+
   protected IntListRemovingDecorator(IntList base) {
     super(base);
+    myRemovedSorted = IntList.EMPTY;
   }
 
-  protected abstract IntList getRemovedPrepared();
-
-  public int size() {
-    return Math.max(0, base().size() - getRemovedPrepared().size());
-  }
-
-  public int get(int index) {
-    return base().get(index + removedBefore(index));
-  }
-
-  public boolean iterate(int from, int to, IntVisitor visitor) {
-    IntList removedPrepared = getRemovedPrepared();
-    int idx = removedBefore(from);
-    int left = to - from;
-    while (left > 0) {
-      if (idx >= removedPrepared.size() || removedPrepared.get(idx) > from + left)
-        return iterateBase(from + idx, from + idx + left, visitor);
-      to = removedPrepared.get(idx);
-      if (!iterateBase(from + idx, to + idx, visitor))
-        return false;
-      int processed = to - from;
-      left -= processed;
-      from += processed;
-      while (idx < removedPrepared.size() && removedPrepared.get(idx) == to)
-        idx++;
-    }
-    return true;
-  }
-
-  protected final int removedBefore(int index) {
-    int idx = getRemovedPrepared().binarySearch(index + 1);
-    if (idx < 0)
-      return -idx - 1;
-    return idx;
-  }
-
-  @NotNull
-  public IntListIterator iterator(int from, int to) {
-    return new LocalIterator(from, to);
-  }
-
-  public IntListIterator removedIndexIterator() {
-    return new RemovedIndexIterator(getRemovedPrepared().iterator());
-  }
-
-  public IntIterator removedValueIterator() {
-    return new IndexedIntListIterator(base(), removedIndexIterator());
-  }
-
-  public int getRemoveCount() {
-    return getRemovedPrepared().size();
-  }
-
-  public boolean isRemovedAt(int baseIndex) {
-    return getNewIndex(baseIndex) < 0;
-  }
-
-  public int getNewIndex(int baseIndex) {
-    IntList removedPrepared = getRemovedPrepared();
-    int size = removedPrepared.size();
-    if (size == 0)
-      return baseIndex;
-    int idx = removedPrepared.binarySearch(baseIndex);
-    if (idx < 0)
-      idx = -idx - 1;
-    if (idx >= size)
-      idx = size - 1;
-    while (idx >= 0) {
-      int v = removedPrepared.get(idx);
-      int removed = v + idx;
-      if (removed == baseIndex)
-        return -1;
-      if (removed < baseIndex)
-        return v + (baseIndex - removed) - 1;
-      idx--;
-    }
-    return baseIndex;
+  private IntListRemovingDecorator(IntList base, IntList preparedIndices) {
+    super(base);
+    myRemovedSorted = preparedIndices;
   }
 
   /**
-   * Prepares the given sorted indices array to be used by the decorator.
-   * @param indices indices array, must be sorted, must not contain duplicates.
+   * Indices must be prepared for use by the removing decorator.
+   * @see #prepareSortedIndices
+   * @see #prepareUnsortedIndices
    */
-  protected static void prepareSortedIndicesInternal(WritableIntList indices) {
-    int i = 1;
-    int last = Integer.MIN_VALUE;
-    // todo apply "-i" when sortedRemoveIndexes are collected
-    for (WritableIntListIterator ii = indices.iterator(1); ii.hasNext();) {
-      int value = ii.nextValue();
-      assert value > last : i + " " + last + " " + value;
-      last = value;
-      ii.set(0, value - i);
-      i++;
-    }
+  public static IntListRemovingDecorator createFromPrepared(IntList base, IntList preparedIndices) {
+    return new IntListRemovingDecorator(base, preparedIndices);
   }
 
   /**
-   * For the given list of remove indices (may be empty, unsorted, or contain duplicates), creates a prepared list of remove indices ready to be used by implementations of this class.
-   * @param removeIndexes remove indices
+   * Prepares the list of remove indices for use by objects this class. The list must be sorted and contain no duplicates.
+   * @param indices a sorted unique list of indices that will be prepared for use by objects of this class
    */
-  protected static IntArray prepareUnsortedIndicesInternal(int... removeIndexes) {
-    int[] correctRemove = arrayCopy(removeIndexes);
-    Arrays.sort(correctRemove);
-    int dupCount = 0;
-    int prev = 0;
-    for (int i = 0; i < correctRemove.length; i++) {
-      if (i > 0 && prev == correctRemove[i])
-        dupCount++;
-      else {
-        prev = correctRemove[i];
-        correctRemove[i - dupCount] = prev - (i - dupCount);
-      }
-    }
-    return new IntArray(correctRemove, correctRemove.length - dupCount);
+  public static void prepareSortedIndices(WritableIntList indices) {
+    prepareSortedIndicesInternal(indices);
   }
 
-  private class LocalIterator extends AbstractIntListIndexIterator {
-    private int myNextRemoved;
-    private IntListIterator myBaseIterator;
-    private int myValue;
-
-    private LocalIterator(int from, int to) {
-      super(from, to);
-      myNextRemoved = removedBefore(from);
-      myBaseIterator = base().iterator(from + myNextRemoved);
-    }
-
-    public IntListIterator next() throws ConcurrentModificationException, NoSuchElementException {
-      if (getNextIndex() >= getTo())
-        throw new NoSuchElementException();
-      setNext(getNextIndex() + 1);
-      myValue = myBaseIterator.nextValue();
-      IntList removedPrepared = getRemovedPrepared();
-      int rs = removedPrepared.size();
-      if (myNextRemoved < rs) {
-        int nr = removedPrepared.binarySearch(getNextIndex() + 1, myNextRemoved, rs);
-        if (nr < 0)
-          nr = -nr - 1;
-        if (nr > myNextRemoved) {
-          myBaseIterator.move(nr - myNextRemoved);
-          myNextRemoved = nr;
-        }
-      }
-      return this;
-    }
-
-    public int value() {
-      if (getNextIndex() <= getFrom())
-        throw new NoSuchElementException();
-      return myValue;
-    }
-
-    public boolean hasNext() {
-      return getNextIndex() < getTo() && myBaseIterator.hasNext();
-    }
-
-    public void move(int count) throws ConcurrentModificationException, NoSuchElementException {
-      // todo more effective move?
-      super.move(count);
-      if (count != 0) {
-        myNextRemoved = removedBefore(getNextIndex());
-        myBaseIterator = base().iterator(getNextIndex() + myNextRemoved);
-      }
-    }
-
-    protected int absget(int index) {
-      if (index == getNextIndex())
-        return myBaseIterator.get(1);
-      else
-        return IntListRemovingDecorator.this.get(index);
-    }
+  /**
+   * Prepares the list of remove indices for use by objects of this class. The list may be empty, unsorted, or contain duplicates.
+   * @param removeIndexes a possibly empty, unsorted, or non-unique list of indices. The list is copied internally. After this method returns, the contents of original list are not used by this class.
+   * @return prepared list of indices ready to be given to {@link #createFromPrepared(IntList, IntList)}
+   */
+  public static IntArray prepareUnsortedIndices(int... removeIndexes) {
+    return prepareUnsortedIndicesInternal(removeIndexes);
   }
+
+
+  protected IntList getRemovedPrepared() {
+    return myRemovedSorted;
+  }
+
+
 }

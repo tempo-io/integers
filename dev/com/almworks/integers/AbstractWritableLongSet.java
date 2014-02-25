@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/AbstractWritablePSet.tpl
+
+
 package com.almworks.integers;
 
 public abstract class AbstractWritableLongSet extends AbstractLongSet implements WritableLongSet {

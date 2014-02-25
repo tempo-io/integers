@@ -1,4 +1,4 @@
-/*
+  /*
  * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PList.tpl
+
+
 
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
+  import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+  import java.util.List;
+  import java.util.NoSuchElementException;
 
-import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
+  import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public interface IntList extends IntSizedIterable {
   IntList EMPTY = new IntArray(EMPTY_INTS);
+
+  /**
+   * Size of the collection. May not be efficient (up to O(N)).
+   * @return the number of values in the collection
+   */
+  int size();
 
   /**
    * Checks whether collection is empty. Must be efficient.
@@ -42,6 +51,35 @@ public interface IntList extends IntSizedIterable {
   boolean contains(int value);
 
   /**
+  * @return the item at index. Valid value of an index is in range [0, size()).
+  * Note: May not be efficient (up to O(N)). Efficient algorithm should use iterator to iterate collection.
+  */
+  int get(int index) throws NoSuchElementException;
+
+  /**
+   * Creates and returns a list which is this list indexed by {@code indices}<br>
+   *
+   * Analogy: get(index) returns one value from this list,
+   * get(indices) returns a list with multiple values from this list.
+   * The values are
+   * <pre>[get(indices.get(0)), get(indices.get(1)), .., get(indices.get(indices.size() - 1))]</pre><br>
+   *
+   * One of the possible usages is for MATLAB-like indexing, i.e. vector indexed by vector.
+   *
+   * Also {@link IntIndexedIterator} and {@link IntListIndexedIterator} can be used
+   * to iterate over this list via a custom set of indices.
+   * @return IntList with values located at {@code indices} in this list
+   * @see IntIndexedIterator
+   * @see IntListIndexedIterator
+   * */
+  public IntList get(final IntList indices);
+
+    /**
+    * @return index of first occurence of value. If not found returns negative value
+    */
+  int indexOf(int value);
+
+  /**
    * Creates new native array and stores values there.
    * <p>
    * Note: effectively written code should avoid use this method.
@@ -49,21 +87,10 @@ public interface IntList extends IntSizedIterable {
   int[] toNativeArray();
 
   /**
-  * @return the item at index. Valid value of an index is in range [0, size()).
-  * Note: May not be efficient (up to O(N)). Efficient algorithm should use iterator to iterate collection.
-  */
-  int get(int index) throws NoSuchElementException;
-
-  /**
-  * @return index of first occurence of value. If not found returns negative value
-  */
-  int indexOf(int value);
-
-  /**
    * Writes values to dest.
    * @return dest
    */
-  int[] toArray(int startIndex, int[] dest, int destOffset, int length);
+  int[] toNativeArray(int startIndex, int[] dest, int destOffset, int length);
 
   /**
    * Returns a sub-list, backed by this list. If the list changes, changes
@@ -97,7 +124,7 @@ public interface IntList extends IntSizedIterable {
   /**
   * @return true if list is sorted in smallest first order and all elements are unique
   */
-  boolean isUniqueSorted();
+  boolean isSortedUnique();
 
   /**
   * @return iterator initially located before first element. Iterator will walk the whole list

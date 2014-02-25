@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/AbstractWritablePList.tpl
+
+
 
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 
@@ -263,7 +266,7 @@ import java.util.NoSuchElementException;
       public int invoke(int a, int b) {
         return LongCollections.compare(get(a), get(b));
       }
-    }, new IntProcedure2() {
+    }, new IntIntProcedure() {
       public void invoke(int a, int b) {
         swap(a, b);
         if (sortAlso != null)

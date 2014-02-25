@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PQIterators.tpl
+
+
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
@@ -52,21 +55,20 @@ public class IntLongIterators {
   }
 
   public static IntIterator leftProjection(final IntLongIterator pairs) {
-    return new AbstractIntIterator() {
+    return new AbstractIntIteratorWithFlag() {
       @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return pairs.hasNext();
-      }
-
-      @Override
-      public int value() throws NoSuchElementException {
+      public int valueImpl() {
         return pairs.left();
       }
 
       @Override
-      public IntIterator next() {
+      public void nextImpl() {
         pairs.next();
-        return this;
+      }
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return pairs.hasNext();
       }
     };
   }

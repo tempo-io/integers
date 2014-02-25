@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/wrappers/PQHppcOpenHashMap.tpl
+
+
 package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
 import com.carrotsearch.hppc.IntLongOpenHashMap;
 
 import static com.almworks.integers.LongCollections.sizeOfIterable;
-import static com.almworks.integers.wrappers.IntHppcWrappers.intCursorToIterator;
+import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 import static com.almworks.integers.wrappers.IntLongHppcWrappers.cursorToIntLongIterator;
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 
@@ -109,11 +112,21 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
   }
 
   public IntIterator keysIterator() {
-    return failFast(intCursorToIterator(myMap.keys().iterator()));
+    return new IntFailFastIterator(cursorToIntIterator(myMap.keys().iterator())) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public LongIterator valuesIterator() {
-    return failFast(cursorToLongIterator(myMap.values().iterator()));
+    return new LongFailFastIterator(cursorToLongIterator(myMap.values().iterator())) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   @Override

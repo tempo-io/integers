@@ -16,9 +16,9 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntProcedure;
-import com.almworks.integers.func.IntProcedure2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,11 +82,11 @@ public final class IntegersUtils {
    * from 0 to <code>length</code>-1 inclusive.
    */
   // Copied from CollectionUtil
-  public static void quicksort(int length, IntIntToInt order, IntProcedure2 swap) {
+  public static void quicksort(int length, IntIntToInt order, IntIntProcedure swap) {
     sort1(0, length, order, swap);
   }
 
-  private static void sort1(int off, int len, IntIntToInt order, IntProcedure2 swap) {
+  private static void sort1(int off, int len, IntIntToInt order, IntIntProcedure swap) {
     // Insertion sort on smallest arrays
     if (len < 7) {
       for (int i = off; i < len + off; i++)
@@ -157,7 +157,7 @@ public final class IntegersUtils {
       sort1(n - s, s, order, swap);
   }
 
-  private static void vecswap(int a, int b, int n, IntProcedure2 swap) {
+  private static void vecswap(int a, int b, int n, IntIntProcedure swap) {
     for (int i = 0; i < n; i++, a++, b++)
       swap.invoke(a, b);
   }

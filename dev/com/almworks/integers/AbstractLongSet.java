@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/AbstractPSet.tpl
+
+
 package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.appendShortName;

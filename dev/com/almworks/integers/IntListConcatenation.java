@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PListConcatenation.tpl
+
+
 
 
 package com.almworks.integers;
@@ -23,6 +26,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * List that allows to access a concatenation of several lists (here called slices) as a list
+ * as if they go one after the other.
+ * <br>Changes in lists propagate to this list — added / removed values are immediately visible through this list.
+ * <br>Because of that, {@link #get(int)}, {@link #indexOf(int)}, {@link #size()}, {@link #isEmpty()} are O(n).
+ * <br>Slices can be added during the lifetime of the list.
+ */
 public class IntListConcatenation extends AbstractIntList {
   private final List<IntList> mySlices = IntegersUtils.arrayList();
 
@@ -33,7 +43,7 @@ public class IntListConcatenation extends AbstractIntList {
     mySlices.addAll(Arrays.asList(collections));
   }
 
-  public int[] toArray(int sourceOffset, int[] dest, int destOffset, int length) {
+  public int[] toNativeArray(int sourceOffset, int[] dest, int destOffset, int length) {
     int slices = mySlices.size();
     for (int i = 0; i < slices && length > 0; i++) {
       IntList list = mySlices.get(i);
@@ -42,7 +52,7 @@ public class IntListConcatenation extends AbstractIntList {
         sourceOffset -= size;
       } else {
         int x = Math.min(size - sourceOffset, length);
-        list.toArray(sourceOffset, dest, destOffset, x);
+        list.toNativeArray(sourceOffset, dest, destOffset, x);
         destOffset += x;
         sourceOffset = 0;
         length -= x;

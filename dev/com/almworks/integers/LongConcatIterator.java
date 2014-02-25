@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PConcatIterator.tpl
+
+
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;

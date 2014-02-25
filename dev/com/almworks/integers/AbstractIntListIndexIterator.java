@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/AbstractPListIndexIterator.tpl
+
+
 
 
 package com.almworks.integers;
@@ -28,6 +31,7 @@ public abstract class AbstractIntListIndexIterator extends AbstractIntIterator i
 
   protected AbstractIntListIndexIterator(int from, int to) {
     if (from > to) throw new IllegalArgumentException(from + " > " + to);
+    if (from < 0) throw new IllegalArgumentException("from < 0");
     myFrom = from;
     myTo = to;
     myNext = myFrom;
@@ -45,8 +49,13 @@ public abstract class AbstractIntListIndexIterator extends AbstractIntIterator i
     return this;
   }
 
+  public boolean hasValue() {
+    return myFrom < myNext;
+  }
+
   public int value() throws NoSuchElementException {
-    if (myNext <= myFrom) throw new NoSuchElementException();
+    if (!hasValue())
+      throw new NoSuchElementException();
     return absget(myNext-1);
   }
 

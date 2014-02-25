@@ -59,24 +59,6 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
     };
   }
 
-  protected final #F#Iterator failFast(#F#Iterator iter) {
-    return new #F#FailFastIterator(iter) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  protected final #E#Iterator failFast(#E#Iterator iter) {
-    return new FailFast#E#Iterator(iter) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
   @Override
   public boolean containsKeys(#E#Iterable iterable) {
     for (#E#Iterator it: iterable.iterator()) {

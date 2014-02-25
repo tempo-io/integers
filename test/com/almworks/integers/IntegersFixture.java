@@ -267,7 +267,7 @@ public abstract class IntegersFixture extends TestCase {
    * */
   public static LongArray generateRandomLongArray(int maxLength, SortedStatus status, int... minMaxValues) {
     final LongArray res = new LongArray(maxLength);
-    fillRandomArray(new IntCollectorAdapter() {
+    fillRandomArray(new AbstractIntCollector() {
       public void add(int value) {
         res.add(value);
       }
@@ -287,7 +287,7 @@ public abstract class IntegersFixture extends TestCase {
    * */
   public static IntArray generateRandomIntArray(int maxLength, SortedStatus status, int... minMaxValues) {
     final IntArray res = new IntArray(maxLength);
-    fillRandomArray(new IntCollectorAdapter() {
+    fillRandomArray(new AbstractIntCollector() {
       public void add(int value) {
         res.add(value);
       }

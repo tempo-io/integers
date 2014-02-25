@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/wrappers/PHppcWrappers.tpl
+
+
 package com.almworks.integers.wrappers;
 
-import com.almworks.integers.FindingIntIterator;
+import com.almworks.integers.IntFindingIterator;
 import com.almworks.integers.IntIterator;
 import com.carrotsearch.hppc.cursors.IntCursor;
 
 import java.util.Iterator;
 
 public class IntHppcWrappers {
-  public static IntIterator intCursorToIterator(final Iterator<IntCursor> cursor) {
-    return new FindingIntIterator() {
-      int myCurrent = Integer.MAX_VALUE;
-      @Override
-      protected int getNext() {
-        return myCurrent;
-      }
-
+  public static IntIterator cursorToIntIterator(final Iterator<IntCursor> cursor) {
+    return new IntFindingIterator() {
       @Override
       protected boolean findNext() {
         if (!cursor.hasNext()) return false;
-        myCurrent = cursor.next().value;
+        myNext = cursor.next().value;
         return true;
       }
     };

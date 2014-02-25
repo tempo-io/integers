@@ -19,7 +19,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.#E#To#E#;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -211,7 +211,7 @@ public class #E#Collections {
             return #E#Collections.compare(sorted.get(a), sorted.get(b));
           }
         },
-        new IntProcedure2() {
+        new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
             sorted.swap(a, b);
@@ -311,7 +311,7 @@ public class #E#Collections {
    * Beware of unboxing: each call to the returned #E#List leads to unboxing of the source collection element.
    * If you will frequently access the returned #E#List, it's a better idea to make a copy. See {@link #E#Array#create(java.util.Collection)}
    */
-  public static #E#List as#E#List(@Nullable final List<#E#> coll) {
+  public static #E#List as#E#List(@Nullable final List<#EW#> coll) {
     if (coll == null || coll.isEmpty()) return #E#List.EMPTY;
     return new Abstract#E#List() {
       @Override
@@ -597,7 +597,7 @@ public class #E#Collections {
             return comp;
           }
         },
-        new IntProcedure2() {
+        new IntIntProcedure() {
           @Override
           public void invoke(int i, int j) {
             primary.swap(i, j);

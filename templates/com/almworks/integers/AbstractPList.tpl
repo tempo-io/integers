@@ -303,8 +303,8 @@ public abstract class Abstract#E#List implements #E#List {
   }
 
   @Override
-  public List<#E#> toList() {
-    List<#E#> list = IntegersUtils.arrayList();
+  public List<#EW#> toList() {
+    List<#EW#> list = IntegersUtils.arrayList();
     for(#E#Iterator ii : Abstract#E#List.this) {
       list.add(ii.value());
     }

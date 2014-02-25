@@ -19,7 +19,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntProcedure2;
+import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.#E##E#To#E#;
 import com.almworks.integers.func.#E#To#E#;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +51,7 @@ public class #E#TwoWayMap {
   }
 
   public boolean containsKeys(#E#List keys, boolean all) {
-    #E# key;
+    #EW# key;
     if (keys.isSorted()) {
       key = containsKeysSorted(keys, all);
     } else {
@@ -62,7 +62,7 @@ public class #E#TwoWayMap {
 
   /** @return returns the first key from <tt>keys</tt> that (is contained in the map if <tt>shouldContain</tt> and is not contained in the map otherwise) if such key exists, otherwise <tt>null</tt>. */
   @Nullable
-  private #E# containsKeysSorted(#E#List keys, boolean shouldContain) {
+  private #EW# containsKeysSorted(#E#List keys, boolean shouldContain) {
     for (int i = 0,
       m = keys.size(),
       pos = 0,
@@ -79,7 +79,7 @@ public class #E#TwoWayMap {
 
   /** @return returns the first key from <tt>keys</tt> that (is contained in the map if <tt>shouldContain</tt> and is not contained in the map otherwise) if such key exists, otherwise <tt>null</tt>. */
   @Nullable
-  private #E# containsKeysUnsorted(#E#List keys, boolean shouldContain) {
+  private #EW# containsKeysUnsorted(#E#List keys, boolean shouldContain) {
     for (int i = 0, iEnd = keys.size(); i < iEnd; ++i) {
       #e# key = keys.get(i);
       if (containsKey(key) != shouldContain) return key;
@@ -185,7 +185,7 @@ public class #E#TwoWayMap {
   private boolean checkIdxMap() {
     IntArray sorted = new IntArray(myIdxMap);
     sorted.sort();
-    return sorted.isUniqueSorted();
+    return sorted.isSortedUnique();
   }
 
   public void insertAllRo(#E#List keys, #E#List vals) {
@@ -214,7 +214,7 @@ public class #E#TwoWayMap {
     int n = myIdxMap.size();
 
     if (vals.size() != m) throw new IllegalArgumentException("Sizes of keys and values lists are not equal: " + m + " keys, but " + vals.size() + " values");
-    #E# violatingKey = containsKeysUnsorted(keys, false);
+    #EW# violatingKey = containsKeysUnsorted(keys, false);
     if (violatingKey != null) throw new IllegalArgumentException("Cannot insert multiple mappings because key " + violatingKey + " is already contained");
     int duplicateKeyIdx = #E#Collections.findDuplicate(keys);
     if (duplicateKeyIdx >= 0) throw new IllegalArgumentException("Duplicate key " + keys.get(duplicateKeyIdx));
@@ -309,7 +309,7 @@ public class #E#TwoWayMap {
         }
       },
       // swap
-      new IntProcedure2() {
+      new IntIntProcedure() {
         @Override
         public void invoke(int i, int j) {
           myValues.swap(i, j);
@@ -360,7 +360,7 @@ public class #E#TwoWayMap {
         return #E#Collections.compare(main.get(a), main.get(b));
       }},
       // swap
-      new IntProcedure2() {
+      new IntIntProcedure() {
         @Override
         public void invoke(int a, int b) {
           main.swap(a, b);

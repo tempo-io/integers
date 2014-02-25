@@ -19,8 +19,7 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-class RemovedIndexIterator extends AbstractIntIterator implements IntListIterator  {
-  private boolean myIterated;
+class RemovedIndexIterator extends AbstractIntIteratorWithFlag implements IntListIterator  {
   private final IntListIterator myRemovedLocations;
 
   RemovedIndexIterator(IntListIterator removedLocations) {
@@ -31,14 +30,11 @@ class RemovedIndexIterator extends AbstractIntIterator implements IntListIterato
     return myRemovedLocations.hasNext();
   }
 
-  public IntListIterator next() throws ConcurrentModificationException, NoSuchElementException {
+  protected void nextImpl() throws ConcurrentModificationException, NoSuchElementException {
     myRemovedLocations.next();
-    myIterated = true;
-    return this;
   }
 
-  public int value() throws NoSuchElementException {
-    if (!myIterated) throw new NoSuchElementException();
+  protected int valueImpl() throws NoSuchElementException {
     return myRemovedLocations.value() + myRemovedLocations.index();
   }
 

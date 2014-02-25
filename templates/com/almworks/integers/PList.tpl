@@ -155,7 +155,7 @@ public interface #E#List extends #E#SizedIterable {
   /**
   * @return List filled with object wrappers
   */
-  List<#E#> toList();
+  List<#EW#> toList();
 
   class Single extends Abstract#E#List {
     private #e# myValue;

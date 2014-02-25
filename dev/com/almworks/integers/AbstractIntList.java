@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/AbstractPList.tpl
+
+
 
 
 package com.almworks.integers;
@@ -21,6 +24,7 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
@@ -34,7 +38,7 @@ public abstract class AbstractIntList implements IntList {
     String sep = "";
     for  (IntIterator ii : this) {
       builder.append(sep).append(ii.value());
-      sep = ",";
+      sep = ", ";
     }
     builder.append("]");
     return builder;
@@ -63,6 +67,27 @@ public abstract class AbstractIntList implements IntList {
     return new IndexIterator(from, to);
   }
 
+  public IntList get(final IntList indices) {
+    if (indices == null) {
+      throw new NullPointerException("indices");
+    }
+    return new AbstractIntList() {
+      @Override
+      public int size() {
+        return indices.size();
+      }
+
+      @Override
+      public int get(int index) throws NoSuchElementException {
+        return AbstractIntList.this.get(indices.get(index));
+      }
+    };
+  }
+
+  /**
+   * Returns the index of the first occurrence of the specified element
+   * in this list, or -1 if this list does not contain the element.
+   * */
   public int indexOf(int value) {
     int i = 0;
     for (IntIterator ii : this) {
@@ -76,7 +101,7 @@ public abstract class AbstractIntList implements IntList {
     return indexOf(value) >= 0;
   }
 
-  public int[] toArray(int startIndex, int[] dest, int destOffset, int length) {
+  public int[] toNativeArray(int startIndex, int[] dest, int destOffset, int length) {
     if (length > 0) {
       IntIterator ii = iterator(startIndex, size());
       int e = destOffset + length;
@@ -101,7 +126,7 @@ public abstract class AbstractIntList implements IntList {
   public int[] toNativeArray() {
     int size = size();
     if (size == 0) return EMPTY_INTS;
-    return toArray(0, new int[size], 0, size);
+    return toNativeArray(0, new int[size], 0, size);
   }
 
   public boolean equals(Object o) {
@@ -136,26 +161,32 @@ public abstract class AbstractIntList implements IntList {
     return binarySearch(value, 0, size());
   }
 
-  protected boolean checkSorted(boolean checkUnique) {
+  protected boolean isSorted(boolean isUnique) {
     IntIterator it = iterator();
     if (!it.hasNext()) return true;
     int prev = it.nextValue();
     while (it.hasNext()) {
       int next = it.nextValue();
-      if (next < prev || (checkUnique && next == prev)) return false;
+      if (next < prev || (isUnique && next == prev)) return false;
       prev = next;
     }
     return true;
   }
 
+  /**
+   * @return true if this list is sorted and does not contain duplicates, otherwise false
+   */
   @Override
-  public boolean isUniqueSorted() {
-    return checkSorted(true);
+  public boolean isSortedUnique() {
+    return isSorted(true);
   }
 
+  /**
+   * @return true if this list is sorted, otherwise false
+   */
   @Override
   public boolean isSorted() {
-    return checkSorted(false);
+    return isSorted(false);
   }
 
   public int binarySearch(int value, int from, int to) {
@@ -188,7 +219,7 @@ public abstract class AbstractIntList implements IntList {
     }
 
     while (low <= high) {
-      int mid = (low + high) >> 1;
+      int mid = (low + high) >>> 1;
       comp = IntCollections.compare(get(mid), value);
       if (comp < 0) {
         low = mid + 1;
@@ -237,8 +268,31 @@ public abstract class AbstractIntList implements IntList {
     return size();
   }
 
+  /**
+   * @return {@code get(size() - backwardIndex - 1)}
+   */
   public int getLast(int backwardIndex) {
     return get(size() - backwardIndex - 1);
+  }
+
+  public boolean equalSortedUniqueValues(IntList collection) {
+    assert isSortedUnique();
+    if (size() != collection.size())
+      return false;
+    IntIterator ownIt = iterator();
+    int prevOther = Integer.MIN_VALUE;
+    for (IntIterator it : collection) {
+      int own = ownIt.nextValue();
+      int other = it.value();
+      if (other < prevOther) {
+        assert false : collection; // Not sorted
+        return false;
+      }
+      if (own != other)
+        return false;
+      prevOther = other;
+    }
+    return true;
   }
 
   protected class IndexIterator extends AbstractIntListIndexIterator {
@@ -293,6 +347,18 @@ public abstract class AbstractIntList implements IntList {
         return this;
       else
         return new SubList(myParent, myFrom + from, myFrom + to);
+    }
+
+    @Override
+    public int[] toNativeArray(int startIndex, int[] dest, int destOffset, int length) {
+      return getParent().toNativeArray(myFrom + startIndex, dest, destOffset, length);
+    }
+
+    @Override
+    public int[] toNativeArray() {
+      int size = size();
+      if (size == 0) return EMPTY_INTS;
+      return getParent().toNativeArray(myFrom, new int[size], 0, size);
     }
 
     public AbstractIntList getParent() {

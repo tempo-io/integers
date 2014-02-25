@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/func/PToQ.tpl
+
+
 
 
 package com.almworks.integers.func;
 
 public interface IntToLong {
-  int invoke(long a);
+  long invoke(int a);
 }

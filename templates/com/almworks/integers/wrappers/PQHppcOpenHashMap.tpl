@@ -20,8 +20,8 @@ import com.almworks.integers.*;
 import com.carrotsearch.hppc.#E##F#OpenHashMap;
 
 import static com.almworks.integers.#F#Collections.sizeOfIterable;
-import static com.almworks.integers.wrappers.#E#HppcWrappers.#e#CursorToIterator;
 import static com.almworks.integers.wrappers.#E##F#HppcWrappers.cursorTo#E##F#Iterator;
+import static com.almworks.integers.wrappers.#E#HppcWrappers.cursorTo#E#Iterator;
 import static com.almworks.integers.wrappers.#F#HppcWrappers.cursorTo#F#Iterator;
 
 public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
@@ -31,7 +31,7 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
     myMap = new #E##F#OpenHashMap();
   }
 
-  public #E##F#HppcOpenHashMap(#e# initicalCapacity) {
+  public #E##F#HppcOpenHashMap(int initicalCapacity) {
     myMap = new #E##F#OpenHashMap(initicalCapacity);
   }
 
@@ -109,11 +109,21 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
   }
 
   public #E#Iterator keysIterator() {
-    return failFast(#e#CursorToIterator(myMap.keys().iterator()));
+    return new #E#FailFastIterator(cursorTo#E#Iterator(myMap.keys().iterator())) {
+      @Override
+      protected int getCurrentModCount() {
+        return 0;
+      }
+    };
   }
 
   public #F#Iterator valuesIterator() {
-    return failFast(cursorTo#F#Iterator(myMap.values().iterator()));
+    return new #F#FailFastIterator(cursorTo#F#Iterator(myMap.values().iterator())) {
+      @Override
+      protected int getCurrentModCount() {
+        return 0;
+      }
+    };
   }
 
   @Override

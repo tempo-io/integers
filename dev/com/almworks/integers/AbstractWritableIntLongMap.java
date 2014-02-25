@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/AbstractWritablePQMap.tpl
+
+
 package com.almworks.integers;
 
 import static com.almworks.integers.IntLongIterators.pair;
@@ -52,24 +55,6 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
 
   protected final IntLongIterator failFast(IntLongIterator iter) {
     return new IntLongFailFastIterator(iter) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  protected final LongIterator failFast(LongIterator iter) {
-    return new LongFailFastIterator(iter) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
-  }
-
-  protected final IntIterator failFast(IntIterator iter) {
-    return new FailFastIntIterator(iter) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;

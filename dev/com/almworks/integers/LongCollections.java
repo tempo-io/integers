@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PCollections.tpl
+
+
 
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -211,7 +214,7 @@ public class LongCollections {
             return LongCollections.compare(sorted.get(a), sorted.get(b));
           }
         },
-        new IntProcedure2() {
+        new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
             sorted.swap(a, b);
@@ -597,7 +600,7 @@ public class LongCollections {
             return comp;
           }
         },
-        new IntProcedure2() {
+        new IntIntProcedure() {
           @Override
           public void invoke(int i, int j) {
             primary.swap(i, j);

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PListDiffIndexedDecorator.tpl
+
+
 
 
 package com.almworks.integers;

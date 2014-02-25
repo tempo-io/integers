@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PIterator.tpl
+
+
 
 
 package com.almworks.integers;
@@ -29,12 +32,19 @@ public interface IntIterator extends IntIterable, Iterator<IntIterator> {
   /**
   * Constant value for empty Iterators
   */
-  WritableIntListIterator EMPTY = new EmptyIntIterator();
+  WritableIntListIterator EMPTY = new IntEmptyIterator();
 
   /**
-   * @return true next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
+   * @return {@code true} if next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
    */
   boolean hasNext() throws ConcurrentModificationException;
+
+
+  /**
+   * @return {@code false} if this iterator has never been advanced.
+   * In other words, returns {@code false} if the subsequent call to {@link #value()} will throw NoSuchElementException, otherwise {@code true}.
+   */
+  boolean hasValue();
 
   /**
    * @throws NoSuchElementException if iterator has never been advanced
@@ -49,9 +59,8 @@ public interface IntIterator extends IntIterable, Iterator<IntIterator> {
   */
   int nextValue() throws ConcurrentModificationException, NoSuchElementException;
 
-  class Single extends AbstractIntIterator {
+  class Single extends AbstractIntIteratorWithFlag {
     private int myValue;
-    private boolean myIterated;
 
     public Single(int value) {
       myValue = value;
@@ -61,16 +70,13 @@ public interface IntIterator extends IntIterable, Iterator<IntIterator> {
       return !myIterated;
     }
 
-    public IntIterator next() throws NoSuchElementException {
-      if (myIterated)
-        throw new NoSuchElementException();
-      myIterated = true;
-      return this;
+    @Override
+    protected void nextImpl() throws NoSuchElementException {
+      if (!hasNext()) throw new NoSuchElementException();
     }
 
-    public int value() throws NoSuchElementException {
-      if (!myIterated)
-        throw new NoSuchElementException();
+    @Override
+    protected int valueImpl() throws NoSuchElementException {
       return myValue;
     }
   }

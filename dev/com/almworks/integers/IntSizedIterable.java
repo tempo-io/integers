@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PSizedIterable.tpl
+
+
 package com.almworks.integers;
 
 /**
  * Iterables with size
  * @see com.almworks.integers.IntList
- * @see com.almworks.integers.LongSet
+ * @see com.almworks.integers.IntSet
  */
 public interface IntSizedIterable extends IntIterable {
   /**
-   * Size of the collection. May not be efficient (up to O(N)).
-   * @return the number of values in the collection
+   * @return size of this iterable
    */
   int size();
 }

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PQFailFastIterator.tpl
+
+
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;

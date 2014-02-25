@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PTwoWayMap.tpl
+
+
 
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.func.LongLongToLong;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
@@ -185,7 +188,7 @@ public class LongTwoWayMap {
   private boolean checkIdxMap() {
     IntArray sorted = new IntArray(myIdxMap);
     sorted.sort();
-    return sorted.isUniqueSorted();
+    return sorted.isSortedUnique();
   }
 
   public void insertAllRo(LongList keys, LongList vals) {
@@ -309,7 +312,7 @@ public class LongTwoWayMap {
         }
       },
       // swap
-      new IntProcedure2() {
+      new IntIntProcedure() {
         @Override
         public void invoke(int i, int j) {
           myValues.swap(i, j);
@@ -360,7 +363,7 @@ public class LongTwoWayMap {
         return LongCollections.compare(main.get(a), main.get(b));
       }},
       // swap
-      new IntProcedure2() {
+      new IntIntProcedure() {
         @Override
         public void invoke(int a, int b) {
           main.swap(a, b);

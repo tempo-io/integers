@@ -14,41 +14,36 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PSetBuilder.tpl
+
+
 
 
 package com.almworks.integers;
 
-import java.util.NoSuchElementException;
+import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
-
-public final class IntSetBuilder implements Cloneable, IntCollector {
+public final class IntSetBuilder extends AbstractIntSet implements Cloneable, IntCollector, IntSortedSet {
   public static final int DEFAULT_TEMP_STORAGE_SIZE = 1024;
 
   private final int myTempLength;
 
-  private int[] mySorted;
-  private int[] myTemp;
+  @NotNull
+  private IntArray mySorted = new IntArray();
+
+  private IntArray myTemp = new IntArray();
 
   /**
    * Used when merge() is called
    */
-  private int[] myTempInsertionPoints;
-
-  /**
-   * mySorted contains valid ids on [0, mySortedSize)
-   */
-  private int mySortedSize;
-
-  /**
-   * myTemp contains valid ids on [0, myTempSize)
-   */
-  private int myTempSize;
+  private int[][] myTempInsertionPoints = {null};
 
   /**
    * When finished, no change possible: the array has passed outside.
    */
   private boolean myFinished;
+
+  private int myModCount = 0;
 
   public IntSetBuilder() {
     this(DEFAULT_TEMP_STORAGE_SIZE);
@@ -59,37 +54,44 @@ public final class IntSetBuilder implements Cloneable, IntCollector {
   }
 
   public void add(int value) {
-    if (myFinished)
-      throw new IllegalStateException();
-    if (myTemp == null) {
-      myTemp = new int[myTempLength];
+    if (myFinished) throw new IllegalStateException();
+    if (myTemp.getCapacity() == 0) {
+      myTemp = new IntArray(myTempLength);
     }
-    if (myTempSize == myTempLength)
-      mergeTemp();
-    assert myTempSize < myTempLength;
-    myTemp[myTempSize++] = value;
+    if (myTemp.size() == myTempLength)
+      coalesce();
+    assert myTemp.size() < myTempLength;
+    myTemp.add(value);
   }
 
   public void addAll(int... values) {
-    for (int value : values) {
-      add(value);
+    addAll(new IntArray(values));
+  }
+
+  public void addAll(IntIterable iterable) {
+    for (IntIterator it : iterable) {
+      add(it.value());
     }
   }
 
-  public void addAll(IntIterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
-  }
-
   public void addAll(IntList values) {
-    addAll(values.iterator());
+    int vSize = values.size();
+    int startPos = 0;
+    int endPos = myTempLength - myTemp.size();
+    while (endPos < vSize) {
+      myTemp.addAll(values.subList(startPos, endPos));
+      coalesce();
+      startPos = endPos;
+      endPos += myTempLength;
+    }
+    myTemp.addAll(values.subList(startPos, vSize));
   }
 
   public void mergeFrom(IntSetBuilder other) {
-    if (other.mySortedSize == 0)
+    other.coalesce();
+    if (other.mySorted.isEmpty())
       return;
-    other.mergeTemp();
-    mergeFromSortedCollection(new IntArray(other.mySorted, other.mySortedSize));
+    mergeFromSortedCollection(other.mySorted);
   }
 
   public void mergeFromSortedCollection(IntList other) {
@@ -97,68 +99,45 @@ public final class IntSetBuilder implements Cloneable, IntCollector {
       throw new IllegalStateException();
     if (other.isEmpty())
       return;
-    mergeTemp();
-    IntArray res = IntCollections.unionWithSameLengthList(mySorted, mySortedSize, other);
-    mySortedSize = res.size();
-    mySorted = res.extractHostArray();
+    coalesce();
+    mySorted.merge(other);
   }
 
-  private void mergeTemp() {
-    if (myTempInsertionPoints == null)
-      myTempInsertionPoints = new int[myTempLength];
-    IntArray res = IntCollections.unionWithSmallArray(mySorted, mySortedSize, myTemp, myTempSize, myTempInsertionPoints);
-    mySortedSize = res.size();
-    mySorted = res.extractHostArray();
-    myTempSize = 0;
+  void coalesce() {
+    if (myTemp.isEmpty())
+      return;
+    modified();
+    myTemp.sort();
+    mySorted.mergeWithSmall(myTemp, myTempInsertionPoints);
+    myTemp.clear();
   }
 
-  public IntList toSortedCollection() {
+  public IntArray commitToArray() {
     myFinished = true;
-    mergeTemp();
-    if (mySortedSize == 0)
-      return IntList.EMPTY;
-    return new IntArray(mySorted, mySortedSize);
-  }
-
-  public IntArray toIntArray() {
-    myFinished = true;
-    mergeTemp();
-    return new IntArray(mySorted, mySortedSize);
+    coalesce();
+    return mySorted;
   }
 
   /**
-   * @return a list of numbers, which should be used before any further mutation of the builder.
-   *
    * This method does not finalize the builder.
+   * @return sorted list of set elements, which should be used before any further mutation of the builder.
    */
-  public IntList toTemporaryReadOnlySortedCollection() {
-    mergeTemp();
-    if (mySortedSize == 0)
+  public IntList toList() {
+    coalesce();
+    if (mySorted.isEmpty()) {
       return IntList.EMPTY;
-    return new AbstractIntList() {
-      @Override
-      public int size() {
-        return mySortedSize;
-      }
-
-      @Override
-      public int get(int index) throws NoSuchElementException {
-        if (index < 0 || index >= mySortedSize) throw new NoSuchElementException("" + index);
-        return mySorted[index];
-      }
-    };
+    }
+    return mySorted;
   }
 
-  public int[] toNativeArray() {
-    myFinished = true;
-    mergeTemp();
-    if (mySortedSize == 0)
-      return EMPTY_INTS;
-    return IntCollections.arrayCopy(mySorted, 0, mySortedSize);
+  @Override
+  public void toNativeArrayImpl(int[] dest, int destPos) {
+    coalesce();
+    mySorted.toNativeArray(0, dest, destPos, size());
   }
 
   public IntSetBuilder clone() {
-    mergeTemp();
+    coalesce();
     IntSetBuilder r;
     try {
       r = (IntSetBuilder) super.clone();
@@ -166,29 +145,92 @@ public final class IntSetBuilder implements Cloneable, IntCollector {
       throw new Error(e);
     }
     r.myFinished = false;
-    r.myTemp = null;
-    r.myTempInsertionPoints = null;
-    if (r.mySorted != null) {
-      r.mySorted = r.mySorted.clone();
-    }
+    r.myTemp = new IntArray();
+    r.myTempInsertionPoints = new int[][]{null};
+    r.mySorted = IntArray.copy(mySorted);
     return r;
   }
 
   public boolean isEmpty() {
-    return mySortedSize + myTempSize == 0;
+    return mySorted.isEmpty() && myTemp.isEmpty();
   }
 
   public void clear(boolean reuseArrays) {
-    mySortedSize = 0;
-    myTempSize = 0;
+    mySorted.clear();
+    myTemp.clear();
     if (myFinished && !reuseArrays) {
-      mySorted = null;
+      mySorted = new IntArray();
     }
     myFinished = false;
   }
 
+  private void modified() {
+    myModCount++;
+  }
+
   public int size() {
-    mergeTemp();
-    return mySortedSize;
+    coalesce();
+    return mySorted.size();
+  }
+
+  public boolean contains(int value) {
+    return mySorted.binarySearch(value) >= 0 || myTemp.contains(value);
+  }
+
+  public String toDebugString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("IntSetBuilder\n");
+    builder.append("mySorted: ").append(IntCollections.toBoundedString(mySorted)).append('\n');
+    builder.append("myTemp: ").append(IntCollections.toBoundedString(myTemp)).append('\n');
+    return builder.toString();
+  }
+
+  @NotNull
+  public IntIterator iterator() {
+    coalesce();
+    return new IntFailFastIterator(mySorted.iterator()) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
+  }
+
+  public IntIterator tailIterator(int value) {
+    coalesce();
+    int baseIndex = mySorted.binarySearch(value);
+    if (baseIndex < 0) baseIndex = -baseIndex - 1;
+    IntIterator baseIterator = mySorted.iterator(baseIndex, mySorted.size());
+    return new IntFailFastIterator(baseIterator) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
+  }
+
+  @Override
+  public int getUpperBound() {
+    int val = Integer.MIN_VALUE;
+    if (!mySorted.isEmpty()) {
+      val = mySorted.get(mySorted.size() - 1);
+    }
+    for (int i = 0; i < myTemp.size(); i++) {
+      val = Math.max(i, myTemp.get(i));
+    }
+    return val;
+  }
+
+  @Override
+  public int getLowerBound() {
+    int val = Integer.MAX_VALUE;
+    if (!mySorted.isEmpty()) {
+      val = mySorted.get(0);
+    }
+    for (int i = 0; i < myTemp.size(); i++) {
+      val = Math.min(i, myTemp.get(i));
+    }
+    return val;
+
   }
 }

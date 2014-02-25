@@ -30,14 +30,14 @@ public abstract class Abstract#E##F#IteratorWithFlag extends Abstract#E##F#Itera
     return myIterated;
   }
 
-  public int left() throws NoSuchElementException {
+  public #e# left() throws NoSuchElementException {
     if (!myIterated) {
       throw new NoSuchElementException();
     }
     return leftImpl();
   }
 
-  public long right() throws NoSuchElementException {
+  public #f# right() throws NoSuchElementException {
     if (!myIterated) {
       throw new NoSuchElementException();
     }
@@ -54,13 +54,13 @@ public abstract class Abstract#E##F#IteratorWithFlag extends Abstract#E##F#Itera
    * Called after any call to {@link AbstractLongIteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
-  protected abstract int leftImpl();
+  protected abstract #e# leftImpl();
 
   /**
    * Called after any call to {@link AbstractLongIteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
-  protected abstract long rightImpl();
+  protected abstract #f# rightImpl();
 
   /**
    * Called before any call to {@link AbstractLongIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.

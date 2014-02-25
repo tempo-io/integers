@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/WritablePQMap.tpl
+
+
 package com.almworks.integers;
 
 public interface WritableIntLongMap extends IntLongMap {

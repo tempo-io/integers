@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/AbstractWritablePList.tpl
+
+
 
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntProcedure2;
 import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +32,7 @@ import java.util.NoSuchElementException;
 // function on indices, hence int
 // function on indices, hence int
 
-public abstract class AbstractWritableIntList extends AbstractIntList implements WritableIntList {
+  public abstract class AbstractWritableIntList extends AbstractIntList implements WritableIntList {
   private transient int myModCount;
   private int mySize;
 
@@ -85,9 +88,10 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
     }
   }
 
-  public void addAll(IntIterator iterator) {
-    while (iterator.hasNext())
-      add(iterator.nextValue());
+  public void addAll(IntIterable iterable) {
+    for (IntIterator it : iterable) {
+      add(it.value());
+    }
   }
 
   public void addAll(int... values) {
@@ -115,33 +119,35 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
     return value;
   }
 
-  public void removeAll(int value) {
+  // todo more effective - we do extra copies
+  public boolean removeAll(int value) {
+    boolean modified = false;
     for (WritableIntListIterator ii : write()) {
       if (ii.value() == value) {
         ii.remove();
+        modified = true;
       }
     }
+    return modified;
   }
 
-  /**
-   * Removes all appearances of value if this collection is sorted
-   */
-  public void removeAllSorted(int value) {
+  public boolean removeAllSorted(int value) {
     int from = binarySearch(value);
     if (from >= 0) {
       int to;
       if (value < Integer.MAX_VALUE) {
-        to = binarySearch((int)(value + 1), from + 1, size());
+        to = binarySearch(value + 1, from + 1, size());
         if (to < 0)
           to = -to - 1;
       } else to = size();
       assert to > from : from + " " + to;
       removeRange(from, to);
+      return true;
     }
+    return false;
   }
 
   /**
-   * Removes all values contained in collection.
    * <p/>
    * Method 1: iterate through this, lookup collection
    * Cost 1: N*cost(lookup(R))
@@ -152,15 +158,19 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
    * <p/>
    * // todo something effective
    */
-  public void removeAll(IntList collection) {
-    for (IntIterator ii : collection)
-      removeAll(ii.value());
+  public boolean removeAll(IntIterable iterable) {
+    boolean modified = false;
+    for (IntIterator ii : iterable) {
+      modified |= removeAll(ii.value());
+    }
+    return modified;
   }
 
-  public void removeAll(int... values) {
+  public boolean removeAll(int... values) {
     if (values != null && values.length > 0) {
-      removeAll(new IntArray(values));
+      return removeAll(new IntNativeArrayIterator(values));
     }
+    return false;
   }
 
   public void clear() {
@@ -212,6 +222,12 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
     if (count <= 0) return;
     int sz = size();
     checkAddedCount(index, count, sz);
+    if (values == this || values instanceof SubList && ((SubList) values).getParent() == this) {
+      for (int i = 0, sourceIndex = sourceOffset; i < count; i++, sourceIndex++) {
+        set(index + i, values.get(sourceIndex));
+      }
+      return;
+    }
     transfer(values.iterator(sourceOffset, sourceOffset + count), iterator(index, sz), count);
   }
 
@@ -236,7 +252,11 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
       set(i, function.invoke(get(i)));
   }
 
-  public void sort(final WritableIntList ... sortAlso) {
+  /**
+   * Sorts this list using quicksort copied from {@link java.util.Arrays#sort(int[])} then corrected
+   * @param sortAlso lists in which the order is changed as well as this list
+   */
+  public void sort(final WritableIntList... sortAlso) {
     if (sortAlso != null) {
       for (WritableIntList list : sortAlso) {
         assert list.size() == size();
@@ -246,7 +266,7 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
       public int invoke(int a, int b) {
         return IntCollections.compare(get(a), get(b));
       }
-    }, new IntProcedure2() {
+    }, new IntIntProcedure() {
       public void invoke(int a, int b) {
         swap(a, b);
         if (sortAlso != null)
@@ -255,6 +275,11 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
           }
       }
     });
+  }
+
+  public void sortUnique() {
+    sort();
+    removeDuplicates();
   }
 
   public void swap(int index1, int index2) {
@@ -283,8 +308,11 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
   }
 
   public void insertMultiple(int index, int value, int count) {
-    if (count <= 0)
-      return;
+    if (count < 0) throw new IllegalArgumentException();
+    if (index < 0 || index > size())
+      throw new IndexOutOfBoundsException(index + " " + this);
+    if (count == 0) return;
+
     expand(index, count);
     setRange(index, index + count, value);
   }
@@ -298,7 +326,21 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
 
   public void reverse() {
     int j = size() - 1;
-    for (int i = 0; i < j; i++, j--) swap(i,j);
+    for (int i = 0; i < j; i++, j--) {
+      swap(i,j);
+    }
+  }
+
+  /** Updates the value in this list at the specified index; if list is currently shorter, it is first appended
+   * with {@code defaultValue} up to {@code idx}.
+   * @param update the update function to apply. See {@link com.almworks.integers.func.IntFunctions}
+   * @return the updated value
+   * */
+  public int update(int idx, int defaultValue, IntToInt update) {
+    if (size() <= idx) insertMultiple(size(), defaultValue, idx - size() + 1);
+    int updated = update.invoke(get(idx));
+    set(idx, updated);
+    return updated;
   }
 
   protected class WritableIndexIterator extends IndexIterator implements WritableIntListIterator {
@@ -339,6 +381,11 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
       if (isJustRemoved())
         throw new IllegalStateException();
       return super.value();
+    }
+
+    public boolean hasValue() throws ConcurrentModificationException {
+      checkMod();
+      return super.hasValue();
     }
 
     public void move(int count) throws ConcurrentModificationException, NoSuchElementException {

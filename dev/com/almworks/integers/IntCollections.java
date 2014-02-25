@@ -14,63 +14,37 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PCollections.tpl
+
+
 
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntToInt;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_INTS;
 
 public class IntCollections {
-
-  /**
-   * @param capacity initial capacity for array
-   * @return array with elements from {@code iterables}.
-   */
-  public static IntArray collectIterables(int capacity, IntIterable ... iterables) {
-    IntArray res = new IntArray(capacity);
-    for (IntIterable iterable : iterables) {
-      if (iterable instanceof IntList) {
-        res.addAll((IntList) iterable);
-      } else {
-        if (iterable instanceof IntSizedIterable) {
-          res.ensureCapacity(res.size() + ((IntSizedIterable) iterable).size());
-        }
-        res.addAll(iterable.iterator());
-      }
-    }
-    return res;
-  }
-
-  public static IntArray collectLists(IntList ... lists) {
-    int capacity = 0;
-    for (IntList list : lists) {
-      capacity += list.size();
-    }
-
-    IntArray res = new IntArray(capacity);
-    for (IntList list : lists) {
-      res.addAll(list);
-    }
-    return res;
-  }
-
   public static int[] toNativeArray(IntIterable iterable) {
     if (iterable instanceof IntList) return ((IntList) iterable).toNativeArray();
-    return toNativeArray(iterable.iterator());
-  }
-
-  public static int[] toNativeArray(IntIterator it) {
-    if (!it.hasNext()) return EMPTY_INTS;
-    IntArray array = new IntArray();
-    array.addAll(it);
-    return array.toNativeArray();
+    if (iterable instanceof IntSizedIterable) {
+      IntSizedIterable sized = (IntSizedIterable)iterable;
+      int size = sized.size();
+      int[] res = IntCollections.collectIterable(size, sized).extractHostArray();
+      assert res.length == sized.size();
+      return res;
+    }
+    return collectIterable(0, iterable).toNativeArray();
   }
 
   public static int[] toSortedNativeArray(IntIterable iterable) {
@@ -86,31 +60,40 @@ public class IntCollections {
   public static IntList toSorted(boolean unique, IntIterable values) {
     if (values instanceof IntList) {
       IntList list = (IntList) values;
-      if ((unique && list.isUniqueSorted()) || (!unique && list.isSorted())) return list;
+      if ((unique && list.isSortedUnique()) || (!unique && list.isSorted())) return list;
     }
-    int[] array = toNativeArray(values.iterator());
-    if (array.length == 0) return IntList.EMPTY;
-    Arrays.sort(array);
-    int length = unique ? removeSubsequentDuplicates(array, 0, array.length) : array.length;
+    IntArray buf = collectIterable(0, values);
+    int bufSize = buf.size();
+    if (bufSize == 0) return IntList.EMPTY;
+    int[] array = buf.extractHostArray();
+    Arrays.sort(array, 0, bufSize);
+    int length = unique ? removeSubsequentDuplicates(array, 0, bufSize) : bufSize;
     return new IntArray(array, length);
   }
 
   public static IntList toSortedUnique(int[] values) {
+    if (values.length == 0) {
+      return IntList.EMPTY;
+    } else {
+      return toWritableSortedUnique(values);
+    }
+  }
+
+  public static IntArray toWritableSortedUnique(int[] values) {
     int res = isSortedUnique(true, values, 0, values.length);
     if (res == 0) return new IntArray(values);
     if (res < 0) {
-      int[] copy = new int[-res];
-      int i = 1;
-      int prev = values[0];
+      int prev, copy[] = new int[values.length + res];
+      int i = 0;
+      copy[0] = prev = values[0];
       for (int j = 1; j < values.length; j++) {
         int value = values[j];
         if (value > prev) {
-          copy[i] = value;
           i++;
-          prev = value;
+          copy[i] = prev = value;
         }
       }
-      assert i == copy.length;
+      assert i + 1 == copy.length : i + " " + copy.length + " " + res;
       return new IntArray(copy);
     }
     IntArray copy = IntArray.copy(values);
@@ -118,8 +101,8 @@ public class IntCollections {
     return copy;
   }
 
-  public static boolean isSorted(@Nullable int[] ints) {
-    return ints == null || isSorted(ints, 0, ints.length);
+  public static boolean isSorted(@Nullable int[] array) {
+    return array == null || isSorted(array, 0, array.length);
   }
 
   /**
@@ -132,7 +115,7 @@ public class IntCollections {
   /**
    * Checks if slice of array is sorted and doesn't contain duplicates. Empty slices and slices of length 1 are always sorted and unique.
    * @param checkNotUnique don't stop if head is sorted but duplicate found. If false terminates and returns index where terminated.
-   * @param ints array to check. if null is treated as empty array
+   * @param array array to check. if null is treated as empty array
    * @param offset begin of array slice to be checked
    * @param length of array slice to be checked
    * @return positive no info: element at returned index is less or equal to previous. Check terminated at the index.
@@ -143,15 +126,15 @@ public class IntCollections {
    * @throws ArrayIndexOutOfBoundsException if offset+length is greater than array length
    */
   @SuppressWarnings({"NonBooleanMethodNameMayNotStartWithQuestion"})
-  public static int isSortedUnique(boolean checkNotUnique, @Nullable int[] ints, int offset, int length) {
-    if (ints == null) ints = EMPTY_INTS;
+  public static int isSortedUnique(boolean checkNotUnique, @Nullable int[] array, int offset, int length) {
+    if (array == null) array = EMPTY_INTS;
     if (length < 0 || offset < 0) throw new IllegalArgumentException(offset + " " + length);
-    if (ints.length < offset + length) throw new ArrayIndexOutOfBoundsException(offset + "+" + length + ">" + ints.length);
+    if (array.length < offset + length) throw new ArrayIndexOutOfBoundsException(offset + "+" + length + ">" + array.length);
     if (length < 2) return 0;
     int dupCount = 0;
-    int prev = ints[offset];
+    int prev = array[offset];
     for (int i = 1; i < length; i++) {
-      int next = ints[i + offset];
+      int next = array[i + offset];
       if (next < prev) return i;
       else if (next == prev) {
         if (!checkNotUnique) return i;
@@ -172,35 +155,36 @@ public class IntCollections {
     return binarySearch(val, array, 0, array.length);
   }
 
+  // todo optimize - check borders
   /**
    * Copied from Arrays.
    *
    * @param from index to start search, inclusive
    * @param to   ending index, exclusive
    */
-  public static int binarySearch(int key, int[] a, int from, int to) {
+  public static int binarySearch(int val, int[] a, int from, int to) {
     int low = from;
     int high = to - 1;
 
     while (low <= high) {
-      int mid = (low + high) >> 1;
+      int mid = (low + high) >>> 1;
       int midVal = a[mid];
 
-      if (midVal < key)
+      if (midVal < val)
         low = mid + 1;
-      else if (midVal > key)
+      else if (midVal > val)
         high = mid - 1;
       else
-        return mid; // key found
+        return mid; // val found
     }
-    return -(low + 1);  // key not found.
+    return -(low + 1);  // val not found.
   }
 
   /**
-  * Replaces subsequences of equal elements with single element. Common usage is remove duplicates from
-  * sorted array and make all elements unique.
-  * @return new length of an array without duplicated elements 
-  */
+   * Replaces subsequences of equal elements with single element. Common usage is remove duplicates from
+   * sorted array and make all elements unique.
+   * @return new length of an array without duplicated elements
+   */
   public static int removeSubsequentDuplicates(int[] array, int offset, int length) {
     if (length < 2)
       return length;
@@ -221,9 +205,24 @@ public class IntCollections {
 
   /** @return index of a duplicate (not necessarily leftmost) or -1 if none */
   public static int findDuplicate(IntList unsorted) {
-    IntArray sorted = new IntArray(unsorted);
-    sorted.sort();
-    return findDuplicateSorted(unsorted);
+    final IntArray sorted = new IntArray(unsorted);
+    final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
+    IntegersUtils.quicksort(sorted.size(),
+        new IntIntToInt() {
+          @Override
+          public int invoke(int a, int b) {
+            return IntCollections.compare(sorted.get(a), sorted.get(b));
+          }
+        },
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int a, int b) {
+            sorted.swap(a, b);
+            perms.swap(a, b);
+          }
+        });
+    int result = findDuplicateSorted(sorted);
+    return result == -1 ? -1 : perms.get(result);
   }
 
   /** @return index of the leftmost duplicate or -1 if none*/
@@ -237,8 +236,17 @@ public class IntCollections {
     return -1;
   }
 
+  /**
+   * @param array
+   * @param capacity
+   * @return {@code array} if {@code capacity <= array.length} otherwise
+   * new array that contains all values of array and has length equal to the
+   * maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
+   */
   public static int[] ensureCapacity(@Nullable int[] array, int capacity) {
     int length = array == null ? -1 : array.length;
+    if (capacity < 0)
+      throw new IllegalArgumentException();
     if (length >= capacity)
       return array;
     if (capacity == 0)
@@ -246,6 +254,20 @@ public class IntCollections {
     return reallocArray(array, Math.max(16, Math.max(capacity, length * 2)));
   }
 
+  /**
+   * Unlike {@link Arrays#copyOf(int[], int)} returns the specified array if {@code array.length == length}
+   * @return
+   *   <table>
+   *   <thead><tr><th>if</th><th>returns</th></tr></thead>
+   *   <tbody>
+   *   <tr><td>{@code length == 0}</td><td> {@link IntegersUtils#EMPTY_INTS}</td></tr>
+   *   <tr><td>{@code 0 < length < array.length}</td><td> a copy of the original array, truncated to {@code length}
+   *   <tr><td>{@code length == array.length}</td><td> {@code array}</td></tr>
+   *   <tr><td>{@code length > array.length}</td><td> New array of the specified length whose values are values of array trailed with zeroes</td></tr>
+   *   </tbody>
+   *   </table>
+   * @see Arrays#copyOf(int[], int)
+   */
   public static int[] reallocArray(@Nullable int[] array, int length) {
     assert length >= 0 : length;
     int current = array == null ? -1 : array.length;
@@ -255,15 +277,22 @@ public class IntCollections {
       return EMPTY_INTS;
     int[] newArray = new int[length];
     int copy = Math.min(length, current);
-    if (copy > 0)
+    if (copy > 0) {
       System.arraycopy(array, 0, newArray, 0, copy);
+    }
     return newArray;
   }
 
-  public static int indexOf(int value, int[] ints, int from, int to) {
+  /**
+   * Returns the index of the first occurrence of {@code value}
+   * in the specified array on the specified interval, or -1 if this array does not contain the element.
+   * @param from starting index, inclusive
+   * @param to ending index, exclusive */
+  public static int indexOf(int value, int[] array, int from, int to) {
     for (int i = from; i < to; i++) {
-      if (ints[i] == value)
+      if (array[i] == value) {
         return i;
+      }
     }
     return -1;
   }
@@ -282,7 +311,8 @@ public class IntCollections {
 
   /**
    * Returns IntList adapter of the specified collection. If collection changes, the returned IntList changes also. <br>
-   * Beware of unboxing: each call to the returned IntList leads to unboxing of the source collection element. If you will frequently access the returned IntList, it's a better idea to make a copy. See {@link IntArray#create(java.util.Collection)}
+   * Beware of unboxing: each call to the returned IntList leads to unboxing of the source collection element.
+   * If you will frequently access the returned IntList, it's a better idea to make a copy. See {@link IntArray#create(java.util.Collection)}
    */
   public static IntList asIntList(@Nullable final List<Integer> coll) {
     if (coll == null || coll.isEmpty()) return IntList.EMPTY;
@@ -331,7 +361,12 @@ public class IntCollections {
     return result;
   }
 
-  public static IntList diffSortedLists(IntList a, IntList b) {
+  /**
+   * @param a sorted unique {@code IntList}
+   * @param b sorted unique {@code IntList}
+   * @return union of {@code a} and {@code b} without elements that are contained both in {@code a} and {@code b}
+   */
+  public static IntArray diffSortedUniqueLists(IntList a, IntList b) {
     int ia = 0;
     int sza = a.size();
     int ib = 0;
@@ -362,8 +397,12 @@ public class IntCollections {
     return diff;
   }
 
+  /**
+   * Removes from the specified list all elements whose index is contained in the specified {@code IntList indices}.
+   * @param indices sorted {@code IntList}
+   */
   public static void removeAllAtSorted(WritableIntList list, IntList indices) {
-    if (!indices.isSorted()) throw new IllegalArgumentException("Indexes are not sorted: " + indices);
+    assert indices.isSorted() : "Indexes are not sorted: " + indices;
     int rangeStart = -1;
     int rangeFinish = -2;
     int diff = 0;
@@ -383,253 +422,8 @@ public class IntCollections {
     if (rangeFinish - rangeStart >= 1) list.removeRange(rangeStart - diff, rangeFinish - diff);
   }
 
-  public static SameValuesIntList sameValues(int value, int count) {
-    if (count < 0)
-      throw new IllegalArgumentException();
-    SameValuesIntList array = new SameValuesIntList();
-    if (count == 0)
-      return array;
-    array.add(value);
-    array.expand(0, count - 1);
-    return array;
-  }
-
   /**
-   * Complexity: {@code O(N + T * log(N))}, where {@code N = destSize} and {@code T - otherSize}.
-   * @param  dest - sorted unique dest
-   * @param  destSize - size of dest
-   * @param  other - another array
-   * @param  otherSize - size of other
-   *
-   * @return union of dest and other. If there is enough memory, changing dest. Otherwise creating new array.
-   * */
-  public static IntArray unionWithSmallArray(int[] dest, int destSize, int[] other, int otherSize) {
-    return unionWithSmallArray(dest, destSize, other, otherSize, null);
-  }
-
-  /***
-   * @param insertionPoints is temprorary array, its length = otherSize
-   * @see #unionWithSmallArray(int[], int, int[], int, int[])
-   */
-  public static IntArray unionWithSmallArray(int[] dest, int destSize, int[] other, int otherSize, int[] insertionPoints) {
-    if (otherSize == 0)
-      return new IntArray(dest, destSize);
-    Arrays.sort(other, 0, otherSize);
-    if (dest == null || destSize + otherSize > dest.length) {
-      // merge with reallocation
-      int oldLength = dest == null ? 0 : dest.length;
-      int[] newSorted = new int[Math.max(destSize + otherSize, oldLength * 2)];
-      int last = 0;
-      int destP = 0;
-      int sourceP = 0;
-      for (int i = 0; i < otherSize; i++) {
-        int v = other[i];
-        if (i > 0 && v == last)
-          continue;
-        last = v;
-        if (dest != null && sourceP < destSize) {
-          int k = IntCollections.binarySearch(v, dest, sourceP, destSize);
-          if (k >= 0) {
-            // found
-            continue;
-          }
-          int insertion = -k - 1;
-          if (insertion < sourceP) {
-            assert false : insertion + " " + sourceP;
-            continue;
-          }
-          int chunkSize = insertion - sourceP;
-          System.arraycopy(dest, sourceP, newSorted, destP, chunkSize);
-          sourceP = insertion;
-          destP += chunkSize;
-        }
-        newSorted[destP++] = v;
-      }
-      if (dest != null && sourceP < destSize) {
-        int chunkSize = destSize - sourceP;
-        System.arraycopy(dest, sourceP, newSorted, destP, chunkSize);
-        destP += chunkSize;
-      }
-      return new IntArray(newSorted, destP);
-    } else {
-      // merge in place
-      // a) find insertion points and count how many to be inserted
-      if (insertionPoints == null)
-        insertionPoints = new int[other.length];
-      Arrays.fill(insertionPoints, 0, otherSize, -1);
-      int insertCount = 0;
-      int sourceP = 0;
-      int last = 0;
-      for (int i = 0; i < otherSize; i++) {
-        int v = other[i];
-        if (i > 0 && v == last)
-          continue;
-        last = v;
-        if (sourceP < destSize) {
-          int k = IntCollections.binarySearch(v, dest, sourceP, destSize);
-          if (k >= 0) {
-            // found
-            continue;
-          }
-          int insertion = -k - 1;
-          if (insertion < sourceP) {
-            assert false : insertion + " " + sourceP;
-            continue;
-          }
-          sourceP = insertion;
-        }
-        insertionPoints[i] = sourceP;
-        insertCount++;
-      }
-      // b) insertionPoints contains places in the old dest for insertion
-      // insertCount contains number of insertions
-      sourceP = destSize;
-      destSize += insertCount;
-      int i = otherSize - 1;
-      while (insertCount > 0) {
-        // get next to insert
-        while (i >= 0 && insertionPoints[i] == -1)
-          i--;
-        assert i >= 0 : i;
-        int insertion = insertionPoints[i];
-        if (sourceP > insertion) {
-          System.arraycopy(dest, insertion, dest, insertion + insertCount, sourceP - insertion);
-          sourceP = insertion;
-        }
-        dest[insertion + insertCount - 1] = other[i];
-        insertCount--;
-        i--;
-      }
-      return new IntArray(dest, destSize);
-    }
-  }
-
-  /**
-   * Complexity: {@code O(N + T)}, where {@code N = destSize} and T - size of other.
-   * @param  dest - sorted array
-   * @param  destSize - size of dest
-   * @param  other - sorted list of numbers (set)
-   *
-   * @return union of dest and other. If there is enough memory, changing dest. Otherwise creating new array.
-   * */
-  public static IntArray unionWithSameLengthList(int[] dest, int destSize, IntList other) {
-    int otherSize = other.size();
-    int totalLength = destSize + otherSize;
-    if (dest == null || totalLength > dest.length) {
-      // merge with reallocation
-      return merge0withReallocation(dest, destSize, other, otherSize, totalLength);
-    } else {
-      return merge0inPlace(dest, destSize, other, otherSize, totalLength);
-    }
-  }
-
-  private static IntArray merge0inPlace(int[] dest, int destSize, IntList other, int otherSize, int totalLength) {
-    // in place
-    // 1. find offset (scan for duplicates)
-    // 2. merge starting from the end
-    if (destSize > 0 && otherSize > 0 && dest[0] > other.get(otherSize - 1)) {
-      System.arraycopy(dest, 0, dest, otherSize, destSize);
-      other.toArray(0, dest, 0, otherSize);
-      destSize = totalLength;
-    } else if (destSize > 0 && otherSize > 0 && dest[destSize - 1] < other.get(0)) {
-      other.toArray(0, dest, destSize, otherSize);
-      destSize = totalLength;
-    } else {
-      int insertCount = 0;
-      int pi = 0, pj = 0;
-      while (pi < destSize && pj < otherSize) {
-        int vi = dest[pi];
-        int vj = other.get(pj);
-        if (vi < vj) {
-          pi++;
-        } else if (vi > vj) {
-          pj++;
-          insertCount++;
-        } else {
-          assert vi == vj;
-          pi++;
-          pj++;
-        }
-      }
-      insertCount += (otherSize - pj);
-      pi = destSize - 1;
-      pj = otherSize - 1;
-      int i = destSize + insertCount;
-      while (pi >= 0 && pj >= 0) {
-        assert i > pi : i + " " + pi;
-        int vi = dest[pi];
-        int vj = other.get(pj);
-        if (vi < vj) {
-          dest[--i] = vj;
-          pj--;
-        } else if (vi > vj) {
-          dest[--i] = vi;
-          pi--;
-        } else {
-          assert vi == vj;
-          dest[--i] = vi;
-          pi--;
-          pj--;
-        }
-      }
-      if (pj >= 0) {
-        int size = pj + 1;
-        other.toArray(0, dest, 0, size);
-        i -= size;
-      } else if (pi >= 0) {
-        i -= pi + 1;
-      }
-      assert i == 0 : i;
-      destSize += insertCount;
-    }
-    return new IntArray(dest, destSize);
-  }
-
-  private static IntArray merge0withReallocation(int[] dest, int destSize, IntList other, int otherSize, int totalLength) {
-    int newSize = Math.max(totalLength, dest == null ? 0 : dest.length * 2);
-    int[] newArray = new int[newSize];
-    int pi = 0, pj = 0;
-    int i = 0;
-    if (destSize > 0 && otherSize > 0) {
-      // boundary conditions: quickly merge disjoint sets
-      if (dest[0] > other.get(otherSize - 1)) {
-        other.toArray(0, newArray, 0, otherSize);
-        i = pj = otherSize;
-      } else if (dest[destSize - 1] < other.get(0)) {
-        System.arraycopy(dest, 0, newArray, 0, destSize);
-        i = pi = destSize;
-      }
-    }
-    while (pi < destSize && pj < otherSize) {
-      int vi = dest[pi];
-      int vj = other.get(pj);
-      if (vi < vj) {
-        newArray[i++] = vi;
-        pi++;
-      } else if (vi > vj) {
-        newArray[i++] = vj;
-        pj++;
-      } else {
-        assert vi == vj;
-        newArray[i++] = vi;
-        pi++;
-        pj++;
-      }
-    }
-    if (pi < destSize) {
-      int size = destSize - pi;
-      System.arraycopy(dest, pi, newArray, i, size);
-      i += size;
-    } else if (pj < otherSize) {
-      int size = otherSize - pj;
-      other.toArray(pj, newArray, i, size);
-      i += size;
-    }
-    return new IntArray(newArray, i);
-  }
-
-  /**
-   * @return {@code LongList} with element {@code value} repeated {@code count} times.
+   * @return {@code IntList} with element {@code value} repeated {@code count} times.
    * */
   public static IntList repeat(final int value, final int count) {
     if (count < 0)
@@ -646,39 +440,432 @@ public class IntCollections {
       public int get(int index) throws NoSuchElementException {
         return value;
       }
-    };
-  }
-
-  public static IntIterator range(final int start, final int stop, final int step) {
-    return new AbstractIntIterator() {
-      int cur = start - step;
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return cur + step < stop;
-      }
 
       @Override
-      public int value() throws NoSuchElementException {
-        return cur;
-      }
-
-      @Override
-      public IntIterator next() {
-        cur += step;
-        return this;
+      public int[] toNativeArray(int startIndex, int[] dest, int destOffset, int length) {
+        Arrays.fill(dest, destOffset, destOffset + length, value);
+        return dest;
       }
     };
   }
 
-  public static IntIterator range(int start, int stop) {
-    return range(start, stop, 1);
+  /**
+   * @return union of the two sets
+   */
+  @NotNull
+  public static WritableIntSet union(@NotNull IntSet first, @NotNull IntSet second) {
+    WritableIntSet set = IntOpenHashSet.createForAdd(first.size() + second.size());
+    set.addAll(first);
+    set.addAll(second);
+    return set;
   }
 
-  public static IntIterator range(int stop) {
-    return range(0, stop, 1);
+  /**
+   * @return union of the two sets
+   */
+  @NotNull
+  public static WritableIntSortedSet toSortedUnion(@NotNull IntSet first, @NotNull IntSet second) {
+    IntArray[] arrays = {first.toArray(), second.toArray()};
+    if (!(first instanceof IntSortedSet)) arrays[0].sort();
+    if (!(second instanceof IntSortedSet)) arrays[1].sort();
+    assert arrays[0].size() == first.size() && arrays[1].size() == second.size();
+
+    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
+    arrays[dest].merge(arrays[1 - dest]);
+    return IntAmortizedSet.createFromSortedUniqueArray(arrays[dest]);
   }
 
+  /**
+   * @return intersection of the two sets
+   */
+  @NotNull
+  public static WritableIntSortedSet intersection(@NotNull IntSet first, @NotNull IntSet second) {
+    IntArray[] arrays = {first.toArray(), second.toArray()};
+    if (!(first instanceof IntSortedSet)) arrays[0].sort();
+    if (!(second instanceof IntSortedSet)) arrays[1].sort();
+    assert arrays[0].size() == first.size() && arrays[1].size() == second.size();
+
+    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
+    arrays[dest].retainSorted(arrays[1 - dest]);
+    return IntAmortizedSet.createFromSortedUniqueArray(arrays[dest]);
+  }
+
+  /**
+   * @param includeSorted sorted {@code IntList}
+   * @param excludeSorted sorted {@code IntList}
+   * @return IntList that contains elements from {@code includeSorted}
+   * with the exception of those elements that are contained in {@code excludeSorted}.
+   */
+  @NotNull
+  public static IntList complementSorted(@Nullable IntList includeSorted, @Nullable IntList excludeSorted) {
+    if (includeSorted == null || includeSorted.isEmpty()) return IntList.EMPTY;
+    if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted;
+    IntMinusIterator complement = new IntMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
+    return complement.hasNext() ? collectIterable(includeSorted.size(), complement) : IntList.EMPTY;
+  }
+
+  /**
+   * @return union of the specified lists
+   * @param aSorted sorted unique {@code IntList}
+   * @param bSorted sorted unique {@code IntList}
+   * @return union of the specified lists
+   */
+  @NotNull
+  public static IntList unionSortedUnique(@Nullable IntList aSorted, @Nullable IntList bSorted) {
+    if (aSorted == null || aSorted.isEmpty()) return bSorted == null ? IntList.EMPTY : bSorted;
+    if (bSorted == null || bSorted.isEmpty()) return aSorted;
+    IntArray array;
+    if (aSorted.size() < bSorted.size()) {
+      array = new IntArray(bSorted);
+      array.merge(aSorted);
+    } else {
+      array = new IntArray(aSorted);
+      array.merge(bSorted);
+    }
+    return array;
+  }
+
+  /**
+   * @return intersection of the specified lists
+   * @param aSorted sorted unique {@code IntList}
+   * @param bSorted sorted unique {@code IntList}
+   */
+  @NotNull
+  public static IntList intersectionSortedUnique(@Nullable IntList aSorted, @Nullable IntList bSorted) {
+    if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return IntList.EMPTY;
+    IntIterator intersection = new IntIntersectionIterator(aSorted.iterator(), bSorted.iterator());
+    return intersection.hasNext() ? collectIterable(Math.max(aSorted.size(), bSorted.size()), intersection) : IntList.EMPTY;
+  }
+
+  /**
+   * @return true if intersection of the specified lists is not empty, otherwise false
+   * @param aSorted sorted {@code IntList}
+   * @param bSorted sorted {@code IntList}
+   */
+  public static boolean hasIntersection(@Nullable IntList aSorted, @Nullable IntList bSorted) {
+    if (aSorted == null || aSorted.isEmpty() || bSorted == null || bSorted.isEmpty()) return false;
+    IntIterator intersection = new IntIntersectionIterator(aSorted.iterator(), bSorted.iterator());
+    return intersection.hasNext();
+  }
+
+  /**
+   * @return true if union of the specified lists is not empty, otherwise false
+   * @param aSorted sorted {@code IntList}
+   * @param bSorted sorted {@code IntList}
+   */
+  public static boolean hasUnion(@Nullable IntList aSorted, @Nullable IntList bSorted) {
+    return aSorted != null && !aSorted.isEmpty() || bSorted != null && !bSorted.isEmpty();
+  }
+
+  /**
+   * @return true if complement of the specified lists is not empty, otherwise false
+   * @param includeSorted sorted {@code IntList}
+   * @param excludeSorted sorted {@code IntList}
+   */
+  public static boolean hasComplement(@Nullable IntList includeSorted, @Nullable IntList excludeSorted) {
+    if (includeSorted == null || includeSorted.isEmpty()) return false;
+    if (excludeSorted == null || excludeSorted.isEmpty()) return !includeSorted.isEmpty();
+    IntMinusIterator complement = new IntMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
+    return complement.hasNext();
+  }
+
+  /**
+   * @return list with elements from the specified list in the sorted order without duplicates
+   */
+  @NotNull
+  public static IntList toSortedUnique(@Nullable IntList list) {
+    if (list == null || list.isEmpty()) return IntList.EMPTY;
+    if (list.size() < 33 && list.isSortedUnique()) return list; // check only small lists
+    IntArray r = new IntArray(list);
+    r.sortUnique();
+    return r;
+  }
+
+  /**
+   * Sorts lists by comparing corresponding pairs of the specified lists.
+   * {@code primary} and {@code secondary} are supposed to be a representation of a list P that
+   * consists of pairs (primary[i], secondary[i]).
+   * This method modifies given lists so that P becomes sorted lexicographically.
+   * @param secondary must not be shorter than {@code primary}
+   * @throws IllegalArgumentException in case {@code secondary} is shorter than the {@code primary}
+   * */
+  public static void sortPairs(final WritableIntList primary, final WritableIntList secondary) throws IllegalArgumentException {
+    if (primary.size() > secondary.size()) throw new IllegalArgumentException("secondary is shorter than primary: " +
+        primary.size() + " > " + secondary.size());
+    IntegersUtils.quicksort(primary.size(), new IntIntToInt() {
+          @Override
+          public int invoke(int i, int j) {
+            int comp = IntCollections.compare(primary.get(i), primary.get(j));
+            if (comp == 0) comp = IntCollections.compare(secondary.get(i), secondary.get(j));
+            return comp;
+          }
+        },
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int i, int j) {
+            primary.swap(i, j);
+            secondary.swap(i, j);
+          }
+        });
+  }
+
+  /**
+   * @return array with elements from {@code iterables}.
+   * @see #collectIterables(int, IntIterable...)
+   * @see #concatLists(IntList...)
+   */
+  public static IntArray collectIterables(IntIterable ... iterables) {
+    if (iterables.length == 1) {
+      return collectIterable(0, iterables[0]);
+    } else {
+      return collectIterables(0, iterables);
+    }
+  }
+
+  public static IntArray collectLists(IntList ... lists) {
+    return new IntArray(new IntListConcatenation(lists));
+  }
+
+  /**
+   * Represents given lists as a single {@link IntList}.
+   * Changes in lists propagate to returned list.
+   * @see IntListConcatenation
+   * @see #collectLists(IntList...)
+   */
   public static IntList concatLists(IntList ... lists) {
     return IntListConcatenation.concatUnmodifiable(lists);
+  }
+
+  /**
+   * @param capacity initial capacity for array
+   * @return array with elements from {@code iterables}.
+   */
+  public static IntArray collectIterables(int capacity, IntIterable ... iterables) {
+    IntArray res = new IntArray(capacity);
+    for (IntIterable iterable : iterables) {
+      if (iterable instanceof IntList) {
+        res.addAll((IntList) iterable);
+      } else if (iterable instanceof IntSet) {
+        res.addAll((IntSet)iterable);
+      } else {
+        if (iterable instanceof IntSizedIterable) {
+          res.ensureCapacity(res.size() + ((IntSizedIterable) iterable).size());
+        }
+        res.addAll(iterable.iterator());
+      }
+    }
+    return res;
+  }
+
+  /**
+   * @see #collectIterables(int, IntIterable...)
+   */
+  public static IntArray collectIterable(int capacity, IntIterable iterable) {
+    IntArray res = new IntArray(capacity);
+    if (iterable instanceof IntList) {
+      res.addAll((IntList) iterable);
+    } else if (iterable instanceof IntSet) {
+      res.addAll((IntSet)iterable);
+    } else {
+      if (iterable instanceof IntSizedIterable) {
+        res.ensureCapacity(((IntSizedIterable) iterable).size());
+      }
+      res.addAll(iterable.iterator());
+    }
+    return res;
+  }
+
+  /**
+   * Appends to {@code sb} the string representation of {@code iterable}.
+   * String representation - elements from {@code iterable} separated by comma and wrapped in parentheses: "(a, b, c)".
+   * If {@code sb == null} creats new StringBuilder.
+   * @return {@code sb} with appended string representation of iterable
+   */
+  @NotNull
+  public static StringBuilder append(@Nullable StringBuilder sb, @Nullable IntIterable iterable) {
+    if (sb == null) sb = new StringBuilder();
+    if (iterable == null) {
+      sb.append("null");
+    } else {
+      IntIterator it = iterable.iterator();
+      if (!it.hasNext()) {
+        sb.append("()");
+      } else {
+        sb.append("(").append(it.nextValue());
+        while (it.hasNext()) {
+          sb.append(", ").append(it.nextValue());
+        }
+        sb.append(")");
+      }
+    }
+    return sb;
+  }
+
+  /**
+   * Returns the string representation of {@code iterable}, bounded by {@code 20} elements.
+   * This method calls {@link #toBoundedString(IntIterable, int)} with {@code lim = 10}.
+   * @see #toBoundedString(IntIterable, int)
+   */
+  public static String toBoundedString(IntIterable iterable) {
+    return toBoundedString(iterable, 10);
+  }
+
+  /**
+   * Returns the string representation of {@code iterable}, bounded by {@code 2 * lim} elements.
+   * If size of {@code iterable} is less than {@code 2 * lim}, the result string
+   * contains all elements from {@code iterable} separated by comma and wrapped in parentheses: "(a, b, c, d)".<br>
+   * Otherwise result contains size of {@code iterable}, the first {@code lim} elements of {@code iterable} and
+   * the last {@code lim} elements of {@code iterable}.
+   * Example: "[size] (a, b, c, ..., d, e, f)"
+   * if {@code lim == 3} and size of {@code iterable} is more than 6.
+   * @param lim defines the maximum count of elements({@code 2 * lim}) of iterable to display
+   *
+   * @return the string representation of {@code iterable}, bounded by {@code 2 * lim} elements.
+   */
+  public static String toBoundedString(IntIterable iterable, int lim) {
+    if (iterable instanceof IntSizedIterable) {
+      IntSizedIterable sizedIterable = (IntSizedIterable)iterable;
+      int size = sizedIterable.size();
+      if (size > lim * 2) {
+        IntIterator lastElemsIt;
+        if (iterable instanceof IntList) {
+          lastElemsIt = ((IntList) iterable).iterator(size - lim);
+        } else {
+          lastElemsIt = iterable.iterator();
+          for (int i = 0; i < size - lim; i++) {
+            lastElemsIt.next();
+          }
+        }
+        return toShortString(size, lim, iterable.iterator(), lastElemsIt);
+      } else {
+        return append(null, sizedIterable).toString();
+      }
+    }
+    return outputIterator(iterable.iterator(), lim);
+  }
+
+  private static String outputIterator(IntIterator it, int lim) {
+    IntArray headValues = new IntArray(lim);
+    headValues.addAllNotMore(it, lim);
+    int itSize = headValues.size();
+
+    IntCyclicQueue tailValues = new IntCyclicQueue(lim);
+    for ( int lim2 = lim * 2; it.hasNext() && itSize < lim2; itSize++) {
+      tailValues.add(it.nextValue());
+    }
+
+    if (!it.hasNext()) {
+      return append(null, IntIterators.concat(headValues, tailValues)).toString();
+    } else {
+      // there are more than 2 * lim elements in the iterator
+      for ( ; it.hasNext(); itSize++) {
+        tailValues.removeFirst();
+        tailValues.add(it.nextValue());
+      }
+      return toShortString(itSize, lim, headValues.iterator(), tailValues.iterator());
+    }
+  }
+
+  private static String toShortString(int size, int lim, IntIterator headIt, IntIterator tailIt) {
+    assert size > 2 * lim : size + " " + lim;
+    StringBuilder sb = new StringBuilder("[").append(size).append("] (");
+    sb.append(headIt.nextValue());
+    for (int i = 1; i < lim; i++) {
+      sb.append(", ").append(headIt.nextValue());
+    }
+    sb.append(", ...");
+    for (int i = 0; i < lim; i++) {
+      sb.append(", ").append(tailIt.nextValue());
+    }
+    return sb.append(")").toString();
+  }
+
+  /**
+   * @return Iterable with all sublists of the {@code list}
+   * @throws IllegalArgumentException if {@code list.size >= 32}
+   */
+  public static Iterable<IntArray> allSubLists(final IntList list) throws IllegalArgumentException {
+    if (list.size() >= 32) {
+      throw new IllegalArgumentException();
+    }
+    return new Iterable<IntArray>() {
+
+      @Override
+      public Iterator<IntArray> iterator() {
+        return new Iterator<IntArray>() {
+          int mask = 0;
+          int size = 1 << list.size();
+
+          @Override
+          public boolean hasNext() {
+            return mask < size;
+          }
+
+          @Override
+          public IntArray next() {
+            return getSubList(list, mask++);
+          }
+
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
+        };
+      }
+    };
+  }
+
+  /**
+   * Creates array and adds there elements from {@code values} whose indices beint to {@code mask},
+   * i.e. {@code (mask & (1 << idx)) != 0}.
+   * <br>Examples: get([0, 1, 2], 0) -> [], get([0, 1, 2], 1) -> [2], get([0, 1, 2], 5) -> [0, 2]
+   * @param mask {@code 0 <= mask && mask < 2^values.size()}
+   *
+   * @return an array consisting of elements from {@code values} whose indices beint to {@code mask},
+   * i.e. {@code (mask & (1 << idx)) != 0}.
+   */
+  public static IntArray getSubList(IntList values, int mask) {
+    assert (mask + 1) <= (1 << values.size()) : mask + " " + (1 << values.size());
+    assert values.size() < 31 : values.size() + " >= " + 31;
+    IntArray res = new IntArray();
+    for (int i = 0; i < values.size(); i++) {
+      if ((mask & (1 << i)) != 0) {
+        res.add(values.get(i));
+      }
+    }
+    return res;
+  }
+
+  /**
+   * @return size of {@code iterable} if it is an instance of {@code IntSizedIterable}, otherwise {@code defaultSize}
+   */
+  public static int sizeOfIterable(IntIterable iterable, int defaultSize) {
+    return (iterable instanceof IntSizedIterable) ? ((IntSizedIterable) iterable).size() : defaultSize;
+  }
+
+  public static IntList map(final IntToInt fun, final IntList list) {
+    return new AbstractIntList() {
+      @Override
+      public int size() {
+        return list.size();
+      }
+
+      @Override
+      public int get(int index) throws NoSuchElementException {
+        return fun.invoke(list.get(index));
+      }
+
+      @Override
+      public int[] toNativeArray(int startIndex, int[] dest, int destOffset, int length) {
+        if (length > 0) {
+          list.toNativeArray(startIndex, dest, destOffset, length);
+          int destEnd = destOffset + length;
+          for (int i = destOffset; i < destEnd; i++) {
+            dest[i] = fun.invoke(dest[i]);
+          }
+        }
+        return dest;
+      }
+    };
   }
 }

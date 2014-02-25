@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PObjMap.tpl
+
+
 
 
 package com.almworks.integers;
@@ -63,7 +66,7 @@ public class IntObjMap<E> implements Iterable<IntObjMap.Entry<E>> {
   /**
    * Puts the element for the specified key.
    *
-   * @return if the key was already present in the map, returns the previously stored value. Otherwise, returns null.
+   * @return the previously stored value if the key was already present in the map. Otherwise, null.
    */
   @Nullable
   public E put(int key, @NonNls @Nullable E value) {
@@ -149,8 +152,16 @@ public class IntObjMap<E> implements Iterable<IntObjMap.Entry<E>> {
     return new IntMapIterator();
   }
 
-  public WritableIntListIterator keysIterator(int from, int to) {
-    return myKeys.iterator(from, to);
+  /**
+   * Returns a unique sorted {@link IntList} view of the keys contained in this map.
+   * The collection is backed by the map, so changes to the map are
+   * reflected in the keySet. Unlike {@link java.util.Map#keySet()},
+   * {@link IntObjMap#keySet()} returns read-only list.
+   *
+   * @return IntList of the values contained in this map
+   * */
+  public IntList keySet() {
+    return myKeys;
   }
 
   public int size() {
@@ -197,9 +208,6 @@ public class IntObjMap<E> implements Iterable<IntObjMap.Entry<E>> {
       }
     }
 
-    /**
-     * @see ListIterator#remove
-     */
     @Override
     public void remove() {
       if(myLastRetPos == -1) {

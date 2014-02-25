@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PCollector.tpl
+
+
 
 
 package com.almworks.integers;
@@ -22,11 +25,31 @@ package com.almworks.integers;
 * Interface for write-only collection
 */
 public interface IntCollector {
+  IntCollector DUMMY = new Dummy();
+
   void add(int value);
 
   void addAll(IntList values);
 
-  void addAll(IntIterator iterator);
+  void addAll(IntIterable iterable);
 
   void addAll(int ... values);
+
+  class Dummy implements IntCollector {
+    @Override
+    public void add(int value) {
+    }
+
+    @Override
+    public void addAll(IntList values) {
+    }
+
+    @Override
+    public void addAll(IntIterable iterable) {
+    }
+
+    @Override
+    public void addAll(int... values) {
+    }
+  }
 }

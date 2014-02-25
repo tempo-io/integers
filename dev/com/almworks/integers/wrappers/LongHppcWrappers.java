@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/wrappers/PHppcWrappers.tpl
+
+
 package com.almworks.integers.wrappers;
 
 import com.almworks.integers.LongFindingIterator;

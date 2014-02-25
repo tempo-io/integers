@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PIterators.tpl
+
+
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntToInt;

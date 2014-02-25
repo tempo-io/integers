@@ -125,12 +125,12 @@ public final class #E#Array extends AbstractWritable#E#List {
    * {@code #E#Array.create(values).extractHostArray()}.
    * @return #E#Array containing elements from collection {@code values}
    */
-  public static #E#Array create(@Nullable Collection<#E#> values) {
+  public static #E#Array create(@Nullable Collection<#EW#> values) {
     #e#[] host = EMPTY_#EC#S;
     if (values != null && !values.isEmpty()) {
       int sz = values.size();
       host = new #e#[sz];
-      Iterator<#E#> it = values.iterator();
+      Iterator<#EW#> it = values.iterator();
       for (int i = 0; i < sz; ++i) {
         if (it.hasNext()) {
           host[i] = it.next();

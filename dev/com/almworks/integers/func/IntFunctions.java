@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/func/PFunctions.tpl
+
+
 
 
 package com.almworks.integers.func;
@@ -35,6 +38,115 @@ public class IntFunctions {
       return "-";
     }
   };
+
+  public static final IntToInt INC = new IntToInt() {
+    @Override
+    public int invoke(int a) {
+      return a + 1;
+    }
+
+    @Override
+    public String toString() {
+      return "+1";
+    }
+  };
+
+  public static final IntToInt DEC = new IntToInt() {
+    @Override
+    public int invoke(int a) {
+      return a - 1;
+    }
+
+    @Override
+    public String toString() {
+      return "-1";
+    }
+  };
+
+  public static final IntToInt SQR = new IntToInt() {
+    @Override
+    public int invoke(int a) {
+      return a * a;
+    }
+
+    @Override
+    public String toString() {
+      return "^2";
+    }
+  };
+
+  public static final IntToInt I = new IntToInt() {
+    @Override
+    public int invoke(int a) {
+      return a;
+    }
+
+    @Override
+    public String toString() {
+      return "I";
+    }
+  };
+
+  public static IntToInt apply(final IntIntToInt f, final int a) {
+    return new IntToInt() {
+      @Override
+      public int invoke(int b) {
+        return f.invoke(a, b);
+      }
+
+      @Override
+      public String toString() {
+        return f + " " + a;
+      }
+    };
+  }
+
+  public static IntToInt swap(final int v1, final int v2) {
+    return new IntToInt() {
+      @Override
+      public int invoke(int x) {
+        return
+            x == v1 ? v2 :
+                x == v2 ? v1 :
+                    x;
+      }
+
+      @Override
+      public String toString() {
+        return v1 + " <-> " + v2;
+      }
+    };
+  }
+
+  public static IntToInt compose(final IntToInt f1, final IntToInt f2) {
+    return new IntToInt() {
+      @Override
+      public int invoke(int a) {
+        return f1.invoke(f2.invoke(a));
+      }
+
+      @Override
+      public String toString() {
+        return '(' + f1.toString() + ") o (" + f2.toString() + ')';
+      }
+    };
+  }
+
+  /** Returns a function that returns values from the supplied Iterable. Function argument is ignored. */
+  public static IntToInt sequence(final IntIterable iterable) {
+    return new IntToInt() {
+      IntIterator it = iterable.iterator();
+      @Override
+      public int invoke(int a) {
+        return it.nextValue();
+      }
+
+      @Override
+      public String toString() {
+        return "i => " + iterable;
+      }
+    };
+  }
 
   public static final IntIntToInt ADD = new IntIntToInt() {
     @Override
@@ -72,32 +184,6 @@ public class IntFunctions {
     }
   };
 
-  public static final IntToInt I = new IntToInt() {
-    @Override
-    public int invoke(int a) {
-      return a;
-    }
-
-    @Override
-    public String toString() {
-      return "I";
-    }
-  };
-
-  public static IntToInt apply(final IntIntToInt f, final int a) {
-    return new IntToInt() {
-      @Override
-      public int invoke(int b) {
-        return f.invoke(a, b);
-      }
-
-      @Override
-      public String toString() {
-        return f + " " + a;
-      }
-    };
-  }
-
   public static IntIntToInt swap(final IntIntToInt f) {
     return new IntIntToInt() {
       @Override
@@ -122,53 +208,6 @@ public class IntFunctions {
       @Override
       public String toString() {
         return "ingore1 (" + f + ')';
-      }
-    };
-  }
-
-  public static IntToInt swap(final int v1, final int v2) {
-    return new IntToInt() {
-      @Override
-      public int invoke(int x) {
-        return
-          x == v1 ? v2 :
-          x == v2 ? v1 :
-          x;
-      }
-
-      @Override
-      public String toString() {
-        return v1 + " <-> " + v2;
-      }
-    };
-  }
-  
-  public static IntToInt compose(final IntToInt f1, final IntToInt f2) {
-    return new IntToInt() {
-      @Override
-      public int invoke(int a) {
-        return f1.invoke(f2.invoke(a));
-      }
-
-      @Override
-      public String toString() {
-        return '(' + f1.toString() + ") o (" + f2.toString() + ')';
-      }
-    };
-  }
-    
-  /** Returns a function that returns values from the supplied Iterable. Function argument is ignored. */
-  public static IntToInt sequence(final IntIterable iterable) {
-    return new IntToInt() {
-      IntIterator it = iterable.iterator();
-      @Override
-      public int invoke(int a) {
-        return it.nextValue();
-      }
-  
-      @Override
-      public String toString() {
-        return "i => " + iterable;
       }
     };
   }

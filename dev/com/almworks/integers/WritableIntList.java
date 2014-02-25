@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/WritablePList.tpl
+
+
 
 
 package com.almworks.integers;
@@ -42,31 +45,106 @@ public interface WritableIntList extends IntList, IntCollector {
 
   int removeAt(int index);
 
-  void removeAll(int value);
+  /**
+   * Removes the first occurrence of the specified element from this list, if it is present.
+   * @return true if this list was modified, otherwise false
+   */
+  boolean remove(int value);
 
+  /**
+   * This method removes from this list all values that are equal to {@code value}
+   * <br> {@link #removeAllSorted(int)} may be more effective than this method
+   * @return true if this list was modified, otherwise false
+   * @see #removeAllSorted(int)
+   */
+  boolean removeAll(int value);
+
+  /**
+   * Removes all appearances of {@code value} from this sorted list.
+   * <br>May be more effective than {@link #removeAll(int)}.
+   * <br>Invoking this method on an unsorted array produces unspecified results.
+   * @return true if this array was modified, otherwise false
+   */
+  boolean removeAllSorted(int value);
+
+  /**
+   * Removes from this list all values contained in {@code iterable}.
+   * @return true if this list was modified, otherwise false
+   */
+  boolean removeAll(IntIterable iterable);
+
+  /**
+   * Removes from this list all values contained in the specified array
+   * @return true if this list was modified, otherwise false
+   */
+  boolean removeAll(int... values);
+
+  /**
+   * Insert {@code value} {@code count} times between indices {@code index, index + 1}
+   * @throws IllegalArgumentException if count < 0
+   * */
   void insertMultiple(int index, int value, int count);
 
   void insert(int index, int value);
 
+  /**
+   * Insert values from {@code iterator} between indices {@code index, index + 1}
+   */
   void insertAll(int index, IntIterator iterator);
 
+  /**
+   * Insert values from {@code list} between indices {@code index, index + 1}
+   */
   void insertAll(int index, IntList list);
 
   void insertAll(int index, IntList values, int sourceIndex, int count);
 
+  /**
+   * Inserts {@code value} in this sorted list if this list doesn't contain {@code value}, keeping sorted order.
+   * @return true if this list was modified, otherwise false
+   */
   boolean addSorted(int value);
 
   void set(int index, int value);
 
   void setRange(int from, int to, int value);
 
+  /**
+   * Replaces the elements in this list from {@code index} to {@code index + values.size()}
+   * with the elements from {@code values}
+   * @throws ArrayIndexOutOfBoundsException if {@code index + values.size > size()};
+   */
   void setAll(int index, IntList values);
 
+  /**
+   * Replaces the elements in this list from {@code index} to {@code index + count}
+   * with the elements from {@code values} beginning from index {@code sourceIndex}
+   * and ending with {@code sourceIndex + count}
+   * @throws ArrayIndexOutOfBoundsException if
+   * {@code index + count > size()} or {@code sourceIndex + count > values.size()};
+   */
   void setAll(int index, IntList values, int sourceIndex, int count);
 
+  /**
+   * Updates the values in this list at the specified interval with result of applying
+   * {@code function} to elements at this interval.
+   * @param from starting index, inclusive
+   * @param to ending index, exclusive
+   */
   void apply(int from, int to, IntToInt function);
 
+  /**
+   * Sorts this list. Permutation of indices in this array
+   * will be reflected in the same permutation of indices in each array of {@code sortAlso}.
+   * Stability is not guaranteed.
+   * @param sortAlso lists in which the order is changed as well as this list
+   */
   void sort(WritableIntList... sortAlso);
+
+  /**
+   * Sorts this list, removes duplicates.
+   */
+  void sortUnique();
 
   void swap(int index1, int index2);
 
@@ -84,11 +162,14 @@ public interface WritableIntList extends IntList, IntCollector {
   void removeDuplicates();
 
   /**
-   * Increasing list's size and shifts all values to the right of index. The resulting "hole"
-   * in the range [index; index + count) contains undefined values.
+   * Increases the list size and shifts all values to the right of {@code index}. The resulting "hole"
+   * in the range {@code [index; index + count)} contains undefined values.
    *
-   * @param index where to insert "hole"
+   * @param index where to insert the "hole"
    * @param count how much size increase is needed, must be >= 0
+   *
+   * @throws IndexOutOfBoundsException when index < 0 or index > size
+   * @throws IllegalArgumentException when count < 0
    */
   void expand(int index, int count);
 

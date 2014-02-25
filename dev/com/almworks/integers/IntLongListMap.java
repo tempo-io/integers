@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PQListMap.tpl
+
+
 
 
 package com.almworks.integers;
@@ -201,7 +204,12 @@ public class IntLongListMap extends AbstractWritableIntLongMap {
 
   public IntIterator keysIterator() {
     checkMutatorPresence();
-    return failFast(keysIterator(0));
+    return new IntFailFastIterator(keysIterator(0)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public LongIterator valuesIterator(int from) {
@@ -216,7 +224,12 @@ public class IntLongListMap extends AbstractWritableIntLongMap {
 
   public LongIterator valuesIterator() {
     checkMutatorPresence();
-    return failFast(valuesIterator(0));
+    return new LongFailFastIterator(valuesIterator(0)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   /**
@@ -262,7 +275,7 @@ public class IntLongListMap extends AbstractWritableIntLongMap {
     if (myKeys.size() != myValues.size()) {
       return "sizes of keys and values should be equal";
     }
-    if (!myKeys.isUniqueSorted()) {
+    if (!myKeys.isSortedUnique()) {
       return "keys should be sorted unique";
     }
     return null;

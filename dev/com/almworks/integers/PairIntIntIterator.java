@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 ALM Works Ltd
+ * Copyright 2011 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PairIntPIterator.tpl
 
 
 package com.almworks.integers;

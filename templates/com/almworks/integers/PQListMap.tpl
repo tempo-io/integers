@@ -155,7 +155,7 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
     return myKeys.get(index);
   }
 
-  public #e# findKey(#e# key, int from) {
+  public int findKey(#e# key, int from) {
     checkMutatorPresence();
     int size = myKeys.size();
     assert from == size || from == 0 || myKeys.get(from - 1) < key : key + " " + from + " " + this;
@@ -201,7 +201,12 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
 
   public #E#Iterator keysIterator() {
     checkMutatorPresence();
-    return failFast(keysIterator(0));
+    return new #E#FailFastIterator(keysIterator(0)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public #F#Iterator valuesIterator(int from) {
@@ -216,7 +221,12 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
 
   public #F#Iterator valuesIterator() {
     checkMutatorPresence();
-    return failFast(valuesIterator(0));
+    return new #F#FailFastIterator(valuesIterator(0)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   /**
@@ -262,7 +272,7 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
     if (myKeys.size() != myValues.size()) {
       return "sizes of keys and values should be equal";
     }
-    if (!myKeys.isUniqueSorted()) {
+    if (!myKeys.isSortedUnique()) {
       return "keys should be sorted unique";
     }
     return null;

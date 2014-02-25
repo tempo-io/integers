@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/func/PProcedure.tpl
+
+
 
 
 package com.almworks.integers.func;

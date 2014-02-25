@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PEmptyIterator.tpl
+
+
 
 
 package com.almworks.integers;
@@ -21,7 +24,7 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public class EmptyIntIterator extends AbstractIntIterator implements WritableIntListIterator {
+public class IntEmptyIterator extends AbstractIntIterator implements WritableIntListIterator {
   public void set(int offset, int value) throws NoSuchElementException {
     throw new NoSuchElementException();
   }
@@ -43,12 +46,18 @@ public class EmptyIntIterator extends AbstractIntIterator implements WritableInt
     throw new NoSuchElementException();
   }
 
+  public boolean hasValue() {
+    return false;
+  }
+
   public int value() throws NoSuchElementException {
     throw new NoSuchElementException();
   }
 
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
-    throw new NoSuchElementException();
+    if (offset != 0) {
+      throw new NoSuchElementException();
+    }
   }
 
   public int get(int offset) throws NoSuchElementException {
