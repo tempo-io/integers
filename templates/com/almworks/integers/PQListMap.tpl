@@ -181,7 +181,12 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
 
   public #E##F#Iterator iterator() {
     checkMutatorPresence();
-    return failFast(iterator(0));
+    return new #E##F#FailFastIterator(iterator(0)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public boolean containsKey(#e# key) {

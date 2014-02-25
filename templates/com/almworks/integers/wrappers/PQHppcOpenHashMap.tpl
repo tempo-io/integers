@@ -105,14 +105,19 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
   }
 
   public #E##F#Iterator iterator() {
-    return failFast(cursorTo#E##F#Iterator(myMap.iterator()));
+	return new #E##F#FailFastIterator(cursorTo#E##F#Iterator(myMap.iterator())) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public #E#Iterator keysIterator() {
     return new #E#FailFastIterator(cursorTo#E#Iterator(myMap.keys().iterator())) {
       @Override
       protected int getCurrentModCount() {
-        return 0;
+        return myModCount;
       }
     };
   }
@@ -121,7 +126,7 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
     return new #F#FailFastIterator(cursorTo#F#Iterator(myMap.values().iterator())) {
       @Override
       protected int getCurrentModCount() {
-        return 0;
+        return myModCount;
       }
     };
   }

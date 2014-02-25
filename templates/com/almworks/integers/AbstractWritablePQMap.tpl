@@ -22,20 +22,6 @@ import static com.almworks.integers.IntegersUtils.appendShortName;
 public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
   protected int myModCount = 0;
 
-  abstract public boolean containsKey(#e# key);
-
-  abstract public int size();
-
-  abstract public #E##F#Iterator iterator();
-
-  abstract public #E#Iterator keysIterator();
-
-  abstract public #F#Iterator valuesIterator();
-
-  abstract public #f# get(#e# key);
-
-  abstract public void clear();
-
   /**
    * put element without invocation of {@code AbstractWritable#E##F#Map#modified()}
    */
@@ -48,15 +34,6 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
 
   public boolean isEmpty() {
     return size() == 0;
-  }
-
-  protected final #E##F#Iterator failFast(#E##F#Iterator iter) {
-    return new #E##F#FailFastIterator(iter) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
   }
 
   @Override

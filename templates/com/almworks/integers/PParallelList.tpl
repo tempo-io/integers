@@ -116,6 +116,10 @@ public class #E#ParallelList {
       return myIt.hasNext();
     }
 
+    public boolean hasValue() {
+      return myIt.hasValue();
+    }
+
     public void next(@Nullable #e#[] dst) {
       if (dst != null && dst.length < getListCount())
         throw new IllegalArgumentException();
