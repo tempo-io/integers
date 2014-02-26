@@ -1,6 +1,3 @@
-import com.sun.xml.internal.ws.transport.http.DeploymentDescriptorParser
-import groovy.transform.Field
-
 ant.taskdef (  name : 'groovyc' , classname : 'org.codehaus.groovy.ant.Groovyc' )
 
 final getCommandProperty = {String param -> (ant.project.properties[param] in ["", "true"])}
@@ -59,6 +56,7 @@ final String utilClassesDir =       rel2(buildDir, antProp("util.classes.dir"))
 final String generatorClass = antProp("generator.mainClass")
 
 final String jarName = antProp("jar.name")
+final String jarWrappersName = antProp("jar.wrappers.name")
 
 String version = ""
 
@@ -256,7 +254,7 @@ target(name: 'dist') {
   String deliverName = jarName
   ant.mkdir(dir: deliverDir)
   def jarFileName = deliverName + ".jar"
-  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn") {
+  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn/**/wrappers/**") {
     manifest {
       attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
       attribute(name: "Implementation-Vendor", value: "ALM Works")
@@ -268,8 +266,37 @@ target(name: 'dist') {
   ant.delete(dir: deliverSources)
   ant.mkdir(dir: deliverSources)
   ant.copy(todir: deliverSources) {
-    fileset(dir: javaDir, excludes: "**/.svn")
-    fileset(dir: generatedJavaDir, excludes: "**/.svn")
+    fileset(dir: javaDir, excludes: "**/.svn/**/wrappers/**")
+    fileset(dir: generatedJavaDir, excludes: "**/.svn/**/wrappers/**")
+  }
+  String srcFileName = deliverName + "-src.zip"
+  ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
+  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar")
+  almMessage "dist done"
+}
+
+target(name: 'dist-wrappers') {
+  depends(['init', 'make', 'test'])
+  if (!isDirty) depends(['fetchVersion'])
+  almMessage "dist"
+
+  String deliverName = jarWrappersName
+  ant.mkdir(dir: deliverDir)
+  def jarFileName = deliverName + ".jar"
+  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), includes: "**/wrappers/**", excludes: "**/.svn") {
+    manifest {
+      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+      attribute(name: "Implementation-Vendor", value: "ALM Works")
+      attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
+    }
+  }
+
+  def deliverSources = rel2(buildDir, "deliver-sources")
+  ant.delete(dir: deliverSources)
+  ant.mkdir(dir: deliverSources)
+  ant.copy(todir: deliverSources) {
+    fileset(dir: javaDir,  includes: "**/wrappers/**", excludes: "**/.svn")
+    fileset(dir: generatedJavaDir, includes: "**/wrappers/**", excludes: "**/.svn")
   }
   String srcFileName = deliverName + "-src.zip"
   ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
@@ -278,7 +305,7 @@ target(name: 'dist') {
 }
 
 target(name: 'build') {
-  depends(['init', 'clean', 'make', 'test', 'dist'])
+  depends(['init', 'clean', 'make', 'test', 'dist', 'dist-wrappers'])
   almMessage "build finished"
 }
 
