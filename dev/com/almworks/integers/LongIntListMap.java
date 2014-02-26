@@ -184,7 +184,12 @@ public class LongIntListMap extends AbstractWritableLongIntMap {
 
   public LongIntIterator iterator() {
     checkMutatorPresence();
-    return failFast(iterator(0));
+    return new LongIntFailFastIterator(iterator(0)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public boolean containsKey(long key) {
@@ -212,12 +217,12 @@ public class LongIntListMap extends AbstractWritableLongIntMap {
     };
   }
 
-  public IntIterator valuesIterator(int from) {
+  public IntListIterator valuesIterator(int from) {
     checkMutatorPresence();
     return valuesIterator(from, size());
   }
 
-  public IntIterator valuesIterator(int from, int to) {
+  public IntListIterator valuesIterator(int from, int to) {
     checkMutatorPresence();
     return myValues.iterator(from, to);
   }

@@ -46,7 +46,7 @@ import java.util.BitSet;
  *
  * With the specified threshold {@link IntChainHashSet} takes {@code M*(1+2*f)} memory
  * where {@code M} - memory for {@link IntOpenHashSet}, {@code f} - loadFactor.
- * {@link LongOpenHashSet} takes {@code M*(1+3*f)/2} memory.
+ * {@link LongChainHashSet} takes {@code M*(1+3*f)/2} memory, where {@code M} - memory for {@link LongOpenHashSet}
  *
  * @see	    LongChainHashSet
  * @see	    LongTreeSet

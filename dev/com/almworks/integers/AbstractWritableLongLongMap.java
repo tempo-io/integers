@@ -25,20 +25,6 @@ import static com.almworks.integers.LongLongIterators.pair;
 public abstract class AbstractWritableLongLongMap implements WritableLongLongMap {
   protected int myModCount = 0;
 
-  abstract public boolean containsKey(long key);
-
-  abstract public int size();
-
-  abstract public LongLongIterator iterator();
-
-  abstract public LongIterator keysIterator();
-
-  abstract public LongIterator valuesIterator();
-
-  abstract public long get(long key);
-
-  abstract public void clear();
-
   /**
    * put element without invocation of {@code AbstractWritableLongLongMap#modified()}
    */
@@ -51,15 +37,6 @@ public abstract class AbstractWritableLongLongMap implements WritableLongLongMap
 
   public boolean isEmpty() {
     return size() == 0;
-  }
-
-  protected final LongLongIterator failFast(LongLongIterator iter) {
-    return new LongLongFailFastIterator(iter) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
   }
 
   @Override

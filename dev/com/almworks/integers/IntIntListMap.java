@@ -184,7 +184,12 @@ public class IntIntListMap extends AbstractWritableIntIntMap {
 
   public IntIntIterator iterator() {
     checkMutatorPresence();
-    return failFast(iterator(0));
+    return new IntIntFailFastIterator(iterator(0)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   public boolean containsKey(int key) {

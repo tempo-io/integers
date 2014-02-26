@@ -21,9 +21,11 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.NoSuchElementException;
 
-public class LongParallelListMap {
+public class LongParallelListMap implements LongLongIterable {
   private final LongList myKeys;
   private final LongList myValues;
 
@@ -192,7 +194,7 @@ public class LongParallelListMap {
     myMap.clear();
   }
 
-  public class Iterator {
+  public class Iterator implements LongLongIterator {
     private final LongParallelList.Iterator ii;
     private final long[] myKeyValue = new long[2];
     private boolean myEntry;
@@ -205,18 +207,24 @@ public class LongParallelListMap {
       return ii.hasNext();
     }
 
-    public void next() {
+    @Override
+    public boolean hasValue() {
+      return ii.hasValue();
+    }
+
+    public Iterator next() {
       myEntry = false;
       ii.next(myKeyValue);
       myEntry = true;
+      return this;
     }
 
-    public long key() {
+    public long left() {
       if (!myEntry) throw new NoSuchElementException();
       return myKeyValue[0];
     }
 
-    public long value() {
+    public long right() {
       if (!myEntry) throw new NoSuchElementException();
       return myKeyValue[1];
     }
@@ -243,6 +251,12 @@ public class LongParallelListMap {
 
     public void move(int offset) {
       ii.move(offset);
+    }
+
+    @NotNull
+    @Override
+    public LongLongIterator iterator() {
+      return null;
     }
   }
 }

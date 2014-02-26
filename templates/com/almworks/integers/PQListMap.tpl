@@ -214,12 +214,12 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
     };
   }
 
-  public #F#Iterator valuesIterator(int from) {
+  public #F#ListIterator valuesIterator(int from) {
     checkMutatorPresence();
     return valuesIterator(from, size());
   }
 
-  public #F#Iterator valuesIterator(int from, int to) {
+  public #F#ListIterator valuesIterator(int from, int to) {
     checkMutatorPresence();
     return myValues.iterator(from, to);
   }

@@ -912,12 +912,11 @@ public class IntTreeSet extends AbstractWritableIntSet implements WritableIntSor
     });
   }
 
-  private class LURIterator extends AbstractIntIterator {
+  private class LURIterator extends AbstractIntIteratorWithFlag {
     private int myValue;
     private int x = myRoot;
     private final int[] ps;
     private int psi;
-    private boolean myIterated = false;
 
     public LURIterator() {
       int[] cache = myStackCache;
@@ -951,9 +950,8 @@ public class IntTreeSet extends AbstractWritableIntSet implements WritableIntSor
       return x != 0 || psi > 0;
     }
 
-    public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
+    protected void nextImpl() throws NoSuchElementException, ConcurrentModificationException {
       if (!hasNext()) throw new NoSuchElementException();
-      myIterated = true;
       if (x == 0) {
         x = ps[--psi];
       }  else {
@@ -966,15 +964,10 @@ public class IntTreeSet extends AbstractWritableIntSet implements WritableIntSor
       }
       myValue = x;
       x = myRight[x];
-      return this;
     }
 
-    public boolean hasValue() {
-      return myIterated;
-    }
-
-    public int value() throws NoSuchElementException {
-      if (!hasValue()) throw new NoSuchElementException();
+    @Override
+    protected int valueImpl() {
       return myValue;
     }
   }
