@@ -52,26 +52,18 @@ public class SetOperationsChecker {
   public LongArray[] generateRandomArrays(int intersectionLength, int arraysNumber, int maxArrayLength, int... minMaxValues) {
     final int mLen = minMaxValues.length;
     assert mLen == 0 || mLen == 1 || mLen == 2 || mLen == arraysNumber * 2 : mLen;
-    int[] mValues = new int[arraysNumber * 2];
-    int min, max;
-    if (mLen > 2) {
-      mValues = minMaxValues;
+
+    IntIterator mValues;
+    if (mLen < 2) {
+      mValues = IntIterators.cycle(0, mLen == 0 ? MAX : minMaxValues[0]);
     } else {
-      for (int i = 0; i < arraysNumber * 2; i += 2) {
-        switch (mLen) {
-          case 0: min = 0; max = MAX; break;
-          case 1: min = 0; max = minMaxValues[0]; break;
-          case 2: min = minMaxValues[0]; max = minMaxValues[1]; break;
-          default: min = 0; max = -1;
-        }
-        mValues[i] = min;
-        mValues[i + 1] = max;
-      }
+      mValues = IntIterators.cycle(minMaxValues);
     }
+
     LongArray intersection = generateRandomLongArray(intersectionLength, UNORDERED);
     LongArray[] arrays = new LongArray[arraysNumber];
     for (int i = 0; i < arraysNumber; i++) {
-      arrays[i] = generateRandomLongArray(RAND.nextInt(maxArrayLength), UNORDERED, mValues[i * 2], mValues[i * 2 + 1]);
+      arrays[i] = generateRandomLongArray(RAND.nextInt(maxArrayLength), UNORDERED, mValues.nextValue(), mValues.nextValue());
       arrays[i].addAll(intersection);
       if (getCurrentStatus(i) == UNORDERED) {
         arrays[i].shuffle(RAND);

@@ -44,6 +44,29 @@ public class IntLongPairIteratorTests extends IntegersFixture {
     });
   }
 
+  public void testLeftIteratorSpecification() {
+    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+      private LongIterator getFromProjection(IntIterable leftIterable, LongIterable rightIterable) {
+        return asLongs(leftProjection(new IntLongPairIterator(leftIterable, rightIterable)));
+      }
+
+      @Override
+      public List<LongIterator> get(long... values) {
+        int length = values.length;
+        IntArray left = new IntArray(values.length);
+        for (long value : values) {
+          left.add((int) value);
+        }
+        return Arrays.asList(
+            getFromProjection(left, generateRandomLongArray(values.length, UNORDERED)),
+            getFromProjection(left, LongCollections.repeat(0, length)),
+            getFromProjection(left, LongCollections.repeat(0, length + 10)),
+            getFromProjection(left, LongCollections.repeat(Integer.MAX_VALUE, length))
+        );
+      }
+    }, LongIteratorSpecificationChecker.ValuesType.INTEGER);
+  }
+
   public void testSimple() {
     int[][] leftVariants = {{}, {0, 1, 2}, {10, 20, 30}, {0, 2, 4, 6}, {Integer.MIN_VALUE, Integer.MAX_VALUE, 1, 2, 0}};
     for (int[] left : leftVariants) {

@@ -22,47 +22,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
-import static com.almworks.integers.wrappers.IntLongHppcOpenHashMap.createForAdd;
-import static com.almworks.integers.wrappers.IntLongHppcOpenHashMap.createFrom;
+import static com.almworks.integers.wrappers.LongIntHppcOpenHashMap.createForAdd;
+import static com.almworks.integers.wrappers.LongIntHppcOpenHashMap.createFrom;
 
-public class IntLongHppcOpenHashMapTests extends WritableIntLongMapChecker<IntLongHppcOpenHashMap> {
+public class LongIntHppcOpenHashMapTests extends WritableLongIntMapChecker<LongIntHppcOpenHashMap> {
   @Override
-  protected IntLongHppcOpenHashMap createMap() {
-    return new IntLongHppcOpenHashMap();
+  protected LongIntHppcOpenHashMap createMap() {
+    return new LongIntHppcOpenHashMap();
   }
 
   @Override
-  protected IntLongHppcOpenHashMap createMapWithCapacity(int capacity) {
-    return new IntLongHppcOpenHashMap(capacity);
+  protected LongIntHppcOpenHashMap createMapWithCapacity(int capacity) {
+    return new LongIntHppcOpenHashMap(capacity);
   }
 
   @Override
-  protected List<IntLongHppcOpenHashMap> createMapFromLists(IntList keys, LongList values) {
-    List<IntLongHppcOpenHashMap> res = new ArrayList<IntLongHppcOpenHashMap>();
-    int[] keysNative = keys.toNativeArray();
-    long[] valuesNative = values.toNativeArray();
+  protected List<LongIntHppcOpenHashMap> createMapsFromLists(LongList keys, IntList values) {
+    List<LongIntHppcOpenHashMap> res = new ArrayList();
+    long[] keysNative = keys.toNativeArray();
+    int[] valuesNative = values.toNativeArray();
     res.add(createFrom(keys, values));
     res.add(createFrom(keysNative, valuesNative));
     res.add(createFrom(keys.iterator(), values.iterator()));
 
-    map = new IntLongHppcOpenHashMap();
+    map = new LongIntHppcOpenHashMap();
     map.putAll(keysNative, valuesNative);
     res.add(map);
 
-    map = new IntLongHppcOpenHashMap();
+    map = new LongIntHppcOpenHashMap();
     map.putAll(keys, values);
     res.add(map);
 
     int countToAdd = keys.size() / 2;
-    map = new IntLongHppcOpenHashMap(countToAdd);
+    map = new LongIntHppcOpenHashMap(countToAdd);
     map.putAll(keys.subList(0, countToAdd), values.subList(0, countToAdd));
     map.putAll(keys.subList(countToAdd, keys.size()), values.subList(countToAdd, values.size()));
     res.add(map);
 
-    map = new IntLongHppcOpenHashMap();
+    map = new LongIntHppcOpenHashMap();
     map.putAllKeys(keys.iterator(), values.iterator());
     int size = 10;
-    map.putAllKeys(keys, LongCollections.concatLists(values, generateRandomLongArray(size, UNORDERED)));
+    map.putAllKeys(keys, IntCollections.concatLists(values, generateRandomIntArray(size, UNORDERED)));
 
     return res;
   }
@@ -75,8 +75,8 @@ public class IntLongHppcOpenHashMapTests extends WritableIntLongMapChecker<IntLo
         map = createForAdd(size, loadFactor);
         int innerKeysSize = map.myMap.keys.length;
 
-        IntList keys = IntProgression.range(size);
-        LongProgression values = LongProgression.range(size);
+        LongList keys = LongProgression.range(size);
+        IntProgression values = IntProgression.range(size);
 
         map.putAllKeys(keys.iterator(), values.iterator());
         checkMap(map, keys, values);

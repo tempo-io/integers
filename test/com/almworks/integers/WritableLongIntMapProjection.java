@@ -1,0 +1,152 @@
+/*
+ * Copyright 2014 ALM Works Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.almworks.integers;
+
+import org.jetbrains.annotations.NotNull;
+
+public class WritableLongIntMapProjection<T extends WritableLongIntMap> implements WritableLongSet {
+  static int DEFAULT_CONTAINS_VALUE = 239;
+
+  private WritableLongIntMap myMap;
+
+  public WritableLongIntMapProjection(WritableLongIntMap map) {
+    myMap = map;
+  }
+
+  @Override
+  public void clear() {
+    myMap.clear();
+  }
+
+  @Override
+  public boolean include(long value) {
+    return myMap.put(value, DEFAULT_CONTAINS_VALUE) != DEFAULT_CONTAINS_VALUE;
+  }
+
+  @Override
+  public boolean exclude(long value) {
+    return myMap.remove(value) == DEFAULT_CONTAINS_VALUE;
+  }
+
+  @Override
+  public void remove(long value) {
+    myMap.remove(value);
+  }
+
+  @Override
+  public void removeAll(long... values) {
+    for (long value : values) {
+      remove(value);
+    }
+  }
+
+  @Override
+  public void removeAll(LongList values) {
+    removeAll(values.iterator());
+  }
+
+  @Override
+  public void removeAll(LongIterator iterator) {
+    for (LongIterator it : iterator) {
+      remove(it.value());
+    }
+  }
+
+  @Override
+  public void retain(LongList values) {
+    LongArray res = new LongArray();
+    for (LongIterator it: values.iterator()) {
+      long value = it.value();
+      if (contains(value)) res.add(value);
+    }
+    clear();
+    addAll(res);
+  }
+
+  @Override
+  public void add(long value) {
+    myMap.add(value, DEFAULT_CONTAINS_VALUE);
+  }
+
+  @Override
+  public void addAll(LongList values) {
+    addAll(values.iterator());
+  }
+
+  @Override
+  public void addAll(LongIterable iterable) {
+    for (LongIterator iterator : iterable) {
+      add(iterator.value());
+    }
+  }
+
+  @Override
+  public void addAll(long... values) {
+    for (long value : values) {
+      add(value);
+    }
+  }
+
+  @Override
+  public boolean contains(long value) {
+    return myMap.containsKey(value);
+  }
+
+  @Override
+  public boolean containsAll(LongIterable iterable) {
+    for (LongIterator iterator : iterable) {
+      if (!contains(iterator.value())) return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int size() {
+    return myMap.size();
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return myMap.isEmpty();
+  }
+
+  @Override
+  public long[] toNativeArray(long[] dest) {
+    return toNativeArray(dest, 0);
+  }
+
+  @Override
+  public long[] toNativeArray(long[] dest, int destPos) {
+    if (destPos < 0 || destPos + size() > dest.length) {
+      throw new ArrayIndexOutOfBoundsException();
+    }
+    for (LongIterator it : iterator()) {
+      dest[destPos++] = it.value();
+    }
+    return dest;
+  }
+
+  public LongArray toArray() {
+    return new LongArray(toNativeArray(new long[size()]));
+  }
+
+  @NotNull
+  @Override
+  public LongIterator iterator() {
+    return myMap.keysIterator();
+  }
+}

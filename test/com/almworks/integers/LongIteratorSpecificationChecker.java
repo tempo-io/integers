@@ -131,6 +131,27 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       public ValuesType[] supportedTypes() {
         return new ValuesType[]{ARITHMETHIC};
       }
+    },
+    INTEGER {
+      @Override
+      public boolean check(long... values) {
+        for (long value : values) {
+          if ((long) ((int) value) != value) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @Override
+      public long[] generateValues(int size) {
+        return asLongs(generateRandomIntArray(size, SortedStatus.UNORDERED)).toNativeArray();
+      }
+
+      @Override
+      public ValuesType[] supportedTypes() {
+        return new ValuesType[]{INTEGER};
+      }
     };
     public abstract boolean check(long ... values);
     public abstract long[] generateValues(int size);
@@ -290,6 +311,12 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
     if (iterator instanceof IntIterator) {
       IntIterator it = (IntIterator) iterator;
+      try {
+       it.hasValue();
+       fail();
+      } catch (ConcurrentModificationException _) {
+        // ok
+      }
       try {
         it.value();
         fail();

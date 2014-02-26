@@ -205,7 +205,6 @@ public class LongTwoWayMapTests extends IntegersFixture {
       }
       if (attempt >= 10) {
         System.err.println("Test has not finished: not enough keys left on iteration " + n);
-        return;
       }
     }
   }

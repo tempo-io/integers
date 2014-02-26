@@ -340,4 +340,29 @@ public abstract class IntegersFixture extends TestCase {
       }
     };
   }
+
+  public static LongIterator asLongs(final IntIterator iterator) {
+    return new AbstractLongIterator() {
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public boolean hasValue() {
+        return iterator.hasValue();
+      }
+
+      @Override
+      public long value() throws NoSuchElementException {
+        return iterator.value();
+      }
+
+      @Override
+      public LongIterator next() {
+        iterator.next();
+        return this;
+      }
+    };
+  }
 }

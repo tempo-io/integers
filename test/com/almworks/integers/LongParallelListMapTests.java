@@ -161,18 +161,18 @@ public class LongParallelListMapTests extends TestCase {
     assertTrue(it.hasNext());
 
     try {
-      it.key();
+      it.left();
       fail();
     } catch (NoSuchElementException ex) { }
 
     try {
-      it.value();
+      it.right();
       fail();
     } catch (NoSuchElementException ex) { }
 
     it.next();
-    assertEquals(2, it.key());
-    assertEquals(11, it.value());
+    assertEquals(2, it.left());
+    assertEquals(11, it.right());
 
     assertEquals(4, it.getKey(1));
     assertEquals(21, it.getValue(1));

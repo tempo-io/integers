@@ -346,7 +346,6 @@ test/com/almworks/integers/BinarySearchChecker.java -text
 test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
 test/com/almworks/integers/IntLongIteratorTests.java -text
-test/com/almworks/integers/IntLongMapTests.java -text
 test/com/almworks/integers/IntLongPairIteratorTests.java -text
 test/com/almworks/integers/IntegersFixture.java -text
 test/com/almworks/integers/IntegersUtilsTests.java -text
@@ -358,6 +357,7 @@ test/com/almworks/integers/LongConcatIteratorTests.java -text
 test/com/almworks/integers/LongCyclicQueueTests.java -text
 test/com/almworks/integers/LongFindingIteratorTests.java -text
 test/com/almworks/integers/LongIndexedIteratorTests.java -text
+test/com/almworks/integers/LongIntMapTests.java -text
 test/com/almworks/integers/LongIntersectionIteratorTests.java -text
 test/com/almworks/integers/LongIterableLexicographicComparatorTests.java -text
 test/com/almworks/integers/LongIteratorSingleTests.java -text
@@ -385,7 +385,8 @@ test/com/almworks/integers/LongTwoWayMapTests.java -text
 test/com/almworks/integers/LongUnionIteratorTests.java -text
 test/com/almworks/integers/LongUnionIteratorTwoTests.java -text
 test/com/almworks/integers/SetOperationsChecker.java -text
-test/com/almworks/integers/WritableIntLongMapChecker.java -text
+test/com/almworks/integers/WritableLongIntMapChecker.java -text
+test/com/almworks/integers/WritableLongIntMapProjection.java -text
 test/com/almworks/integers/WritableLongListChecker.java -text
 test/com/almworks/integers/WritableLongListRemovingDecoratorTests.java -text
 test/com/almworks/integers/WritableLongSetChecker.java -text
@@ -393,7 +394,7 @@ test/com/almworks/integers/segmented/LongSegmentedArrayTests.java -text
 test/com/almworks/integers/segmented/SegmentedLongArrayTests.java -text
 test/com/almworks/integers/segmented/TestEnvForLongSegmentedArray.java -text
 test/com/almworks/integers/segmented/TestEnvForSegmentedLongArray.java -text
-test/com/almworks/integers/wrappers/IntLongHppcOpenHashMapTests.java -text
+test/com/almworks/integers/wrappers/LongIntHppcOpenHashMapTests.java -text
 test/com/almworks/util/TestUtil.java -text
 util/Util.iml -text
 util/com/almworks/util/BadFormatException.java -text
