@@ -337,7 +337,7 @@ test/com/almworks/integers/LongConcatIteratorTests.java -text
 test/com/almworks/integers/LongCyclicQueueTests.java -text
 test/com/almworks/integers/LongFindingIteratorTests.java -text
 test/com/almworks/integers/LongIndexedIteratorTests.java -text
-test/com/almworks/integers/LongIntMapTests.java -text
+test/com/almworks/integers/LongIntListMapTests.java -text
 test/com/almworks/integers/LongIntersectionIteratorTests.java -text
 test/com/almworks/integers/LongIterableLexicographicComparatorTests.java -text
 test/com/almworks/integers/LongIteratorSingleTests.java -text

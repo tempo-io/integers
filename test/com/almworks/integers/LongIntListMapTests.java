@@ -21,9 +21,8 @@ import com.almworks.integers.func.IntIntToInt;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
-public class LongIntMapTests extends WritableLongIntMapChecker<LongIntListMap> {
+public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMap> {
 
   @Override
   protected LongIntListMap createMap() {
@@ -37,14 +36,11 @@ public class LongIntMapTests extends WritableLongIntMapChecker<LongIntListMap> {
 
   @Override
   protected List<LongIntListMap> createMapsFromLists(LongList keys, IntList values) {
-    long seed = System.currentTimeMillis();
+    IntArray indices = new IntArray(IntProgression.range(keys.size()));
+    indices.shuffle(RAND);
 
-    LongArray keys0 = new LongArray(keys);
-    IntArray values0 = new IntArray(values);
-    keys0.shuffle(new Random(seed));
-    values0.shuffle(new Random(seed));
     LongIntListMap createdMap = new LongIntListMap();
-    for (LongIntIterator it : LongIntIterators.pair(keys0, values0)) {
+    for (LongIntIterator it : LongIntIterators.pair(keys.get(indices), values.get(indices))) {
       createdMap.add(it.left(), it.right());
     }
 
