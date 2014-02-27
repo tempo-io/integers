@@ -77,16 +77,10 @@ public abstract class AbstractWritableLongSet extends AbstractLongSet implements
   }
 
   @Override
-  public void removeAll(LongList values) {
+  public void removeAll(LongIterable iterable) {
     modified();
-    removeAll(values.iterator());
-  }
-
-  @Override
-  public void removeAll(LongIterator iterator) {
-    modified();
-    while (iterator.hasNext()) {
-      remove0(iterator.nextValue());
+    for (LongIterator iterator : iterable) {
+      remove0(iterator.value());
     }
   }
 

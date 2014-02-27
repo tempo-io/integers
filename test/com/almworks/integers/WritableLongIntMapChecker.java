@@ -21,12 +21,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntCollections.repeat;
+import static com.almworks.integers.IntIterators.cycle;
+import static com.almworks.integers.IntIterators.limit;
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.LongCollections.concatLists;
 import static com.almworks.integers.LongIterators.range;
 import static com.almworks.integers.WritableLongIntMapProjection.DEFAULT_CONTAINS_VALUE;
 
-public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> extends WritableLongSetChecker<WritableLongIntMapProjection<T>> {
+public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> extends WritableLongSetChecker<WritableLongIntMapProjection> {
   protected abstract T createMap();
 
   protected abstract T createMapWithCapacity(int capacity);
@@ -34,30 +37,30 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
   protected abstract List<T> createMapsFromLists(LongList keys, IntList values);
 
   @Override
-  protected List<WritableLongIntMapProjection<T>> createSets(LongList sortedUniqueList) {
+  protected List<WritableLongIntMapProjection> createSets(LongList sortedUniqueList) {
     IntList repeatContains = repeat(DEFAULT_CONTAINS_VALUE, sortedUniqueList.size());
     List<T> maps = createMapsFromLists(sortedUniqueList, repeatContains);
-    List<WritableLongIntMapProjection<T>> sets = new ArrayList();
+    List<WritableLongIntMapProjection> sets = new ArrayList();
     for (T map : maps) {
-      sets.add(new WritableLongIntMapProjection<T>(map));
+      sets.add(new WritableLongIntMapProjection(map));
     }
     return sets;
   }
 
   @Override
-  protected WritableLongIntMapProjection<T> createSet() {
-    return new WritableLongIntMapProjection<T>(createMap());
+  protected WritableLongIntMapProjection createSet() {
+    return new WritableLongIntMapProjection(createMap());
   }
 
   @Override
-  protected WritableLongIntMapProjection<T> createSet(LongList sortedUniqueList) {
+  protected WritableLongIntMapProjection createSet(LongList sortedUniqueList) {
     T map = createMap();
     map.putAll(sortedUniqueList, repeat(DEFAULT_CONTAINS_VALUE, sortedUniqueList.size()));
-    return new WritableLongIntMapProjection<T>(map);
+    return new WritableLongIntMapProjection(map);
   }
 
   @Override
-  protected WritableLongIntMapProjection<T> createSetWithCapacity(int capacity) {
+  protected WritableLongIntMapProjection createSetWithCapacity(int capacity) {
     return createSet();
   }
 
@@ -104,18 +107,6 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     }
   }
 
-  public void testSize() {
-    // sets
-  }
-
-  public void testIsEmpty() {
-    // sets
-  }
-
-  public void testClear() {
-    // sets
-  }
-
   public void testIterators() {
     // assumed that method createMapsFromLists returns variants with all constructors
     int attemptsCount = 10;
@@ -157,10 +148,6 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     }
   }
 
-  public void testKeysIterator() {
-    // sets
-  }
-
   public void testValuesIterator() {
     IntArray expected = IntArray.create(1, 1, 2, 2, 3, 3);
     map.putAll(LongArray.create(0, 2, 4, 6, 8, 10), expected);
@@ -182,7 +169,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
       actual = new IntArray(map.valuesIterator());
       actual.sort();
       expected.sort();
-      CHECK.order(asLongs(expected), asLongs(actual));
+      CHECK.order(actual.toNativeArray(), expected.toNativeArray());
     }
   }
 
@@ -204,6 +191,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
 
   public void checkMap(T map, LongList keys, IntList values) {
     assertEquals(keys.size(), map.size());
+    assertEquals(keys.isEmpty(), map.isEmpty());
     for (int i = 0; i < keys.size(); i++) {
       assertEquals(values.get(i), map.get(keys.get(i)));
     }
@@ -292,23 +280,53 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
 
   }
 
-  public void testContainsKeys() {
-    // sets
+  public void checkPutIfAbsent(LongList keys) {
+    map.clear();
+    for (int i = 0; i < keys.size(); i++) {
+      long key = keys.get(i);
+      int idx = keys.subList(0, i).indexOf(key);
+      if (idx >= 0) {
+        assertEquals(idx, map.get(key));
+        assertFalse(map.putIfAbsent(key, i));
+        assertEquals(idx, map.get(key));
+      } else {
+        assertEquals(LongIntMap.DEFAULT_VALUE, map.get(key));
+        assertTrue(map.putIfAbsent(key, i));
+        assertEquals(i, map.get(key));
+      }
+    }
   }
 
   public void testPutIfAbsent() {
-    // sets - include
-  }
-
-  public void testAdd() {
-    // sets - add
+    checkPutIfAbsent(LongProgression.range(20));
+    checkPutIfAbsent(concatLists(LongProgression.range(20), LongProgression.range(20)));
+    checkPutIfAbsent(concatLists(LongProgression.range(20), LongProgression.range(19, 0, -1)));
+    int attemptsCount = 10, size = 300, max = size * 3 / 2;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      checkPutIfAbsent(generateRandomLongArray(size, UNORDERED, max));
+    }
   }
 
   public void testRemoveKeyValue() {
-    // sets -
-  }
-
-  public void testRemoveAll() {
-    // sets
+    int size = 20, maxKey = size * 2;
+    LongList keys = LongProgression.range(0, maxKey, maxKey / size);
+    IntList values = new IntArray(limit(cycle(0, 1, 2, 3), 20));
+    for (T map0 : createMapsFromLists(keys, values)) {
+      for (int i = 0; i < maxKey; i++) {
+        assertFalse(map0.remove(i, -1));
+        if (keys.contains(i)) {
+          int val = (i/2) % 4;
+          if (val == 0) {
+            assertTrue(map0.remove(i, 0));
+          } else {
+            assertFalse(map0.remove(i, 0));
+            assertTrue(map0.remove(i, val));
+          }
+        } else {
+          assertFalse(map0.remove(i, 0));
+          assertFalse(map0.remove(i, 1));
+        }
+      }
+    }
   }
 }

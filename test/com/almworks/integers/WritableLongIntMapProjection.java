@@ -18,7 +18,7 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-public class WritableLongIntMapProjection<T extends WritableLongIntMap> implements WritableLongSet {
+public class WritableLongIntMapProjection implements WritableLongSet {
   static int DEFAULT_CONTAINS_VALUE = 239;
 
   private WritableLongIntMap myMap;
@@ -49,21 +49,12 @@ public class WritableLongIntMapProjection<T extends WritableLongIntMap> implemen
 
   @Override
   public void removeAll(long... values) {
-    for (long value : values) {
-      remove(value);
-    }
+    myMap.removeAll(values);
   }
 
   @Override
-  public void removeAll(LongList values) {
-    removeAll(values.iterator());
-  }
-
-  @Override
-  public void removeAll(LongIterator iterator) {
-    for (LongIterator it : iterator) {
-      remove(it.value());
-    }
+  public void removeAll(LongIterable iterable) {
+    myMap.removeAll(iterable);
   }
 
   @Override

@@ -81,10 +81,12 @@ public class LongIntMapTests extends WritableLongIntMapChecker<LongIntListMap> {
       map.adjustKeys(1, 3, 1);
       LongList expectedKeys = LongArray.create(0, 3, 5, 6, 8);
       CHECK.order(map.keysIterator(0, map.size()), expectedKeys.iterator());
+      checkMap(map, expectedKeys, values);
 
       map.adjustKeys(1, 3, -2);
       expectedKeys = LongArray.create(0, 1, 3, 6, 8);
       CHECK.order(map.keysIterator(0, map.size()), expectedKeys.iterator());
+      checkMap(map, expectedKeys, values);
 
       try {
         map.adjustKeys(-1, 2, 5);

@@ -551,10 +551,10 @@ public class LongTreeSet extends AbstractWritableLongSet implements WritableLong
   }
 
   @Override
-  public void removeAll(LongIterator iterator) {
+  public void removeAll(LongIterable iterable) {
     modified();
     int[] parentStack = fetchStackCache(0);
-    for (LongIterator it: iterator) {
+    for (LongIterator it: iterable) {
       exclude0(it.value(), parentStack);
     }
     maybeShrink();

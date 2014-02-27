@@ -108,7 +108,7 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   }
 
   public LongIntIterator iterator() {
-	return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
+    return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -214,5 +214,14 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   @Override
   protected int removeImpl(long key) {
     return myMap.remove(key);
+  }
+
+  @Override
+  public boolean remove(long key, int value) {
+    modified();
+    if (!containsKey(key)) return false;
+    if (!(myMap.lget() == value)) return false;
+    myMap.remove(key);
+    return true;
   }
 }
