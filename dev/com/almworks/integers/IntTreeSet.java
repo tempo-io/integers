@@ -551,10 +551,10 @@ public class IntTreeSet extends AbstractWritableIntSet implements WritableIntSor
   }
 
   @Override
-  public void removeAll(IntIterator iterator) {
+  public void removeAll(IntIterable iterable) {
     modified();
     int[] parentStack = fetchStackCache(0);
-    for (IntIterator it: iterator) {
+    for (IntIterator it: iterable) {
       exclude0(it.value(), parentStack);
     }
     maybeShrink();

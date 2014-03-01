@@ -74,16 +74,10 @@ public abstract class AbstractWritable#E#Set extends Abstract#E#Set implements W
   }
 
   @Override
-  public void removeAll(#E#List values) {
+  public void removeAll(#E#Iterable iterable) {
     modified();
-    removeAll(values.iterator());
-  }
-
-  @Override
-  public void removeAll(#E#Iterator iterator) {
-    modified();
-    while (iterator.hasNext()) {
-      remove0(iterator.nextValue());
+    for (#E#Iterator iterator : iterable) {
+      remove0(iterator.value());
     }
   }
 

@@ -21,9 +21,11 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.NoSuchElementException;
 
-public class IntParallelListMap {
+public class IntParallelListMap implements IntIntIterable {
   private final IntList myKeys;
   private final IntList myValues;
 
@@ -192,7 +194,7 @@ public class IntParallelListMap {
     myMap.clear();
   }
 
-  public class Iterator {
+  public class Iterator implements IntIntIterator {
     private final IntParallelList.Iterator ii;
     private final int[] myKeyValue = new int[2];
     private boolean myEntry;
@@ -205,18 +207,24 @@ public class IntParallelListMap {
       return ii.hasNext();
     }
 
-    public void next() {
+    @Override
+    public boolean hasValue() {
+      return ii.hasValue();
+    }
+
+    public Iterator next() {
       myEntry = false;
       ii.next(myKeyValue);
       myEntry = true;
+      return this;
     }
 
-    public int key() {
+    public int left() {
       if (!myEntry) throw new NoSuchElementException();
       return myKeyValue[0];
     }
 
-    public int value() {
+    public int right() {
       if (!myEntry) throw new NoSuchElementException();
       return myKeyValue[1];
     }
@@ -243,6 +251,12 @@ public class IntParallelListMap {
 
     public void move(int offset) {
       ii.move(offset);
+    }
+
+    @NotNull
+    @Override
+    public IntIntIterator iterator() {
+      return null;
     }
   }
 }

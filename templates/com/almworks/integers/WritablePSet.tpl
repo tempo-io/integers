@@ -54,18 +54,13 @@ public interface Writable#E#Set extends #E#Collector, #E#Set {
   void removeAll(#e# ... values);
 
   /**
-   * Removes from this set all elements that are contained in the list {@code values}
+   * Removes from this set all elements that are contained in the {@code iterable}
    */
-  void removeAll(#E#List values);
-
-  /**
-   * Removes from this set all elements that are produced by {@code iterator}
-   */
-  void removeAll(#E#Iterator iterator);
+  void removeAll(#E#Iterable iterable);
 
   /**
    * Removes from this set all of its elements that are not contained in the specified list.
-   * @see #removeAll(#E#List)
+   * @see #removeAll(#E#Iterable)
    * @see #containsAll(#E#Iterable)
    * */
   void retain(#E#List values);

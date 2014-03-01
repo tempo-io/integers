@@ -217,12 +217,12 @@ public class IntIntListMap extends AbstractWritableIntIntMap {
     };
   }
 
-  public IntIterator valuesIterator(int from) {
+  public IntListIterator valuesIterator(int from) {
     checkMutatorPresence();
     return valuesIterator(from, size());
   }
 
-  public IntIterator valuesIterator(int from, int to) {
+  public IntListIterator valuesIterator(int from, int to) {
     checkMutatorPresence();
     return myValues.iterator(from, to);
   }

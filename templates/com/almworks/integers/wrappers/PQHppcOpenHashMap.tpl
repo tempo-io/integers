@@ -212,4 +212,13 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
   protected #f# removeImpl(#e# key) {
     return myMap.remove(key);
   }
+
+  @Override
+  public boolean remove(#e# key, #f# value) {
+    modified();
+    if (!containsKey(key)) return false;
+    if (!(myMap.lget() == value)) return false;
+    myMap.remove(key);
+    return true;
+  }
 }

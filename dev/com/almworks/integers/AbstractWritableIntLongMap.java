@@ -76,9 +76,11 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
 
   public boolean remove(int key, long value) {
     modified();
-    if (!(get(key) == value)) return false;
-    removeImpl(key);
-    return true;
+    if (containsKey(key) && get(key) == value) {
+      removeImpl(key);
+      return true;
+    }
+    return false;
   }
 
   public void putAll(IntSizedIterable keys, LongSizedIterable values) {

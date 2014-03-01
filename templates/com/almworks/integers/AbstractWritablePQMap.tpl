@@ -16,8 +16,8 @@
 
 package com.almworks.integers;
 
-import static com.almworks.integers.#E##F#Iterators.pair;
 import static com.almworks.integers.IntegersUtils.appendShortName;
+import static com.almworks.integers.#E##F#Iterators.pair;
 
 public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
   protected int myModCount = 0;
@@ -73,9 +73,11 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
 
   public boolean remove(#e# key, #f# value) {
     modified();
-    if (!(get(key) == value)) return false;
-    removeImpl(key);
-    return true;
+    if (containsKey(key) && get(key) == value) {
+      removeImpl(key);
+      return true;
+    }
+    return false;
   }
 
   public void putAll(#E#SizedIterable keys, #F#SizedIterable values) {

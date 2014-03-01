@@ -77,16 +77,10 @@ public abstract class AbstractWritableIntSet extends AbstractIntSet implements W
   }
 
   @Override
-  public void removeAll(IntList values) {
+  public void removeAll(IntIterable iterable) {
     modified();
-    removeAll(values.iterator());
-  }
-
-  @Override
-  public void removeAll(IntIterator iterator) {
-    modified();
-    while (iterator.hasNext()) {
-      remove0(iterator.nextValue());
+    for (IntIterator iterator : iterable) {
+      remove0(iterator.value());
     }
   }
 

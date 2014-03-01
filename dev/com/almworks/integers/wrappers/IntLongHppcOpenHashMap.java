@@ -215,4 +215,13 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
   protected long removeImpl(int key) {
     return myMap.remove(key);
   }
+
+  @Override
+  public boolean remove(int key, long value) {
+    modified();
+    if (!containsKey(key)) return false;
+    if (!(myMap.lget() == value)) return false;
+    myMap.remove(key);
+    return true;
+  }
 }

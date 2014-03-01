@@ -57,18 +57,13 @@ public interface WritableIntSet extends IntCollector, IntSet {
   void removeAll(int ... values);
 
   /**
-   * Removes from this set all elements that are contained in the list {@code values}
+   * Removes from this set all elements that are contained in the {@code iterable}
    */
-  void removeAll(IntList values);
-
-  /**
-   * Removes from this set all elements that are produced by {@code iterator}
-   */
-  void removeAll(IntIterator iterator);
+  void removeAll(IntIterable iterable);
 
   /**
    * Removes from this set all of its elements that are not contained in the specified list.
-   * @see #removeAll(IntList)
+   * @see #removeAll(IntIterable)
    * @see #containsAll(IntIterable)
    * */
   void retain(IntList values);

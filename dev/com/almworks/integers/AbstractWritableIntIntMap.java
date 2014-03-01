@@ -76,9 +76,11 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
 
   public boolean remove(int key, int value) {
     modified();
-    if (!(get(key) == value)) return false;
-    removeImpl(key);
-    return true;
+    if (containsKey(key) && get(key) == value) {
+      removeImpl(key);
+      return true;
+    }
+    return false;
   }
 
   public void putAll(IntSizedIterable keys, IntSizedIterable values) {

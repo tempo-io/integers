@@ -548,10 +548,10 @@ public class #E#TreeSet extends AbstractWritable#E#Set implements Writable#E#Sor
   }
 
   @Override
-  public void removeAll(#E#Iterator iterator) {
+  public void removeAll(#E#Iterable iterable) {
     modified();
     int[] parentStack = fetchStackCache(0);
-    for (#E#Iterator it: iterator) {
+    for (#E#Iterator it: iterable) {
       exclude0(it.value(), parentStack);
     }
     maybeShrink();

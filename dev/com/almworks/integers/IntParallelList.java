@@ -119,6 +119,10 @@ public class IntParallelList {
       return myIt.hasNext();
     }
 
+    public boolean hasValue() {
+      return myIt.hasValue();
+    }
+
     public void next(@Nullable int[] dst) {
       if (dst != null && dst.length < getListCount())
         throw new IllegalArgumentException();

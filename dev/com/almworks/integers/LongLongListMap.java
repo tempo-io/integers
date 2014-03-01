@@ -217,12 +217,12 @@ public class LongLongListMap extends AbstractWritableLongLongMap {
     };
   }
 
-  public LongIterator valuesIterator(int from) {
+  public LongListIterator valuesIterator(int from) {
     checkMutatorPresence();
     return valuesIterator(from, size());
   }
 
-  public LongIterator valuesIterator(int from, int to) {
+  public LongListIterator valuesIterator(int from, int to) {
     checkMutatorPresence();
     return myValues.iterator(from, to);
   }
