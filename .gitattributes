@@ -305,7 +305,6 @@ templates/com/almworks/integers/PTreeSet.tpl -text
 templates/com/almworks/integers/PTwoWayMap.tpl -text
 templates/com/almworks/integers/PUnionIterator.tpl -text
 templates/com/almworks/integers/PUnionIteratorOfTwo.tpl -text
-templates/com/almworks/integers/PairIntPIterator.tpl -text
 templates/com/almworks/integers/WritablePList.tpl -text
 templates/com/almworks/integers/WritablePListIterator.tpl -text
 templates/com/almworks/integers/WritablePListRemovingDecorator.tpl -text
