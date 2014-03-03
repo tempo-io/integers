@@ -236,6 +236,9 @@ java/com/almworks/integers/IntegersDebug.java -text
 java/com/almworks/integers/IntegersUtils.java -text
 java/com/almworks/integers/RemovedIndexIterator.java -text
 lib/annotations.jar -text
+lib/hppc-0.5.2-javadoc.jar -text
+lib/hppc-0.5.2-sources.jar -text
+lib/hppc-0.5.2.jar -text
 lib/junit-4.11.jar -text
 templates/com/almworks/integers/AbstractPCollector.tpl -text
 templates/com/almworks/integers/AbstractPIterator.tpl -text
