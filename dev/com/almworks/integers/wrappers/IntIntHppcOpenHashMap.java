@@ -23,8 +23,9 @@ import com.almworks.integers.*;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
 
 import static com.almworks.integers.IntCollections.sizeOfIterable;
-import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 import static com.almworks.integers.wrappers.IntIntHppcWrappers.cursorToIntIntIterator;
+import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
+import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 
 public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
   protected final IntIntOpenHashMap myMap;

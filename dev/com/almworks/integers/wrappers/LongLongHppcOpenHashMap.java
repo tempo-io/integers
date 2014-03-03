@@ -23,8 +23,9 @@ import com.almworks.integers.*;
 import com.carrotsearch.hppc.LongLongOpenHashMap;
 
 import static com.almworks.integers.LongCollections.sizeOfIterable;
-import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 import static com.almworks.integers.wrappers.LongLongHppcWrappers.cursorToLongLongIterator;
+import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
+import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 
 public class LongLongHppcOpenHashMap extends AbstractWritableLongLongMap {
   protected final LongLongOpenHashMap myMap;

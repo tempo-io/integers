@@ -19,8 +19,8 @@
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntIntIterators.pair;
 import static com.almworks.integers.IntegersUtils.appendShortName;
+import static com.almworks.integers.IntIntIterators.pair;
 
 public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
   protected int myModCount = 0;

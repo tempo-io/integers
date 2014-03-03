@@ -23,8 +23,8 @@ import com.almworks.integers.*;
 import com.carrotsearch.hppc.IntLongOpenHashMap;
 
 import static com.almworks.integers.LongCollections.sizeOfIterable;
-import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 import static com.almworks.integers.wrappers.IntLongHppcWrappers.cursorToIntLongIterator;
+import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 
 public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
