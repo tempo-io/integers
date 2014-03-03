@@ -177,7 +177,6 @@ dev/com/almworks/integers/LongTreeSet.java -text
 dev/com/almworks/integers/LongTwoWayMap.java -text
 dev/com/almworks/integers/LongUnionIterator.java -text
 dev/com/almworks/integers/LongUnionIteratorOfTwo.java -text
-dev/com/almworks/integers/PairIntIntIterator.java -text
 dev/com/almworks/integers/WritableIntIntMap.java -text
 dev/com/almworks/integers/WritableIntList.java -text
 dev/com/almworks/integers/WritableIntListIterator.java -text
