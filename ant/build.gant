@@ -81,6 +81,7 @@ target(name: 'init') {
 target(name: 'clean') {
   almMessage "cleaning build directory"
   ant.delete(dir: buildDir)
+  if (isDirty) ant.delete(dir: generatedJavaDir, excludes: "**/.svn/**")
 }
 
 target(name: 'utils') {
