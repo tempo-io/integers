@@ -304,6 +304,13 @@ target(name: 'dist-wrappers') {
   almMessage "dist done"
 }
 
+target(name: 'test-report') {
+  ant.junitreport(todir: testResultsDir) {
+    fileset(dir: testResultsDir, includes: "TEST-*.xml")
+    report(todir: rel2(testResultsDir, 'html'), format: 'frames')
+  }
+}
+
 target(name: 'build') {
   depends(['init', 'clean', 'make', 'test', 'dist', 'dist-wrappers'])
   almMessage "build finished"
