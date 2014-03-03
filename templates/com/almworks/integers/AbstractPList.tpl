@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-import static com.almworks.integers.IntegersUtils.*;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+
+import static com.almworks.integers.IntegersUtils.EMPTY_#EC#S;
 
 public abstract class Abstract#E#List implements #E#List {
   public boolean isEmpty() {
@@ -32,7 +35,7 @@ public abstract class Abstract#E#List implements #E#List {
     String sep = "";
     for  (#E#Iterator ii : this) {
       builder.append(sep).append(ii.value());
-      sep = ",";
+      sep = ", ";
     }
     builder.append("]");
     return builder;
@@ -61,6 +64,27 @@ public abstract class Abstract#E#List implements #E#List {
     return new IndexIterator(from, to);
   }
 
+  public #E#List get(final IntList indices) {
+    if (indices == null) {
+      throw new NullPointerException("indices");
+    }
+    return new Abstract#E#List() {
+      @Override
+      public int size() {
+        return indices.size();
+      }
+
+      @Override
+      public #e# get(int index) throws NoSuchElementException {
+        return Abstract#E#List.this.get(indices.get(index));
+      }
+    };
+  }
+
+  /**
+   * Returns the index of the first occurrence of the specified element
+   * in this list, or -1 if this list does not contain the element.
+   * */
   public int indexOf(#e# value) {
     int i = 0;
     for (#E#Iterator ii : this) {
@@ -74,7 +98,7 @@ public abstract class Abstract#E#List implements #E#List {
     return indexOf(value) >= 0;
   }
 
-  public #e#[] toArray(int startIndex, #e#[] dest, int destOffset, int length) {
+  public #e#[] toNativeArray(int startIndex, #e#[] dest, int destOffset, int length) {
     if (length > 0) {
       #E#Iterator ii = iterator(startIndex, size());
       int e = destOffset + length;
@@ -99,7 +123,7 @@ public abstract class Abstract#E#List implements #E#List {
   public #e#[] toNativeArray() {
     int size = size();
     if (size == 0) return EMPTY_#EC#S;
-    return toArray(0, new #e#[size], 0, size);
+    return toNativeArray(0, new #e#[size], 0, size);
   }
 
   public boolean equals(Object o) {
@@ -134,26 +158,32 @@ public abstract class Abstract#E#List implements #E#List {
     return binarySearch(value, 0, size());
   }
 
-  protected boolean checkSorted(boolean checkUnique) {
+  protected boolean isSorted(boolean isUnique) {
     #E#Iterator it = iterator();
     if (!it.hasNext()) return true;
     #e# prev = it.nextValue();
     while (it.hasNext()) {
       #e# next = it.nextValue();
-      if (next < prev || (checkUnique && next == prev)) return false;
+      if (next < prev || (isUnique && next == prev)) return false;
       prev = next;
     }
     return true;
   }
 
+  /**
+   * @return true if this list is sorted and does not contain duplicates, otherwise false
+   */
   @Override
-  public boolean isUniqueSorted() {
-    return checkSorted(true);
+  public boolean isSortedUnique() {
+    return isSorted(true);
   }
 
+  /**
+   * @return true if this list is sorted, otherwise false
+   */
   @Override
   public boolean isSorted() {
-    return checkSorted(false);
+    return isSorted(false);
   }
 
   public int binarySearch(#e# value, int from, int to) {
@@ -186,7 +216,7 @@ public abstract class Abstract#E#List implements #E#List {
     }
 
     while (low <= high) {
-      int mid = (low + high) >> 1;
+      int mid = (low + high) >>> 1;
       comp = #E#Collections.compare(get(mid), value);
       if (comp < 0) {
         low = mid + 1;
@@ -232,11 +262,34 @@ public abstract class Abstract#E#List implements #E#List {
         return i;
       }
     }
-    return -1;
+    return size();
   }
 
+  /**
+   * @return {@code get(size() - backwardIndex - 1)}
+   */
   public #e# getLast(int backwardIndex) {
     return get(size() - backwardIndex - 1);
+  }
+
+  public boolean equalSortedUniqueValues(#E#List collection) {
+    assert isSortedUnique();
+    if (size() != collection.size())
+      return false;
+    #E#Iterator ownIt = iterator();
+    #e# prevOther = #EW#.MIN_VALUE;
+    for (#E#Iterator it : collection) {
+      #e# own = ownIt.nextValue();
+      #e# other = it.value();
+      if (other < prevOther) {
+        assert false : collection; // Not sorted
+        return false;
+      }
+      if (own != other)
+        return false;
+      prevOther = other;
+    }
+    return true;
   }
 
   protected class IndexIterator extends Abstract#E#ListIndexIterator {
@@ -291,6 +344,18 @@ public abstract class Abstract#E#List implements #E#List {
         return this;
       else
         return new SubList(myParent, myFrom + from, myFrom + to);
+    }
+
+    @Override
+    public #e#[] toNativeArray(int startIndex, #e#[] dest, int destOffset, int length) {
+      return getParent().toNativeArray(myFrom + startIndex, dest, destOffset, length);
+    }
+
+    @Override
+    public #e#[] toNativeArray() {
+      int size = size();
+      if (size == 0) return EMPTY_#EC#S;
+      return getParent().toNativeArray(myFrom, new #e#[size], 0, size);
     }
 
     public Abstract#E#List getParent() {

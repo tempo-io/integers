@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
@@ -27,12 +29,19 @@ public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
   /**
   * Constant value for empty Iterators
   */
-  Writable#E#ListIterator EMPTY = new Empty#E#Iterator();
+  Writable#E#ListIterator EMPTY = new #E#EmptyIterator();
 
   /**
-   * @return true next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
+   * @return {@code true} if next call to {@link #next()} or {@link #nextValue()} won't throw NoSuchElementException
    */
   boolean hasNext() throws ConcurrentModificationException;
+
+
+  /**
+   * @return {@code false} if this iterator has never been advanced.
+   * In other words, returns {@code false} if the subsequent call to {@link #value()} will throw NoSuchElementException, otherwise {@code true}.
+   */
+  boolean hasValue();
 
   /**
    * @throws NoSuchElementException if iterator has never been advanced
@@ -47,9 +56,8 @@ public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
   */
   #e# nextValue() throws ConcurrentModificationException, NoSuchElementException;
 
-  class Single extends Abstract#E#Iterator {
+  class Single extends Abstract#E#IteratorWithFlag {
     private #e# myValue;
-    private boolean myIterated;
 
     public Single(#e# value) {
       myValue = value;
@@ -59,16 +67,13 @@ public interface #E#Iterator extends #E#Iterable, Iterator<#E#Iterator> {
       return !myIterated;
     }
 
-    public #E#Iterator next() throws NoSuchElementException {
-      if (myIterated)
-        throw new NoSuchElementException();
-      myIterated = true;
-      return this;
+    @Override
+    protected void nextImpl() throws NoSuchElementException {
+      if (!hasNext()) throw new NoSuchElementException();
     }
 
-    public #e# value() throws NoSuchElementException {
-      if (!myIterated)
-        throw new NoSuchElementException();
+    @Override
+    protected #e# valueImpl() throws NoSuchElementException {
       return myValue;
     }
   }

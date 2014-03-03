@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,14 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.*;
+import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntProcedure;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * Utilities from everywhere on which integer collections depend.
@@ -29,6 +34,8 @@ public final class IntegersUtils {
   public static final int[] EMPTY_INTS = {};
   public static final long[] EMPTY_LONGS = {};
   public static final short[] EMPTY_SHORTS = {};
+  public static final int MAX_INT = Integer.MAX_VALUE;
+  public static final long MAX_LONG = Long.MAX_VALUE;
 
   /**
    * Returns string's substring that starts after the last occurence of the separator. If separator is not encountered,
@@ -49,6 +56,18 @@ public final class IntegersUtils {
       return string.substring(k + separator.length());
   }
 
+  public static StringBuilder appendShortName(StringBuilder builder, Object obj) {
+    String name = obj.getClass().getSimpleName();
+    // LongAmortizedSet -> LAS, LongTreeSet -> LTS
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if ('A' <= c && c <= 'Z') {
+        builder.append(c);
+      }
+    }
+    return builder;
+  }
+
   // Copied from Collections15
   public static <T> List<T> arrayList() {
     return new ArrayList<T>();
@@ -57,17 +76,17 @@ public final class IntegersUtils {
   /**
    * Performs quicksort. Copied from {@link Arrays#sort(int[])} then corrected.
    * @param length - number of elements to sort
-   * @param order - "comparator". Parameter are indexes of elements to be compared. Will be invoked with parameters
+   * @param order - "comparator". Parameter are indices of elements to be compared. Will be invoked with parameters
    * from 0 to <code>length</code>-1 inclusive.
-   * @param swap - procedure to swap. Parameters are indexes of elements to be swapped. Will be invoked with parameters
+   * @param swap - procedure to swap. Parameters are indices of elements to be swapped. Will be invoked with parameters
    * from 0 to <code>length</code>-1 inclusive.
    */
   // Copied from CollectionUtil
-  public static void quicksort(int length, IntFunction2 order, IntProcedure2 swap) {
+  public static void quicksort(int length, IntIntToInt order, IntIntProcedure swap) {
     sort1(0, length, order, swap);
   }
 
-  private static void sort1(int off, int len, IntFunction2 order, IntProcedure2 swap) {
+  private static void sort1(int off, int len, IntIntToInt order, IntIntProcedure swap) {
     // Insertion sort on smallest arrays
     if (len < 7) {
       for (int i = off; i < len + off; i++)
@@ -138,12 +157,12 @@ public final class IntegersUtils {
       sort1(n - s, s, order, swap);
   }
 
-  private static void vecswap(int a, int b, int n, IntProcedure2 swap) {
+  private static void vecswap(int a, int b, int n, IntIntProcedure swap) {
     for (int i = 0; i < n; i++, a++, b++)
       swap.invoke(a, b);
   }
 
-  private static int med3(int a, int b, int c, IntFunction2 order) {
+  private static int med3(int a, int b, int c, IntIntToInt order) {
     return (order.invoke(a, b) < 0 ? (order.invoke(b, c) < 0 ? b : order.invoke(a, c) < 0 ? c : a) :
       (order.invoke(b, c) > 0 ? b : order.invoke(a, c) > 0 ? c : a));
   }
@@ -163,6 +182,14 @@ public final class IntegersUtils {
     if (length == 0)
       return EMPTY_INTS;
     int[] copy = new int[length];
+    System.arraycopy(array, offset, copy, 0, length);
+    return copy;
+  }
+
+  public static long[] arrayCopy(long[] array, int offset, int length) {
+    if (length == 0)
+      return EMPTY_LONGS;
+    long[] copy = new long[length];
     System.arraycopy(array, offset, copy, 0, length);
     return copy;
   }
@@ -203,7 +230,7 @@ public final class IntegersUtils {
    * <br/>
    * @param n size of the permutation, must be > 0 (otherwise NegativeArraySizeException is thrown)
    * @param swapWithNext callback that receives an index of a position to swap with its neighbour on the right (swapPos + 1).
-   * It is guaranteed that both of these indexes are in the interval [0, n). Each swap produces a new permutation that differs from the previously generated ones. <br/>
+   * It is guaranteed that both of these indices are in the interval [0, n). Each swap produces a new permutation that differs from the previously generated ones. <br/>
    * */
   public static void allPermutations(int n, IntProcedure swapWithNext) {
     // Direct permutation
@@ -226,6 +253,25 @@ public final class IntegersUtils {
     }
   }
 
+  public static void reversePerm(IntArray p) {
+    int n = p.size();
+    boolean[] visited = new boolean[n];
+    for (int i = 0; i < n; ++i) {
+      if (visited[i]) continue;
+      // Reverse the cycle starting at i
+      int last = i;
+      int j = p.get(i);
+      while (true) {
+        int next = p.get(j);
+        p.set(j, last);
+        visited[j] = true;
+        if (j == i) break;
+        last = j;
+        j = next;
+      }
+    }
+  }
+
   /**
    * Increments a number in the factorial-base.<Br/>
    * Number in the factorial base is represented as
@@ -238,6 +284,64 @@ public final class IntegersUtils {
     if (i >= 0) t[i] += 1;
     for (int j = i + 1; j < t.length; ++j) t[j] = 0;
     return i;
+  }
+
+  /**
+   * Copied from hppc.
+   * @return the next highest power of two, or the current value if it's already a power of two or zero
+   */
+  public static int nextHighestPowerOfTwo(int v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+  }
+
+  /**
+   * Copied from hppc.
+   * @return the next highest power of two, or the current value if it's already a power of two or zero
+   */
+  public static long nextHighestPowerOfTwo(long v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v |= v >> 32;
+    v++;
+    return v;
+  }
+
+  /**
+   * MurmurHash3
+   * Hashes a 4-byte sequence (Java int).
+   */
+  public static int hash(int k) {
+    k ^= k >>> 16;
+    k *= 0x85ebca6b;
+    k ^= k >>> 13;
+    k *= 0xc2b2ae35;
+    k ^= k >>> 16;
+    return k;
+  }
+
+  /**
+   * MurmurHash3
+   * Hashes an 8-byte sequence (Java long).
+   */
+  public static int hash(long k) {
+    k ^= k >>> 33;
+    k *= 0xff51afd7ed558ccdL;
+    k ^= k >>> 33;
+    k *= 0xc4ceb9fe1a85ec53L;
+    k ^= k >>> 33;
+
+    return (int)k;
   }
 
   private IntegersUtils() {}

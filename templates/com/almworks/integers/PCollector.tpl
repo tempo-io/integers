@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,39 @@
  * limitations under the License.
  */
 
+
+
 package com.almworks.integers;
 
 /**
 * Interface for write-only collection
 */
 public interface #E#Collector {
+  #E#Collector DUMMY = new Dummy();
+
   void add(#e# value);
 
   void addAll(#E#List values);
 
-  void addAll(#E#Iterator iterator);
+  void addAll(#E#Iterable iterable);
 
   void addAll(#e# ... values);
+
+  class Dummy implements #E#Collector {
+    @Override
+    public void add(#e# value) {
+    }
+
+    @Override
+    public void addAll(#E#List values) {
+    }
+
+    @Override
+    public void addAll(#E#Iterable iterable) {
+    }
+
+    @Override
+    public void addAll(#e#... values) {
+    }
+  }
 }

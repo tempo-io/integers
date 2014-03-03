@@ -1,5 +1,14 @@
 ant.taskdef (  name : 'groovyc' , classname : 'org.codehaus.groovy.ant.Groovyc' )
 
+final getCommandProperty = {String param -> (ant.project.properties[param] in ["", "true"])}
+
+// run "gant -Ddirty" or "gant -Ddirty=true"
+final isDirty = getCommandProperty("dirty")
+
+// run "gant -DskipSlowChecks" or "gant -DskipSlowChecks=true"
+final isCheckStr = String.valueOf(!getCommandProperty("skipSlowChecks"))
+
+final almMessage = {Object v -> println " [almworks] " + (isDirty ? "[dirty] ": "") + v; System.out.flush(); System.err.flush() }
 final String antProp(String it) {
   prop = ant.project.properties[it] as String
   if (prop == null) ant.fail("missing property: $it")
@@ -7,22 +16,29 @@ final String antProp(String it) {
 }
 
 final String gantDir = {
-  String v = ant.project.baseDir.getCanonicalPath().replace('\\', '/');
-  if (v.endsWith("/")) v = v.substring(0, v.length() - 1)
-  v
+  command = System.getProperty("sun.java.command")
+  almMessage command
+  String path
+  if (command.contains(" -f ")) {
+    commandSub = command.substring(command.indexOf(" -f ") + 4);
+    path = commandSub.substring(0, commandSub.indexOf("build.gant") - 1)
+  } else {
+    path = ant.project.baseDir.getCanonicalPath().replace('\\', '/');
+    if (path.endsWith("/")) path = path.substring(0, path.length() - 1)
+  }
+  path
 }()
-
 final rel2 = {String root, String file -> "$root/$file"}
 final rel = {String file -> rel2 (gantDir, file) }
 
 ant.property(file: rel("build.properties"))
 
-final Boolean skipGenerate = "true".equals(System.getProperty("skipGenerate"));
+final Boolean skipGenerate = isDirty || getCommandProperty("skipGenerate");
 
 final String rootDir = rel("..")
 
 final String templatesDir =     rel2(rootDir, antProp("templates.dir"))
-final String buildDir =         rel2(rootDir, antProp("build.dir"))
+final String buildDir =         rel2(rootDir, isDirty ? "dirty" : antProp("build.dir"))
 final String javaDir =          rel2(rootDir, antProp("java.dir"))
 final String libDir =           rel2(rootDir, antProp("lib.dir"))
 final String generatorSrcDir =  rel2(rootDir, antProp("generator.java.dir"))
@@ -30,7 +46,7 @@ final String testDir =          rel2(rootDir, antProp("test.dir"))
 final String utilDir =          rel2(rootDir, antProp("util.dir"))
 
 final String generatorClassesDir =    rel2(buildDir, antProp("generator.classes.dir"))
-final String generatedJavaDir =       rel2(buildDir, antProp("generated.java.dir"))
+final String generatedJavaDir =       isDirty ? rel2(rootDir, "dev") : rel2(buildDir, antProp("generated.java.dir"))
 final String generatedClassesDir =    rel2(buildDir, antProp("generated.classes.dir"))
 final String testsClassesDir =        rel2(buildDir, antProp("test.classes.dir"))
 final String testResultsDir =         rel2(buildDir, antProp("test.results.dir"))
@@ -40,10 +56,9 @@ final String utilClassesDir =       rel2(buildDir, antProp("util.classes.dir"))
 final String generatorClass = antProp("generator.mainClass")
 
 final String jarName = antProp("jar.name")
+final String jarWrappersName = antProp("jar.wrappers.name")
 
 String version = ""
-
-final almMessage = {Object v -> println " [almworks] " + v; System.out.flush(); System.err.flush() }
 
 final defaultCompileParams = [debug: "true", includeAntRuntime: "no", source: "1.5", target: "1.5", nowarn: "on"]
 
@@ -98,10 +113,10 @@ runGenerator = {boolean checkOnly ->
   if(!groovyHome) ant.fail(message: "cannot run integer collections code generator: no GROOVY_HOME found")
 
   ant.java(
-    classname: generatorClass,
-    fork: "true",
-    dir: generatorClassesDir,
-    failonerror: "true"
+      classname: generatorClass,
+      fork: "true",
+      dir: generatorClassesDir,
+      failonerror: "true"
   ) {
     classpath {
       pathelement(path: generatorClassesDir)
@@ -141,13 +156,15 @@ List<String> collectRelFileNames(File dir, String prefix, List<String> acceptedE
 
 target(name: 'generateJavaCode') {
   depends(['makeGen'])
-  if (!skipGenerate) runGenerator(false)
+  almMessage "generateJavaCode"
+  runGenerator(false)
 }
 
 target(name: 'make') {
-  depends(['init', 'generateJavaCode'])
+  depends(['init', 'utils'])
+  if (!skipGenerate) depends(['generateJavaCode'])
   ant.mkdir(dir: generatedClassesDir)
-  println "classpath: $libDir/"
+  almMessage "classpath: $libDir/"
   ant.javac(defaultCompileParams + [destdir: generatedClassesDir, classpathref: "libs"]) {
     src {
       pathelement(path: generatedJavaDir)
@@ -171,8 +188,9 @@ target(name: 'test') {
     }
   }
   almMessage "make tests done"
+  almMessage "run tests(check = " + isCheckStr + ")"
   ant.mkdir(dir: testResultsDir)
-  ant.junit(fork: "true", forkmode: "once", printsummary: "true", haltonfailure: "true") {
+  ant.junit(fork: "true", forkmode: "once", printsummary: "true", haltonfailure: isDirty ? "false" : "true") {
     formatter(type: "xml", usefile: "true")
     assertions {
       enable()
@@ -187,6 +205,7 @@ target(name: 'test') {
       fileset(dir: testsClassesDir, includes: "**/*Test.class")
       fileset(dir: testsClassesDir, includes: "**/*Tests.class")
     }
+    jvmarg(value: "-Dcom.almworks.integers.check=" + isCheckStr)
   }
   almMessage "tests succeeded"
 }
@@ -228,17 +247,18 @@ target(name: 'javadoc') {
 }
 
 target(name: 'dist') {
-  depends(['init', 'fetchVersion', 'make', 'test'])
+  depends(['init', 'make', 'test'])
+  if (!isDirty) depends(['fetchVersion'])
   almMessage "dist"
 
   String deliverName = jarName
   ant.mkdir(dir: deliverDir)
   def jarFileName = deliverName + ".jar"
-  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn") {
+  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn/**/wrappers/**") {
     manifest {
       attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
       attribute(name: "Implementation-Vendor", value: "ALM Works")
-      attribute(name: "Implementation-Version", value: "${version}")
+      attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
     }
   }
 
@@ -246,8 +266,8 @@ target(name: 'dist') {
   ant.delete(dir: deliverSources)
   ant.mkdir(dir: deliverSources)
   ant.copy(todir: deliverSources) {
-    fileset(dir: javaDir, excludes: "**/.svn")
-    fileset(dir: generatedJavaDir, excludes: "**/.svn")
+    fileset(dir: javaDir, excludes: "**/.svn/**/wrappers/**")
+    fileset(dir: generatedJavaDir, excludes: "**/.svn/**/wrappers/**")
   }
   String srcFileName = deliverName + "-src.zip"
   ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
@@ -255,8 +275,44 @@ target(name: 'dist') {
   almMessage "dist done"
 }
 
+target(name: 'dist-wrappers') {
+  depends(['init', 'make', 'test'])
+  if (!isDirty) depends(['fetchVersion'])
+  almMessage "dist"
+
+  String deliverName = jarWrappersName
+  ant.mkdir(dir: deliverDir)
+  def jarFileName = deliverName + ".jar"
+  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), includes: "**/wrappers/**", excludes: "**/.svn") {
+    manifest {
+      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+      attribute(name: "Implementation-Vendor", value: "ALM Works")
+      attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
+    }
+  }
+
+  def deliverSources = rel2(buildDir, "deliver-sources")
+  ant.delete(dir: deliverSources)
+  ant.mkdir(dir: deliverSources)
+  ant.copy(todir: deliverSources) {
+    fileset(dir: javaDir,  includes: "**/wrappers/**", excludes: "**/.svn")
+    fileset(dir: generatedJavaDir, includes: "**/wrappers/**", excludes: "**/.svn")
+  }
+  String srcFileName = deliverName + "-src.zip"
+  ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
+  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar")
+  almMessage "dist done"
+}
+
+target(name: 'test-report') {
+  ant.junitreport(todir: testResultsDir) {
+    fileset(dir: testResultsDir, includes: "TEST-*.xml")
+    report(todir: rel2(testResultsDir, 'html'), format: 'frames')
+  }
+}
+
 target(name: 'build') {
-  depends(['init', 'clean', 'make', 'test', 'dist'])
+  depends(['init', 'clean', 'make', 'test', 'dist', 'dist-wrappers'])
   almMessage "build finished"
 }
 

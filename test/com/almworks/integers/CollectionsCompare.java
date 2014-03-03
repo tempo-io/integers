@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 ALM Works Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.almworks.integers;
 
 import junit.framework.Assert;
@@ -160,6 +176,10 @@ public class CollectionsCompare {
     order(array);
   }
 
+  public void empty(long[] array) {
+    order(array);
+  }
+
   public void empty(Enumeration<?> enumeration) {
     empty(Containers.collectList(enumeration));
   }
@@ -276,6 +296,65 @@ public class CollectionsCompare {
 
   public void empty(Iterable<?> iterable) {
     empty(Containers.collectList(iterable.iterator()));
+  }
+
+  public void order(IntIterator actual, int ... expected) {
+    order(IntCollections.toNativeArray(actual), expected);
+  }
+
+  public void order(IntIterator actual, IntIterator expected) {
+    order(IntCollections.toNativeArray(actual), IntCollections.toNativeArray(expected));
+  }
+
+  public void order(LongIterator actual, long ... expected) {
+    order(LongCollections.collectIterable(expected.length, actual).toNativeArray(), expected);
+  }
+
+  public void order(LongIterator actual, LongIterator expected) {
+    order(LongCollections.toNativeArray(actual), LongCollections.toNativeArray(expected));
+  }
+
+  public void unordered(IntList actual, IntList expected) {
+    unordered(actual.toNativeArray(), expected.toNativeArray());
+  }
+
+  public void unordered(LongList actual, LongList expected) {
+    unordered(actual.toNativeArray(), expected.toNativeArray());
+  }
+
+  public void unordered(IntList actual, int ... expected) {
+    unordered(actual.toNativeArray(), expected);
+  }
+
+  public void emptyIntersection(int[] array1, int[] array2) {
+    array1 = IntegersUtils.arrayCopy(array1);
+    array2 = IntegersUtils.arrayCopy(array2);
+    Arrays.sort(array1);
+    Arrays.sort(array2);
+    for (int val : array1) {
+      if (IntCollections.binarySearch(val, array2) >= 0) {
+        Failure failure = createFailure();
+        failure.actual().setIntArray(array1);
+        failure.expected().setIntArray(array2);
+        failure.fail("Equal elements");
+      }
+    }
+  }
+
+  public void unordered(int[] actual, int... expected) {
+    int[] actualCopy = IntegersUtils.arrayCopy(actual);
+    Arrays.sort(actualCopy);
+    int[] expectedCopy = IntegersUtils.arrayCopy(expected);
+    Arrays.sort(expectedCopy);
+    order(actualCopy, expectedCopy);
+  }
+
+  public void unordered(long[] actual, long... expected) {
+    long[] actualCopy = Arrays.copyOf(actual, actual.length);
+    Arrays.sort(actualCopy);
+    long[] expectedCopy = Arrays.copyOf(expected, expected.length);
+    Arrays.sort(expectedCopy);
+    order(actualCopy, expectedCopy);
   }
 
   protected static class FailureSide {

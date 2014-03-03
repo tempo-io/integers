@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 ALM Works Ltd
+ * Copyright 2014 ALM Works Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntProcedure;
-import junit.framework.TestCase;
 
 import java.util.HashSet;
 
-public class IntegersUtilsTests extends TestCase {
+public class IntegersUtilsTests extends IntegersFixture {
   public void testPermutationsSimple() {
     IntegersUtils.allPermutations(1, new IntProcedure() {
       @Override
@@ -40,7 +39,7 @@ public class IntegersUtilsTests extends TestCase {
       }
     });
     final IntArray is = IntArray.create(1, 2, 3, 4);
-    System.out.println("0 " + is);
+    IntegersDebug.println("0 " + is);
     IntegersUtils.allPermutations(4, new IntProcedure() {
       int count = 1;
 
@@ -49,7 +48,7 @@ public class IntegersUtilsTests extends TestCase {
         assertTrue("" + i, i >= 0);
         assertTrue("" + i, i < 3);
         is.swap(i, i + 1);
-        System.out.println(count++ + " " + is);
+        IntegersDebug.println(count++ + " " + is);
       }
     });
   }
@@ -75,5 +74,70 @@ public class IntegersUtilsTests extends TestCase {
     for (int i = 2; i <= c.length; ++i) {
       assertEquals(permCount[0] + " " + i, 0, permCount[0] % i);
     }
+  }
+
+  public void testReversePerm() {
+    final IntArray perms = IntArray.copy(new IntProgression.ArithmeticIterator(0, 9, 1));
+    IntegersUtils.allPermutations(perms.size(), new IntProcedure() {
+      {
+        testRevPerm(perms);
+      }
+
+      @Override
+      public void invoke(int i) {
+        perms.swap(i, i + 1);
+        testRevPerm(perms);
+      }
+    });
+  }
+
+  private static void testRevPerm(IntArray perms) {
+    IntArray rev = new IntArray(perms);
+    IntegersUtils.reversePerm(rev);
+    int n = perms.size();
+    IntArray e = new IntArray(n);
+    for (int i = 0; i < n; ++i) {
+      e.add(perms.get(rev.get(i)));
+    }
+    CHECK.order(IntProgression.arithmetic(0, n).iterator(), e.iterator());
+  }
+
+
+  public void testArrayCopy() {
+    int arrayLength = 1000;
+    int maxValue = Integer.MAX_VALUE;
+
+    int[] res = new int[arrayLength];
+    int[] expected = new int[arrayLength];
+    for (int i = 0; i < arrayLength; i++) {
+      res[i] = RAND.nextInt(maxValue);
+      expected[i] = res[i];
+    }
+    int[] copy = IntegersUtils.arrayCopy(res);
+    CHECK.order(expected, copy);
+  }
+
+  public void testIndexOf() {
+    int arrayLength = 1000;
+    int maxValue = Integer.MAX_VALUE;
+
+    IntArray res = new IntArray(arrayLength);
+    int[] intArr = new int[arrayLength];
+
+    for (int i = 0; i < arrayLength; i++) {
+      int val = RAND.nextInt(maxValue);
+      res.add(val);
+      intArr[i] = val;
+    }
+
+    for (int i = 0; i < arrayLength; i++) {
+      int val = res.get(i);
+      assertEquals(res.indexOf(val), IntegersUtils.indexOf(intArr, val));
+    }
+  }
+
+  public void testSubstringAfterLast() {
+    assertEquals("b", IntegersUtils.substringAfterLast("a b", " "));
+    assertEquals("", IntegersUtils.substringAfterLast("a ", " "));
   }
 }
