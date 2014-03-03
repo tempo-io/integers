@@ -23,35 +23,8 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public class IntIntIterators {
-  public static IntIntIterator pair(final IntIterator left, final IntIterator right) {
-    return new AbstractIntIntIteratorWithFlag() {
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return (left.hasNext() && right.hasNext());
-      }
-
-      @Override
-      protected int leftImpl() {
-        return left.value();
-      }
-
-      @Override
-      protected int rightImpl() {
-        return right.value();
-      }
-
-      @Override
-      protected void nextImpl() throws NoSuchElementException {
-        myIterated = false;
-        left.next();
-        right.next();
-        myIterated = true;
-      }
-    };
-  }
-
   public static IntIntIterator pair(final IntIterable left, final IntIterable right) {
-    return pair(left.iterator(), right.iterator());
+    return new IntIntPairIterator(left, right);
   }
 
   public static IntIterator leftProjection(final IntIntIterator pairs) {

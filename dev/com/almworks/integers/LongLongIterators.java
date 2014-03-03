@@ -23,35 +23,8 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public class LongLongIterators {
-  public static LongLongIterator pair(final LongIterator left, final LongIterator right) {
-    return new AbstractLongLongIteratorWithFlag() {
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return (left.hasNext() && right.hasNext());
-      }
-
-      @Override
-      protected long leftImpl() {
-        return left.value();
-      }
-
-      @Override
-      protected long rightImpl() {
-        return right.value();
-      }
-
-      @Override
-      protected void nextImpl() throws NoSuchElementException {
-        myIterated = false;
-        left.next();
-        right.next();
-        myIterated = true;
-      }
-    };
-  }
-
   public static LongLongIterator pair(final LongIterable left, final LongIterable right) {
-    return pair(left.iterator(), right.iterator());
+    return new LongLongPairIterator(left, right);
   }
 
   public static LongIterator leftProjection(final LongLongIterator pairs) {

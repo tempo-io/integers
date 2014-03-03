@@ -1,0 +1,39 @@
+build process
+
+* groovy and gant
+http://gant.codehaus.org/
+install groovy and gant to run build script
+
+* run
+run "gant" in the ant directory of the project
+OR
+run "gant -f <integers_directory>/ant/build.gant"
+
+* arguments
+default target - build
+running gant without arguments will build library
+** gant -Ddirty 
+for build without checking that version of code complies with last release version
+** all useful targets
+| generateJavaCode | generate code from templates               |
+| make             | generate all classes                       |
+| test             | run tests                                  |
+| fetchVersion     | checking complies with server version      |
+| javadoc          | generate javadoc                           |
+| dist             | create jar                                 |
+| build            | clean and make all targets without javadoc |
+
+** comment build.gant in integers_documentation
+| init                           | presetdef??                    |
+| clean                          | delete buildDir                |
+| utils                          | build util                     |
+| makeGen                        | srcFiles?                      |
+| validateGeneratedCodeIntegrity | generate code from templates   |
+| generateJavaCode               | if skipGenerate runGenerator() |
+| make                           | javac                          |
+| test                           | make tests                     |
+| fetchVersion                   | ?                              |
+| javadoc                        | doc                            |
+| dist                           | generate jars                  |
+| build                          | empty                          |
+

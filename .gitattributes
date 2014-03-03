@@ -23,6 +23,7 @@
 .idea/runConfigurations/fetchVersion.xml -text
 .idea/uiDesigner.xml -text
 .idea/vcs.xml -text
+/README -text
 ant/build.gant -text
 ant/build.properties -text
 ant/build.xml -text

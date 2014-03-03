@@ -20,35 +20,8 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public class #E##F#Iterators {
-  public static #E##F#Iterator pair(final #E#Iterator left, final #F#Iterator right) {
-    return new Abstract#E##F#IteratorWithFlag() {
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return (left.hasNext() && right.hasNext());
-      }
-
-      @Override
-      protected #e# leftImpl() {
-        return left.value();
-      }
-
-      @Override
-      protected #f# rightImpl() {
-        return right.value();
-      }
-
-      @Override
-      protected void nextImpl() throws NoSuchElementException {
-        myIterated = false;
-        left.next();
-        right.next();
-        myIterated = true;
-      }
-    };
-  }
-
   public static #E##F#Iterator pair(final #E#Iterable left, final #F#Iterable right) {
-    return pair(left.iterator(), right.iterator());
+    return new #E##F#PairIterator(left, right);
   }
 
   public static #E#Iterator leftProjection(final #E##F#Iterator pairs) {
