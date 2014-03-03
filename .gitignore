@@ -1,3 +1,8 @@
 /.clover
+.idea/codeStyleSettings.xml
+.idea/dictionaries
+.idea/findbugs-idea.xml
+.idea/gant_config.xml
+.idea/scopes
 .idea/workspace.xml
 /build
