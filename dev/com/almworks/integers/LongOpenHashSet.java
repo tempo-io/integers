@@ -275,7 +275,6 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
       int curSlot = 0;
       @Override
       protected boolean findNext() {
-        if (curSlot == -1) return false;
         curSlot = myAllocated.nextSetBit(curSlot);
         if (curSlot == -1) return false;
         myNext = myKeys[curSlot];

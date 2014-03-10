@@ -27,6 +27,7 @@
 ant/build.gant -text
 ant/build.properties -text
 ant/build.xml -text
+dev/com/almworks/integers/LongIntEmptyMap.java -text
 gen/com/almworks/integers/generator/IntegerCollectionsCodegen.java -text
 gen/com/almworks/integers/generator/SkipImportsRegex.groovy -text
 gen/com/almworks/integers/generator/StringSets.java -text
@@ -77,6 +78,7 @@ test/com/almworks/integers/LongParallelListTests.java -text
 test/com/almworks/integers/LongProgressionTests.java -text
 test/com/almworks/integers/LongSameValuesListTests.java -text
 test/com/almworks/integers/LongSetBuilderTests.java -text
+test/com/almworks/integers/LongSortedUniqueListSet.java -text
 test/com/almworks/integers/LongSubListTests.java -text
 test/com/almworks/integers/LongTreeSetTests.java -text
 test/com/almworks/integers/LongTwoWayMapTests.java -text

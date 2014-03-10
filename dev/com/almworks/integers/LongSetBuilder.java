@@ -231,6 +231,15 @@ public final class LongSetBuilder extends AbstractLongSet implements Cloneable, 
       val = Math.min(i, myTemp.get(i));
     }
     return val;
+  }
 
+  @Override
+  public int hashCode() {
+    coalesce();
+    int h = 0;
+    for (int i = 0; i < mySorted.size(); i++) {
+      h += IntegersUtils.hash(mySorted.get(i));
+    }
+    return h;
   }
 }

@@ -21,9 +21,11 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
+import static com.almworks.integers.IntegersUtils.hash;
+
 /**
  * Operations {@link LongAmortizedSet#include(long)} and {@link LongAmortizedSet#exclude(long)}
- * may be slower than {@link LongAmortizedSet#add(long)} and {@link LongAmortizedSet#remove(long)} respectively
+   * may be slower than {@link LongAmortizedSet#add(long)} and {@link LongAmortizedSet#remove(long)} respectively
  * @author Igor Sereda
  */
 public class LongAmortizedSet extends AbstractWritableLongSet implements WritableLongSortedSet {
@@ -319,6 +321,21 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
     builder.append("myAdded:         ").append(LongCollections.toBoundedString(myAdded)).append('\n');
     builder.append("myRemoved:       ").append(LongCollections.toBoundedString(sortedRemovedIterator()));
     return builder.toString();
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (int i = 0; i < myBaseList.size(); i++) {
+      long value = myBaseList.get(i);
+      if (!myRemoved.contains(value) && !myAdded.contains(value)) {
+        h += hash(value);
+      }
+    }
+    for (LongIterator it : myAdded) {
+      h += hash(it.value());
+    }
+    return h;
   }
 
   private class CoalescingIterator extends LongFindingIterator {

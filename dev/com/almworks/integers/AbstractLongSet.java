@@ -72,4 +72,24 @@ public abstract class AbstractLongSet implements LongSet {
   public final String toString() {
     return toString(new StringBuilder()).toString();
   }
+
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof LongSet)) return false;
+
+    LongSet otherSet = (LongSet) o;
+    if (otherSet.size() != size()) {
+      return false;
+    }
+    return containsAll(otherSet);
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (LongIterator it : iterator()) {
+      h += IntegersUtils.hash(it.value());
+    }
+    return h;
+  }
 }

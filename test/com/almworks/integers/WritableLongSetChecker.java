@@ -29,6 +29,7 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.map;
 import static com.almworks.integers.LongCollections.toSorted;
 import static com.almworks.integers.LongProgression.range;
+import static com.almworks.integers.LongSortedUniqueListSet.asSet;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -685,4 +686,52 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     }
   }
 
+  public void testHashCode() {
+    int attemptsCount = 10, shuffleCount = 10;
+    int sizeMax = 600, step = 50;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      for (int size = step; size < sizeMax; size += step) {
+        LongArray array = generateRandomLongArray(size, SORTED_UNIQUE);
+        int expectedHash = 0;
+        for (LongIterator it : array) {
+          expectedHash += IntegersUtils.hash(it.value());
+        }
+
+        for (T set0 : createSets(array)) {
+          assertEquals(expectedHash, set0.hashCode());
+        }
+
+        IntArray indices = new IntArray(IntProgression.range(size));
+        for (int i = 0; i < shuffleCount; i++) {
+          set = createSet();
+          set.addAll(array.get(indices));
+          assertEquals(expectedHash, set.hashCode());
+          indices.shuffle(RAND);
+        }
+      }
+    }
+  }
+
+  public void testEquals() {
+    int size = 100;
+    int attemptsCount = 10;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      // suppose array != [0, 1, 2, ... size]
+      LongArray array = generateRandomLongArray(size, SORTED_UNIQUE);
+      long lastElem = array.getLast(0);
+      LongList list = LongCollections.concatLists(array.subList(0, array.size() - 1), new LongList.Single(lastElem + 1));
+      for (T set0 : createSets(array)) {
+        assertTrue(set0.equals(set0));
+        assertFalse(set0.equals(null));
+        assertFalse(set0.equals(LongSet.EMPTY));
+        assertFalse(set0.equals(asSet(list)));
+        assertFalse(set0.equals(asSet(LongProgression.range(array.size()))));
+        for (T set1 : createSets(array)) {
+          assertTrue(set0.equals(set1));
+          assertTrue(set1.equals(set0));
+        }
+
+      }
+    }
+  }
 }

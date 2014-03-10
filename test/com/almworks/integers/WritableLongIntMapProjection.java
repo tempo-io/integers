@@ -121,6 +121,25 @@ public class WritableLongIntMapProjection implements WritableLongSet {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof LongSet)) return false;
+    LongSet otherSet = (LongSet) o;
+    if (otherSet.size() != size())
+      return false;
+    return containsAll(otherSet);
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (LongIterator it : iterator()) {
+      h += IntegersUtils.hash(it.value());
+    }
+    return h;
+  }
+
+  @Override
   public long[] toNativeArray(long[] dest, int destPos) {
     if (destPos < 0 || destPos + size() > dest.length) {
       throw new ArrayIndexOutOfBoundsException();

@@ -41,8 +41,8 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     IntList repeatContains = repeat(DEFAULT_CONTAINS_VALUE, sortedUniqueList.size());
     List<T> maps = createMapsFromLists(sortedUniqueList, repeatContains);
     List<WritableLongIntMapProjection> sets = new ArrayList();
-    for (T map : maps) {
-      sets.add(new WritableLongIntMapProjection(map));
+    for (T map0 : maps) {
+      sets.add(new WritableLongIntMapProjection(map0));
     }
     return sets;
   }
@@ -54,9 +54,9 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
 
   @Override
   protected WritableLongIntMapProjection createSet(LongList sortedUniqueList) {
-    T map = createMap();
-    map.putAll(sortedUniqueList, repeat(DEFAULT_CONTAINS_VALUE, sortedUniqueList.size()));
-    return new WritableLongIntMapProjection(map);
+    T map0 = createMap();
+    map0.putAll(sortedUniqueList, repeat(DEFAULT_CONTAINS_VALUE, sortedUniqueList.size()));
+    return new WritableLongIntMapProjection(map0);
   }
 
   @Override
@@ -325,6 +325,59 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
         } else {
           assertFalse(map0.remove(i, 0));
           assertFalse(map0.remove(i, 1));
+        }
+      }
+    }
+  }
+
+  public void testHashCode2() {
+    int attemptsCount = 10, shuffleCount = 10;
+    int sizeMax = 600, step = 50;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      for (int size = step; size < sizeMax; size += step) {
+        LongArray keys = generateRandomLongArray(size, SORTED_UNIQUE);
+        IntArray values = generateRandomIntArray(keys.size(), UNORDERED);
+        int expectedHash = 0;
+        for (int i = 0; i < size; i++) {
+          expectedHash += IntegersUtils.hash(keys.get(i)) + IntegersUtils.hash(values.get(i));
+        }
+
+        for (T map0 : createMapsFromLists(keys, values)) {
+          assertEquals(expectedHash, map0.hashCode());
+        }
+
+        IntArray indices = new IntArray(IntProgression.range(size));
+        for (int i = 0; i < shuffleCount; i++) {
+          map = createMap();
+          map.putAll(keys.get(indices), values.get(indices));
+          assertEquals(expectedHash, map.hashCode());
+          indices.shuffle(RAND);
+        }
+      }
+    }
+  }
+
+  public void testEquals2() {
+    int attemptsCount = 20;
+    int maxVal = 10;
+    int mapSize = 200;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      LongArray keys = generateRandomLongArray(mapSize, SORTED_UNIQUE);
+      IntArray values = generateRandomIntArray(keys.size(), UNORDERED, maxVal);
+
+      for (T map0 : createMapsFromLists(keys, values)) {
+        assertTrue(map0.equals(map0));
+        assertFalse(map0.equals(null));
+        assertFalse(map0.equals(LongIntMap.EMPTY));
+        assertTrue(map0.equals(map0));
+        T expected = createMap();
+
+        expected.putAll(LongIntIterators.pair(keys.subList(0, keys.size() - 1), values));
+        expected.put(keys.getLast(0), values.getLast(0) != 0 ? 0 : 1);
+        assertFalse(map0.equals(expected));
+
+        for (T map1 : createMapsFromLists(keys, values)) {
+          assertEquals(map1, map0);
         }
       }
     }
