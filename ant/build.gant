@@ -233,7 +233,7 @@ target(name: 'javadoc') {
   almMessage "javadoc"
   ant.mkdir(dir: deliverDir)
   ant.mkdir(dir: "$buildDir/javadoc")
-  ant.javadoc(destdir: "$buildDir/javadoc", 'protected': "true", packagenames: 'com.almworks.integers') {
+  ant.javadoc(destdir: "$buildDir/javadoc", 'protected': "true", packagenames: '**/*.*') {
     sourcepath {
       pathelement(path: generatedJavaDir)
       pathelement(path: javaDir)
