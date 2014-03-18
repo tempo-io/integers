@@ -27,7 +27,10 @@
 ant/build.gant -text
 ant/build.properties -text
 ant/build.xml -text
+dev/com/almworks/integers/IntIntEmptyMap.java -text
+dev/com/almworks/integers/IntLongEmptyMap.java -text
 dev/com/almworks/integers/LongIntEmptyMap.java -text
+dev/com/almworks/integers/LongLongEmptyMap.java -text
 gen/com/almworks/integers/generator/IntegerCollectionsCodegen.java -text
 gen/com/almworks/integers/generator/SkipImportsRegex.groovy -text
 gen/com/almworks/integers/generator/StringSets.java -text
@@ -41,6 +44,7 @@ lib/hppc-0.5.2-javadoc.jar -text
 lib/hppc-0.5.2-sources.jar -text
 lib/hppc-0.5.2.jar -text
 lib/junit-4.11.jar -text
+templates/com/almworks/integers/PQEmptyMap.tpl -text
 test/com/almworks/integers/BinarySearchChecker.java -text
 test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
