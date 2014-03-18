@@ -166,7 +166,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
 
         LongArray expected = LongArray.copy(values);
         removedIndices = IntCollections.toSorted(false, new IntArray(indices));
-        expected.removeAllAtSorted(removedIndices);
+        expected.removeAllAtSorted(removedIndices.iterator());
         CHECK.order(expected, rem);
 
         checkRemovedIndexes(rem, removedIndices.toNativeArray());
