@@ -224,4 +224,9 @@ public class IntLongHppcOpenHashMap extends AbstractWritableIntLongMap {
     myMap.remove(key);
     return true;
   }
+
+  @Override
+  public int hashCode() {
+    return myMap.hashCode();
+  }
 }

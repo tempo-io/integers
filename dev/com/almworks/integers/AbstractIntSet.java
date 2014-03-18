@@ -72,4 +72,24 @@ public abstract class AbstractIntSet implements IntSet {
   public final String toString() {
     return toString(new StringBuilder()).toString();
   }
+
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof IntSet)) return false;
+
+    IntSet otherSet = (IntSet) o;
+    if (otherSet.size() != size()) {
+      return false;
+    }
+    return containsAll(otherSet);
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (IntIterator it : iterator()) {
+      h += IntegersUtils.hash(it.value());
+    }
+    return h;
+  }
 }

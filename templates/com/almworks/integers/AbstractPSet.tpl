@@ -69,4 +69,24 @@ public abstract class Abstract#E#Set implements #E#Set {
   public final String toString() {
     return toString(new StringBuilder()).toString();
   }
+
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof #E#Set)) return false;
+
+    #E#Set otherSet = (#E#Set) o;
+    if (otherSet.size() != size()) {
+      return false;
+    }
+    return containsAll(otherSet);
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (#E#Iterator it : iterator()) {
+      h += IntegersUtils.hash(it.value());
+    }
+    return h;
+  }
 }

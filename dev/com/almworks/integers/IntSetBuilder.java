@@ -233,4 +233,14 @@ public final class IntSetBuilder extends AbstractIntSet implements Cloneable, In
     return val;
 
   }
+
+  @Override
+  public int hashCode() {
+    coalesce();
+    int h = 0;
+    for (int i = 0; i < mySorted.size(); i++) {
+      h += IntegersUtils.hash(mySorted.get(i));
+    }
+    return h;
+  }
 }

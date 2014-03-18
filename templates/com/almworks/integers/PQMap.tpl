@@ -19,6 +19,7 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 
 public interface #E##F#Map extends #E##F#Iterable {
+  #E##F#Map EMPTY = new #E##F#EmptyMap();
 
   #f# DEFAULT_VALUE = 0;
 
@@ -54,4 +55,19 @@ public interface #E##F#Map extends #E##F#Iterable {
   #E#Iterator keysIterator();
 
   #F#Iterator valuesIterator();
+
+  /**
+   * Compares the specified object with this map for equality. Returns
+   * <tt>true</tt> if and only if the specified object is also a
+   * {@link #E##F#Map} and both objects contain exactly the same key-value pairs.
+   */
+  public boolean equals(Object o);
+
+  /**
+   * @return A hash code of elements stored in the map. The hash code
+   * is defined as a sum of hash codes of keys and values stored
+   * within the set). Because sum is commutative, this ensures that different order
+   * of elements in a set does not affect the hash code.
+   */
+  public int hashCode();
 }

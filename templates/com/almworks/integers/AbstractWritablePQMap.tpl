@@ -188,4 +188,30 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
     builders[0].append(" \\\n").append(builders[1]).append(" /");
     return builders[0].toString();
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof #E##F#Map)) return false;
+
+    #E##F#Map otherMap = (#E##F#Map) o;
+
+    if (otherMap.size() != size()) return false;
+    for (#E##F#Iterator it : iterator()) {
+      #e# key = it.left();
+      if (!otherMap.containsKey(key) || otherMap.get(key) != get(key)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (#E##F#Iterator it : iterator()) {
+      h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right());
+    }
+    return h;
+  }
 }

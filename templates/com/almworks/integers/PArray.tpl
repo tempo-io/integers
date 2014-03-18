@@ -404,14 +404,13 @@ public final class #E#Array extends AbstractWritable#E#List {
    * @param indices sorted {@code IntIterable}
    * @see com.almworks.integers.#E#Collections#removeAllAtSorted(Writable#E#List, IntList)
    */
-  public void removeAllAtSorted(IntIterable indices) {
-    IntIterator it = indices.iterator();
-    if (!it.hasNext()) return;
-    int index = it.nextValue(), to, len;
+  public void removeAllAtSorted(IntIterator indices) {
+    if (!indices.hasNext()) return;
+    int index = indices.nextValue(), to, len;
     int indicesSize = 1;
     int from = index + 1;
-    while (it.hasNext()) {
-      to = it.nextValue();
+    while (indices.hasNext()) {
+      to = indices.nextValue();
       indicesSize++;
       len = to - from;
       System.arraycopy(myArray, from, myArray, index, len);

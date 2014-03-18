@@ -22,6 +22,7 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 
 public interface IntLongMap extends IntLongIterable {
+  IntLongMap EMPTY = new IntLongEmptyMap();
 
   long DEFAULT_VALUE = 0;
 
@@ -57,4 +58,19 @@ public interface IntLongMap extends IntLongIterable {
   IntIterator keysIterator();
 
   LongIterator valuesIterator();
+
+  /**
+   * Compares the specified object with this map for equality. Returns
+   * <tt>true</tt> if and only if the specified object is also a
+   * {@link IntLongMap} and both objects contain exactly the same key-value pairs.
+   */
+  public boolean equals(Object o);
+
+  /**
+   * @return A hash code of elements stored in the map. The hash code
+   * is defined as a sum of hash codes of keys and values stored
+   * within the set). Because sum is commutative, this ensures that different order
+   * of elements in a set does not affect the hash code.
+   */
+  public int hashCode();
 }

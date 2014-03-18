@@ -909,6 +909,16 @@ public class #E#TreeSet extends AbstractWritable#E#Set implements Writable#E#Sor
     });
   }
 
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (int idx = myRemoved.nextClearBit(1); idx != -1 && idx < myFront; idx++) {
+      h += IntegersUtils.hash(myKeys[idx]);
+      idx = myRemoved.nextClearBit(idx);
+    }
+    return h;
+  }
+
   private class LURIterator extends AbstractIntIteratorWithFlag {
     private int myValue;
     private int x = myRoot;

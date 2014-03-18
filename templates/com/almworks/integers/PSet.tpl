@@ -63,4 +63,27 @@ public interface #E#Set extends #E#SizedIterable {
    * @see {@link #toNativeArray(#e#[], int)}
    */
   #e#[] toNativeArray(#e#[] dest);
+
+  /**
+   * Compares the specified object with this set for equality.
+   * Returns {@code true} if the given object also {@code #E#Set},
+   * the two sets have the same size, and every member of the specified set is
+   * contained in this set (or equivalently, every member of this set is
+   * contained in the specified set). This definition ensures that the
+   * equals method works properly across different implementations of the
+   * {@link #E#Set} interface.
+   *
+   * @param o object to be compared for equality with this set
+   * @return {@code true} if the specified set is equal to this set
+   */
+  boolean equals(Object o);
+
+  /**
+   * @return A hash code of elements stored in the set. The hash code is defined identically to
+   * {@link java.util.Set#hashCode()} (sum of hash codes of elements within the set).
+   * Because sum is commutative, this ensures that different order of elements in a set does not affect the hash code.
+   * @see #E#Set#equals(Object)
+   * @see IntegersUtils#hash(#e#)
+   */
+  int hashCode();
 }

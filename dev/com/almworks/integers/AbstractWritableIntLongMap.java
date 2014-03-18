@@ -191,4 +191,30 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     builders[0].append(" \\\n").append(builders[1]).append(" /");
     return builders[0].toString();
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof IntLongMap)) return false;
+
+    IntLongMap otherMap = (IntLongMap) o;
+
+    if (otherMap.size() != size()) return false;
+    for (IntLongIterator it : iterator()) {
+      int key = it.left();
+      if (!otherMap.containsKey(key) || otherMap.get(key) != get(key)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (IntLongIterator it : iterator()) {
+      h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right());
+    }
+    return h;
+  }
 }

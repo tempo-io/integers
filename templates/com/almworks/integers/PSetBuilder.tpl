@@ -230,4 +230,14 @@ public final class #E#SetBuilder extends Abstract#E#Set implements Cloneable, #E
     return val;
 
   }
+
+  @Override
+  public int hashCode() {
+    coalesce();
+    int h = 0;
+    for (int i = 0; i < mySorted.size(); i++) {
+      h += IntegersUtils.hash(mySorted.get(i));
+    }
+    return h;
+  }
 }

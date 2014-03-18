@@ -20,6 +20,7 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
+import static com.almworks.integers.IntegersUtils.hash;
 
 /**
  * Operations {@link IntAmortizedSet#include(int)} and {@link IntAmortizedSet#exclude(int)}
@@ -319,6 +320,21 @@ public class IntAmortizedSet extends AbstractWritableIntSet implements WritableI
     builder.append("myAdded:         ").append(IntCollections.toBoundedString(myAdded)).append('\n');
     builder.append("myRemoved:       ").append(IntCollections.toBoundedString(sortedRemovedIterator()));
     return builder.toString();
+  }
+
+  @Override
+  public int hashCode() {
+    int h = 0;
+    for (int i = 0; i < myBaseList.size(); i++) {
+      int value = myBaseList.get(i);
+      if (!myRemoved.contains(value) && !myAdded.contains(value)) {
+        h += hash(value);
+      }
+    }
+    for (IntIterator it : myAdded) {
+      h += hash(it.value());
+    }
+    return h;
   }
 
   private class CoalescingIterator extends IntFindingIterator {

@@ -20,12 +20,11 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-
 import static com.almworks.integers.IntegersUtils.hash;
 
 /**
  * Operations {@link LongAmortizedSet#include(long)} and {@link LongAmortizedSet#exclude(long)}
-   * may be slower than {@link LongAmortizedSet#add(long)} and {@link LongAmortizedSet#remove(long)} respectively
+ * may be slower than {@link LongAmortizedSet#add(long)} and {@link LongAmortizedSet#remove(long)} respectively
  * @author Igor Sereda
  */
 public class LongAmortizedSet extends AbstractWritableLongSet implements WritableLongSortedSet {

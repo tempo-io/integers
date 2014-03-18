@@ -108,7 +108,7 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   }
 
   public LongIntIterator iterator() {
-    return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
+	return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;

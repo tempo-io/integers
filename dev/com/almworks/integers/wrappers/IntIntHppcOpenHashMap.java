@@ -224,4 +224,9 @@ public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
     myMap.remove(key);
     return true;
   }
+
+  @Override
+  public int hashCode() {
+    return myMap.hashCode();
+  }
 }

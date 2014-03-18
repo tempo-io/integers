@@ -78,7 +78,7 @@ public interface Writable#E#ListIterator extends #E#ListIterator {
   * would throw IllegalStateException until iterator is advanced.
   * After calling this method and subsequent advance, iterator would point at element which is next to removed one.
   * @throws NoSuchElementException if iterator has never been advanced.
-  * @throws IllegalStateException if remove() or removeRange() was previously called without subsequent advance.
+  * @throws IllegalStateException if remove() or removeRange() were previously called without subsequent advance.
   */
   void remove() throws NoSuchElementException, IllegalStateException;
 }

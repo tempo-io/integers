@@ -221,4 +221,9 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
     myMap.remove(key);
     return true;
   }
+
+  @Override
+  public int hashCode() {
+    return myMap.hashCode();
+  }
 }
