@@ -235,7 +235,7 @@ public final class #E#SetBuilder extends Abstract#E#Set implements Cloneable, #E
   public int hashCode() {
     coalesce();
     int h = 0;
-    for (int i = 0; i < mySorted.size(); i++) {
+    for (int i = 0, size = mySorted.size(); i < size; i++) {
       h += IntegersUtils.hash(mySorted.get(i));
     }
     return h;

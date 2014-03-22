@@ -62,15 +62,16 @@ public interface LongLongMap extends LongLongIterable {
   /**
    * Compares the specified object with this map for equality. Returns
    * <tt>true</tt> if and only if the specified object is also a
-   * {@link LongLongMap} and both objects contain exactly the same key-value pairs.
+   * {@link LongLongMap} and both objects contain exactly the same key-value pairs,
+   * regardless of their order
    */
   public boolean equals(Object o);
 
   /**
    * @return A hash code of elements stored in the map. The hash code
    * is defined as a sum of hash codes of keys and values stored
-   * within the set). Because sum is commutative, this ensures that different order
-   * of elements in a set does not affect the hash code.
+   * within the map). Because sum is commutative, this ensures that different order
+   * of elements in a map does not affect the hash code.
    */
   public int hashCode();
 }

@@ -199,7 +199,7 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
     if (otherMap.size() != size()) return false;
     for (#E##F#Iterator it : iterator()) {
       #e# key = it.left();
-      if (!otherMap.containsKey(key) || otherMap.get(key) != get(key)) {
+      if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
       }
     }

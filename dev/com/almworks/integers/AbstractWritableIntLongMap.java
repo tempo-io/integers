@@ -202,7 +202,7 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     if (otherMap.size() != size()) return false;
     for (IntLongIterator it : iterator()) {
       int key = it.left();
-      if (!otherMap.containsKey(key) || otherMap.get(key) != get(key)) {
+      if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
       }
     }

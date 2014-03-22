@@ -66,7 +66,7 @@ public interface #E#Set extends #E#SizedIterable {
 
   /**
    * Compares the specified object with this set for equality.
-   * Returns {@code true} if the given object also {@code #E#Set},
+   * Returns {@code true} if the given object is also a {@code #E#Set},
    * the two sets have the same size, and every member of the specified set is
    * contained in this set (or equivalently, every member of this set is
    * contained in the specified set). This definition ensures that the

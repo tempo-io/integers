@@ -202,7 +202,7 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
     if (otherMap.size() != size()) return false;
     for (IntIntIterator it : iterator()) {
       int key = it.left();
-      if (!otherMap.containsKey(key) || otherMap.get(key) != get(key)) {
+      if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
       }
     }
