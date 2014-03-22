@@ -725,7 +725,6 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
         assertFalse(set0.equals(null));
         assertFalse(set0.equals(LongSet.EMPTY));
         assertFalse(set0.equals(asSet(list)));
-        assertFalse(set0.equals(asSet(LongProgression.range(array.size()))));
         for (T set1 : createSets(array)) {
           assertTrue(set0.equals(set1));
           assertTrue(set1.equals(set0));

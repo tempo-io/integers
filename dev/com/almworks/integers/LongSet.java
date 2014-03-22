@@ -69,7 +69,7 @@ public interface LongSet extends LongSizedIterable {
 
   /**
    * Compares the specified object with this set for equality.
-   * Returns {@code true} if the given object also {@code LongSet},
+   * Returns {@code true} if the given object is also a {@code LongSet},
    * the two sets have the same size, and every member of the specified set is
    * contained in this set (or equivalently, every member of this set is
    * contained in the specified set). This definition ensures that the

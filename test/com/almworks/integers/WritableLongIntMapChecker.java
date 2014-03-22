@@ -372,7 +372,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
         assertTrue(map0.equals(map0));
         T expected = createMap();
 
-        expected.putAll(LongIntIterators.pair(keys.subList(0, keys.size() - 1), values));
+        expected.putAllKeys(keys.subList(0, keys.size() - 1), values);
         expected.put(keys.getLast(0), values.getLast(0) != 0 ? 0 : 1);
         assertFalse(map0.equals(expected));
 
