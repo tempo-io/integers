@@ -47,6 +47,43 @@ public class LongIterators {
   }
 
   /**
+   * @return iterator that repeats the {@code value} {@code count} times
+   */
+  public static LongIterator repeat(final long value, int count) {
+    final int lim0 = Math.max(count, 0);
+    return new AbstractLongIterator() {
+      int count = lim0;
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return count > 0;
+      }
+
+      @Override
+      public LongIterator next() throws NoSuchElementException {
+        if (count == 0) {
+          throw new NoSuchElementException();
+        }
+        count--;
+        return this;
+      }
+
+      @Override
+      public boolean hasValue() {
+        return count != lim0;
+      }
+
+      @Override
+      public long value() throws NoSuchElementException {
+        if (!hasValue()) {
+          throw new NoSuchElementException();
+        }
+        return value;
+      }
+    };
+  }
+
+  /**
    * @return an infinite iterator that cycles through {@code values}
    */
   public static LongIterator cycle(final long... values) {
@@ -83,7 +120,7 @@ public class LongIterators {
    * @see #arithmeticProgression(long, long)
    */
   public static LongIterator arithmetic(long start, final int count, final long step) {
-    if (step == 0) throw new IllegalArgumentException("step = 0");
+    if (step == 0) return repeat(start, count);
     if (count < 0) throw new IllegalArgumentException("count < 0");
     final long myInitialValue = start - step;
     return new AbstractLongIterator() {

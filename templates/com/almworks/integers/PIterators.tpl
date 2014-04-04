@@ -44,6 +44,43 @@ public class #E#Iterators {
   }
 
   /**
+   * @return iterator that repeats the {@code value} {@code count} times
+   */
+  public static #E#Iterator repeat(final #e# value, int count) {
+    final int lim0 = Math.max(count, 0);
+    return new Abstract#E#Iterator() {
+      int count = lim0;
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return count > 0;
+      }
+
+      @Override
+      public #E#Iterator next() throws NoSuchElementException {
+        if (count == 0) {
+          throw new NoSuchElementException();
+        }
+        count--;
+        return this;
+      }
+
+      @Override
+      public boolean hasValue() {
+        return count != lim0;
+      }
+
+      @Override
+      public #e# value() throws NoSuchElementException {
+        if (!hasValue()) {
+          throw new NoSuchElementException();
+        }
+        return value;
+      }
+    };
+  }
+
+  /**
    * @return an infinite iterator that cycles through {@code values}
    */
   public static #E#Iterator cycle(final #e#... values) {
@@ -80,7 +117,7 @@ public class #E#Iterators {
    * @see #arithmeticProgression(#e#, #e#)
    */
   public static #E#Iterator arithmetic(#e# start, final int count, final #e# step) {
-    if (step == 0) throw new IllegalArgumentException("step = 0");
+    if (step == 0) return repeat(start, count);
     if (count < 0) throw new IllegalArgumentException("count < 0");
     final #e# myInitialValue = start - step;
     return new Abstract#E#Iterator() {
