@@ -50,6 +50,7 @@ public interface #E##F#Map extends #E##F#Iterable {
   boolean isEmpty();
 
   @NotNull
+  @Override
   #E##F#Iterator iterator();
 
   #E#Iterator keysIterator();
@@ -67,7 +68,7 @@ public interface #E##F#Map extends #E##F#Iterable {
   /**
    * @return A hash code of elements stored in the map. The hash code
    * is defined as a sum of hash codes of keys and values stored
-   * within the map). Because sum is commutative, this ensures that different order
+   * within the map. Because addition is commutative, this ensures that different order
    * of elements in a map does not affect the hash code.
    */
   public int hashCode();

@@ -53,6 +53,7 @@ public interface LongLongMap extends LongLongIterable {
   boolean isEmpty();
 
   @NotNull
+  @Override
   LongLongIterator iterator();
 
   LongIterator keysIterator();
@@ -70,7 +71,7 @@ public interface LongLongMap extends LongLongIterable {
   /**
    * @return A hash code of elements stored in the map. The hash code
    * is defined as a sum of hash codes of keys and values stored
-   * within the map). Because sum is commutative, this ensures that different order
+   * within the map. Because addition is commutative, this ensures that different order
    * of elements in a map does not affect the hash code.
    */
   public int hashCode();

@@ -151,6 +151,9 @@ public class LongIteratorsTests extends IntegersFixture {
       long start = RAND.nextInt();
       int count = RAND.nextInt(100);
       long step = RAND.nextInt(2000) - 1000;
+      if (attempt % 4 == 0) {
+        step = 0;
+      }
       LongIterator actual = LongIterators.arithmetic(start, count, step);
       checkNoValue(actual);
       CHECK.order(LongProgression.arithmetic(start, count, step).iterator(), actual);

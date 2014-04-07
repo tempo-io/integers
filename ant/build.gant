@@ -232,8 +232,10 @@ target(name: 'javadoc') {
   depends(['init', 'make'])
   almMessage "javadoc"
   ant.mkdir(dir: deliverDir)
+
   ant.mkdir(dir: "$buildDir/javadoc")
-  ant.javadoc(destdir: "$buildDir/javadoc", 'protected': "true", packagenames: '**/*.*') {
+  ant.javadoc(destdir: "$buildDir/javadoc", 'protected': "true", packagenames: "com.almworks.integers.*",
+      excludepackagenames: "com.almworks.integers.wrappers.*") {
     sourcepath {
       pathelement(path: generatedJavaDir)
       pathelement(path: javaDir)
@@ -244,6 +246,19 @@ target(name: 'javadoc') {
     }
   }
   ant.jar(basedir: "$buildDir/javadoc", destfile: "$deliverDir/$jarName-javadoc.jar",)
+
+  ant.mkdir(dir: "$buildDir/javadoc-wrappers")
+  ant.javadoc(destdir: "$buildDir/javadoc-wrappers", 'protected': "true", packagenames: "com.almworks.integers.wrappers.*") {
+    sourcepath {
+      pathelement(path: generatedJavaDir)
+      pathelement(path: javaDir)
+    }
+    classpath {
+      pathelement(path: "$rootDir/lib/junit.jar")
+      pathelement(path: "$rootDir/lib/annotations.jar")
+    }
+  }
+  ant.jar(basedir: "$buildDir/javadoc-wrappers", destfile: "$deliverDir/$jarName-wrappers-javadoc.jar",)
 }
 
 target(name: 'dist') {
@@ -254,7 +269,7 @@ target(name: 'dist') {
   String deliverName = jarName
   ant.mkdir(dir: deliverDir)
   def jarFileName = deliverName + ".jar"
-  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/.svn/**/wrappers/**") {
+  ant.jar(basedir: generatedClassesDir, destfile: rel2(deliverDir, jarFileName), excludes: "**/wrappers/** **/.svn/**") {
     manifest {
       attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
       attribute(name: "Implementation-Vendor", value: "ALM Works")
@@ -266,8 +281,8 @@ target(name: 'dist') {
   ant.delete(dir: deliverSources)
   ant.mkdir(dir: deliverSources)
   ant.copy(todir: deliverSources) {
-    fileset(dir: javaDir, excludes: "**/.svn/**/wrappers/**")
-    fileset(dir: generatedJavaDir, excludes: "**/.svn/**/wrappers/**")
+    fileset(dir: javaDir, excludes: "**/wrappers/** **/.svn/**")
+    fileset(dir: generatedJavaDir, excludes: "**/wrappers/** **/.svn/**")
   }
   String srcFileName = deliverName + "-src.zip"
   ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
@@ -312,7 +327,7 @@ target(name: 'test-report') {
 }
 
 target(name: 'build') {
-  depends(['init', 'clean', 'make', 'test', 'dist', 'dist-wrappers'])
+  depends(['init', 'clean', 'make', 'test', 'dist', 'dist-wrappers', 'javadoc'])
   almMessage "build finished"
 }
 

@@ -47,6 +47,43 @@ public class IntIterators {
   }
 
   /**
+   * @return iterator that repeats the {@code value} {@code count} times
+   */
+  public static IntIterator repeat(final int value, int count) {
+    final int lim0 = Math.max(count, 0);
+    return new AbstractIntIterator() {
+      int count = lim0;
+
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return count > 0;
+      }
+
+      @Override
+      public IntIterator next() throws NoSuchElementException {
+        if (count == 0) {
+          throw new NoSuchElementException();
+        }
+        count--;
+        return this;
+      }
+
+      @Override
+      public boolean hasValue() {
+        return count != lim0;
+      }
+
+      @Override
+      public int value() throws NoSuchElementException {
+        if (!hasValue()) {
+          throw new NoSuchElementException();
+        }
+        return value;
+      }
+    };
+  }
+
+  /**
    * @return an infinite iterator that cycles through {@code values}
    */
   public static IntIterator cycle(final int... values) {
@@ -83,7 +120,7 @@ public class IntIterators {
    * @see #arithmeticProgression(int, int)
    */
   public static IntIterator arithmetic(int start, final int count, final int step) {
-    if (step == 0) throw new IllegalArgumentException("step = 0");
+    if (step == 0) return repeat(start, count);
     if (count < 0) throw new IllegalArgumentException("count < 0");
     final int myInitialValue = start - step;
     return new AbstractIntIterator() {

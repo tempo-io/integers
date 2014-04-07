@@ -81,7 +81,7 @@ public interface #E#Set extends #E#SizedIterable {
   /**
    * @return A hash code of elements stored in the set. The hash code is defined identically to
    * {@link java.util.Set#hashCode()} (sum of hash codes of elements within the set).
-   * Because sum is commutative, this ensures that different order of elements in a set does not affect the hash code.
+   * Because addition is commutative, this ensures that different order of elements in a set does not affect the hash code.
    * @see #E#Set#equals(Object)
    * @see IntegersUtils#hash(#e#)
    */
