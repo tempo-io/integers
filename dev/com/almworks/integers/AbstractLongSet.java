@@ -20,6 +20,7 @@
 package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.appendShortName;
+import static com.almworks.integers.LongIterableLexicographicComparator.LONG_ITERABLE_LEXICOGRAPHIC_COMPARATOR;
 
 public abstract class AbstractLongSet implements LongSet {
 
@@ -81,7 +82,14 @@ public abstract class AbstractLongSet implements LongSet {
     if (otherSet.size() != size()) {
       return false;
     }
-    return containsAll(otherSet);
+    if (!(this instanceof LongSortedSet)) {
+      return containsAll(otherSet);
+    }
+    if (!(otherSet instanceof LongSortedSet)) {
+      return otherSet.containsAll(otherSet);
+    }
+    assert (this instanceof LongSortedSet) && (otherSet instanceof LongSortedSet);
+    return LONG_ITERABLE_LEXICOGRAPHIC_COMPARATOR.compare(this, otherSet) == 0;
   }
 
   @Override
