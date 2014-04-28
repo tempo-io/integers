@@ -34,6 +34,7 @@ public final class IntegersUtils {
   public static final int[] EMPTY_INTS = {};
   public static final long[] EMPTY_LONGS = {};
   public static final short[] EMPTY_SHORTS = {};
+  public static final short[] EMPTY_CHARS = {};
   public static final int MAX_INT = Integer.MAX_VALUE;
   public static final long MAX_LONG = Long.MAX_VALUE;
 
