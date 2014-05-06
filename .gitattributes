@@ -31,6 +31,7 @@ dev/com/almworks/integers/IntIntEmptyMap.java -text
 dev/com/almworks/integers/IntLongEmptyMap.java -text
 dev/com/almworks/integers/LongIntEmptyMap.java -text
 dev/com/almworks/integers/LongLongEmptyMap.java -text
+dev/com/almworks/integers/LongObjEmptyMap.java -text
 gen/com/almworks/integers/generator/IntegerCollectionsCodegen.java -text
 gen/com/almworks/integers/generator/SkipImportsRegex.groovy -text
 gen/com/almworks/integers/generator/StringSets.java -text
