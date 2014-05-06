@@ -78,7 +78,7 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
     }
   }
 
-  public void testGetSet() {
+  public void testGet() {
     long[] nArray = {0, 1, 2, 3, 4, 5};
     iter = new LongNativeArrayIterator(nArray);
     iter.move(2);
@@ -95,7 +95,8 @@ public class LongNativeArrayIteratorTests extends IntegersFixture {
   }
 
   public void testSimple() {
-    LongIterator it = LongArray.create(0, 1, 2).iterator();
+    long[] nArray = {0, 1, 2};
+    LongIterator it = new LongNativeArrayIterator(nArray);
     assertFalse(it.hasValue());
     assertTrue(it.hasNext());
     it.next();

@@ -95,7 +95,7 @@ public abstract class AbstractLongSet implements LongSet {
   @Override
   public int hashCode() {
     int h = 0;
-    for (LongIterator it : iterator()) {
+    for (LongIterator it : this) {
       h += IntegersUtils.hash(it.value());
     }
     return h;

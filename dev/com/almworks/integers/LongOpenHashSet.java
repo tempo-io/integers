@@ -154,7 +154,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     long[] keysNew = new long[newCapacity];
     BitSet alocatedNew = new BitSet(newCapacity);
 
-    for (LongIterator it: iterator()) {
+    for (LongIterator it: this) {
       long value = it.value();
       int slot = index(hash(value), mask);
       while (alocatedNew.get(slot)) {

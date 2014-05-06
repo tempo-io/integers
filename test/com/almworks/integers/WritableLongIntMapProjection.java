@@ -133,7 +133,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
   @Override
   public int hashCode() {
     int h = 0;
-    for (LongIterator it : iterator()) {
+    for (LongIterator it : this) {
       h += IntegersUtils.hash(it.value());
     }
     return h;
@@ -144,7 +144,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
     if (destPos < 0 || destPos + size() > dest.length) {
       throw new ArrayIndexOutOfBoundsException();
     }
-    for (LongIterator it : iterator()) {
+    for (LongIterator it : this) {
       dest[destPos++] = it.value();
     }
     return dest;

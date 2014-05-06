@@ -200,7 +200,7 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
     LongIntMap otherMap = (LongIntMap) o;
 
     if (otherMap.size() != size()) return false;
-    for (LongIntIterator it : iterator()) {
+    for (LongIntIterator it : this) {
       long key = it.left();
       if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
