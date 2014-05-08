@@ -63,7 +63,7 @@ public interface WritableLongObjMap<T> extends LongObjMapI<T> {
    * Puts all keys from the specified iterable to this map, replacing the values
    * of existing keys, if such keys are present.
    */
-  void putAll(LongObjIterable entries);
+  void putAll(LongObjIterable<T> entries);
 
   /**
    * Puts all keys from {@code keys} and {@code values} to this map,
@@ -82,7 +82,7 @@ public interface WritableLongObjMap<T> extends LongObjMapI<T> {
    * (1, 2, 3, 4), (1, 2, 3, 4) -> ([1, 1], [2, 2], [3, 3], [4, 4])
    * (1, 2, 3, 4), (1, 2, 3, 4, 6, 7, 8) -> ([1, 1], [2, 2], [3, 3], [4, 4])
    */
-  void putAllKeys(LongIterable keys, Iterable values);
+  void putAllKeys(LongIterable keys, Iterable<T> values);
 
   void removeAll(long... keys);
 

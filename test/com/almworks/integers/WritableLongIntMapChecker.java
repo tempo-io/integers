@@ -262,8 +262,14 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
         values.add((int) (key * key));
       }
       for (T map : createMapsFromLists(new LongArray(keys), values)) {
-        AbstractWritableLongIntMap map0 = (AbstractWritableLongIntMap) map;
-        String output = map0.toTableString();
+        String output;
+        if (map instanceof AbstractWritableLongIntMap) {
+          output = ((AbstractWritableLongIntMap) map).toTableString();
+        } else if (map instanceof WritableLongIntMapFromLongObjMap) {
+          output = ((WritableLongIntMapFromLongObjMap) map).toTableString();
+        } else {
+          continue;
+        }
         int idx = 0, commasCount = 0;
         for (; idx < output.length() && output.charAt(idx) != '\n'; idx++) {
           if (output.charAt(idx) == ',') commasCount++;

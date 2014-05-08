@@ -92,6 +92,7 @@ test/com/almworks/integers/LongUnionIteratorTests.java -text
 test/com/almworks/integers/LongUnionIteratorTwoTests.java -text
 test/com/almworks/integers/SetOperationsChecker.java -text
 test/com/almworks/integers/WritableLongIntMapChecker.java -text
+test/com/almworks/integers/WritableLongIntMapFromLongObjMap.java -text
 test/com/almworks/integers/WritableLongIntMapProjection.java -text
 test/com/almworks/integers/WritableLongListChecker.java -text
 test/com/almworks/integers/WritableLongListRemovingDecoratorTests.java -text

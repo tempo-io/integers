@@ -54,7 +54,7 @@ public interface LongObjMapI<T> extends LongObjIterable<T> {
 
   @NotNull
   @Override
-  LongObjIterator iterator();
+  LongObjIterator<T> iterator();
 
   LongIterator keysIterator();
 

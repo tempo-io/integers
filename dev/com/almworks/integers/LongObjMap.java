@@ -21,7 +21,6 @@
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -31,46 +30,16 @@ import java.util.*;
  *
  * @param <E> element type
  */
-public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
-  public static class Entry<V> {
-    private final long myKey;
-    private final V myValue;
-
-    public Entry(long aKey, V aValue) {
-      myKey = aKey;
-      myValue = aValue;
-    }
-
-    public long getKey() {
-      return myKey;
-    }
-
-    public V getValue() {
-      return myValue;
-    }
-
-    @Override
-    public String toString() {
-      return myKey + "->" + myValue;
-    }
-  }
-
+public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
   private final LongArray myKeys = new LongArray();
   private final List<E> myValues = IntegersUtils.arrayList();
-  private int myModCount = 0;
 
   public static <E> LongObjMap<E> create() {
     return new LongObjMap();
   }
 
-  /**
-   * Puts the element for the specified key.
-   *
-   * @return the previously stored value if the key was already present in the map. Otherwise, null.
-   */
-  @Nullable
-  public E put(long key, @NonNls @Nullable E value) {
-    mod();
+  @Override
+  protected E putImpl(long key, E value) {
     int pos = myKeys.binarySearch(key);
     if (pos >= 0) {
       return myValues.set(pos, value);
@@ -110,17 +79,6 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   }
 
   /**
-   * Pairs are sorted by their integer value (the key).
-   */
-  public List<Entry<E>> toList() {
-    List<Entry<E>> ret = IntegersUtils.arrayList();
-    for (int i = 0, iend = myKeys.size(); i < iend; ++i) {
-      ret.add(new Entry<E>(myKeys.get(i), myValues.get(i)));
-    }
-    return ret;
-  }
-
-  /**
    * @return an unmodifiable list of values sorted by their keys in ascending order.
    */
   public List<E> getValues() {
@@ -128,12 +86,8 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
     return Collections.unmodifiableList(myValues);
   }
 
-  /**
-   * Removes mapping for the specified key if it is present.
-   * @return previously mapped object
-   */
-  public E remove(long key) {
-    mod();
+  @Override
+  protected E removeImpl(long key) {
     int pos = myKeys.binarySearch(key);
     if (pos >= 0) {
       myKeys.removeAt(pos);
@@ -143,13 +97,19 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
     }
   }
 
-  private void mod() {
-    ++myModCount;
-  }
-
   @Override
   public LongMapIterator iterator() {
     return new LongMapIterator();
+  }
+
+  @Override
+  public LongListIterator keysIterator() {
+    return myKeys.iterator();
+  }
+
+  @Override
+  public Iterator valuesIterator() {
+    return myValues.iterator();
   }
 
   /**
@@ -170,81 +130,76 @@ public class LongObjMap<E> implements Iterable<LongObjMap.Entry<E>> {
   }
 
   @Override
-  public String toString() {
-    return "LongObjMap " + toList().toString();
+  public void clear() {
+    modified();
+    myKeys.clear();
+    myValues.clear();
   }
 
-  public class LongMapIterator implements Iterator<Entry<E>> {
-    private int myKeyPos;
+  public class LongMapIterator extends AbstractLongObjIterator<E> {
+    private int myFrom;
+    private int myNext;
     private int myExpectedModCount;
-    private int myLastRetPos = -1;
 
     public LongMapIterator() {
       this(0);
     }
 
     public LongMapIterator(int keyPos) {
-      myKeyPos = keyPos;
+      if (keyPos < 0) throw new IllegalArgumentException("from < 0");
       myExpectedModCount = myModCount;
+      myNext = myFrom = keyPos;
     }
 
     @Override
     public boolean hasNext() {
-      return myKeyPos < myKeys.size();
+      return myNext < size();
     }
 
     @Override
-    public Entry<E> next() {
+    public boolean hasValue() {
+      return myFrom < myNext;
+    }
+
+    public long left() {
+      return myKeys.get(myNext - 1);
+    }
+
+    public E right() {
+      return myValues.get(myNext - 1);
+    }
+
+    public LongObjIterator next() {
       checkMod();
-      try {
-        long key = myKeys.get(myKeyPos);
-        E value = myValues.get(myKeyPos);
-        myLastRetPos = myKeyPos;
-        ++myKeyPos;
-        return new Entry<E>(key, value);
-      } catch(IndexOutOfBoundsException ex) {
-        checkMod();
-        throw new NoSuchElementException();
-      }
+      if (myNext >= size()) throw new NoSuchElementException();
+      myNext++;
+      return this;
     }
 
     @Override
     public void remove() {
-      if(myLastRetPos == -1) {
-        throw new IllegalStateException();
-      }
+      if (myNext == 0) throw new IllegalStateException();
       checkMod();
 
       try {
-        myKeys.removeAt(myLastRetPos);
-        myValues.remove(myLastRetPos);
-        if(myLastRetPos < myKeyPos) {
-          --myKeyPos;
-        }
-        myLastRetPos = -1;
+        myKeys.removeAt(myNext - 1);
+        myValues.remove(myNext - 1);
         myExpectedModCount = myModCount;
+        myNext--;
       } catch(IndexOutOfBoundsException ex) {
         throw new ConcurrentModificationException();
       }
-
     }
 
     public boolean hasPrevious() {
-      return myKeyPos > 0;
+      return myNext > myFrom + 1;
     }
 
-    public Entry<E> previous() {
+    public LongObjIterator previous() {
       checkMod();
-      try {
-        long key = myKeys.get(myKeyPos - 1);
-        E value = myValues.get(myKeyPos - 1);
-        myLastRetPos = myKeyPos - 1;
-        --myKeyPos;
-        return new Entry<E>(key, value);
-      } catch(IndexOutOfBoundsException ex) {
-        checkMod();
-        throw new NoSuchElementException();
-      }
+      if (!hasPrevious()) throw new NoSuchElementException();
+      myNext--;
+      return this;
     }
 
     private void checkMod() {

@@ -56,7 +56,7 @@ public interface LongObjIterator<T> extends Iterator<LongObjIterator<T>>, LongOb
    */
   T right() throws NoSuchElementException;
 
-  class Single extends AbstractLongObjIteratorWithFlag {
+  class Single<T> extends AbstractLongObjIteratorWithFlag<T> {
     private long myLeft;
     private T myRight;
 
