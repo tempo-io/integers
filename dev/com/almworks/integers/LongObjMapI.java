@@ -58,7 +58,7 @@ public interface LongObjMapI<T> extends LongObjIterable<T> {
 
   LongIterator keysIterator();
 
-  Iterator valuesIterator();
+  Iterator<T> valuesIterator();
 
   /**
    * Compares the specified object with this map for equality. Returns

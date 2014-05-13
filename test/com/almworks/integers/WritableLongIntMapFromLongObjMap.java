@@ -152,6 +152,7 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
         if (!it.hasNext()) {
           return false;
         }
+        it.next();
         myNextLeft = it.left();
         myNextRight = it.right();
         return true;
@@ -211,7 +212,80 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
   }
 
   public boolean equals(Object o) {
-    return myMap.equals(o);
+    if (o == this) return true;
+    if (!(o instanceof LongIntMap)) return false;
+    final LongIntMap map = (LongIntMap) o;
+    LongObjMapI<Integer> objMap = new LongObjMapI<Integer>() {
+
+      @Override
+      public Integer get(long key) {
+        return checkNull(map.get(key));
+      }
+
+      @Override
+      public boolean containsKey(long key) {
+        return map.containsKey(key);
+      }
+
+      @Override
+      public boolean containsKeys(LongIterable keys) {
+        return map.containsKeys(keys);
+      }
+
+      @Override
+      public int size() {
+        return map.size();
+      }
+
+      @Override
+      public boolean isEmpty() {
+        return map.isEmpty();
+      }
+
+      @NotNull
+      @Override
+      public LongObjIterator<Integer> iterator() {
+        final LongIntIterator it = map.iterator();
+        return new AbstractLongObjIterator<Integer>() {
+          @Override
+          public boolean hasNext() throws ConcurrentModificationException {
+            return it.hasNext();
+          }
+
+          @Override
+          public boolean hasValue() {
+            return it.hasValue();
+          }
+
+          @Override
+          public long left() throws NoSuchElementException {
+            return it.left();
+          }
+
+          @Override
+          public Integer right() throws NoSuchElementException {
+            return it.right();
+          }
+
+          @Override
+          public LongObjIterator<Integer> next() {
+            it.next();
+            return this;
+          }
+        };
+      }
+
+      @Override
+      public LongIterator keysIterator() {
+        return map.keysIterator();
+      }
+
+      @Override
+      public Iterator<Integer> valuesIterator() {
+        return IntIterators.asIterator(map.valuesIterator());
+      }
+    };
+    return myMap.equals(objMap);
   }
 
   public int hashCode() {

@@ -23,6 +23,7 @@ import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class IntIterators {
@@ -302,6 +303,62 @@ public class IntIterators {
       @Override
       protected int getCurrentModCount() {
         return currentModCount.invoke(0);
+      }
+    };
+  }
+
+  public static Iterator<Integer> asIterator(final IntIterator iterator) {
+    return new Iterator<Integer>() {
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public Integer next() {
+        return iterator.nextValue();
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
+
+  public static IntIterator asIntIterator(final Iterator<Integer> iterator) {
+    return new IntFindingIterator() {
+      @Override
+      protected boolean findNext() throws ConcurrentModificationException {
+        if (!iterator.hasNext()) return false;
+        iterator.next();
+        myNext = iterator.next();
+        return true;
+      }
+    };
+  }
+
+  public static LongIterator asLongIterator(final IntIterator iterator) {
+    return new AbstractLongIterator() {
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public boolean hasValue() {
+        return iterator.hasValue();
+      }
+
+      @Override
+      public long value() throws NoSuchElementException {
+        return iterator.value();
+      }
+
+      @Override
+      public LongIterator next() {
+        iterator.next();
+        return this;
       }
     };
   }

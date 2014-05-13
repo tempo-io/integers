@@ -47,7 +47,7 @@ public class IntLongPairIteratorTests extends IntegersFixture {
   public void testLeftIteratorSpecification() {
     LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       private LongIterator getFromProjection(IntIterable leftIterable, LongIterable rightIterable) {
-        return asLongs(leftProjection(new IntLongPairIterator(leftIterable, rightIterable)));
+        return LongIterators.asLongIterator(leftProjection(new IntLongPairIterator(leftIterable, rightIterable)));
       }
 
       @Override
@@ -72,7 +72,7 @@ public class IntLongPairIteratorTests extends IntegersFixture {
     for (int[] left : leftVariants) {
       for (int[] right0 : leftVariants) {
         IntList leftList = new IntArray(left);
-        LongList rightList = asLongs(new IntArray(right0));
+        LongList rightList = LongCollections.asLongList(new IntArray(right0));
         IntList leftSingle = new IntList.Single(Integer.MIN_VALUE);
         LongList rightSingle = new LongList.Single(Long.MIN_VALUE);
 

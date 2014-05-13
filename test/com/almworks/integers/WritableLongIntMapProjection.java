@@ -60,7 +60,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
   @Override
   public void retain(LongList values) {
     LongArray res = new LongArray();
-    for (LongIterator it: values.iterator()) {
+    for (LongIterator it: values) {
       long value = it.value();
       if (contains(value)) res.add(value);
     }

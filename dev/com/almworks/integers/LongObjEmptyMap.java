@@ -57,7 +57,7 @@ public class LongObjEmptyMap<T> implements LongObjMapI<T> {
   }
 
   @Override
-  public LongIterator keysIterator() {
+  public WritableLongListIterator keysIterator() {
     return LongIterator.EMPTY;
   }
 

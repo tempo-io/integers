@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -325,44 +326,5 @@ public abstract class IntegersFixture extends TestCase {
     modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
     field.set(null, newValue);
-  }
-
-  public static LongList asLongs(final IntList list) {
-    return new AbstractLongList() {
-      @Override
-      public int size() {
-        return list.size();
-      }
-
-      @Override
-      public long get(int index) throws NoSuchElementException {
-        return list.get(index);
-      }
-    };
-  }
-
-  public static LongIterator asLongs(final IntIterator iterator) {
-    return new AbstractLongIterator() {
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return iterator.hasNext();
-      }
-
-      @Override
-      public boolean hasValue() {
-        return iterator.hasValue();
-      }
-
-      @Override
-      public long value() throws NoSuchElementException {
-        return iterator.value();
-      }
-
-      @Override
-      public LongIterator next() {
-        iterator.next();
-        return this;
-      }
-    };
   }
 }

@@ -17,6 +17,7 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -26,6 +27,7 @@ import static com.almworks.integers.IntIterators.limit;
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.concatLists;
+import static com.almworks.integers.LongIteratorSpecificationChecker.checkIteratorThrowsCME;
 import static com.almworks.integers.LongIterators.range;
 import static com.almworks.integers.WritableLongIntMapProjection.DEFAULT_CONTAINS_VALUE;
 
@@ -125,9 +127,9 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
         LongIntIterator it = map.iterator();
 
         map.add(keyForAdd, keyForAdd * keyForAdd);
-        LongIteratorSpecificationChecker.checkIteratorThrowsCME(keysIt);
-        LongIteratorSpecificationChecker.checkIteratorThrowsCME(valuesIt);
-        LongIteratorSpecificationChecker.checkIteratorThrowsCME(it);
+        checkIteratorThrowsCME(keysIt);
+        checkIteratorThrowsCME(valuesIt);
+        checkIteratorThrowsCME(it);
         map.remove(keyForAdd);
 
         LongArray actualKeys = LongCollections.collectIterables(map.size(), map.keysIterator());

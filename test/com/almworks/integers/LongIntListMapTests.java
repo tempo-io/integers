@@ -67,7 +67,7 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
           }
         });
     CHECK.order(keysArray, actualMap.keysAsList());
-    CHECK.order(asLongs(valuesArray), asLongs(actualMap.valuesAsList()));
+    CHECK.order(LongCollections.asLongList(valuesArray), LongCollections.asLongList(actualMap.valuesAsList()));
 
     CHECK.order(actualMap.keysIterator(0, actualMap.size()), keysArray.iterator());
     CHECK.order(actualMap.valuesIterator(0, actualMap.size()), valuesArray.iterator());

@@ -329,6 +329,20 @@ public class LongCollections {
     };
   }
 
+  public static LongList asLongList(final IntList list) {
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return list.size();
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        return list.get(index);
+      }
+    };
+  }
+
   /**
    * This algorithm supposes that the set to intersect with is usually shorter than the merged ones.
    * It also supposes that a and b have a great deal of common elements (this assumption is not very important, though).

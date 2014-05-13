@@ -130,7 +130,6 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
     }
   }
 
-
   public StringBuilder toString(StringBuilder builder) {
     appendShortName(builder, this);
     builder.append(" ").append(size()).append(" [");
@@ -187,12 +186,12 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   @Override
   public boolean equals(Object o) {
     if (o == this) return true;
-    if (!(o instanceof LongObjMap)) return false;
+    if (!(o instanceof LongObjMapI)) return false;
 
-    LongObjMapI otherMap = (LongObjMapI) o;
+    LongObjMapI<T> otherMap = (LongObjMapI<T>) o;
 
     if (otherMap.size() != size()) return false;
-    for (LongObjIterator it : this) {
+    for (LongObjIterator<T> it : this) {
       long key = it.left();
       if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
@@ -205,7 +204,7 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   public int hashCode() {
     int h = 0;
     for (LongObjIterator<T> it : iterator()) {
-      h += IntegersUtils.hash(it.left()) + it.right().hashCode();
+      h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right().hashCode());
     }
     return h;
   }

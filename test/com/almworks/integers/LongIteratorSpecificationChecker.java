@@ -145,7 +145,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       @Override
       public long[] generateValues(int size) {
-        return asLongs(generateRandomIntArray(size, SortedStatus.UNORDERED)).toNativeArray();
+        return LongCollections.asLongList(generateRandomIntArray(size, SortedStatus.UNORDERED)).toNativeArray();
       }
 
       @Override
@@ -304,6 +304,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       iterator.hasNext();
       fail();
     } catch (ConcurrentModificationException e) {}
+
     try {
       iterator.next();
       fail();
@@ -331,8 +332,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
         it.value();
         fail();
       } catch (ConcurrentModificationException e) {}
-    } else if (iterator instanceof IntLongIterator) {
-      IntLongIterator it = (IntLongIterator) iterator;
+    } else if (iterator instanceof LongIntIterator) {
+      LongIntIterator it = (LongIntIterator) iterator;
       try {
         it.hasValue();
         fail();

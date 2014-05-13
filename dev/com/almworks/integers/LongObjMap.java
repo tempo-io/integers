@@ -108,8 +108,31 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
   }
 
   @Override
-  public Iterator valuesIterator() {
-    return myValues.iterator();
+  public Iterator<E> valuesIterator() {
+    final Iterator<E> iterator = myValues.iterator();
+    final long expectedModCount = myModCount;
+    return new Iterator<E>() {
+      @Override
+      public boolean hasNext() {
+        checkMod();
+        return iterator.hasNext();
+      }
+
+      @Override
+      public E next() {
+        checkMod();
+        return iterator.next();
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+
+      private void checkMod() {
+        if (expectedModCount != myModCount) throw new ConcurrentModificationException();
+      }
+    };
   }
 
   /**
@@ -140,6 +163,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
     private int myFrom;
     private int myNext;
     private int myExpectedModCount;
+    private boolean myIsJustRemoved;
 
     public LongMapIterator() {
       this(0);
@@ -153,19 +177,25 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
 
     @Override
     public boolean hasNext() {
+      checkMod();
       return myNext < size();
     }
 
     @Override
     public boolean hasValue() {
-      return myFrom < myNext;
+      checkMod();
+      return myFrom < myNext && !myIsJustRemoved;
     }
 
     public long left() {
+      checkMod();
+      if (!hasValue()) throw new IllegalStateException();
       return myKeys.get(myNext - 1);
     }
 
     public E right() {
+      checkMod();
+      if (!hasValue()) throw new IllegalStateException();
       return myValues.get(myNext - 1);
     }
 
@@ -173,25 +203,28 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
       checkMod();
       if (myNext >= size()) throw new NoSuchElementException();
       myNext++;
+      myIsJustRemoved = false;
       return this;
     }
 
     @Override
     public void remove() {
-      if (myNext == 0) throw new IllegalStateException();
       checkMod();
+      if (myNext == 0) throw new IllegalStateException();
 
       try {
         myKeys.removeAt(myNext - 1);
         myValues.remove(myNext - 1);
         myExpectedModCount = myModCount;
         myNext--;
+        myIsJustRemoved = true;
       } catch(IndexOutOfBoundsException ex) {
         throw new ConcurrentModificationException();
       }
     }
 
     public boolean hasPrevious() {
+      checkMod();
       return myNext > myFrom + 1;
     }
 
