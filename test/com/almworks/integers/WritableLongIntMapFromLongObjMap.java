@@ -113,6 +113,11 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
   }
 
   @Override
+  public LongSet keySet() {
+    return myMap.keySet();
+  }
+
+  @Override
   public void clear() {
     myMap.clear();
   }
@@ -283,6 +288,11 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
       @Override
       public Iterator<Integer> valuesIterator() {
         return IntIterators.asIterator(map.valuesIterator());
+      }
+
+      @Override
+      public LongSet keySet() {
+        return map.keySet();
       }
     };
     return myMap.equals(objMap);

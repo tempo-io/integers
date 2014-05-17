@@ -85,6 +85,11 @@ public class WritableLongObjMapFromLongIntMap implements WritableLongObjMap<Inte
   }
 
   @Override
+  public LongSet keySet() {
+    return myMap.keySet();
+  }
+
+  @Override
   public void clear() {
 
   }

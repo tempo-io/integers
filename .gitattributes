@@ -86,6 +86,7 @@ test/com/almworks/integers/LongParallelListTests.java -text
 test/com/almworks/integers/LongProgressionTests.java -text
 test/com/almworks/integers/LongSameValuesListTests.java -text
 test/com/almworks/integers/LongSetBuilderTests.java -text
+test/com/almworks/integers/LongSetChecker.java -text
 test/com/almworks/integers/LongSubListTests.java -text
 test/com/almworks/integers/LongTreeSetTests.java -text
 test/com/almworks/integers/LongTwoWayMapTests.java -text

@@ -16,13 +16,13 @@
 
 package com.almworks.integers;
 
-import junit.framework.Assert;
-import junit.framework.ComparisonFailure;
 import org.jetbrains.annotations.Nullable;
+import org.junit.ComparisonFailure;
 
 import java.util.*;
 
 import static com.almworks.integers.IntegersUtils.indexOf;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author : Dyoma
@@ -32,7 +32,7 @@ public class CollectionsCompare {
   public static Object[] EMPTY_OBJECTS = new Object[]{};
 
   public void singleElement(Object element, Collection<?> collection) {
-    Assert.assertNotNull("Collection is null", collection);
+    assertNotNull("Collection is null", collection);
     int size = collection.size();
     if (size == 1 && areEqual(collection.iterator().next(), element)) return;
     Failure failure = createFailure();
@@ -77,8 +77,8 @@ public class CollectionsCompare {
 
 
   public void order(List<?> expected, List<?> actual) {
-    Assert.assertNotNull("Expected in null", expected);
-    Assert.assertNotNull("Collection in null", actual);
+    assertNotNull("Expected in null", expected);
+    assertNotNull("Collection in null", actual);
     if (areOrdersEqual(expected, actual)) return;
     Failure failure = createFailure();
     failure.expected().setCollection(expected);
@@ -92,8 +92,8 @@ public class CollectionsCompare {
   }
 
   public void order(int[] actual, int ... expected) {
-    Assert.assertNotNull("Actual is null", actual);
-    Assert.assertNotNull("Expected is null", expected);
+    assertNotNull("Actual is null", actual);
+    assertNotNull("Expected is null", expected);
     if (Arrays.equals(actual, expected)) return;
     Failure failure = createFailure();
     failure.actual().setIntArray(actual);
@@ -105,8 +105,8 @@ public class CollectionsCompare {
   }
 
   public void order(long[] actual, long ... expected) {
-    Assert.assertNotNull("Actual is null", actual);
-    Assert.assertNotNull("Expected is null", expected);
+    assertNotNull("Actual is null", actual);
+    assertNotNull("Expected is null", expected);
     if (Arrays.equals(actual, expected)) return;
     Failure failure = createFailure();
     failure.actual().setLongArray(actual);
@@ -118,8 +118,8 @@ public class CollectionsCompare {
   }
 
   public void order(byte[] actual, byte... expected) {
-    Assert.assertNotNull("Actual is null", actual);
-    Assert.assertNotNull("Expected is null", expected);
+    assertNotNull("Actual is null", actual);
+    assertNotNull("Expected is null", expected);
 
     if (Arrays.equals(actual, expected)) return;
     Failure failure = createFailure();

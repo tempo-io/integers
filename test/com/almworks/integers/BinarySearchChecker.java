@@ -18,7 +18,7 @@ package com.almworks.integers;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
 import static com.almworks.util.TestUtil.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class BinarySearchChecker {
   private static void check(BinarySearcher bs, LongArray values) {

@@ -18,8 +18,7 @@ package com.almworks.integers;
 
 import java.util.NoSuchElementException;
 
-import static junit.framework.Assert.*;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class LongListIteratorSpecificationChecker extends LongIteratorSpecificationChecker<LongListIterator> {
   private LongListIteratorSpecificationChecker(IteratorGetter<LongListIterator> getter, ValuesType type) {

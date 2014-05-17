@@ -49,4 +49,9 @@ public class LongObjHppcOpenHashMapTests extends WritableLongIntMapChecker<Writa
 
     return Arrays.asList(map0, map1, map2);
   }
+
+  @Override
+  public void testIteratorConcurrentModificationException2() {
+    // empty
+  }
 }

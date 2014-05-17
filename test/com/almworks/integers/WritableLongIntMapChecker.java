@@ -73,7 +73,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     map = createMap();
   }
 
-  public void testSimple() {
+  public void testSimpleMap() {
     for (int i = 0; i < 10; i++) {
       map.put(i, i * i);
     }
@@ -119,19 +119,6 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
       IntArray values = generateRandomIntArray(keys.size(), UNORDERED);
 
       for (T map : createMapsFromLists(keys, values)) {
-        int keyForAdd = 0;
-        while (map.containsKey(keyForAdd)) keyForAdd = RAND.nextInt();
-
-        LongIterator keysIt = map.keysIterator();
-        IntIterator valuesIt = map.valuesIterator();
-        LongIntIterator it = map.iterator();
-
-        map.add(keyForAdd, keyForAdd * keyForAdd);
-        checkIteratorThrowsCME(keysIt);
-        checkIteratorThrowsCME(valuesIt);
-        checkIteratorThrowsCME(it);
-        map.remove(keyForAdd);
-
         LongArray actualKeys = LongCollections.collectIterables(map.size(), map.keysIterator());
         IntArray actualValues = IntCollections.collectIterable(map.size(), map.valuesIterator());
         CHECK.unordered(actualKeys, keys);
@@ -147,6 +134,32 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
         CHECK.unordered(actualValues, values);
       }
 
+    }
+  }
+
+  public void testIteratorConcurrentModificationException2() {
+    // assumed that method createMapsFromLists returns variants with all constructors
+    int attemptsCount = 10;
+    int maxSize = 50;
+//    int maxSize = 1000;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      LongArray keys = generateRandomLongArray(maxSize, SORTED_UNIQUE);
+      IntArray values = generateRandomIntArray(keys.size(), UNORDERED);
+
+      for (T map : createMapsFromLists(keys, values)) {
+        int keyForAdd = 0;
+        while (map.containsKey(keyForAdd)) keyForAdd = RAND.nextInt();
+
+        LongIterator keysIt = map.keysIterator();
+        IntIterator valuesIt = map.valuesIterator();
+        LongIntIterator it = map.iterator();
+
+        map.add(keyForAdd, keyForAdd * keyForAdd);
+        checkIteratorThrowsCME(keysIt);
+        checkIteratorThrowsCME(valuesIt);
+        checkIteratorThrowsCME(it);
+        map.remove(keyForAdd);
+      }
     }
   }
 
@@ -338,7 +351,8 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     }
   }
 
-  public void testHashCode2() {
+  @Override
+  public void testHashCode() {
     int attemptsCount = 10, shuffleCount = 10;
     int sizeMax = 600, step = 50;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {

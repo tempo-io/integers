@@ -34,7 +34,7 @@ import static com.almworks.integers.LongSortedUniqueListSet.asSet;
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
  * */
-public abstract class WritableLongSetChecker<T extends WritableLongSet> extends IntegersFixture {
+public abstract class WritableLongSetChecker<T extends WritableLongSet> extends LongSetChecker<T> {
   protected abstract T createSet();
 
   protected abstract T createSetWithCapacity(int capacity);
@@ -90,7 +90,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     checkSet(set, expected);
   }
 
-  public void testContains() {
+  public void testContains2() {
     int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
@@ -105,7 +105,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     }
   }
 
-  public void testContains2() {
+  public void testContains3() {
     int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
@@ -208,7 +208,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     });
   }
 
-  public void testSimple() {
+  public void testAddRemoveSimple2() {
     set.addAll(3, 1, 5, 2, 0, 4);
     LongList expected = LongProgression.arithmetic(0, 6);
     checkSet(set, expected);
@@ -259,16 +259,6 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     }
   }
 
-  public void testSimple3() {
-    int size = 20, maxVal = 1000, attemptsCount = 10;
-    for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      LongArray expected = generateRandomLongArray(size, SORTED_UNIQUE, maxVal);
-      for (LongSet set : createSets(expected)) {
-        checkSet(set, expected);
-      }
-    }
-  }
-
   public void testEdgeCases() {
     assertFalse(set.exclude(Long.MIN_VALUE));
     assertFalse(set.exclude(0));
@@ -299,27 +289,6 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
 
     res.sortUnique();
     checkSet(set, res);
-  }
-
-  public void testFromSortedList() throws Exception {
-    int testNumber = 10;
-    int arraySize = 10000;
-    for (int i = 0; i < testNumber; i++) {
-      LongArray res = IntegersFixture.generateRandomLongArray(arraySize, SORTED_UNIQUE);
-      LongArray res2 = new LongArray(res.size() * 3 + 1);
-      for (int j = 0, n = res.size(); j < n; j++) {
-        long val = res.get(j);
-        res2.addAll(val - 1, val, val + 1);
-      }
-      res2.sortUnique();
-
-      for (WritableLongSet set : createSets(res)) {
-        for (int j = 0; j < res2.size(); j++) {
-          long val = res2.get(j);
-          assertEquals(res.binarySearch(val) >= 0, set.contains(val));
-        }
-      }
-    }
   }
 
   public void testRandom() {
@@ -440,20 +409,6 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
         return isSorted ? set.iterator() : toSorted(false, set).iterator();
       }
     }, new SetOperationsChecker.IntersectionGetter(isSorted), true, sortedStatus);
-  }
-
-  public void testIteratorHasMethods() {
-    set.addAll(1, 2, 3, 4, 5, 6, 7);
-    LongIterator iterator = set.iterator();
-    assertFalse(iterator.hasValue());
-    assertTrue(iterator.hasNext());
-    iterator.next();
-    assertTrue(iterator.hasValue());
-    for (int i = 0; i < 6; i++) {
-      iterator.next();
-    }
-    assertTrue(iterator.hasValue());
-    assertFalse(iterator.hasNext());
   }
 
   public void testIterator() {
@@ -607,25 +562,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     }
   }
 
-  protected void checkBounds(LongArray array) {
-    long upper = array.size() == 0 ? MIN : array.getLast(0);
-    long lower = array.size() == 0 ? MAX : array.get(0);
-    for (WritableLongSet set : createSets(array)) {
-      WritableLongSortedSet sortedSet = (WritableLongSortedSet) set;
-      assertEquals(sortedSet.toString(), upper, sortedSet.getUpperBound());
-      assertEquals(sortedSet.toString(), lower, sortedSet.getLowerBound());
-    }
-  }
-
-  public void testGetBounds() {
-    if (!(set instanceof WritableLongSortedSet)) return;
-    LongArray values = LongArray.create(MIN, MIN + 1, 0, 1, MAX - 1, MAX);
-    for (LongArray array : LongCollections.allSubLists(values)) {
-      checkBounds(array);
-    }
-  }
-
-  public void testToNativeArray() {
+  public void testToNativeArray2() {
     for (T set : createSets(LongProgression.range(20, 40))) {
       long[] ar = new long[40];
       set.toNativeArray(ar, 3);
@@ -647,90 +584,6 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     }
     for (long i: ap(0, 200, 1)) {
       assertEquals(i % 2 == 1, set.include(i));
-    }
-  }
-
-  public void testIterators2() {
-    if (!(set instanceof LongSortedSet)) return;
-    set.addAll(ap(0, 10, 1));
-    LongIterator it1 = set.iterator();
-    for (int i = 0; i < 5; i++) {
-      assertEquals(i, it1.nextValue());
-    }
-    // call coalesce
-    CHECK.order(new LongArray(ap(0, 10, 1)), set.toArray());
-    CHECK.order(new LongArray(ap(0, 10, 1)).iterator(), set.iterator());
-    CHECK.order(new LongArray(ap(5, 5, 1)).iterator(), it1);
-  }
-
-  public void testTailIteratorRandom() {
-    if (!(set instanceof LongSortedSet)) return;
-    final int size = 200,
-        testCount = 5;
-    LongArray expected;
-    LongArray testValues;
-    for (int i = 0; i < testCount; i++) {
-      expected = new LongArray(LongIterators.limit(randomIterator(), size));
-      expected.sortUnique();
-      testValues = LongCollections.collectLists(
-          expected, map(LongFunctions.INC, expected), map(LongFunctions.DEC, expected));
-      testValues.sortUnique();
-      for (T set0 : createSets(expected)) {
-        LongSortedSet sortedSet = (LongSortedSet) set0;
-        for (int j = 0; j < testValues.size(); j++) {
-          long key = testValues.get(j);
-          int ind = expected. binarySearch(key);
-          CHECK.order(expected.iterator(ind >= 0 ? ind : -ind - 1), sortedSet.tailIterator(key));
-        }
-      }
-    }
-  }
-
-  public void testHashCode() {
-    int attemptsCount = 10, shuffleCount = 10;
-    int sizeMax = 600, step = 50;
-    for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      for (int size = step; size < sizeMax; size += step) {
-        LongArray array = generateRandomLongArray(size, SORTED_UNIQUE);
-        int expectedHash = 0;
-        for (LongIterator it : array) {
-          expectedHash += IntegersUtils.hash(it.value());
-        }
-
-        for (T set0 : createSets(array)) {
-          assertEquals(expectedHash, set0.hashCode());
-        }
-
-        IntArray indices = new IntArray(IntProgression.range(size));
-        for (int i = 0; i < shuffleCount; i++) {
-          set = createSet();
-          set.addAll(array.get(indices));
-          assertEquals(expectedHash, set.hashCode());
-          indices.shuffle(RAND);
-        }
-      }
-    }
-  }
-
-  public void testEquals() {
-    int size = 100;
-    int attemptsCount = 10;
-    for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      // suppose array != [0, 1, 2, ... size]
-      LongArray array = generateRandomLongArray(size, SORTED_UNIQUE);
-      long lastElem = array.getLast(0);
-      LongList list = LongCollections.concatLists(array.subList(0, array.size() - 1), new LongList.Single(lastElem + 1));
-      for (T set0 : createSets(array)) {
-        assertTrue(set0.equals(set0));
-        assertFalse(set0.equals(null));
-        assertFalse(set0.equals(LongSet.EMPTY));
-        assertFalse(set0.equals(asSet(list)));
-        for (T set1 : createSets(array)) {
-          assertTrue(set0.equals(set1));
-          assertTrue(set1.equals(set0));
-        }
-
-      }
     }
   }
 }

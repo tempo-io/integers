@@ -100,7 +100,7 @@ public class LongObjMapTests extends WritableLongIntMapChecker<WritableLongIntMa
     }
   }
 
-  public void testIterator() {
+  public void testIterator2() {
     myMap.put(0, "0");
     myMap.put(100, "100");
 
@@ -168,7 +168,7 @@ public class LongObjMapTests extends WritableLongIntMapChecker<WritableLongIntMa
     myMap.put(0, "0");
     myMap.put(100, "100");
     myMap.put(228, "228");
-    CHECK.order(myMap.keySet(), 0, 100, 228);
+    checkSet(myMap.keySet(), LongArray.create(0, 100, 228));
 
     LongArray expected = new LongArray(10000);
     expected.addAll(0, 100, 228);
@@ -178,6 +178,10 @@ public class LongObjMapTests extends WritableLongIntMapChecker<WritableLongIntMa
       myMap.put(value, Long.toString(value));
     }
     expected.sortUnique();
-    CHECK.order(myMap.keySet(), expected);
+    checkSet(myMap.keySet(), expected);
+  }
+
+  public void testIteratorConcurrentModificationException2() {
+    // empty
   }
 }

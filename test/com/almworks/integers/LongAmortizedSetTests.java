@@ -227,7 +227,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
     }
   }
 
-  public void testContains2() {
+  public void testContains4() {
     int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
