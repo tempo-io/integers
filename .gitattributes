@@ -98,7 +98,6 @@ test/com/almworks/integers/WritableLongIntMapFromLongObjMap.java -text
 test/com/almworks/integers/WritableLongIntMapProjection.java -text
 test/com/almworks/integers/WritableLongListChecker.java -text
 test/com/almworks/integers/WritableLongListRemovingDecoratorTests.java -text
-test/com/almworks/integers/WritableLongObjMapFromLongIntMap.java -text
 test/com/almworks/integers/WritableLongSetChecker.java -text
 test/com/almworks/integers/segmented/LongSegmentedArrayTests.java -text
 test/com/almworks/integers/segmented/TestEnvForLongSegmentedArray.java -text

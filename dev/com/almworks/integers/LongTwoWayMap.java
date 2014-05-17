@@ -331,8 +331,7 @@ public class LongTwoWayMap {
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
   public void transformKeys(LongToLong injection) throws NonInjectiveFunctionException {
     int n = size();
-    LongArray newKeys = new LongArray(n);
-    for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
+    LongArray newKeys = new LongArray(LongCollections.map(injection, myKeys));
 
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
