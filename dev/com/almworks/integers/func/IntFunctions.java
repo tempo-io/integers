@@ -21,8 +21,7 @@
 
 package com.almworks.integers.func;
 
-import com.almworks.integers.IntIterable;
-import com.almworks.integers.IntIterator;
+import com.almworks.integers.*;
 
 public class IntFunctions {
   private IntFunctions() {}
@@ -194,6 +193,15 @@ public class IntFunctions {
       @Override
       public String toString() {
         return "swap (" + f + ')';
+      }
+    };
+  }
+
+  public static IntIntToInt comparator(final IntList list) {
+    return new IntIntToInt() {
+      @Override
+      public int invoke(int a, int b) {
+        return IntCollections.compare(list.get(a), list.get(b));
       }
     };
   }

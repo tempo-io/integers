@@ -23,6 +23,7 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.LongFunctions;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -208,12 +209,7 @@ public class LongCollections {
     final LongArray sorted = new LongArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-        new IntIntToInt() {
-          @Override
-          public int invoke(int a, int b) {
-            return LongCollections.compare(sorted.get(a), sorted.get(b));
-          }
-        },
+        LongFunctions.comparator(sorted),
         new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {

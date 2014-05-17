@@ -18,6 +18,7 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.LongFunctions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,12 +55,8 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
 
     final LongArray keysArray = new LongArray(expectedKeys);
     final IntArray valuesArray = new IntArray(expectedValues);
-    IntegersUtils.quicksort(keysArray.size(), new IntIntToInt() {
-          @Override
-          public int invoke(int a, int b) {
-            return LongCollections.compare(keysArray.get(a), keysArray.get(b));
-          }
-        }, new IntIntProcedure() {
+    IntegersUtils.quicksort(keysArray.size(), LongFunctions.comparator(keysArray),
+        new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
             keysArray.swap(a, b);

@@ -21,10 +21,7 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntIntProcedure;
-import com.almworks.integers.func.LongLongToLong;
-import com.almworks.integers.func.LongToLong;
+import com.almworks.integers.func.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,10 +64,10 @@ public class LongTwoWayMap {
   @Nullable
   private Long containsKeysSorted(LongList keys, boolean shouldContain) {
     for (int i = 0,
-      m = keys.size(),
-      pos = 0,
-      n = myKeys.size()
-        ; i < m; ++i)
+             m = keys.size(),
+             pos = 0,
+             n = myKeys.size()
+                 ; i < m; ++i)
     {
       long key = keys.get(i);
       pos = myKeys.binarySearch(key, pos, n);
@@ -168,8 +165,8 @@ public class LongTwoWayMap {
       for (int i = 0, iEnd = myIdxMap.size(); i < iEnd; ++i) {
         int pos = myIdxMap.get(i);
         if (inc > 0
-          ? pos >= newPos && pos < oldPos
-          : pos > oldPos && pos <= newPos)
+            ? pos >= newPos && pos < oldPos
+            : pos > oldPos && pos <= newPos)
         {
           myIdxMap.set(i, pos + inc);
         }
@@ -304,21 +301,16 @@ public class LongTwoWayMap {
     // Sort the values remembering the sorting transposition, r
     final IntArray r = new IntArray(IntProgression.arithmetic(0, n));
     IntegersUtils.quicksort(n,
-      // order
-      new IntIntToInt() {
-        @Override
-        public int invoke(int i, int j) {
-          return LongCollections.compare(myValues.get(i), myValues.get(j));
+        // order
+        LongFunctions.comparator(myValues),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int i, int j) {
+            myValues.swap(i, j);
+            r.swap(i, j);
+          }
         }
-      },
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int i, int j) {
-          myValues.swap(i, j);
-          r.swap(i, j);
-        }
-      }
     );
     // The trickier part is to restore the index map.
     // Previously, we had k = v*p where k - keys, v - values, p - index map (effectively, a transposition); a*p is a new vector,b, such as b[i] = a[p[i]].
@@ -341,7 +333,7 @@ public class LongTwoWayMap {
     int n = size();
     LongArray newKeys = new LongArray(n);
     for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
-  
+
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
     int dupIdx = LongCollections.findDuplicateSorted(newKeys);
@@ -350,7 +342,7 @@ public class LongTwoWayMap {
     myIdxMap.clear();
     myKeys.addAll(newKeys);
     myIdxMap.addAll(newIdxMap);
-  
+
     assert checkInvariants(String.valueOf(injection));
   }
 
@@ -358,18 +350,16 @@ public class LongTwoWayMap {
     assert main.size() == parallel.size();
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
-      // compare
-      new IntIntToInt() { public int invoke(int a, int b) {
-        return LongCollections.compare(main.get(a), main.get(b));
-      }},
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int a, int b) {
-          main.swap(a, b);
-          parallel.swap(a, b);
+        // comparator
+        LongFunctions.comparator(main),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int a, int b) {
+            main.swap(a, b);
+            parallel.swap(a, b);
+          }
         }
-      }
     );
   }
 

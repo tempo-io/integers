@@ -340,7 +340,7 @@ public class LongSameValuesList extends AbstractWritableLongList {
       } else {
         removeTo = -ti - 2;
       }
-      // compare preceding and following values: if they are equal, don't set boundary - just remove
+      // comparator preceding and following values: if they are equal, don't set boundary - just remove
 
       followingValue = myMap.getValueAt(removeTo);
       long prevValue = prevValueForFindIndex(fi, followingValue);

@@ -175,6 +175,7 @@ public class LongParallelListMap implements LongLongIterable {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
+
     for (LongParallelList.Iterator ii = myMap.iterator(from, to); ii.hasNext();) {
       ii.next(null);
       ii.set(0, 0, (long)(ii.get(0, 0) + increment));
@@ -255,7 +256,7 @@ public class LongParallelListMap implements LongLongIterable {
     @NotNull
     @Override
     public LongLongIterator iterator() {
-      return null;
+      return this;
     }
   }
 }

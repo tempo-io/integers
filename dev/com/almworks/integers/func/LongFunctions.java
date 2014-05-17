@@ -21,8 +21,10 @@
 
 package com.almworks.integers.func;
 
+import com.almworks.integers.LongCollections;
 import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
+import com.almworks.integers.LongList;
 
 public class LongFunctions {
   private LongFunctions() {}
@@ -197,6 +199,16 @@ public class LongFunctions {
       }
     };
   }
+
+  public static IntIntToInt comparator(final LongList list) {
+    return new IntIntToInt() {
+      @Override
+      public int invoke(int a, int b) {
+        return LongCollections.compare(list.get(a), list.get(b));
+      }
+    };
+  }
+
 
   public static LongLongToLong ignore1(final LongToLong f) {
     return new LongLongToLong() {

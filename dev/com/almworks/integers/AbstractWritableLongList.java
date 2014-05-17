@@ -23,6 +23,7 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.LongFunctions;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 
@@ -259,19 +260,16 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
         assert list.size() == size();
       }
     }
-    IntegersUtils.quicksort(size(), new IntIntToInt() {
-      public int invoke(int a, int b) {
-        return LongCollections.compare(get(a), get(b));
-      }
-    }, new IntIntProcedure() {
-      public void invoke(int a, int b) {
-        swap(a, b);
-        if (sortAlso != null)
-          for (WritableLongList list : sortAlso) {
-            list.swap(a, b);
+    IntegersUtils.quicksort(size(), LongFunctions.comparator(this),
+        new IntIntProcedure() {
+          public void invoke(int a, int b) {
+            swap(a, b);
+            if (sortAlso != null)
+              for (WritableLongList list : sortAlso) {
+                list.swap(a, b);
+              }
           }
-      }
-    });
+        });
   }
 
   public void sortUnique() {
