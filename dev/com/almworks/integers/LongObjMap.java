@@ -21,6 +21,7 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -104,7 +105,12 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
 
   @Override
   public LongListIterator keysIterator() {
-    return myKeys.iterator();
+    return new LongFailFastListIterator(myKeys.iterator()) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
   }
 
   @Override
@@ -135,16 +141,9 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
     };
   }
 
-  /**
-   * Returns a unique sorted {@link LongList} view of the keys contained in this map.
-   * The collection is backed by the map, so changes to the map are
-   * reflected in the keySet. Unlike {@link java.util.Map#keySet()},
-   * {@link LongObjMap#keySet()} returns read-only list.
-   *
-   * @return LongList of the values contained in this map
-   * */
-  public LongList keySet() {
-    return myKeys;
+  @Override
+  public LongSortedSet keySet() {
+    return LongSortedUniqueListSet.asSet(myKeys);
   }
 
   public int size() {

@@ -61,6 +61,11 @@ public interface LongIntMap extends LongIntIterable {
   IntIterator valuesIterator();
 
   /**
+   * @return a {@link LongSet} view of the keys contained in this map.
+   */
+  LongSet keySet();
+
+  /**
    * Compares the specified object with this map for equality. Returns
    * <tt>true</tt> if and only if the specified object is also a
    * {@link LongIntMap} and both objects contain exactly the same key-value pairs,

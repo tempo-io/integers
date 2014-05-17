@@ -61,6 +61,11 @@ public interface LongObjMapI<T> extends LongObjIterable<T> {
   Iterator<T> valuesIterator();
 
   /**
+   * @return a {@link LongSet} view of the keys contained in this map.
+   */
+  LongSet keySet();
+
+  /**
    * Compares the specified object with this map for equality. Returns
    * <tt>true</tt> if and only if the specified object is also a
    * {@link com.almworks.integers.LongObjMapI} and both objects contain exactly the same key-value pairs,

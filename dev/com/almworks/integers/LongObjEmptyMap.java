@@ -80,4 +80,9 @@ public class LongObjEmptyMap<T> implements LongObjMapI<T> {
       }
     };
   }
+
+  @Override
+  public LongSet keySet() {
+    return LongSet.EMPTY;
+  }
 }

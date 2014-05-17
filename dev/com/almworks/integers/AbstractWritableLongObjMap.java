@@ -19,6 +19,8 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Iterator;
 
 import static com.almworks.integers.IntegersUtils.appendShortName;
@@ -46,6 +48,34 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
       if (!containsKey(it.value())) return false;
     }
     return true;
+  }
+
+  @Override
+  public LongSet keySet() {
+    return new AbstractLongSet() {
+      @Override
+      protected void toNativeArrayImpl(long[] dest, int destPos) {
+        for (LongIterator it : iterator()) {
+          dest[destPos++] = it.value();
+        }
+      }
+
+      @Override
+      public boolean contains(long value) {
+        return containsKey(value);
+      }
+
+      @Override
+      public int size() {
+        return AbstractWritableLongObjMap.this.size();
+      }
+
+      @NotNull
+      @Override
+      public LongIterator iterator() {
+        return keysIterator();
+      }
+    };
   }
 
   protected void modified() {

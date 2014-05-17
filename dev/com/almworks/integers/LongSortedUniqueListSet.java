@@ -22,7 +22,6 @@ public class LongSortedUniqueListSet extends AbstractLongSet implements LongSort
   protected final LongList myList;
 
   public static LongSortedUniqueListSet asSet(LongList sortedUniqueList) {
-    assert sortedUniqueList.isSortedUnique();
     return new LongSortedUniqueListSet(sortedUniqueList);
   }
 
