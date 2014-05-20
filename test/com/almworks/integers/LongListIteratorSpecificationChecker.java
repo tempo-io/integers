@@ -17,20 +17,21 @@
 package com.almworks.integers;
 
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
 public class LongListIteratorSpecificationChecker extends LongIteratorSpecificationChecker<LongListIterator> {
-  private LongListIteratorSpecificationChecker(IteratorGetter<LongListIterator> getter, ValuesType type) {
-    super(getter, type);
+  private LongListIteratorSpecificationChecker(Random random, IteratorGetter<LongListIterator> getter, ValuesType type) {
+    super(random, getter, type);
   }
 
-  public static void checkListIterator(IteratorGetter<LongListIterator> getter) {
-    checkListIterator(getter, ValuesType.ALL);
+  public static void checkListIterator(Random random, IteratorGetter<LongListIterator> getter) {
+    checkListIterator(random, getter, ValuesType.ALL);
   }
 
-  public static void checkListIterator(IteratorGetter<LongListIterator> getter, ValuesType type) {
-    LongListIteratorSpecificationChecker checker = new LongListIteratorSpecificationChecker(getter, type);
+  public static void checkListIterator(Random random, IteratorGetter<LongListIterator> getter, ValuesType type) {
+    LongListIteratorSpecificationChecker checker = new LongListIteratorSpecificationChecker(random, getter, type);
     checker.run();
   }
 

@@ -83,7 +83,7 @@ public class LongIteratorsTests extends IntegersFixture {
   }
 
   public void testLimitSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       @Override
       public List<LongIterator> get(long... values) {
         LongArray valuesArray2 = LongCollections.collectLists(LongArray.create(values), LongArray.create(10, 20));
@@ -125,10 +125,10 @@ public class LongIteratorsTests extends IntegersFixture {
       checkRange(test);
     }
     for (int attempt = 0; attempt < 20; attempt++) {
-      long start = (long)RAND.nextInt(2000) - 1000;
-      long step = RAND.nextInt(2000) - 1000;
+      long start = (long) myRand.nextInt(2000) - 1000;
+      long step = myRand.nextInt(2000) - 1000;
       if (step == 0) step++;
-      long stop = start + (step > 0 ? 1 : -1) * RAND.nextInt(1000);
+      long stop = start + (step > 0 ? 1 : -1) * myRand.nextInt(1000);
       checkRange(start, stop, step);
     }
 
@@ -148,9 +148,9 @@ public class LongIteratorsTests extends IntegersFixture {
         LongIterators.arithmetic(t[0], t[1], t[2]));
     }
     for (int attempt = 0; attempt < 20; attempt++) {
-      long start = RAND.nextInt();
-      int count = RAND.nextInt(100);
-      long step = RAND.nextInt(2000) - 1000;
+      long start = myRand.nextInt();
+      int count = myRand.nextInt(100);
+      long step = myRand.nextInt(2000) - 1000;
       if (attempt % 4 == 0) {
         step = 0;
       }

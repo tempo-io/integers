@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -148,7 +147,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
 
       for (T map : createMapsFromLists(keys, values)) {
         int keyForAdd = 0;
-        while (map.containsKey(keyForAdd)) keyForAdd = RAND.nextInt();
+        while (map.containsKey(keyForAdd)) keyForAdd = myRand.nextInt();
 
         LongIterator keysIt = map.keysIterator();
         IntIterator valuesIt = map.valuesIterator();
@@ -174,7 +173,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     for (int attempt = 0; attempt < attempts; attempt++) {
       map.clear();
       LongArray keys = generateRandomLongArray(size, SortedStatus.SORTED_UNIQUE, 100, 200);
-      keys.shuffle(RAND);
+      keys.shuffle(myRand);
       expected = new IntArray(size);
       for (int i = 0; i < keys.size(); i++) {
         long key = keys.get(i);
@@ -194,7 +193,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
       map.clear();
       LongArray keys = generateRandomLongArray(size, SortedStatus.SORTED_UNIQUE, maxVal);
       LongArray shuffledKeys = LongCollections.collectLists(keys, keys);
-      shuffledKeys.shuffle(RAND);
+      shuffledKeys.shuffle(myRand);
 
       for (int i = 0; i < shuffledKeys.size(); i++) {
         long key = shuffledKeys.get(i);
@@ -373,7 +372,7 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
           map = createMap();
           map.putAll(keys.get(indices), values.get(indices));
           assertEquals(expectedHash, map.hashCode());
-          indices.shuffle(RAND);
+          indices.shuffle(myRand);
         }
       }
     }

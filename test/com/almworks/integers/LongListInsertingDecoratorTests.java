@@ -62,11 +62,11 @@ public class LongListInsertingDecoratorTests extends LongListChecker<LongListIns
         LongArray source = LongArray.copy(values);
         IntLongListMap inserted = new IntLongListMap();
         int maxDiff = 4;
-        int curIdx = RAND.nextInt(maxDiff);
+        int curIdx = myRand.nextInt(maxDiff);
         int removeCount = 0;
         while (curIdx < source.size()) {
           inserted.add(curIdx + removeCount, source.removeAt(curIdx));
-          curIdx += 1 + RAND.nextInt(maxDiff);
+          curIdx += 1 + myRand.nextInt(maxDiff);
           removeCount++;
         }
         LongListInsertingDecorator resArray = new LongListInsertingDecorator(source, inserted);

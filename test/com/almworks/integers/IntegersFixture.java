@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -29,7 +28,7 @@ public abstract class IntegersFixture extends TestCase {
   protected static final CollectionsCompare CHECK = new CollectionsCompare();
 
   public static final String SEED = "com.almworks.integers.seed";
-  public static final Random RAND = createRandom();
+  public final Random myRand = createRandom();
 
   public enum SortedStatus {
     UNORDERED {
@@ -233,7 +232,7 @@ public abstract class IntegersFixture extends TestCase {
     return b.toString();
   }
 
-  private static void fillRandomArray(IntCollector collector, int arrayLength, int... minMaxValues) {
+  private static void fillRandomArray(Random random, IntCollector collector, int arrayLength, int... minMaxValues) {
     int mLen = minMaxValues.length;
     int minValue = 0, maxValue = Integer.MAX_VALUE;
     switch (mLen) {
@@ -253,7 +252,7 @@ public abstract class IntegersFixture extends TestCase {
     if (diff <= 0) throw new IllegalArgumentException(minValue + " " + maxValue);
 
     for (int i = 0; i < arrayLength; i++) {
-      collector.add(minValue + RAND.nextInt(diff));
+      collector.add(minValue + random.nextInt(diff));
     }
   }
 
@@ -266,9 +265,30 @@ public abstract class IntegersFixture extends TestCase {
    *                  the actual length may be less than maxLength.
    * @return {@link LongArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static LongArray generateRandomLongArray(int maxLength, SortedStatus status, int... minMaxValues) {
+  public LongArray generateRandomLongArray(int maxLength, SortedStatus status, int... minMaxValues) {
+    return generateRandomLongArray(myRand, maxLength, status, minMaxValues);
+  }
+
+  /**
+   * @see IntegersFixture#generateRandomLongArray(int, com.almworks.integers.IntegersFixture.SortedStatus, int...)
+   */
+  public static LongArray generateRandomLongArray(Random random, int maxLength, SortedStatus status, int... minMaxValues) {
     final LongArray res = new LongArray(maxLength);
-    fillRandomArray(new AbstractIntCollector() {
+    fillRandomArray(random, new AbstractIntCollector() {
+      public void add(int value) {
+        res.add(value);
+      }
+    }, maxLength, minMaxValues);
+    status.action(res);
+    return res;
+  }
+
+  /**
+   * @see IntegersFixture#generateRandomIntArray(int, com.almworks.integers.IntegersFixture.SortedStatus, int...)
+   */
+  public static IntArray generateRandomIntArray(Random random, int maxLength, SortedStatus status, int... minMaxValues) {
+    final IntArray res = new IntArray(maxLength);
+    fillRandomArray(random, new AbstractIntCollector() {
       public void add(int value) {
         res.add(value);
       }
@@ -286,18 +306,11 @@ public abstract class IntegersFixture extends TestCase {
    *                  the actual length may be less than maxLength.
    * @return {@link IntArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static IntArray generateRandomIntArray(int maxLength, SortedStatus status, int... minMaxValues) {
-    final IntArray res = new IntArray(maxLength);
-    fillRandomArray(new AbstractIntCollector() {
-      public void add(int value) {
-        res.add(value);
-      }
-    }, maxLength, minMaxValues);
-    status.action(res);
-    return res;
+  public IntArray generateRandomIntArray(int maxLength, SortedStatus status, int... minMaxValues) {
+    return generateRandomIntArray(myRand, maxLength, status, minMaxValues);
   }
 
-  public static LongIterator randomIterator() {
+  public LongIterator randomIterator() {
     return new AbstractLongIteratorWithFlag() {
       long myValue;
       @Override
@@ -307,7 +320,7 @@ public abstract class IntegersFixture extends TestCase {
 
       @Override
       protected void nextImpl() throws NoSuchElementException {
-        myValue = RAND.nextLong();
+        myValue = myRand.nextLong();
       }
 
       @Override

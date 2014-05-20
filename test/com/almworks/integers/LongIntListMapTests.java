@@ -17,7 +17,6 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntProcedure;
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.LongFunctions;
 
 import java.util.Arrays;
@@ -38,7 +37,7 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
   @Override
   protected List<LongIntListMap> createMapsFromLists(LongList keys, IntList values) {
     IntArray indices = new IntArray(IntProgression.range(keys.size()));
-    indices.shuffle(RAND);
+    indices.shuffle(myRand);
 
     LongIntListMap createdMap = new LongIntListMap();
     for (LongIntIterator it : LongIntIterators.pair(keys.get(indices), values.get(indices))) {

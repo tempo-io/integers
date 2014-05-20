@@ -55,7 +55,7 @@ public class LongListConcatenationTests extends LongListChecker<LongListConcaten
     concatenation = new LongListConcatenation();
     for (long value : values) {
       concatenation.addSlice(LongArray.create(value));
-      if (RAND.nextInt(5) == 0) {
+      if (myRand.nextInt(5) == 0) {
         concatenation.addSlice(LongList.EMPTY);
       }
     }

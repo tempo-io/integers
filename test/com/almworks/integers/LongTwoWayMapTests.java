@@ -82,7 +82,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     LongArray keySet = new LongArray(N_KEYS);
     int prime0 = 47;
     for (int n = 0; n < N_KEYS; ++n) {
-      int key = RAND.nextInt(N_KEYS);
+      int key = myRand.nextInt(N_KEYS);
       boolean hasAdded = keySet.contains(key);
       assertEquals(hasAdded, map.containsKey(key));
       if (!hasAdded) {
@@ -189,7 +189,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
       for (attempt = 0; attempt < 10; ++attempt) {
         LongArray keys = new LongArray();
         for (int i = 0; i < 5; ++i) {
-          int start = RAND.nextInt(N_KEYS);
+          int start = myRand.nextInt(N_KEYS);
           keys.addAll(arithmetic(start, i + 1));
         }
         removeDuplicates(keys);
@@ -282,7 +282,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     for (int i = 0; i < N_KEYS / 10; ++i) {
       int k;
       while (true) {
-        k = RAND.nextInt(N_KEYS)*3;
+        k = myRand.nextInt(N_KEYS)*3;
         if (!removed.contains(k)) {
           removed.add(k);
           break;
@@ -325,7 +325,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     map.insertAllRo(LongProgression.arithmetic(0, N_KEYS), apply(swap(MOD), PRIME));
     for (int i = 0; i < N_TRIALS; ++i) {
       LongArray toRemove = new LongArray(N_REMOVED_STEP);
-      for (int j = 0; j < N_REMOVED_STEP; ++j) toRemove.add(RAND.nextInt(N_KEYS));
+      for (int j = 0; j < N_REMOVED_STEP; ++j) toRemove.add(myRand.nextInt(N_KEYS));
       LongList notInMap = map.removeAll(toRemove);
       for (int j = 0; j < notInMap.size(); ++j)
         assertTrue(i + " " + j, alreadyRemoved.contains(notInMap.get(j)));
@@ -415,7 +415,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     for (int i = 0; i < N_ATTEMPTS; ++i) {
       LongArray toRemove = new LongArray();
       for (int j = 0; j < VALS_IN_ATTEMPT; ++j) {
-        int v = RAND.nextInt(PRIME);
+        int v = myRand.nextInt(PRIME);
         toRemove.add(v);
         removed.add(v);
       }

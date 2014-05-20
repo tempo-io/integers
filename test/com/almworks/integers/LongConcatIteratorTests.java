@@ -26,7 +26,7 @@ public class LongConcatIteratorTests extends IntegersFixture {
   public LongIterator[] its;
 
   public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<LongIterator> get(final long... values) {
         List<LongIterator> res = new ArrayList<LongIterator>();

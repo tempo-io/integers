@@ -71,7 +71,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
     int testNumber = 10;
     int arraySize = 10000;
     for (int i = 0; i < testNumber; i++) {
-      LongArray res = IntegersFixture.generateRandomLongArray(arraySize, SORTED_UNIQUE);
+      LongArray res = generateRandomLongArray(arraySize, SORTED_UNIQUE);
       LongArray res2 = new LongArray(res.size() * 3 + 1);
       for (int j = 0, n = res.size(); j < n; j++) {
         long val = res.get(j);
@@ -206,7 +206,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         for (int i = 0; i < shuffleCount; i++) {
           for (T set : createSets(array.get(indices))) {
             assertEquals(expectedHash, set.hashCode());
-            indices.shuffle(RAND);
+            indices.shuffle(myRand);
           }
         }
       }

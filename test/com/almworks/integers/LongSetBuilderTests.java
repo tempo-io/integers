@@ -106,13 +106,13 @@ public class LongSetBuilderTests extends LongSetChecker<LongSetBuilder> {
 
   public void testAddRandom() {
     for (int i = 0; i < 20; i++) { // replace 100 with 20 to make test run faster on build agent
-      int size = RAND.nextInt(16000) + 10;
-      int factor = RAND.nextInt(10) + 1;
+      int size = myRand.nextInt(16000) + 10;
+      int factor = myRand.nextInt(10) + 1;
       int count = size * factor / 2;
       LongArray set = new LongArray();
       LongSetBuilder builder = new LongSetBuilder(5);
       for (int j = 0; j < count; j++) {
-        int v = RAND.nextInt(size);
+        int v = myRand.nextInt(size);
         set.add(v);
         builder.add(v);
       }
@@ -125,13 +125,13 @@ public class LongSetBuilderTests extends LongSetChecker<LongSetBuilder> {
   public void testAddAllRandom() {
     int elementsCount = 300;
     for (int i = 0; i < 3; i++) {
-      int size = RAND.nextInt(1600) + 10;
-      int factor = RAND.nextInt(10) + 1;
+      int size = myRand.nextInt(1600) + 10;
+      int factor = myRand.nextInt(10) + 1;
       int count = size * factor / 2;
       LongArray set = new LongArray();
       LongSetBuilder builder = new LongSetBuilder(100);
       for (int j = 0; j < count; j++) {
-        LongArray v = IntegersFixture.generateRandomLongArray(elementsCount, IntegersFixture.SortedStatus.UNORDERED, size);
+        LongArray v = generateRandomLongArray(elementsCount, IntegersFixture.SortedStatus.UNORDERED, size);
         set.addAll(v);
         builder.addAll(v);
       }
@@ -227,7 +227,7 @@ public class LongSetBuilderTests extends LongSetChecker<LongSetBuilder> {
       LongSetBuilder b = new LongSetBuilder(tempSize);
       for (int i = 0; i < addCount; i++) {
         int start = stop;
-        stop = start + RAND.nextInt(tempSize * 2);
+        stop = start + myRand.nextInt(tempSize * 2);
         b.addAll(LongProgression.range(start, stop));
         assertEquals(stop, b.size());
       }

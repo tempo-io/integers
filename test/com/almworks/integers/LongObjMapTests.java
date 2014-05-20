@@ -173,7 +173,7 @@ public class LongObjMapTests extends WritableLongIntMapChecker<WritableLongIntMa
     LongArray expected = new LongArray(10000);
     expected.addAll(0, 100, 228);
     for (int i = 0; i < 10000; i++) {
-      long value = RAND.nextInt();
+      long value = myRand.nextInt();
       expected.add(value);
       myMap.put(value, Long.toString(value));
     }

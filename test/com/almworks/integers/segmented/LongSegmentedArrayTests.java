@@ -71,7 +71,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
       for (int point: points) {
         array = new LongSegmentedArray();
         array.addAll(vals.subList(0, point));
-        array.add(RAND.nextLong());
+        array.add(myRand.nextLong());
         array.addAll(vals.subList(point, size));
         array.removeAt(point);
         res.add(array);

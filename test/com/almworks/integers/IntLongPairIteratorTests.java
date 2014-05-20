@@ -25,7 +25,7 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 
 public class IntLongPairIteratorTests extends IntegersFixture {
   public void testRightIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       private LongIterator getFromProjection(IntIterable leftIterable, LongIterable rightIterable) {
         return rightProjection(new IntLongPairIterator(leftIterable, rightIterable));
       }
@@ -45,7 +45,7 @@ public class IntLongPairIteratorTests extends IntegersFixture {
   }
 
   public void testLeftIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       private LongIterator getFromProjection(IntIterable leftIterable, LongIterable rightIterable) {
         return LongIterators.asLongIterator(leftProjection(new IntLongPairIterator(leftIterable, rightIterable)));
       }

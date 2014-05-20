@@ -42,7 +42,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
 
     // [...]~
     source = LongArray.copy(values);
-    source.add(RAND.nextInt());
+    source.add(myRand.nextInt());
     IntArray indices = IntArray.create(values.length);
     prepareSortedIndices(indices);
     resArray = createFromPrepared(source, indices);
@@ -50,7 +50,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
     res.add(resArray);
 
     // ~[...]~
-    source = LongCollections.collectIterables(values.length + 2, new LongIterator.Single(RAND.nextInt()), source);
+    source = LongCollections.collectIterables(values.length + 2, new LongIterator.Single(myRand.nextInt()), source);
     indices = IntArray.create(0, values.length + 1);
     prepareSortedIndices(indices);
     resArray = createFromPrepared(source, indices);
@@ -70,7 +70,7 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
     int pos = source.size() / 2;
     if (pos != 0) {
       source = LongArray.copy(values);
-      source.insert(pos, RAND.nextInt());
+      source.insert(pos, myRand.nextInt());
       indices = IntArray.create(pos);
       prepareSortedIndices(indices);
       resArray = createFromPrepared(source, indices);
@@ -85,11 +85,11 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
         source = LongArray.copy(values);
         indices = IntArray.create();
         int maxDiff = 4;
-        int curIdx = RAND.nextInt(maxDiff);
+        int curIdx = myRand.nextInt(maxDiff);
         while (curIdx < source.size()) {
           indices.add(curIdx);
-          source.insert(curIdx, RAND.nextInt());
-          curIdx += 1 + RAND.nextInt(maxDiff);
+          source.insert(curIdx, myRand.nextInt());
+          curIdx += 1 + myRand.nextInt(maxDiff);
         }
         prepareSortedIndices(indices);
         resArray = createFromPrepared(source, indices);

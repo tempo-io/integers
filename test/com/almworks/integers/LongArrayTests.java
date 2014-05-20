@@ -147,7 +147,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
   }
 
   public void testRetainComplex() {
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray res = LongArray.copy(arrays[0]);
@@ -157,7 +157,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
       }
     }, new SetOperationsChecker.IntersectionGetter(false), true, UNORDERED);
 
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray res = LongArray.copy(arrays[0]);
@@ -174,7 +174,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
       array = generateRandomLongArray(arraySize, SORTED, arraySize * 3 / 2);
       LongArray values = generateRandomLongArray(valuesSize, UNORDERED, arraySize * 3 / 2);
       values.addAll(values.get(range(0, values.size(), 2)));
-      values.shuffle(RAND);
+      values.shuffle(myRand);
       checkRetain(array, values, false);
 
       values.sort();
@@ -195,7 +195,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
 
   public void testMergeWithSameLength() {
     // is likely to be launched branch with realloc
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -205,7 +205,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
     }, unionGetter, true, SORTED_UNIQUE);
 
     // guaranteed launch branch with replace
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -218,7 +218,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
 
   public void testMergeWithSmall() {
     // is likely to be launched branch with realloc
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -228,7 +228,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
     }, unionGetter, true, SORTED_UNIQUE, SORTED);
 
     // guaranteed launch branch with replace
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -240,7 +240,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
   }
 
   public void testMerge() {
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterable get(LongArray... arrays) {
         LongArray copy = LongArray.copy(arrays[0]);
@@ -275,7 +275,7 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
     long[] values = new long[size];
     for (int attempt = 0; attempt < 10; attempt++) {
       for (int i = 0; i < size; i++) {
-        values[i] = RAND.nextInt(maxVal);
+        values[i] = myRand.nextInt(maxVal);
       }
       LongArray actual = LongArray.create(values);
       assertEquals(values.length, actual.size());

@@ -29,7 +29,6 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.map;
 import static com.almworks.integers.LongCollections.toSorted;
 import static com.almworks.integers.LongProgression.range;
-import static com.almworks.integers.LongSortedUniqueListSet.asSet;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks
@@ -144,8 +143,8 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
       if (attempt % 3 == 0) set = createSet();
       set.clear();
       expected.clear();
-      for (int i = 0, n = RAND.nextInt(addCount); i < n; i++) {
-        int value = RAND.nextInt(maxVal);
+      for (int i = 0, n = myRand.nextInt(addCount); i < n; i++) {
+        int value = myRand.nextInt(maxVal);
         set.add(value);
         expected.add(value);
       }
@@ -401,7 +400,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   public void testRetainComplex() {
     final boolean isSorted = set instanceof LongSortedSet;
     final SortedStatus sortedStatus = isSorted ? SORTED_UNIQUE : UNORDERED;
-    setOperations.check(new SetOperationsChecker.SetCreator() {
+    setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         set = createSet(arrays[0]);
@@ -437,7 +436,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
 
   public void testIteratorSpecification() {
     if (!(set instanceof LongSortedSet)) return;
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       @Override
       public List<LongIterator> get(long... values) {
         assert 0 == LongCollections.isSortedUnique(false, values, 0, values.length);
@@ -538,7 +537,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
     for (int size : sizes) {
       for (int attempt = 0; attempt < attempts; attempt++) {
         LongArray toAdd = generateRandomLongArray(size, SORTED_UNIQUE, maxVal);
-        toAdd.shuffle(RAND);
+        toAdd.shuffle(myRand);
         set = createSet();
         for (int i = 0; i < toAdd.size(); i++) {
           long value = toAdd.get(i);

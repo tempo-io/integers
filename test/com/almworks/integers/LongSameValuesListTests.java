@@ -167,7 +167,7 @@ public class LongSameValuesListTests extends WritableLongListChecker<LongSameVal
       LongArray array = generateRandomLongArray(1000, UNORDERED, 500);
       array.sort();
       list.addAll(array);
-      int index = RAND.nextInt(list.size());
+      int index = myRand.nextInt(list.size());
       int len = list.size() - index;
       LongList insertArray;
       if (len > 1) {
@@ -275,7 +275,7 @@ public class LongSameValuesListTests extends WritableLongListChecker<LongSameVal
       values = generateRandomLongArray(100, UNORDERED);
       counts = generateRandomIntArray(100, UNORDERED, 4);
       if (i == attemptsCount - 1) {
-        values.add(RAND.nextLong());
+        values.add(myRand.nextLong());
         counts.add(0);
       }
       expected = new LongArray(values.size() * 3);

@@ -31,7 +31,7 @@ public class LongIntersectionIteratorTests extends IntegersFixture {
   }
 
   public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<? extends LongIterator> get(final long... values) {
         if (!new LongArray(values).isSortedUnique()) {
@@ -68,7 +68,7 @@ public class LongIntersectionIteratorTests extends IntegersFixture {
   }
 
   public void testAllCases() {
-    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+    new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return new LongIntersectionIterator(arrays);

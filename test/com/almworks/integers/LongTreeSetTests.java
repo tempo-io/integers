@@ -127,7 +127,7 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
         set = LongTreeSet.createFromSortedUnique(sortedUniqueArray);
       } else {
         set = LongTreeSet.createFromSortedUnique(
-            sortedUniqueArray.iterator(), RAND.nextInt(listSize * 2), types[attempt % 4  - 1]);
+            sortedUniqueArray.iterator(), myRand.nextInt(listSize * 2), types[attempt % 4  - 1]);
       }
       checkSet(set, sortedUniqueArray);
     }

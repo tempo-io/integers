@@ -16,6 +16,8 @@
 
 package com.almworks.integers;
 
+import java.util.Random;
+
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
 import static com.almworks.util.TestUtil.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -46,7 +48,7 @@ public class BinarySearchChecker {
     }
   }
 
-  public static void test(BinarySearcher bs) {
+  public static void test(Random random, BinarySearcher bs) {
     check(bs, LongArray.create(0, 2, 5, 10));
     check(bs, LongArray.create(0, 5, 10, 11, 12, 14, 20, 25, 25));
     check(bs, LongArray.create(0, 5, 10, 11, 12, 12, 12, 14, 20, 25));
@@ -58,7 +60,7 @@ public class BinarySearchChecker {
 
     int arrLength = 100;
     for (IntIterator it : IntIterators.range(50, 400, 50)) {
-      LongArray array = IntegersFixture.generateRandomLongArray(arrLength, SORTED, it.value());
+      LongArray array = IntegersFixture.generateRandomLongArray(random, arrLength, SORTED, it.value());
       check(bs, array);
     }
   }

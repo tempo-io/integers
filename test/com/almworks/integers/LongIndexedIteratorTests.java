@@ -61,11 +61,11 @@ public class LongIndexedIteratorTests extends IntegersFixture {
 
     LongArray list = LongArray.create();
     for ( int i = 0; i < arrayLength; i++) {
-      list.add((long) RAND.nextInt(maxValue));
+      list.add((long) myRand.nextInt(maxValue));
     }
     IntArray arrayIndexes = IntArray.create();
     for ( int i = 0; i < indicesLength; i++) {
-      arrayIndexes.add(RAND.nextInt(arrayLength));
+      arrayIndexes.add(myRand.nextInt(arrayLength));
     }
 
     LongArray expected = LongArray.create();

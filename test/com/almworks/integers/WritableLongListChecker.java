@@ -679,8 +679,8 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       long[] elements = generateRandomLongArray(arrayLength, UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
           createWritableLongLists(elements)) {
-        int index = RAND.nextInt(elements.length);
-        checkExpand(elements, index, RAND.nextInt(maxExpandCount), list);
+        int index = myRand.nextInt(elements.length);
+        checkExpand(elements, index, myRand.nextInt(maxExpandCount), list);
       }
     }
   }
@@ -725,13 +725,13 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
         long[] values = Arrays.copyOf(array, array.length);
         if (!(list instanceof AbstractWritableLongList)) return;
         AbstractWritableLongList abstractList = (AbstractWritableLongList)list;
-        int index = RAND.nextInt(size);
-        abstractList.update(index, RAND.nextInt(), LongFunctions.NEG);
+        int index = myRand.nextInt(size);
+        abstractList.update(index, myRand.nextInt(), LongFunctions.NEG);
         values[index] = -values[index];
         CHECK.order(abstractList, values);
 
-        int count = RAND.nextInt(size);
-        long value = RAND.nextInt();
+        int count = myRand.nextInt(size);
+        long value = myRand.nextInt();
         abstractList.update(size + count, value, LongFunctions.NEG);
         assertEquals(size + count + 1, abstractList.size());
         CHECK.order(abstractList.subList(0, size), values);

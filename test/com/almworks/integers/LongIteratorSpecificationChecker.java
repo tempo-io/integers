@@ -26,6 +26,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
   protected final IteratorGetter<I> getter;
   protected final ValuesType type;
+  protected final Random myRand;
 
 
   public interface IteratorGetter<I extends LongIterator> {
@@ -60,8 +61,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       }
 
       @Override
-      public long[] generateValues(int size) {
-        return generateRandomLongArray(size, SortedStatus.UNORDERED).extractHostArray();
+      public long[] generateValues(Random random, int size) {
+        return generateRandomLongArray(random, size, SortedStatus.UNORDERED).extractHostArray();
       }
 
       @Override
@@ -76,8 +77,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       }
 
       @Override
-      public long[] generateValues(int size) {
-        LongArray array = generateRandomLongArray(size, SortedStatus.SORTED);
+      public long[] generateValues(Random random, int size) {
+        LongArray array = generateRandomLongArray(random, size, SortedStatus.SORTED);
         array.addAll(array.get(IntProgression.range(0, size, 3)));
         array.sort();
         return array.toNativeArray();
@@ -95,8 +96,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       }
 
       @Override
-      public long[] generateValues(int size) {
-        return generateRandomLongArray(size, SortedStatus.SORTED_UNIQUE).extractHostArray();
+      public long[] generateValues(Random random, int size) {
+        return generateRandomLongArray(random, size, SortedStatus.SORTED_UNIQUE).extractHostArray();
       }
 
       @Override
@@ -120,9 +121,9 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       }
 
       @Override
-      public long[] generateValues(int size) {
-        long start = RAND.nextInt(), step = RAND.nextInt() - MAX / 2;
-        int count = RAND.nextInt(size);
+      public long[] generateValues(Random random, int size) {
+        long start = random.nextInt(), step = random.nextInt() - MAX / 2;
+        int count = random.nextInt(size);
         return LongProgression.Arithmetic.nativeArray(start, count, step);
       }
 
@@ -143,8 +144,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       }
 
       @Override
-      public long[] generateValues(int size) {
-        return LongCollections.asLongList(generateRandomIntArray(size, SortedStatus.UNORDERED)).toNativeArray();
+      public long[] generateValues(Random random, int size) {
+        return LongCollections.asLongList(generateRandomIntArray(random, size, SortedStatus.UNORDERED)).toNativeArray();
       }
 
       @Override
@@ -153,21 +154,22 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       }
     };
     public abstract boolean check(long ... values);
-    public abstract long[] generateValues(int size);
+    public abstract long[] generateValues(Random random, int size);
     public abstract ValuesType[] supportedTypes();
   }
 
-  protected LongIteratorSpecificationChecker(IteratorGetter<I> getter, ValuesType type) {
+  protected LongIteratorSpecificationChecker(Random random, IteratorGetter<I> getter, ValuesType type) {
+    this.myRand = random;
     this.getter = getter;
     this.type = type;
   }
 
-  public static void checkIterator(IteratorGetter<LongIterator> getter) {
-    checkIterator(getter, ValuesType.ALL);
+  public static void checkIterator(Random random, IteratorGetter<LongIterator> getter) {
+    checkIterator(random, getter, ValuesType.ALL);
   }
 
-  public static void checkIterator(IteratorGetter<LongIterator> getter, ValuesType type) {
-    LongIteratorSpecificationChecker checker = new LongIteratorSpecificationChecker(getter, type);
+  public static void checkIterator(Random random, IteratorGetter<LongIterator> getter, ValuesType type) {
+    LongIteratorSpecificationChecker checker = new LongIteratorSpecificationChecker(random, getter, type);
     checker.run();
   }
 
@@ -183,7 +185,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
     int attempts = 8, size = 10;
     for (ValuesType curType : type.supportedTypes()) {
       for (int attempt = 0; attempt < attempts; attempt++) {
-        testValues(curType.generateValues(size));
+        testValues(curType.generateValues(myRand, size));
       }
     }
 

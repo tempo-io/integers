@@ -136,7 +136,7 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
       int next = 0;
       int min = 0;
       for (int i = 0; i < 100; ++i) {
-        boolean add = IntegersFixture.RAND.nextBoolean();
+        boolean add = myRand.nextBoolean();
         if (add) {
           myArray.add(next);
           next += 1;
@@ -360,8 +360,8 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
     int maxSize = 2048;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
       myArray = new LongCyclicQueue();
-      int firstCount = RAND.nextInt(maxSize / 2);
-      int secondCount = firstCount + RAND.nextInt(maxSize / 2);
+      int firstCount = myRand.nextInt(maxSize / 2);
+      int secondCount = firstCount + myRand.nextInt(maxSize / 2);
       myArray.addAll(LongProgression.range(firstCount));
       CHECK.order(myArray, LongProgression.range(firstCount));
       // ensureCapacity
