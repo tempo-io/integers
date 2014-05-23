@@ -21,7 +21,6 @@
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -143,7 +142,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
 
   @Override
   public LongSortedSet keySet() {
-    return LongSortedUniqueListSet.asSet(myKeys);
+    return LongListSet.asSet(myKeys);
   }
 
   public int size() {

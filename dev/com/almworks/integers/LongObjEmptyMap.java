@@ -52,12 +52,12 @@ public class LongObjEmptyMap<T> implements LongObjMapI<T> {
 
   @NotNull
   @Override
-  public LongObjIterator iterator() {
+  public LongObjIterator<T> iterator() {
     return LongObjIterator.EMPTY;
   }
 
   @Override
-  public WritableLongListIterator keysIterator() {
+  public LongIterator keysIterator() {
     return LongIterator.EMPTY;
   }
 

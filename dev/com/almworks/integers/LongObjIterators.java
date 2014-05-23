@@ -24,8 +24,12 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LongObjIterators {
-  public static LongObjIterator pair(final LongIterator left, final Iterator right) {
+  public static <T> LongObjIterator pair(final LongIterator left, final Iterator<T> right) {
     return new LongObjPairIterator(left, right);
+  }
+
+  public static <T> LongObjIterator pair(final LongIterable left, final Iterable<T> right) {
+    return new LongObjPairIterator(left.iterator(), right.iterator());
   }
 
   public static LongIterator leftProjection(final LongObjIterator pairs) {
@@ -47,7 +51,7 @@ public class LongObjIterators {
     };
   }
 
-  public static Iterator rightProjection(final LongObjIterator pairs) {
+  public static <T> Iterator<T> rightProjection(final LongObjIterator<T> pairs) {
     return new Iterator() {
       @Override
       public boolean hasNext() {
@@ -55,7 +59,7 @@ public class LongObjIterators {
       }
 
       @Override
-      public Object next() {
+      public T next() {
         pairs.next();
         return pairs.right();
       }

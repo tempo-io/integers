@@ -75,4 +75,10 @@ public interface LongLongMap extends LongLongIterable {
    * of elements in a map does not affect the hash code.
    */
   public int hashCode();
+
+  /**
+   * @return a {@link LongSet} view of the keys contained in this map.
+   */
+  LongSet keySet();
+
 }

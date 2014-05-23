@@ -41,7 +41,7 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
 
   @Override
   public boolean containsKeys(IntIterable iterable) {
-    for (IntIterator it: iterable.iterator()) {
+    for (IntIterator it: iterable) {
       if (!containsKey(it.value())) return false;
     }
     return true;
@@ -133,7 +133,7 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
 
   public void removeAll(IntIterable keys) {
     modified();
-    for (IntIterator it : keys.iterator()) {
+    for (IntIterator it : keys) {
       removeImpl(it.value());
     }
   }

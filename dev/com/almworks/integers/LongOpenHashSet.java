@@ -127,7 +127,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   public static LongOpenHashSet createFrom(LongIterable keys) {
     int capacity = LongCollections.sizeOfIterable(keys, 0);
     LongOpenHashSet set = createForAdd(capacity);
-    for (LongIterator it : keys.iterator()) {
+    for (LongIterator it : keys) {
       set.add(it.value());
     }
     return set;

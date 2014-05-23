@@ -22,57 +22,32 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class LongFailFastListIterator extends AbstractLongIterator implements LongListIterator {
-  private final LongListIterator myIterator;
-  private final int myModCountAtCreation = getCurrentModCount();
-
+public abstract class LongFailFastListIterator extends LongFailFastIterator implements LongListIterator {
   protected abstract int getCurrentModCount();
 
   public LongFailFastListIterator(LongListIterator it) {
-    myIterator = it;
+    super(it);
   }
 
-  public boolean hasNext() throws ConcurrentModificationException {
-    checkMod();
-    return myIterator.hasNext();
-  }
-
-  public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
-    checkMod();
-    myIterator.next();
-    return this;
-  }
-
-  public boolean hasValue() throws ConcurrentModificationException {
-    checkMod();
-    return myIterator.hasValue();
-  }
-
-  public long value() throws IllegalStateException {
-    checkMod();
-    return myIterator.value();
+  private LongListIterator getListIterator() {
+    return (LongListIterator) myIterator;
   }
 
   @Override
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    myIterator.move(offset);
+    getListIterator().move(offset);
   }
 
   @Override
   public long get(int offset) throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    return myIterator.get(offset);
+    return getListIterator().get(offset);
   }
 
   @Override
   public int index() throws NoSuchElementException {
     checkMod();
-    return myIterator.index();
-  }
-
-  private void checkMod() {
-    if (myModCountAtCreation != getCurrentModCount())
-      throw new ConcurrentModificationException(myModCountAtCreation + " " + getCurrentModCount());
+    return getListIterator().index();
   }
 }

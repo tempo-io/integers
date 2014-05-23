@@ -136,7 +136,7 @@ public abstract class IntegersFixture extends TestCase {
     for (int i = 0; i < ints.length; i++) {
       it = collection.iterator();
       it.move(i);
-      CHECK.order(it, IntegersUtils.arrayCopy(ints, i, ints.length - i));
+      CHECK.order(it, LongCollections.arrayCopy(ints, i, ints.length - i));
     }
     it = collection.iterator();
     for (int i = 0; i < ints.length; i++) {
@@ -152,7 +152,7 @@ public abstract class IntegersFixture extends TestCase {
       assertEquals(ints.length, checker.index);
       long[] array = new long[ints.length - i + 1];
       collection.toNativeArray(i, array, 1, collection.size() - i);
-      CHECK.order(IntegersUtils.arrayCopy(array, 1, array.length - 1), IntegersUtils.arrayCopy(ints, i, ints.length - i));
+      CHECK.order(LongCollections.arrayCopy(array, 1, array.length - 1), LongCollections.arrayCopy(ints, i, ints.length - i));
     }
     for (int i = ints.length; i >= 0; i--) {
       CheckLongCollection checker = new CheckLongCollection(collection, 0);

@@ -174,27 +174,6 @@ public final class IntegersUtils {
     x[b] = t;
   }
 
-  // copied from ArrayUtil
-  public static int[] arrayCopy(int[] ints) {
-    return arrayCopy(ints, 0, ints.length);
-  }
-
-  public static int[] arrayCopy(int[] array, int offset, int length) {
-    if (length == 0)
-      return EMPTY_INTS;
-    int[] copy = new int[length];
-    System.arraycopy(array, offset, copy, 0, length);
-    return copy;
-  }
-
-  public static long[] arrayCopy(long[] array, int offset, int length) {
-    if (length == 0)
-      return EMPTY_LONGS;
-    long[] copy = new long[length];
-    System.arraycopy(array, offset, copy, 0, length);
-    return copy;
-  }
-
   public static int indexOf(int[] ints, int value) {
     return indexOf(ints, 0, ints.length, value);
   }

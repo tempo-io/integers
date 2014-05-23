@@ -113,7 +113,7 @@ public class IntegersUtilsTests extends IntegersFixture {
       res[i] = myRand.nextInt(maxValue);
       expected[i] = res[i];
     }
-    int[] copy = IntegersUtils.arrayCopy(res);
+    int[] copy = IntCollections.arrayCopy(res);
     CHECK.order(expected, copy);
   }
 

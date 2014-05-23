@@ -200,6 +200,10 @@ public class LongFunctions {
     };
   }
 
+  /**
+   * @return comparator that for a pair of indices returns the result of comparing the values from {@code list}
+   * at these indices. Behaves in the same way as {@link java.util.Comparator}
+   */
   public static IntIntToInt comparator(final LongList list) {
     return new IntIntToInt() {
       @Override

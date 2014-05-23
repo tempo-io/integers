@@ -56,7 +56,7 @@ public abstract class LongObjFindingIterator<T> extends AbstractLongObjIterator<
 
 
   @Override
-  public LongObjIterator next() {
+  public LongObjIterator<T> next() {
     if (myIteratorStatus == CACHED) {
       myCurrentLeft = myNextLeft;
       myCurrentRight = myNextRight;

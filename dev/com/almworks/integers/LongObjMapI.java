@@ -52,10 +52,6 @@ public interface LongObjMapI<T> extends LongObjIterable<T> {
    */
   boolean isEmpty();
 
-  @NotNull
-  @Override
-  LongObjIterator<T> iterator();
-
   LongIterator keysIterator();
 
   Iterator<T> valuesIterator();

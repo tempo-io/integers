@@ -41,7 +41,7 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
 
   @Override
   public boolean containsKeys(IntIterable iterable) {
-    for (IntIterator it: iterable.iterator()) {
+    for (IntIterator it: iterable) {
       if (!containsKey(it.value())) return false;
     }
     return true;

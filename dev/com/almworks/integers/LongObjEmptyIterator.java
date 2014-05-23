@@ -29,7 +29,7 @@ public class LongObjEmptyIterator<T> extends AbstractLongObjIterator<T> {
   }
 
   @Override
-  public LongObjIterator next() {
+  public LongObjIterator<T> next() {
     throw new NoSuchElementException();
   }
 

@@ -19,6 +19,8 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.almworks.integers.IntegersUtils.appendShortName;
 import static com.almworks.integers.LongLongIterators.pair;
 
@@ -138,6 +140,26 @@ public abstract class AbstractWritableLongLongMap implements WritableLongLongMap
     }
   }
 
+  @Override
+  public LongSet keySet() {
+    return new AbstractLongSet() {
+      @Override
+      public boolean contains(long value) {
+        return containsKey(value);
+      }
+
+      @Override
+      public int size() {
+        return AbstractWritableLongLongMap.this.size();
+      }
+
+      @NotNull
+      @Override
+      public LongIterator iterator() {
+        return keysIterator();
+      }
+    };
+  }
 
   public StringBuilder toString(StringBuilder builder) {
     appendShortName(builder, this);

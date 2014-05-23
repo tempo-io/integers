@@ -21,6 +21,7 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import static com.almworks.integers.IntegersUtils.appendShortName;
@@ -31,12 +32,12 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   /**
    * put element without invocation of {@code AbstractWritableLongIntMap#modified()}
    */
-  abstract protected T putImpl(long key, T value);
+  protected abstract T putImpl(long key, T value);
 
   /**
    * remove element without invocation of {@code AbstractWritableLongIntMap#modified()}
    */
-  abstract protected T removeImpl(long key);
+  protected abstract T removeImpl(long key);
 
   public boolean isEmpty() {
     return size() == 0;
@@ -44,7 +45,7 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
 
   @Override
   public boolean containsKeys(LongIterable iterable) {
-    for (LongIterator it: iterable.iterator()) {
+    for (LongIterator it: iterable) {
       if (!containsKey(it.value())) return false;
     }
     return true;
@@ -53,13 +54,6 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   @Override
   public LongSet keySet() {
     return new AbstractLongSet() {
-      @Override
-      protected void toNativeArrayImpl(long[] dest, int destPos) {
-        for (LongIterator it : iterator()) {
-          dest[destPos++] = it.value();
-        }
-      }
-
       @Override
       public boolean contains(long value) {
         return containsKey(value);
@@ -73,7 +67,12 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
       @NotNull
       @Override
       public LongIterator iterator() {
-        return keysIterator();
+        return new LongFailFastIterator(keysIterator()) {
+          @Override
+          protected int getCurrentModCount() {
+            return myModCount;
+          }
+        };
       }
     };
   }
@@ -122,6 +121,15 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   }
 
   @Override
+  public void putAll(LongSizedIterable keys, Collection<T> values) {
+    modified();
+    if (keys.size() != values.size()) {
+      throw new IllegalArgumentException();
+    }
+    putAll(LongObjIterators.pair(keys.iterator(), values.iterator()));
+  }
+
+  @Override
   public void putAll(long[] keys, T[] values) {
     modified();
     if (keys.length != values.length) {
@@ -155,7 +163,7 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
 
   public void removeAll(LongIterable keys) {
     modified();
-    for (LongIterator it : keys.iterator()) {
+    for (LongIterator it : keys) {
       removeImpl(it.value());
     }
   }
@@ -233,8 +241,8 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   @Override
   public int hashCode() {
     int h = 0;
-    for (LongObjIterator<T> it : iterator()) {
-      h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right().hashCode());
+    for (LongObjIterator<T> it : this) {
+      h += IntegersUtils.hash(it.left()) + it.right().hashCode();
     }
     return h;
   }

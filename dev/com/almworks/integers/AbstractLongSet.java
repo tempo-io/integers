@@ -24,7 +24,11 @@ import static com.almworks.integers.LongIterableLexicographicComparator.LONG_ITE
 
 public abstract class AbstractLongSet implements LongSet {
 
-  protected abstract void toNativeArrayImpl(long[] dest, int destPos);
+  protected void toNativeArrayImpl(long[] dest, int destPos) {
+    for (LongIterator it : iterator()) {
+      dest[destPos++] = it.value();
+    }
+  }
 
   @Override
   public boolean containsAll(LongIterable iterable) {

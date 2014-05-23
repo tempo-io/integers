@@ -37,7 +37,7 @@ public class LongObjPairIterator<T> extends AbstractLongObjIteratorWithFlag<T> {
   private final Iterator<T> myItRight;
   private T myCurrentRight;
 
-  public LongObjPairIterator(LongIterable first, Iterator second) {
+  public LongObjPairIterator(LongIterable first, Iterator<T> second) {
     myItLeft = first.iterator();
     myItRight = second;
   }

@@ -275,7 +275,7 @@ public class LongAmortizedSet extends AbstractWritableLongSet implements Writabl
     // myAdded and myRemoved are disjoint
     if (!myAdded.isEmpty()) {
       int from = 0;
-      for (LongIterator iterator: myAdded.iterator()) {
+      for (LongIterator iterator: myAdded) {
         int idx = myBaseList.binarySearch(iterator.value(), from, myBaseList.size());
         if (idx < 0) {
           size++;

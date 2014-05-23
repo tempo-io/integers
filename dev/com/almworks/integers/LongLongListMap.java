@@ -237,6 +237,11 @@ public class LongLongListMap extends AbstractWritableLongLongMap {
     };
   }
 
+  @Override
+  public LongSet keySet() {
+    return LongListSet.asSet(myKeys);
+  }
+
   /**
    * Returns keys of this map.
    * Subsequent map modifications will be reflected in the returned list.

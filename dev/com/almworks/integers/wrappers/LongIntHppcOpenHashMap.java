@@ -22,7 +22,6 @@ package com.almworks.integers.wrappers;
 import com.almworks.integers.*;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 
-import static com.almworks.integers.IntCollections.sizeOfIterable;
 import static com.almworks.integers.wrappers.LongIntHppcWrappers.cursorToLongIntIterator;
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
@@ -43,18 +42,16 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   }
 
   public static LongIntHppcOpenHashMap createFrom(LongIterable keys, IntIterable values) {
-    int keysSize = (keys instanceof LongSizedIterable) ? ((LongSizedIterable) keys).size() : 0;
-    int valuesSize = sizeOfIterable(values, 0);
-    if (keysSize * valuesSize != 0) {
-      if (keysSize != valuesSize) {
-        throw new IllegalArgumentException("keys.size() != values.size()");
-      }
+    int keysSize = LongCollections.sizeOfIterable(keys, 0);
+    int valuesSize = IntCollections.sizeOfIterable(values, 0);
+    if (keysSize != valuesSize) {
+      throw new IllegalArgumentException("keys.size() != values.size()");
     } else {
       keysSize = Math.max(keysSize, valuesSize);
     }
 
     float loadFactor = LongIntOpenHashMap.DEFAULT_LOAD_FACTOR;
-    int initialCapacity = (int)(keysSize / loadFactor) + 1;
+    int initialCapacity = (int) (keysSize / loadFactor) + 1;
     LongIntHppcOpenHashMap map = new LongIntHppcOpenHashMap(initialCapacity);
 
     LongIterator keysIt = keys.iterator();
@@ -108,7 +105,7 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   }
 
   public LongIntIterator iterator() {
-	return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
+    return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -197,8 +194,8 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
    * @see #containsKey
    * @return Returns the previous value stored under the given key.
    */
-  public int lset(int key) {
-    return myMap.lset(key);
+  public int lset(int value) {
+    return myMap.lset(value);
   }
 
   /**

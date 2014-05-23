@@ -33,7 +33,7 @@ import java.util.List;
  * Keys and values are sorted, and it is possible to retrieve either value by key or key by value. However, mappings are still added only by key. <br/>
  * The mapping is stored in a separate list in the following way: if {@code (k, v)} is a stored pair, then {@code v = vals[idxMap[i]]}, where {@code k = keys[i]}.
  * */
-public class LongTwoWayMap {
+public class LongTwoWayMap implements LongLongMap {
   private final LongArray myKeys = new LongArray();
   private final IntArray myIdxMap = new IntArray();
   private final LongArray myValues = new LongArray();
@@ -48,6 +48,16 @@ public class LongTwoWayMap {
 
   public boolean containsAnyKeys(LongList keys) {
     return containsKeys(keys, false);
+  }
+
+  @Override
+  public boolean containsKeys(LongIterable keys) {
+    for (LongIterator key : keys) {
+      if (!containsKey(key.value())) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public boolean containsKeys(LongList keys, boolean all) {
@@ -114,7 +124,35 @@ public class LongTwoWayMap {
   }
 
   public int size() {
+    assert myKeys.size() == myValues.size();
     return myKeys.size();
+  }
+
+  @Override
+  public boolean isEmpty() {
+    assert myKeys.isEmpty() == myValues.isEmpty();
+    return myKeys.isEmpty();
+  }
+
+  @NotNull
+  @Override
+  public LongLongIterator iterator() {
+    return new LongLongPairIterator(myKeys, new LongIndexedIterator(myValues, myIdxMap.iterator()));
+  }
+
+  @Override
+  public LongIterator keysIterator() {
+    return myKeys.iterator();
+  }
+
+  @Override
+  public LongIterator valuesIterator() {
+    return myValues.iterator();
+  }
+
+  @Override
+  public LongSet keySet() {
+    return LongListSet.asSet(myKeys);
   }
 
   public List<Entry> toList() {

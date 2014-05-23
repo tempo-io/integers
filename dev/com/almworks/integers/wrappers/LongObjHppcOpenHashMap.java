@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.carrotsearch.hppc.LongObjectOpenHashMap;
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
@@ -36,19 +37,20 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     myMap = new LongObjectOpenHashMap<E>();
   }
 
-  public LongObjHppcOpenHashMap(int initicalCapacity) {
-    myMap = new LongObjectOpenHashMap<E>(initicalCapacity);
+  public LongObjHppcOpenHashMap(int initialCapacity) {
+    myMap = new LongObjectOpenHashMap<E>(initialCapacity);
   }
 
   public LongObjHppcOpenHashMap(int initialCapacity, float loadFactor) {
     myMap = new LongObjectOpenHashMap<E>(initialCapacity, loadFactor);
   }
 
-  public static LongObjHppcOpenHashMap createFrom(LongIterable keys, Iterable values) {
+  public static <E> LongObjHppcOpenHashMap createFrom(LongIterable keys, Iterable<E> values) {
     int keysSize = (keys instanceof LongSizedIterable) ? ((LongSizedIterable) keys).size() : 0;
+    int valuesSize = (values instanceof Collection) ? ((Collection) keys).size() : 0;
 
     float loadFactor = LongIntOpenHashMap.DEFAULT_LOAD_FACTOR;
-    int initialCapacity = (int)(keysSize / loadFactor) + 1;
+    int initialCapacity = (int)(Math.max(keysSize, valuesSize) / loadFactor) + 1;
     LongObjHppcOpenHashMap map = new LongObjHppcOpenHashMap(initialCapacity);
 
     LongIterator keysIt = keys.iterator();
@@ -61,14 +63,14 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     return map;
   }
 
-  public static LongObjHppcOpenHashMap createFrom(long[] keys, Object[] values) {
+  public static <E> LongObjHppcOpenHashMap createFrom(long[] keys, E[] values) {
     if (keys.length != values.length) {
       throw new IllegalArgumentException("Arrays of keys and values must have an identical length.");
     }
     int size = keys.length;
     float loadFactor = LongObjectOpenHashMap.DEFAULT_LOAD_FACTOR;
     int initialCapacity = (int)(size / loadFactor) + 1;
-    LongObjHppcOpenHashMap map = new LongObjHppcOpenHashMap(initialCapacity, loadFactor);
+    LongObjHppcOpenHashMap map = new LongObjHppcOpenHashMap<E>(initialCapacity, loadFactor);
     map.putAll(keys, values);
     return map;
   }
@@ -119,9 +121,9 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     };
   }
 
-  public Iterator valuesIterator() {
+  public Iterator<E> valuesIterator() {
     final Iterator<ObjectCursor<E>> it = myMap.values().iterator();
-    return new Iterator() {
+    return new Iterator<E>() {
       @Override
       public boolean hasNext() {
         return it.hasNext();
@@ -168,10 +170,11 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
    * in the map already.
    *
    * @see #containsKey
-   * @return Returns the previous value stored under the given key.
+   * @return Returns the previous value stored under the given key
+   * or {@code null} if there was no mapping for the last used key
    */
-  public E lset(E key) {
-    return myMap.lset(key);
+  public E lset(E value) {
+    return myMap.lset(value);
   }
 
   /**
@@ -198,8 +201,4 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     return true;
   }
 
-  @Override
-  public int hashCode() {
-    return myMap.hashCode();
-  }
 }

@@ -21,7 +21,6 @@ import org.junit.ComparisonFailure;
 
 import java.util.*;
 
-import static com.almworks.integers.IntegersUtils.indexOf;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -228,7 +227,7 @@ public class CollectionsCompare {
   }
 
   public void contains(int val, int[] array) {
-    if (indexOf(array, val) >= 0)
+    if (IntCollections.indexOf(val, array) >= 0)
       return;
     Failure failure = createFailure();
     failure.expected().setElement(val);
@@ -327,8 +326,8 @@ public class CollectionsCompare {
   }
 
   public void emptyIntersection(int[] array1, int[] array2) {
-    array1 = IntegersUtils.arrayCopy(array1);
-    array2 = IntegersUtils.arrayCopy(array2);
+    array1 = IntCollections.arrayCopy(array1);
+    array2 = IntCollections.arrayCopy(array2);
     Arrays.sort(array1);
     Arrays.sort(array2);
     for (int val : array1) {
@@ -342,9 +341,9 @@ public class CollectionsCompare {
   }
 
   public void unordered(int[] actual, int... expected) {
-    int[] actualCopy = IntegersUtils.arrayCopy(actual);
+    int[] actualCopy = IntCollections.arrayCopy(actual);
     Arrays.sort(actualCopy);
-    int[] expectedCopy = IntegersUtils.arrayCopy(expected);
+    int[] expectedCopy = IntCollections.arrayCopy(expected);
     Arrays.sort(expectedCopy);
     order(actualCopy, expectedCopy);
   }

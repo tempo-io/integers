@@ -307,6 +307,9 @@ public class LongIterators {
     };
   }
 
+  /**
+   * Beware of boxing: every call to {@link java.util.Iterator#next()} leads to boxing
+   */
   public static Iterator<Long> asIterator(final LongIterator iterator) {
     return new Iterator<Long>() {
       @Override
@@ -326,6 +329,9 @@ public class LongIterators {
     };
   }
 
+  /**
+   * Beware of unboxing: it always occurns on receiving the next element of {@code iterator}
+   */
   public static LongIterator asLongIterator(final Iterator<Long> iterator) {
     return new LongFindingIterator() {
       @Override

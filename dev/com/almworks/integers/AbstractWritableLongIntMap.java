@@ -30,12 +30,12 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
   /**
    * put element without invocation of {@code AbstractWritableLongIntMap#modified()}
    */
-  abstract protected int putImpl(long key, int value);
+  protected abstract int putImpl(long key, int value);
 
   /**
    * remove element without invocation of {@code AbstractWritableLongIntMap#modified()}
    */
-  abstract protected int removeImpl(long key);
+  protected abstract int removeImpl(long key);
 
   public boolean isEmpty() {
     return size() == 0;
@@ -43,7 +43,7 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
 
   @Override
   public boolean containsKeys(LongIterable iterable) {
-    for (LongIterator it: iterable.iterator()) {
+    for (LongIterator it: iterable) {
       if (!containsKey(it.value())) return false;
     }
     return true;
@@ -52,13 +52,6 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
   @Override
   public LongSet keySet() {
     return new AbstractLongSet() {
-      @Override
-      protected void toNativeArrayImpl(long[] dest, int destPos) {
-        for (LongIterator it : iterator()) {
-          dest[destPos++] = it.value();
-        }
-      }
-
       @Override
       public boolean contains(long value) {
         return containsKey(value);
@@ -72,7 +65,12 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
       @NotNull
       @Override
       public LongIterator iterator() {
-        return keysIterator();
+        return new LongFailFastIterator(keysIterator()) {
+          @Override
+          protected int getCurrentModCount() {
+            return myModCount;
+          }
+        };
       }
     };
   }
@@ -163,7 +161,7 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
 
   public void removeAll(LongIterable keys) {
     modified();
-    for (LongIterator it : keys.iterator()) {
+    for (LongIterator it : keys) {
       removeImpl(it.value());
     }
   }

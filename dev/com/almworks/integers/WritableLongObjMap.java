@@ -19,6 +19,8 @@
 
 package com.almworks.integers;
 
+import java.util.Collection;
+
 public interface WritableLongObjMap<T> extends LongObjMapI<T> {
 
   /**
@@ -64,6 +66,12 @@ public interface WritableLongObjMap<T> extends LongObjMapI<T> {
    * of existing keys, if such keys are present.
    */
   void putAll(LongObjIterable<T> entries);
+
+  /**
+   * @throws IllegalArgumentException if {@code keys.size() != values.size()}
+   * @see #putAll(long[], Object[])
+   */
+  void putAll(LongSizedIterable keys, Collection<T> values);
 
   /**
    * Puts all keys from {@code keys} and {@code values} to this map,
