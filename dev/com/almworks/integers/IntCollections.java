@@ -297,12 +297,24 @@ public class IntCollections {
     return -1;
   }
 
+  /**
+   * @see IntCollections#indexOf(int, int[], int, int)
+   */
+  public static long indexOf(int value, int[] ints) {
+    return indexOf(value, ints, 0, ints.length);
+  }
+
   public static int[] arrayCopy(int[] array, int offset, int length) {
     if (length == 0)
       return EMPTY_INTS;
     int[] copy = new int[length];
     System.arraycopy(array, offset, copy, 0, length);
     return copy;
+  }
+
+  // copied from ArrayUtil
+  public static int[] arrayCopy(int[] ints) {
+    return arrayCopy(ints, 0, ints.length);
   }
 
   public static int compare(int a, int b) {

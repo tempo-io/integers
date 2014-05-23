@@ -22,8 +22,8 @@ package com.almworks.integers;
 import java.util.NoSuchElementException;
 
 /**
- * @see com.almworks.integers.LongIntIterator
- * @see com.almworks.integers.AbstractLongIteratorWithFlag
+ * @see LongObjIterator
+ * @see AbstractLongIteratorWithFlag
  */
 public abstract class AbstractLongObjIteratorWithFlag<T> extends AbstractLongObjIterator<T> {
 

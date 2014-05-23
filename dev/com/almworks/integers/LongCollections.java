@@ -293,12 +293,24 @@ public class LongCollections {
     return -1;
   }
 
+  /**
+   * @see LongCollections#indexOf(long, long[], int, int)
+   */
+  public static int indexOf(long[] ints, int value) {
+    return indexOf(value, ints, 0, ints.length);
+  }
+
   public static long[] arrayCopy(long[] array, int offset, int length) {
     if (length == 0)
       return EMPTY_LONGS;
     long[] copy = new long[length];
     System.arraycopy(array, offset, copy, 0, length);
     return copy;
+  }
+
+  // copied from ArrayUtil
+  public static long[] arrayCopy(long[] ints) {
+    return arrayCopy(ints, 0, ints.length);
   }
 
   public static int compare(long a, long b) {
