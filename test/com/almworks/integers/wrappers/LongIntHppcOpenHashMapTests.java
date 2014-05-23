@@ -84,4 +84,9 @@ public class LongIntHppcOpenHashMapTests extends WritableLongIntMapChecker<LongI
       }
     }
   }
+
+  @Override
+  protected boolean isSortedSet() {
+    return false;
+  }
 }

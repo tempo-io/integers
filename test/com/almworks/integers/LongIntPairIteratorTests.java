@@ -23,7 +23,7 @@ import static com.almworks.integers.IntLongIterators.leftProjection;
 import static com.almworks.integers.IntLongIterators.rightProjection;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 
-public class IntLongPairIteratorTests extends IntegersFixture {
+public class LongIntPairIteratorTests extends IntegersFixture {
   public void testRightIteratorSpecification() {
     LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       private LongIterator getFromProjection(IntIterable leftIterable, LongIterable rightIterable) {

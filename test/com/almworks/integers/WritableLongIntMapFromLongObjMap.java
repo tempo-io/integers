@@ -100,14 +100,33 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
   @Override
   public IntIterator valuesIterator() {
     final Iterator<Integer> it = myMap.valuesIterator();
-    return new IntFindingIterator() {
+    return new AbstractIntIterator(){
+      boolean myHasValue = false;
+      int myCurValue;
+
       @Override
-      protected boolean findNext() throws ConcurrentModificationException {
-        if (!it.hasNext()) {
-          return false;
-        }
-        myNext = it.next();
-        return true;
+      public boolean hasNext() throws ConcurrentModificationException {
+        return it.hasNext();
+      }
+
+      @Override
+      public IntIterator next() {
+        myCurValue = it.next();
+        myHasValue = true;
+        return this;
+      }
+
+      @Override
+      public boolean hasValue() {
+        it.hasNext();
+        return myHasValue;
+      }
+
+      @Override
+      public int value() throws NoSuchElementException {
+        it.hasNext();
+        if (!myHasValue) throw new NoSuchElementException();
+        return myCurValue;
       }
     };
   }

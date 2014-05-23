@@ -23,6 +23,7 @@ import junit.framework.ComparisonFailure;
 import java.util.List;
 
 import static com.almworks.integers.LongProgression.arithmetic;
+import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.func.LongFunctions.*;
 
 public class LongTwoWayMapTests extends IntegersFixture {
@@ -427,6 +428,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     }
 
   }
+
   public void testNonInjectiveFunctionException() {
     map.insertAll(new LongArray(arithmetic(0, 10)), apply(MULT, 10));
     map.transformValues(apply(ADD, 1));
@@ -441,6 +443,25 @@ public class LongTwoWayMapTests extends IntegersFixture {
       fail();
     } catch (LongTwoWayMap.NonInjectiveFunctionException ex) {
       assertEquals(3, ex.getDuplicateValue());
+    }
+  }
+
+  public void testIterator() {
+    LongArray keys = new LongArray(range(0, 10, 1));
+    LongArray values = new LongArray(LongCollections.map(SQR, range(10, 0, -1)));
+    for (LongLongIterator it : new LongLongPairIterator(keys, values)) {
+      map.put(it.left(), it.right());
+    }
+    CHECK.order(map.keysIterator(), keys.iterator());
+    CHECK.order(LongCollections.toSortedUnique(values).iterator(), map.valuesIterator());
+
+    LongLongIterator mapIt = map.iterator(), it = new LongLongPairIterator(keys, values);
+    while (mapIt.hasNext()) {
+      assertTrue(it.hasNext());
+      mapIt.next();
+      it.next();
+      assertEquals(it.left(), mapIt.left());
+      assertEquals(it.right(), mapIt.right());
     }
   }
 }

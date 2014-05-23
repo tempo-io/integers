@@ -267,7 +267,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
 
     set.addAll(1, 3, 2, Long.MIN_VALUE, Long.MAX_VALUE);
     assertEquals(set.size(), 5);
-    if (set instanceof LongSortedSet) {
+    if (isSortedSet()) {
       assertTrue(set.toArray().isSorted(true));
     }
     assertTrue(set.contains(1));
@@ -398,16 +398,15 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   }
 
   public void testRetainComplex() {
-    final boolean isSorted = set instanceof LongSortedSet;
-    final SortedStatus sortedStatus = isSorted ? SORTED_UNIQUE : UNORDERED;
+    final SortedStatus sortedStatus = isSortedSet() ? SORTED_UNIQUE : UNORDERED;
     setOperations.check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         set = createSet(arrays[0]);
         set.retain(arrays[1]);
-        return isSorted ? set.iterator() : toSorted(false, set).iterator();
+        return isSortedSet() ? set.iterator() : toSorted(false, set).iterator();
       }
-    }, new SetOperationsChecker.IntersectionGetter(isSorted), true, sortedStatus);
+    }, new SetOperationsChecker.IntersectionGetter(isSortedSet()), true, sortedStatus);
   }
 
   public void testIterator() {
@@ -425,7 +424,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
         }
         fail();
       } catch (ConcurrentModificationException e) {}
-      CHECK.order(expected, (createdSet instanceof LongSortedSet) ? res : toSorted(false, res));
+      CHECK.order(expected, isSortedSet() ? res : toSorted(false, res));
 
       createdSet.clear();
       CHECK.order(LongIterator.EMPTY, createdSet.iterator());
@@ -435,7 +434,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   }
 
   public void testIteratorSpecification() {
-    if (!(set instanceof LongSortedSet)) return;
+    if (!isSortedSet()) return;
     LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       @Override
       public List<LongIterator> get(long... values) {
@@ -494,7 +493,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   }
 
   public void testTailIterator() {
-    if (!(set instanceof WritableLongSortedSet)) return;
+    if (!isSortedSet()) return;
     WritableLongSortedSet sortedSet = (WritableLongSortedSet)set;
     sortedSet.addAll(ap(1, 50, 2));
     for (int i = 0; i < 99; i++) {
@@ -510,7 +509,7 @@ public abstract class WritableLongSetChecker<T extends WritableLongSet> extends 
   }
 
   public void testTailIteratorHasMethods() {
-    if (!(set instanceof WritableLongSortedSet)) return;
+    if (!isSortedSet()) return;
     WritableLongSortedSet sortedSet = (WritableLongSortedSet)set;
 
     set.addAll(LongProgression.arithmetic(1, 10, 2));

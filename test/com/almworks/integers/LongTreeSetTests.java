@@ -63,6 +63,11 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
     return LongTreeSet.createFromSortedUnique(sortedUniqueList);
   }
 
+  @Override
+  protected boolean isSortedSet() {
+    return true;
+  }
+
   public void testRandom2() {
     int setSize = 510, listSize = 510;
     int nAttempts = 10;

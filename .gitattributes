@@ -54,7 +54,6 @@ test/com/almworks/integers/CollectionsCompare.java -text
 test/com/almworks/integers/Containers.java -text
 test/com/almworks/integers/IntCollectionsCompare.java -text
 test/com/almworks/integers/IntLongIteratorTests.java -text
-test/com/almworks/integers/IntLongPairIteratorTests.java -text
 test/com/almworks/integers/IntegersFixture.java -text
 test/com/almworks/integers/IntegersUtilsTests.java -text
 test/com/almworks/integers/LongAmortizedSetTests.java -text
@@ -66,6 +65,9 @@ test/com/almworks/integers/LongCyclicQueueTests.java -text
 test/com/almworks/integers/LongFindingIteratorTests.java -text
 test/com/almworks/integers/LongIndexedIteratorTests.java -text
 test/com/almworks/integers/LongIntListMapTests.java -text
+test/com/almworks/integers/LongIntMapSortedKeySetTests.java -text
+test/com/almworks/integers/LongIntMapUnsortedKeySetTests.java -text
+test/com/almworks/integers/LongIntPairIteratorTests.java -text
 test/com/almworks/integers/LongIntersectionIteratorTests.java -text
 test/com/almworks/integers/LongIterableLexicographicComparatorTests.java -text
 test/com/almworks/integers/LongIteratorSingleTests.java -text
@@ -100,6 +102,7 @@ test/com/almworks/integers/WritableLongIntMapFromLongObjMap.java -text
 test/com/almworks/integers/WritableLongIntMapProjection.java -text
 test/com/almworks/integers/WritableLongListChecker.java -text
 test/com/almworks/integers/WritableLongListRemovingDecoratorTests.java -text
+test/com/almworks/integers/WritableLongObjMapChecker.java -text
 test/com/almworks/integers/WritableLongSetChecker.java -text
 test/com/almworks/integers/segmented/LongSegmentedArrayTests.java -text
 test/com/almworks/integers/segmented/TestEnvForLongSegmentedArray.java -text

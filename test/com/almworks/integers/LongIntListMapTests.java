@@ -16,7 +16,9 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.IntFunctions;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.LongFunctions;
 
 import java.util.Arrays;
@@ -44,8 +46,17 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
       createdMap.add(it.left(), it.right());
     }
 
-    return Arrays.asList(new LongIntListMap(new LongArray(keys), new IntArray(values)),
-        createdMap);
+    final LongArray keys0 = new LongArray(keys);
+    final IntArray values0 = new IntArray(values);
+    IntegersUtils.quicksort(keys.size(), LongFunctions.comparator(keys0),
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int a, int b) {
+            keys0.swap(a, b);
+            values0.swap(a, b);
+          }
+        });
+    return Arrays.asList(new LongIntListMap(keys0, values0), createdMap);
   }
 
   @Override
@@ -168,5 +179,10 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
         // ok
       }
     }
+  }
+
+  @Override
+  protected boolean isSortedSet() {
+    return false;
   }
 }

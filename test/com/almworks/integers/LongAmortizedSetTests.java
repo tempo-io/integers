@@ -81,6 +81,11 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
     return LongAmortizedSet.createFromSortedUniqueArray(new LongArray(sortedUniqueList));
   }
 
+  @Override
+  protected boolean isSortedSet() {
+    return true;
+  }
+
   public void testIteratorCoalesce() {
     set = new LongAmortizedSet();
     set.addAll(2, 4, 6, 8);

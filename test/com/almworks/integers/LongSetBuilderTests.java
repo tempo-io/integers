@@ -62,6 +62,11 @@ public class LongSetBuilderTests extends LongSetChecker<LongSetBuilder> {
     return builder;
   }
 
+  @Override
+  protected boolean isSortedSet() {
+    return true;
+  }
+
   protected void check(long[] ... v) {
     LongSetBuilder builder = new LongSetBuilder();
     for (long[] ints : v) {

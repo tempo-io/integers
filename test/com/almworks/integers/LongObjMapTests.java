@@ -21,22 +21,29 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class LongObjMapTests extends WritableLongIntMapChecker<WritableLongIntMapFromLongObjMap> {
+public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
   private LongObjMap<String> myMap = LongObjMap.create();
-
-  @Override
-  protected WritableLongIntMapFromLongObjMap createMap() {
-    return new WritableLongIntMapFromLongObjMap(new LongObjMap<Integer>());
-  }
-
-  @Override
-  protected WritableLongIntMapFromLongObjMap createMapWithCapacity(int capacity) {
-    return createMap();
-  }
 
   @Override
   protected List<WritableLongIntMapFromLongObjMap> createMapsFromLists(LongList keys, IntList values) {
     WritableLongIntMapFromLongObjMap map0 = createMap();
+    map0.putAll(keys, values);
+    return Arrays.asList(map0);
+  }
+
+  @Override
+  protected <E> LongObjMap<E> createObjMap() {
+    return new LongObjMap<E>();
+  }
+
+  @Override
+  protected <E> LongObjMap<E> createObjMapWithCapacity(int capacity) {
+    return createObjMap();
+  }
+
+  @Override
+  protected <E> List<WritableLongObjMap<E>> createObjMapsFromLists(LongList keys, List<E> values) {
+    WritableLongObjMap<E> map0 = new LongObjMap<E>();
     map0.putAll(keys, values);
     return Arrays.asList(map0);
   }
@@ -181,7 +188,8 @@ public class LongObjMapTests extends WritableLongIntMapChecker<WritableLongIntMa
     checkSet(myMap.keySet(), expected);
   }
 
-  public void testIteratorConcurrentModificationException2() {
-    // empty
+  @Override
+  protected boolean isSortedSet() {
+    return false;
   }
 }

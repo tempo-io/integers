@@ -350,34 +350,6 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     }
   }
 
-  @Override
-  public void testHashCode() {
-    int attemptsCount = 10, shuffleCount = 10;
-    int sizeMax = 600, step = 50;
-    for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      for (int size = step; size < sizeMax; size += step) {
-        LongArray keys = generateRandomLongArray(size, SORTED_UNIQUE);
-        IntArray values = generateRandomIntArray(keys.size(), UNORDERED);
-        int expectedHash = 0;
-        for (int i = 0; i < size; i++) {
-          expectedHash += IntegersUtils.hash(keys.get(i)) + IntegersUtils.hash(values.get(i));
-        }
-
-        for (T map0 : createMapsFromLists(keys, values)) {
-          assertEquals(expectedHash, map0.hashCode());
-        }
-
-        IntArray indices = new IntArray(IntProgression.range(size));
-        for (int i = 0; i < shuffleCount; i++) {
-          map = createMap();
-          map.putAll(keys.get(indices), values.get(indices));
-          assertEquals(expectedHash, map.hashCode());
-          indices.shuffle(myRand);
-        }
-      }
-    }
-  }
-
   public void testEquals2() {
     int attemptsCount = 20;
     int maxVal = 10;

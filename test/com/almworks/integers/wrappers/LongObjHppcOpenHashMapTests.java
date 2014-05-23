@@ -16,24 +16,12 @@
 
 package com.almworks.integers.wrappers;
 
-import com.almworks.integers.IntList;
-import com.almworks.integers.LongList;
-import com.almworks.integers.WritableLongIntMapChecker;
-import com.almworks.integers.WritableLongIntMapFromLongObjMap;
+import com.almworks.integers.*;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class LongObjHppcOpenHashMapTests extends WritableLongIntMapChecker<WritableLongIntMapFromLongObjMap> {
-  @Override
-  protected WritableLongIntMapFromLongObjMap createMap() {
-    return new WritableLongIntMapFromLongObjMap(new LongObjHppcOpenHashMap<Integer>());
-  }
-
-  @Override
-  protected WritableLongIntMapFromLongObjMap createMapWithCapacity(int capacity) {
-    return new WritableLongIntMapFromLongObjMap(new LongObjHppcOpenHashMap<Integer>(capacity));
-  }
+public class LongObjHppcOpenHashMapTests extends WritableLongObjMapChecker<LongObjHppcOpenHashMap> {
 
   @Override
   protected List<WritableLongIntMapFromLongObjMap> createMapsFromLists(LongList keys, IntList values) {
@@ -51,7 +39,37 @@ public class LongObjHppcOpenHashMapTests extends WritableLongIntMapChecker<Writa
   }
 
   @Override
+  protected <E> LongObjHppcOpenHashMap<E> createObjMap() {
+    return new LongObjHppcOpenHashMap<E>();
+  }
+
+  @Override
+  protected <E> LongObjHppcOpenHashMap<E> createObjMapWithCapacity(int capacity) {
+    return new LongObjHppcOpenHashMap<E>(capacity);
+  }
+
+  @Override
+  protected <E> List<WritableLongObjMap<E>> createObjMapsFromLists(LongList keys, List<E> values) {
+    WritableLongObjMap<E> map0 = createObjMap();
+    map0.putAll(keys, values);
+
+    int capacity = Math.max(keys.size(), values.size());
+    WritableLongObjMap<E> map1 = createObjMapWithCapacity(capacity);
+    map1.putAll(keys, values);
+
+    WritableLongObjMap<E> map2 = createObjMapWithCapacity(capacity * 2);
+    map2.putAll(keys, values);
+
+    return Arrays.asList(map0, map1, map2);
+  }
+
+  @Override
   public void testIteratorConcurrentModificationException2() {
     // empty
+  }
+
+  @Override
+  protected boolean isSortedSet() {
+    return false;
   }
 }
