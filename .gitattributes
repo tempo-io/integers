@@ -42,7 +42,6 @@ gen/com/almworks/integers/generator/TypeDescriptor.java -text
 java/com/almworks/integers/IntegersDebug.java -text
 java/com/almworks/integers/IntegersUtils.java -text
 java/com/almworks/integers/RemovedIndexIterator.java -text
-java/com/almworks/integers/package-info.java -text
 lib/annotations.jar -text
 lib/hppc-0.5.2-javadoc.jar -text
 lib/hppc-0.5.2-sources.jar -text

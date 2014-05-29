@@ -1,25 +1,27 @@
 package com.almworks.integers;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Basic LCS algorithm. 
  * @author Igor Sereda
  */
 public class LongLongestCommonSubsequence {
-  private final LongList aseq;
-  private final LongList bseq;
+  private final LongList aSequence;
+  private final LongList bSequence;
   private final int alen;
   private final int blen;
   private final int[] lens;
 
   private LongLongestCommonSubsequence(LongList aseq, LongList bseq) {
-    this.aseq = aseq;
-    this.bseq = bseq;
+    this.aSequence = aseq;
+    this.bSequence = bseq;
     alen = aseq.size();
     blen = bseq.size();
     lens = new int[alen * blen];
   }
 
-  public static LongList getLCS(LongList aseq, LongList bseq) {
+  public static LongList getLCS(@Nullable LongList aseq,@Nullable LongList bseq) {
     if (aseq == null || bseq == null || aseq.isEmpty() || bseq.isEmpty()) return LongList.EMPTY;
     return new LongLongestCommonSubsequence(aseq, bseq).calc();
   }
@@ -27,7 +29,7 @@ public class LongLongestCommonSubsequence {
   private LongList calc() {
     for (int i = 0; i < alen; i++) {
       for (int j = 0; j < blen; j++) {
-        if (aseq.get(i) == bseq.get(j)) {
+        if (aSequence.get(i) == bSequence.get(j)) {
           lens[p(i, j)] = m(i - 1, j - 1) + 1;
         } else {
           lens[p(i, j)] = Math.max(m(i - 1, j), m(i, j - 1));
@@ -40,8 +42,8 @@ public class LongLongestCommonSubsequence {
     int ri = lcslen - 1;
     int i = alen - 1, j = blen - 1;
     while (i >= 0 && j >= 0 && ri >= 0) {
-      long v = aseq.get(i);
-      if (v == bseq.get(j)) {
+      long v = aSequence.get(i);
+      if (v == bSequence.get(j)) {
         r[ri--] = v;
         i--;
         j--;
@@ -51,8 +53,8 @@ public class LongLongestCommonSubsequence {
         i--;
       }
     }
-    assert ri == -1 : ri + " " + i + " " + j + " " + aseq + " " + bseq;
-    assert i == -1 || j == -1 : i + " " + j + " " + aseq + " " + bseq;
+    assert ri == -1 : ri + " " + i + " " + j + " " + aSequence + " " + bSequence;
+    assert i == -1 || j == -1 : i + " " + j + " " + aSequence + " " + bSequence;
     return new LongArray(r);
   }
 

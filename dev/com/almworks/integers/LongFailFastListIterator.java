@@ -16,38 +16,32 @@
 
 // CODE GENERATED FROM com/almworks/integers/PFailFastIterator.tpl
 
-
 package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class LongFailFastListIterator extends LongFailFastIterator implements LongListIterator {
-  protected abstract int getCurrentModCount();
+public abstract class LongFailFastListIterator extends LongFailFastIterator<LongListIterator> implements LongListIterator {
 
   public LongFailFastListIterator(LongListIterator it) {
     super(it);
   }
 
-  private LongListIterator getListIterator() {
-    return (LongListIterator) myIterator;
-  }
-
   @Override
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    getListIterator().move(offset);
+    getIterator().move(offset);
   }
 
   @Override
   public long get(int offset) throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    return getListIterator().get(offset);
+    return getIterator().get(offset);
   }
 
   @Override
   public int index() throws NoSuchElementException {
     checkMod();
-    return getListIterator().index();
+    return getIterator().index();
   }
 }

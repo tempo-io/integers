@@ -243,8 +243,12 @@ public final class LongArray extends AbstractWritableLongList {
   }
 
   public void setAll(int index, LongList values, int sourceIndex, int count) {
-    if (count <= 0)
+    if (count < 0) {
+      throw new IllegalArgumentException("count < 0");
+    }
+    if (count == 0) {
       return;
+    }
     int sz = size();
     if (index < 0 || index >= sz)
       throw new IndexOutOfBoundsException(index + " " + sz);

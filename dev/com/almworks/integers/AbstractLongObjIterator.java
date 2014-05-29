@@ -21,9 +21,12 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 public abstract class AbstractLongObjIterator<T> implements LongObjIterator<T> {
 
-  public LongObjIterator iterator() {
+  @NotNull
+  public LongObjIterator<T> iterator() {
     return this;
   }
 

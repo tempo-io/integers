@@ -24,11 +24,11 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LongObjIterators {
-  public static <T> LongObjIterator pair(final LongIterator left, final Iterator<T> right) {
+  public static <T> LongObjIterator<T> pair(final LongIterator left, final Iterator<T> right) {
     return new LongObjPairIterator(left, right);
   }
 
-  public static <T> LongObjIterator pair(final LongIterable left, final Iterable<T> right) {
+  public static <T> LongObjIterator<T> pair(final LongIterable left, final Iterable<T> right) {
     return new LongObjPairIterator(left.iterator(), right.iterator());
   }
 

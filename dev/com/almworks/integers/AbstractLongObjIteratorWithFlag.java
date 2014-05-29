@@ -47,7 +47,7 @@ public abstract class AbstractLongObjIteratorWithFlag<T> extends AbstractLongObj
     return rightImpl();
   }
 
-  public LongObjIterator next() {
+  public LongObjIterator<T> next() {
     nextImpl();
     myIterated = true;
     return this;

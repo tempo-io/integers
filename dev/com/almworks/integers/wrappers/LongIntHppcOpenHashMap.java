@@ -21,6 +21,7 @@ package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
+import org.jetbrains.annotations.NotNull;
 
 import static com.almworks.integers.wrappers.LongIntHppcWrappers.cursorToLongIntIterator;
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
@@ -33,8 +34,8 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
     myMap = new LongIntOpenHashMap();
   }
 
-  public LongIntHppcOpenHashMap(int initicalCapacity) {
-    myMap = new LongIntOpenHashMap(initicalCapacity);
+  public LongIntHppcOpenHashMap(int initialCapacity) {
+    myMap = new LongIntOpenHashMap(initialCapacity);
   }
 
   public LongIntHppcOpenHashMap(int initialCapacity, float loadFactor) {
@@ -104,6 +105,7 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
     return myMap.size();
   }
 
+  @NotNull
   public LongIntIterator iterator() {
     return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
       @Override

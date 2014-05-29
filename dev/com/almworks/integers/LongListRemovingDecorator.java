@@ -24,6 +24,7 @@ package com.almworks.integers;
 /**
  * Removing {@code LongList} decorator that does not alter the given list of removed indices.
  * @see WritableLongListRemovingDecorator
+ * @see LongListDiffIndexedDecorator
  * @author igor baltiyskiy
  */
 public class LongListRemovingDecorator extends AbstractLongListRemovingDecorator {

@@ -28,7 +28,7 @@ public abstract class LongObjFailFastIterator<T> extends AbstractLongObjIterator
 
   protected abstract int getCurrentModCount();
 
-  public LongObjFailFastIterator(LongObjIterator it) {
+  public LongObjFailFastIterator(LongObjIterator<T> it) {
     myIterator = it;
   }
 
@@ -37,7 +37,7 @@ public abstract class LongObjFailFastIterator<T> extends AbstractLongObjIterator
     return myIterator.hasNext();
   }
 
-  public LongObjIterator next() throws ConcurrentModificationException, NoSuchElementException {
+  public LongObjIterator<T> next() throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
     myIterator.next();
     return this;

@@ -26,30 +26,40 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
+/**
+ * Read-only decorator on the specified list.
+ * Suppose that decorator contains elements from the base list on the indices I = (i0, i1, i2, ...).
+ * Then it will be stored as J = I - (0, 1, 2, 3, ...) = (i0 - 0, i1 - 1, i2 - 2, ...),
+ * so if amount of removes much smaller then the size of the base list or removals are successive,
+ * it's more compact to store indices in the {@link IntSameValuesList}.
+ * For example: new DiffIndexedDecorator([0, 1, 2, 3, 4, 5], [0, 0, 2, 2]) -> [0, 1, 4, 5]
+ * @see LongListRemovingDecorator
+ */
 public class LongListDiffIndexedDecorator extends AbstractLongList {
   private final LongList mySource;
-  private final IntList myIndices;
+  // list with the differences between the indices
+  private final IntList myDiffIndices;
 
-  public LongListDiffIndexedDecorator(LongList source, IntList indices) {
+  public LongListDiffIndexedDecorator(LongList source, IntList diffIndices) {
     mySource = source;
-    myIndices = indices;
+    myDiffIndices = diffIndices;
   }
 
   public int size() {
-    return myIndices.size();
+    return myDiffIndices.size();
   }
 
   public long get(int index) {
-    return mySource.get(myIndices.get(index) + index);
+    return mySource.get(myDiffIndices.get(index) + index);
   }
 
   public boolean isEmpty() {
-    return myIndices.isEmpty();
+    return myDiffIndices.isEmpty();
   }
 
   @NotNull
   public LongListIterator iterator(int from, int to) {
-    IntListIterator indexIterator = myIndices.iterator(from, to);
+    IntListIterator indexIterator = myDiffIndices.iterator(from, to);
     return new DiffIndexedIterator(from, indexIterator);
   }
 
@@ -58,7 +68,7 @@ public class LongListDiffIndexedDecorator extends AbstractLongList {
   }
 
   public IntList getIndexes() {
-    return myIndices;
+    return myDiffIndices;
   }
 
   private class DiffIndexedIterator extends AbstractLongIteratorWithFlag implements LongListIterator {

@@ -233,8 +233,6 @@ public class LongCollections {
   }
 
   /**
-   * @param array
-   * @param capacity
    * @return {@code array} if {@code capacity <= array.length} otherwise
    * new array that contains all values of array and has length equal to the
    * maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
@@ -296,8 +294,8 @@ public class LongCollections {
   /**
    * @see LongCollections#indexOf(long, long[], int, int)
    */
-  public static int indexOf(long[] ints, int value) {
-    return indexOf(value, ints, 0, ints.length);
+  public static int indexOf(int value, long[] array) {
+    return indexOf(value, array, 0, array.length);
   }
 
   public static long[] arrayCopy(long[] array, int offset, int length) {
@@ -527,7 +525,6 @@ public class LongCollections {
   }
 
   /**
-   * @return union of the specified lists
    * @param aSorted sorted unique {@code LongList}
    * @param bSorted sorted unique {@code LongList}
    * @return union of the specified lists
@@ -890,4 +887,9 @@ public class LongCollections {
       }
     };
   }
+
+  public static <T> LongObjMapI<T> emptyMap() {
+    return LongObjMapI.EMPTY;
+  }
+
 }

@@ -21,6 +21,7 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -98,6 +99,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
   }
 
   @Override
+  @NotNull
   public LongMapIterator iterator() {
     return new LongMapIterator();
   }
@@ -197,7 +199,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
       return myValues.get(myNext - 1);
     }
 
-    public LongObjIterator next() {
+    public LongObjIterator<E> next() {
       checkMod();
       if (myNext >= size()) throw new NoSuchElementException();
       myNext++;
@@ -226,7 +228,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
       return myNext > myFrom + 1;
     }
 
-    public LongObjIterator previous() {
+    public LongObjIterator<E> previous() {
       checkMod();
       if (!hasPrevious()) throw new NoSuchElementException();
       myNext--;

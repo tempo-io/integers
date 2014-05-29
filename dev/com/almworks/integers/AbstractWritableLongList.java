@@ -217,7 +217,12 @@ public abstract class AbstractWritableLongList extends AbstractLongList implemen
   }
 
   public void setAll(int index, LongList values, int sourceOffset, int count) {
-    if (count <= 0) return;
+    if (count < 0) {
+      throw new IllegalArgumentException("count < 0");
+    }
+    if (count == 0) {
+      return;
+    }
     int sz = size();
     checkAddedCount(index, count, sz);
     if (values == this || values instanceof SubList && ((SubList) values).getParent() == this) {

@@ -174,18 +174,6 @@ public final class IntegersUtils {
     x[b] = t;
   }
 
-  public static int indexOf(int[] ints, int value) {
-    return indexOf(ints, 0, ints.length, value);
-  }
-
-  public static int indexOf(int[] ints, int from, int to, int value) {
-    for (int i = from; i < to; i++) {
-      if (ints[i] == value)
-        return i;
-    }
-    return -1;
-  }
-
 
   /**
    * Generates all permutations of size <tt>n</tt> with the property that two subsequent permutations differ in a swap of two subsequent elements (Gray property.) <br/>

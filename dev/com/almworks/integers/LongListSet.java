@@ -19,7 +19,7 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Class, which allow you to consider the specified sorted unique list as set.
+ * Class that allows you to consider the specified sorted unique list as set.
  * Changes in list propagate to this set.
  */
 public class LongListSet extends AbstractLongSet implements LongSortedSet {

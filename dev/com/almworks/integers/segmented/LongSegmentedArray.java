@@ -250,8 +250,18 @@ public class LongSegmentedArray extends AbstractWritableLongList implements Clon
 
   public void setAll(int index, LongList values, int sourceIndex, int count) {
     assert !IntegersDebug.CHECK || checkInvariants();
-    if (values == null || count <= 0)
+    if (count < 0) {
+      throw new IllegalArgumentException("count < 0");
+    }
+    if (values == null || count == 0) {
       return;
+    }
+    int sz = size();
+    if (index < 0 || index >= sz)
+      throw new IndexOutOfBoundsException(index + " " + sz);
+    if (index + count > sz)
+      throw new IndexOutOfBoundsException(index + " " + count + " " + sz);
+
     if (values instanceof LongSegmentedArray) {
       copySegmented(index, (LongSegmentedArray) values, sourceIndex, count);
     } else if (values instanceof SubList) {

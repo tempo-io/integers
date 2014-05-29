@@ -298,10 +298,10 @@ public class IntCollections {
   }
 
   /**
-   * @see IntCollections#indexOf(int, int[], int, int)
+   * @see #indexOf(int, int[], int, int)
    */
-  public static long indexOf(int value, int[] ints) {
-    return indexOf(value, ints, 0, ints.length);
+  public static long indexOf(int value, int[] array) {
+    return indexOf(value, array, 0, array.length);
   }
 
   public static int[] arrayCopy(int[] array, int offset, int length) {
@@ -517,7 +517,6 @@ public class IntCollections {
   }
 
   /**
-   * @return union of the specified lists
    * @param aSorted sorted unique {@code IntList}
    * @param bSorted sorted unique {@code IntList}
    * @return union of the specified lists

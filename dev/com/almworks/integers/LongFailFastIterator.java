@@ -22,35 +22,39 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class LongFailFastIterator extends AbstractLongIterator {
-  protected final LongIterator myIterator;
+public abstract class LongFailFastIterator<T extends LongIterator> extends AbstractLongIterator {
+  protected final T myIterator;
   private final int myModCountAtCreation = getCurrentModCount();
 
   protected abstract int getCurrentModCount();
 
-  public LongFailFastIterator(LongIterator it) {
+  protected T getIterator() {
+    return myIterator;
+  }
+
+  public LongFailFastIterator(T it) {
     myIterator = it;
   }
 
   public boolean hasNext() throws ConcurrentModificationException {
     checkMod();
-    return myIterator.hasNext();
+    return getIterator().hasNext();
   }
 
   public LongIterator next() throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    myIterator.next();
+    getIterator().next();
     return this;
   }
 
   public boolean hasValue() throws ConcurrentModificationException {
     checkMod();
-    return myIterator.hasValue();
+    return getIterator().hasValue();
   }
 
   public long value() throws IllegalStateException {
     checkMod();
-    return myIterator.value();
+    return getIterator().value();
   }
 
   protected void checkMod() {

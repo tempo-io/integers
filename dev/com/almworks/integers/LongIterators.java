@@ -53,25 +53,25 @@ public class LongIterators {
   public static LongIterator repeat(final long value, int count) {
     final int lim0 = Math.max(count, 0);
     return new AbstractLongIterator() {
-      int count = lim0;
+      int myCount = lim0;
 
       @Override
       public boolean hasNext() throws ConcurrentModificationException {
-        return count > 0;
+        return myCount > 0;
       }
 
       @Override
       public LongIterator next() throws NoSuchElementException {
-        if (count == 0) {
+        if (myCount == 0) {
           throw new NoSuchElementException();
         }
-        count--;
+        myCount--;
         return this;
       }
 
       @Override
       public boolean hasValue() {
-        return count != lim0;
+        return myCount != lim0;
       }
 
       @Override
@@ -330,7 +330,7 @@ public class LongIterators {
   }
 
   /**
-   * Beware of unboxing: it always occurns on receiving the next element of {@code iterator}
+   * Beware of unboxing: it always occurs on receiving the next element of {@code iterator}
    */
   public static LongIterator asLongIterator(final Iterator<Long> iterator) {
     return new LongFindingIterator() {

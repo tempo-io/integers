@@ -32,6 +32,8 @@ import java.util.List;
  * Maps integer keys to integer values. <br/>
  * Keys and values are sorted, and it is possible to retrieve either value by key or key by value. However, mappings are still added only by key. <br/>
  * The mapping is stored in a separate list in the following way: if {@code (k, v)} is a stored pair, then {@code v = vals[idxMap[i]]}, where {@code k = keys[i]}.
+ * Method {@link #iterator()} returns key-value pairs sorted by key and
+ * methods {@link #keysIterator()} and {@link #valuesIterator()} return keys and values in sorted order.
  * */
 public class LongTwoWayMap implements LongLongMap {
   private final LongArray myKeys = new LongArray();
@@ -134,6 +136,9 @@ public class LongTwoWayMap implements LongLongMap {
     return myKeys.isEmpty();
   }
 
+  /**
+   * @return pair-iterator over this map in the sorted by key order.
+   */
   @NotNull
   @Override
   public LongLongIterator iterator() {
@@ -145,6 +150,10 @@ public class LongTwoWayMap implements LongLongMap {
     return myKeys.iterator();
   }
 
+  /**
+   * Note, that this iterator isn't equal to right projection of {@link #iterator()}
+   * @return iterator over values of this map in the sorted order.
+   */
   @Override
   public LongIterator valuesIterator() {
     return myValues.iterator();
@@ -304,14 +313,14 @@ public class LongTwoWayMap implements LongLongMap {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(long valFrom, @NotNull LongToLong f) {
+  public void transformValues(long valFrom, @NotNull LongToLong fun) {
     int n = size();
     boolean isSortingBroken = false;
     long lastValue = Long.MIN_VALUE;
     int viFrom = myValues.binarySearch(valFrom);
     if (viFrom < 0) viFrom = -viFrom - 1;
     for (int vi = viFrom; vi < n; ++vi) {
-      long val = f.invoke(myValues.get(vi));
+      long val = fun.invoke(myValues.get(vi));
       myValues.set(vi, val);
       if (val < lastValue) isSortingBroken = true;
       lastValue = val;
@@ -319,7 +328,7 @@ public class LongTwoWayMap implements LongLongMap {
     if (isSortingBroken) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
@@ -368,7 +377,6 @@ public class LongTwoWayMap implements LongLongMap {
 
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
   public void transformKeys(LongToLong injection) throws NonInjectiveFunctionException {
-    int n = size();
     LongArray newKeys = new LongArray(LongCollections.map(injection, myKeys));
 
     IntArray newIdxMap = new IntArray(myIdxMap);
@@ -556,10 +564,7 @@ public class LongTwoWayMap implements LongLongMap {
 
       Entry entry = (Entry) o;
 
-      if (key != entry.key) return false;
-      if (val != entry.val) return false;
-
-      return true;
+      return key == entry.key && val == entry.val;
     }
 
     @Override

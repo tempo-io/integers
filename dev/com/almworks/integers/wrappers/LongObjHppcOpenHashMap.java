@@ -23,6 +23,7 @@ import com.almworks.integers.*;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.carrotsearch.hppc.LongObjectOpenHashMap;
 import com.carrotsearch.hppc.cursors.ObjectCursor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -45,7 +46,7 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     myMap = new LongObjectOpenHashMap<E>(initialCapacity, loadFactor);
   }
 
-  public static <E> LongObjHppcOpenHashMap createFrom(LongIterable keys, Iterable<E> values) {
+  public static <E> LongObjHppcOpenHashMap<E> createFrom(LongIterable keys, Iterable<E> values) {
     int keysSize = (keys instanceof LongSizedIterable) ? ((LongSizedIterable) keys).size() : 0;
     int valuesSize = (values instanceof Collection) ? ((Collection) keys).size() : 0;
 
@@ -63,7 +64,7 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     return map;
   }
 
-  public static <E> LongObjHppcOpenHashMap createFrom(long[] keys, E[] values) {
+  public static <E> LongObjHppcOpenHashMap<E> createFrom(long[] keys, E[] values) {
     if (keys.length != values.length) {
       throw new IllegalArgumentException("Arrays of keys and values must have an identical length.");
     }
@@ -80,16 +81,16 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
    * that is garanteed to not invoke {@code resize} after adding {@code count} elements
    * @return new hashmap with the specified capacity dependent on {@code count} and {@code loadFactor}
    */
-  public static LongObjHppcOpenHashMap createForAdd(int count, float loadFactor) {
+  public static <T> LongObjHppcOpenHashMap<T> createForAdd(int count, float loadFactor) {
     int initialCapacity = (int)(count / loadFactor) + 1;
-    return new LongObjHppcOpenHashMap(initialCapacity, loadFactor);
+    return new LongObjHppcOpenHashMap<T>(initialCapacity, loadFactor);
   }
 
   /**
    * Creates new hashmap with default load factor
    * @see #createForAdd(int, float)
    */
-  public static LongObjHppcOpenHashMap createForAdd(int count) {
+  public static <T> LongObjHppcOpenHashMap<T> createForAdd(int count) {
     return createForAdd(count, LongObjectOpenHashMap.DEFAULT_LOAD_FACTOR);
   }
 
@@ -103,6 +104,7 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     return myMap.size();
   }
 
+  @NotNull
   public LongObjIterator<E> iterator() {
 	return new LongObjFailFastIterator<E>(cursorToLongObjIterator(myMap.iterator())) {
       @Override

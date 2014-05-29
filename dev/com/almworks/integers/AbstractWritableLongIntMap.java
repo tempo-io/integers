@@ -65,12 +65,7 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
       @NotNull
       @Override
       public LongIterator iterator() {
-        return new LongFailFastIterator(keysIterator()) {
-          @Override
-          protected int getCurrentModCount() {
-            return myModCount;
-          }
-        };
+        return keysIterator();
       }
     };
   }

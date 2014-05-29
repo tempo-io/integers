@@ -67,12 +67,7 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
       @NotNull
       @Override
       public LongIterator iterator() {
-        return new LongFailFastIterator(keysIterator()) {
-          @Override
-          protected int getCurrentModCount() {
-            return myModCount;
-          }
-        };
+        return keysIterator();
       }
     };
   }
@@ -93,7 +88,7 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
     return true;
   }
 
-  public AbstractWritableLongObjMap add(long key, T value) {
+  public AbstractWritableLongObjMap<T> add(long key, T value) {
     modified();
     putImpl(key, value);
     return this;
@@ -172,7 +167,7 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
     appendShortName(builder, this);
     builder.append(" ").append(size()).append(" [");
     String sep = "";
-    for (LongObjIterator ii : this) {
+    for (LongObjIterator<T> ii : this) {
       builder.append(sep).append('(').append(ii.left()).append(' ').append(ii.right()).append(')');
       sep = ", ";
     }
@@ -203,7 +198,7 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
     joinCurrent(cur, builders);
 
     String sep = "";
-    for (LongObjIterator ii : this) {
+    for (LongObjIterator<T> ii : this) {
       cur[0].setLength(0);
       cur[1].setLength(0);
 

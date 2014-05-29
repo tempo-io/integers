@@ -40,7 +40,7 @@ public interface WritableLongObjMap<T> extends LongObjMapI<T> {
    * Associates the specified value with the specified key in this map.
    * @return this
    */
-  WritableLongObjMap add(long key, T value);
+  WritableLongObjMap<T> add(long key, T value);
 
   /**
    * Associates the specified value with the specified key only if the specified key has no current mapping.

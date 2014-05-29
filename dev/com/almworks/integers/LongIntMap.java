@@ -52,10 +52,6 @@ public interface LongIntMap extends LongIntIterable {
    */
   boolean isEmpty();
 
-  @NotNull
-  @Override
-  LongIntIterator iterator();
-
   LongIterator keysIterator();
 
   IntIterator valuesIterator();
