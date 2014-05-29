@@ -168,7 +168,7 @@ public abstract class IntegersFixture extends TestCase {
     LongList base = rem.getBase();
     for (int i = 0; i < base.size(); i++) {
       boolean removed = rem.isRemovedAt(i);
-      boolean kept = IntegersUtils.indexOf(expected, i) < 0;
+      boolean kept = IntCollections.indexOf(i, expected) < 0;
       assertTrue(String.valueOf(i), removed != kept);
       int newIndex = rem.getNewIndex(i);
       if (removed)

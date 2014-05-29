@@ -19,6 +19,8 @@ package com.almworks.integers;
 import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 
 public class LongIteratorSpecificationChecker<I extends LongIterator> {
   public static int MAX = Integer.MAX_VALUE;
@@ -194,14 +196,15 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
   private void testRemoveException() {
     for(LongIterator it: getter.get(0, 1, 2)) {
-      if (!(it instanceof WritableLongListIterator))
+      if (!(it instanceof WritableLongListIterator)) {
+        it.next();
         try {
-          it.next();
           it.remove();
           fail();
         } catch (UnsupportedOperationException ex) {
           // ok
         }
+      }
     }
   }
 
@@ -219,6 +222,19 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
       assertEquals(1, it.nextValue());
       assertTrue(it.hasNext());
       assertEquals(1, it.value());
+
+      assertEquals(it, it.next());
+      assertEquals(2, it.value());
+
+      assertFalse(it.hasNext());
+      try {
+       it.next();
+       fail();
+      } catch (NoSuchElementException _) {
+        // ok
+      }
+
+      assertEquals(it, it.iterator());
     }
   }
 
@@ -314,8 +330,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
     if (iterator instanceof IntIterator) {
       IntIterator it = (IntIterator) iterator;
       try {
-       it.hasValue();
-       fail();
+        it.hasValue();
+        fail();
       } catch (ConcurrentModificationException _) {
         // ok
       }

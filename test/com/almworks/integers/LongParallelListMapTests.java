@@ -158,7 +158,9 @@ public class LongParallelListMapTests extends TestCase {
 
   public void testIteratorGet() {
     LongParallelListMap.Iterator it = myMap.iterator(1);
+    assertNotNull(it.iterator());
     assertTrue(it.hasNext());
+    assertFalse(it.hasValue());
 
     try {
       it.left();
@@ -171,25 +173,29 @@ public class LongParallelListMapTests extends TestCase {
     } catch (NoSuchElementException ex) { }
 
     it.next();
+    assertTrue(it.hasValue());
     assertEquals(2, it.left());
     assertEquals(11, it.right());
 
-    assertEquals(4, it.getKey(1));
-    assertEquals(21, it.getValue(1));
+    assertEquals(4, it.getLeft(1));
+    assertEquals(21, it.getRight(1));
 
 
   }
 
   public void testIteratorMove() {
     LongParallelListMap.Iterator it = myMap.iterator(1, 3);
+    assertNotNull(it.iterator());
     it.move(2);
-    assertEquals(4, it.getKey(0));
-    assertEquals(21, it.getValue(0));
+    assertEquals(4, it.getLeft(0));
+    assertEquals(21, it.getRight(0));
   }
 
   public void testIteratorRemove() {
     LongParallelListMap.Iterator it = myMap.iterator(1);
+    assertFalse(it.hasValue());
     it.next();
+    assertTrue(it.hasValue());
     it.removeRange(0, 2);
     CHECK.order(myMap.keysIterator(0, myMap.size()), LongArray.create(0, 6, 8).iterator());
     CHECK.order(myMap.valuesIterator(0, myMap.size()), LongArray.create(1, 31, 41).iterator());
@@ -203,9 +209,12 @@ public class LongParallelListMapTests extends TestCase {
 
   public void testIteratorSetValue() {
     LongParallelListMap.Iterator it = myMap.iterator(1);
+    assertNotNull(it.iterator());
+    assertFalse(it.hasValue());
     for (; it.hasNext(); it.next()) {
-      it.setValue(1, it.getValue(1) - 11);
+      it.setRight(1, it.getRight(1) - 11);
     }
+    assertTrue(it.hasValue());
     LongIterator expected = LongArray.create(1, 0, 10, 20, 30).iterator();
     CHECK.order(myMap.valuesIterator(0, myMap.size()), expected);
   }

@@ -17,9 +17,13 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.LongFunctions;
+
+import java.util.ArrayList;
 import java.util.List;
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
+import static com.almworks.integers.LongCollections.concatLists;
 import static com.almworks.integers.LongCollections.map;
+import static com.almworks.integers.LongIteratorSpecificationChecker.ValuesType;
 import static com.almworks.integers.LongProgression.arithmetic;
 import static com.almworks.integers.LongProgression.range;
 import static com.almworks.integers.LongListSet.asSet;
@@ -55,6 +59,11 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
           long value = arr2.get(i);
           assertEquals(arr.binarySearch(value) >= 0, curSet.contains(value));
         }
+        assertTrue(curSet.containsAll(arr));
+        assertTrue(curSet.containsAll(curSet));
+        assertTrue(curSet.containsAll(curSet.iterator()));
+        assertTrue(curSet.containsAll(LongList.EMPTY));
+        assertFalse(curSet.containsAll(concatLists(arr, new LongList.Single(arr.getLast(0) + 1))));
       }
     }
   }
@@ -124,19 +133,50 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
   }
 
   public void testToNativeArray() {
-    for (T set : createSets(LongProgression.range(20, 40))) {
+    for (T curSet : createSets(LongProgression.range(20, 40))) {
       long[] ar = new long[40];
-      set.toNativeArray(ar, 3);
+      curSet.toNativeArray(ar, 3);
       LongArray actual = new LongArray(new LongArray(ar).subList(3, 23));
       LongList expected = LongProgression.range(20, 40);
       CHECK.unordered(actual, expected);
+
+      try {
+        curSet.toNativeArray(new long[20], 1);
+        fail();
+      } catch (IndexOutOfBoundsException _) {
+        // ok
+      }
+
+      try {
+        curSet.toNativeArray(new long[20], -1);
+        fail();
+      } catch (IndexOutOfBoundsException _) {
+        // ok
+      }
+
     }
-    for (T set : createSets(LongProgression.range(21, 40, 2))) {
+
+    for (T curSet : createSets(LongProgression.range(21, 40, 2))) {
+      int setSize = curSet.size();
       long[] ar = new long[40];
-      set.toNativeArray(ar, 4);
+      curSet.toNativeArray(ar, 4);
       LongList expected = LongProgression.range(21, 40, 2);
       LongArray actual = new LongArray(new LongArray(ar).subList(4, 4 + expected.size()));
       CHECK.unordered(actual, expected);
+
+      try {
+        curSet.toNativeArray(new long[setSize], 1);
+        fail();
+      } catch (IndexOutOfBoundsException _) {
+        // ok
+      }
+
+      try {
+        curSet.toNativeArray(new long[20], -1);
+        fail();
+      } catch (IndexOutOfBoundsException _) {
+        // ok
+      }
     }
   }
 
@@ -237,5 +277,30 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         }
       }
     }
+  }
+
+  public void testIteratorSpecification() {
+    if (!isSortedSet()) return;
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+      @Override
+      public List<LongIterator> get(long... values) {
+        ArrayList<LongIterator> iterators = new ArrayList<LongIterator>();
+        LongArray valuesArray = new LongArray(values);
+        for (T curSet : createSets(valuesArray)) {
+          iterators.add(curSet.iterator());
+        }
+        if (values.length != 0) {
+          if (values[0] != Long.MIN_VALUE) {
+            for (T curSet : createSets(concatLists(new LongList.Single(Long.MIN_VALUE), valuesArray))) {
+              LongSortedSet sortedSet = (LongSortedSet) curSet;
+              iterators.add(sortedSet.tailIterator(Long.MIN_VALUE + 1));
+              iterators.add(sortedSet.tailIterator(values[0]));
+              iterators.add(sortedSet.tailIterator(values[0] - 1));
+            }
+          }
+        }
+        return iterators;
+      }
+    }, ValuesType.SORTED_UNIQUE);
   }
 }

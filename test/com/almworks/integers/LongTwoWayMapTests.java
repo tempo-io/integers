@@ -143,6 +143,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
 
     map.clear();
     assertEquals(0, map.size());
+    assertTrue(map.isEmpty());
 
     assertEquals(0, map.put(0, 0));
     assertEquals(50, map.put(5, 50));
@@ -272,6 +273,7 @@ public class LongTwoWayMapTests extends IntegersFixture {
     map.remove(2);
     assertFalse(map.containsAnyKeys(LongArray.create(1, 2, 3, 5)));
     assertEquals(6, map.size());
+    assertFalse(map.isEmpty());
     checkMapValuesEqualKeysMod(3);
   }
 
@@ -463,5 +465,19 @@ public class LongTwoWayMapTests extends IntegersFixture {
       assertEquals(it.left(), mapIt.left());
       assertEquals(it.right(), mapIt.right());
     }
+  }
+
+  public void testSimple() {
+    LongList keys = LongProgression.Arithmetic.range(10);
+    for (LongLongIterator it : new LongLongPairIterator(keys, LongCollections.map(SQR, keys))) {
+      map.put(it.left(), it.right());
+    }
+    map.transformValues(new LongLongToLong() {
+      @Override
+      public long invoke(long a, long b) {
+        return 0;
+      }
+    });
+    System.out.println(map);
   }
 }

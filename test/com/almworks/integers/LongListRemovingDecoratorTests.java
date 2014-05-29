@@ -200,4 +200,48 @@ public class LongListRemovingDecoratorTests extends LongListChecker<LongListRemo
     it.next();
     assertEquals(3, it.get(1));
   }
+
+  public void testIterate() {
+    long[] values = LongProgression.Arithmetic.range(0, 101, 5).toNativeArray();
+    int size = values.length;
+    AbstractLongListDecorator.LongVisitor[] visitors = {
+        new AbstractLongListDecorator.LongVisitor() {
+      @Override
+      public boolean accept(long value, LongList source) {
+        return value == 0;
+      }
+    }, new AbstractLongListDecorator.LongVisitor() {
+      @Override
+      public boolean accept(long value, LongList source) {
+        return value == 50;
+      }
+    }, new AbstractLongListDecorator.LongVisitor() {
+      @Override
+      public boolean accept(long value, LongList source) {
+        return value == 100;
+      }
+    }};
+    for (AbstractLongListDecorator.LongVisitor visitor : visitors) {
+      for (LongListRemovingDecorator decorator : createLongListVariants(values)) {
+        assertFalse(decorator.iterate(0, size, visitor));
+      }
+    }
+
+    for (LongListRemovingDecorator decorator : createLongListVariants(values)) {
+      assertTrue(decorator.iterate(0, size, new AbstractLongListDecorator.LongVisitor() {
+        @Override
+        public boolean accept(long value, LongList source) {
+          return true;
+        }
+      }));
+    }
+
+  }
+
+  public void testPrepareIndices() {
+    IntArray indices = IntArray.create(0, 1, 2, 5, 6, 7);
+    LongListRemovingDecorator.prepareSortedIndices(indices);
+    System.out.println(indices);
+  }
 }
+

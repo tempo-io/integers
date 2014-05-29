@@ -132,7 +132,7 @@ public class IntegersUtilsTests extends IntegersFixture {
 
     for (int i = 0; i < arrayLength; i++) {
       int val = res.get(i);
-      assertEquals(res.indexOf(val), IntegersUtils.indexOf(intArr, val));
+      assertEquals(res.indexOf(val), IntCollections.indexOf(val, intArr));
     }
   }
 

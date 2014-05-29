@@ -19,6 +19,8 @@ package com.almworks.integers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.almworks.integers.LongIterators.range;
+
 public class LongUnionIteratorTests extends IntegersFixture {
   public void testCreate() {
     List<LongArray> list = new ArrayList<LongArray>();
@@ -80,5 +82,14 @@ public class LongUnionIteratorTests extends IntegersFixture {
         return res;
       }
     }, LongIteratorSpecificationChecker.ValuesType.SORTED_UNIQUE);
+  }
+
+  public void testGetCurrentIteratorIndex() {
+    long[] values = {2, 3, 5};
+    LongIterator[] iterators = {range(0, 100, 2), range(0, 100, 3), range(0, 100, 5)};
+    LongUnionIterator unionIterator = new LongUnionIterator(iterators);
+    while (!unionIterator.hasNext()) {
+      unionIterator.value();
+    }
   }
 }

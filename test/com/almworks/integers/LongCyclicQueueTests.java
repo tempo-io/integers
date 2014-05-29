@@ -19,8 +19,10 @@ package com.almworks.integers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.LongProgression.range;
 
 public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
   private LongCyclicQueue myArray = new LongCyclicQueue(5);
@@ -247,8 +249,12 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
     clq.addAll(10, 11, 12, 13, 14);
     assertEquals("(10, 11, 12, 13, 14)", clq.toStringWithPiterators());
 
-    LongCyclicQueue.PinnedIterator i1 = clq.pinnedIterator().next();
+    LongCyclicQueue.PinnedIterator i1 = clq.pinnedIterator();
+    assertEquals(0, i1.age());
+    i1.next();
+    assertEquals(1, i1.age());
     LongCyclicQueue.PinnedIterator i2 = clq.pinnedIterator().next().next().next();
+    assertEquals(3, i2.age());
     LongCyclicQueue.PinnedIterator i3 = clq.pinnedIterator().next().next().next().next().next();
     assertEquals("(10*, 11, 12*, 13, 14*)", clq.toStringWithPiterators());
 
@@ -288,7 +294,7 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
 
   public void testPiteratorIndex() {
     myArray.addAll(LongIterators.range(15));
-    CHECK.order(LongProgression.range(15), myArray);
+    CHECK.order(range(15), myArray);
 
     LongCyclicQueue.PinnedIterator it = myArray.pinnedIterator();
     try {
@@ -297,6 +303,7 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
     } catch (NoSuchElementException _) {
       // ok
     }
+    assertEquals(0, it.age());
     for (int i = 0; i < 10; i++) {
       it.next();
       assertEquals(i, it.index());
@@ -317,7 +324,7 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
         LongCyclicQueue queue = new LongCyclicQueue();
         queue.addAll(LongCollections.repeat(-1, startIdx));
         queue.removeFirst(startIdx);
-        queue.addAll(LongProgression.range(mSize));
+        queue.addAll(range(mSize));
 
         LongCyclicQueue.PinnedIterator it = queue.pinnedIterator();
         checkRemoveAndCatchISE(queue, -1);
@@ -362,11 +369,11 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
       myArray = new LongCyclicQueue();
       int firstCount = myRand.nextInt(maxSize / 2);
       int secondCount = firstCount + myRand.nextInt(maxSize / 2);
-      myArray.addAll(LongProgression.range(firstCount));
-      CHECK.order(myArray, LongProgression.range(firstCount));
+      myArray.addAll(range(firstCount));
+      CHECK.order(myArray, range(firstCount));
       // ensureCapacity
-      myArray.addAll(LongProgression.range(firstCount, secondCount));
-      CHECK.order(myArray, LongProgression.range(secondCount));
+      myArray.addAll(range(firstCount, secondCount));
+      CHECK.order(myArray, range(secondCount));
     }
   }
 
@@ -380,5 +387,22 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
     }
     assertEquals(0, myArray.removeFirst(1));
     assertEquals(0, myArray.removeFirst(5));
+  }
+
+  public void testEnsureRoomToAdd() {
+    myArray = new LongCyclicQueue();
+    assertEquals(0, myArray.getCapacity());
+    int[] counts = {20, 50, 110};
+
+    for (int count : counts) {
+      myArray.ensureRoomToAdd(count);
+      int cap = myArray.getCapacity();
+      myArray.addAll(range(count));
+      assertEquals(cap, myArray.getCapacity());
+
+      myArray.removeFirst(10);
+      myArray.addAll(range(10));
+      assertEquals(cap, myArray.getCapacity());
+    }
   }
 }

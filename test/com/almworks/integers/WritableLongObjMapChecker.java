@@ -38,7 +38,7 @@ public abstract class WritableLongObjMapChecker<T extends WritableLongObjMap> ex
   @Override
   protected List<WritableLongIntMapFromLongObjMap> createMapsFromLists(LongList keys, IntList values) {
 
-    List<WritableLongObjMap<Integer>> objMapsFromLists = createObjMapsFromLists(keys, asList(values));
+    List<WritableLongObjMap<Integer>> objMapsFromLists = createObjMapsFromLists(keys, values.toList());
     int size = objMapsFromLists.size();
 
     ArrayList<WritableLongIntMapFromLongObjMap> maps = new ArrayList<WritableLongIntMapFromLongObjMap>(size);
@@ -54,20 +54,6 @@ public abstract class WritableLongObjMapChecker<T extends WritableLongObjMap> ex
 
   protected abstract <E> List<WritableLongObjMap<E>> createObjMapsFromLists(LongList keys, List<E> values);
 
-  protected List<Integer> asList(final IntList list) {
-    return new AbstractList<Integer>() {
-      @Override
-      public Integer get(int index) {
-        return list.get(index);
-      }
-
-      @Override
-      public int size() {
-        return list.size();
-      }
-    };
-  }
-
   @Override
   public void testHashCode() {
     int attemptsCount = 10, shuffleCount = 10;
@@ -81,7 +67,7 @@ public abstract class WritableLongObjMapChecker<T extends WritableLongObjMap> ex
           expectedHash += IntegersUtils.hash(keys.get(i)) + (new Integer(values.get(i))).hashCode();
         }
 
-        for (WritableLongObjMap<Integer> map0 : createObjMapsFromLists(keys, asList(values))) {
+        for (WritableLongObjMap<Integer> map0 : createObjMapsFromLists(keys, values.toList())) {
           assertEquals(expectedHash, map0.hashCode());
         }
 

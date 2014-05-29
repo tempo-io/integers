@@ -16,6 +16,8 @@
 
 package com.almworks.integers;
 
+import com.almworks.util.TestUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,6 +27,7 @@ import static com.almworks.integers.IntIterators.cycle;
 import static com.almworks.integers.IntIterators.limit;
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.LongCollections.collectIterable;
 import static com.almworks.integers.LongCollections.concatLists;
 import static com.almworks.integers.LongIteratorSpecificationChecker.checkIteratorThrowsCME;
 import static com.almworks.integers.LongIterators.range;
@@ -209,6 +212,11 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     for (int i = 0; i < keys.size(); i++) {
       assertEquals(values.get(i), map.get(keys.get(i)));
     }
+    LongArray mapKeys = collectIterable(map.size(), map.keysIterator());
+    CHECK.unordered(mapKeys, keys);
+
+    IntArray mapValues = IntCollections.collectIterable(map.size(), map.valuesIterator());
+    CHECK.unordered(mapValues, values);
   }
 
   private static IntList getSqrValues(final LongList keys) {
@@ -225,10 +233,18 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     };
   }
 
-  public void testAddAllRemoveAllSimple() {
+  public void testPutAllRemoveAllSimple() {
     LongArray keys = new LongArray(LongProgression.arithmetic(1, 10, 2));
     IntList values = getSqrValues(keys);
     map.putAll(keys, values);
+    checkMap(map, keys, values);
+
+    try {
+      map.putAll(keys, values.subList(0, values.size() - 1));
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
+    }
     checkMap(map, keys, values);
 
     keys.addAll(LongProgression.arithmetic(0, 10, 2));
@@ -345,6 +361,34 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
         } else {
           assertFalse(map0.remove(i, 0));
           assertFalse(map0.remove(i, 1));
+        }
+      }
+    }
+  }
+
+  @Override
+  public void testHashCode() {
+    int attemptsCount = 10, shuffleCount = 10;
+    int sizeMax = 600, step = 50;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      for (int size = step; size < sizeMax; size += step) {
+        LongArray keys = generateRandomLongArray(size, SORTED_UNIQUE);
+        IntArray values = generateRandomIntArray(keys.size(), UNORDERED);
+        int expectedHash = 0;
+        for (int i = 0; i < size; i++) {
+          expectedHash += IntegersUtils.hash(keys.get(i)) + IntegersUtils.hash(values.get(i));
+        }
+
+        for (T map0 : createMapsFromLists(keys, values)) {
+          assertEquals(expectedHash, map0.hashCode());
+        }
+
+        IntArray indices = new IntArray(IntProgression.range(size));
+        for (int i = 0; i < shuffleCount; i++) {
+          map = createMap();
+          map.putAll(keys.get(indices), values.get(indices));
+          assertEquals(expectedHash, map.hashCode());
+          indices.shuffle(myRand);
         }
       }
     }

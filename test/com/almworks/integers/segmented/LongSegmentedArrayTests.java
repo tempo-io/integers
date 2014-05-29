@@ -425,4 +425,16 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
       CHECK.order(expected, array);
     }
   }
+
+  public void testSetAllBorders() {
+    array.addAll(LongProgression.Arithmetic.range(1050));
+    array.removeRange(0, 10);
+
+    try {
+      array.setAll(-5, LongArray.create(-1, -1), 0, 2);
+      fail();
+    } catch (IndexOutOfBoundsException _) {
+      // ok
+    }
+  }
 }

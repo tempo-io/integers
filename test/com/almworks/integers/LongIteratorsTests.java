@@ -62,6 +62,10 @@ public class LongIteratorsTests extends IntegersFixture {
       assertEquals(cur, arithmetic.nextValue());
       cur += 10;
     }
+
+    for (LongIterator it : LongIterators.limit(LongIterators.arithmeticProgression(239, 0), 100)) {
+      assertEquals(239, it.value());
+    }
   }
 
   public void testLimit() throws Exception {
@@ -157,6 +161,13 @@ public class LongIteratorsTests extends IntegersFixture {
       LongIterator actual = LongIterators.arithmetic(start, count, step);
       checkNoValue(actual);
       CHECK.order(LongProgression.arithmetic(start, count, step).iterator(), actual);
+    }
+
+    try {
+      LongIterators.arithmetic(0, -1);
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
     }
   }
 }

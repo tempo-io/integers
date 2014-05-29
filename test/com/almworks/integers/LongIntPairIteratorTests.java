@@ -18,6 +18,7 @@ package com.almworks.integers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntLongIterators.leftProjection;
 import static com.almworks.integers.IntLongIterators.rightProjection;
@@ -98,6 +99,12 @@ public class LongIntPairIteratorTests extends IntegersFixture {
       assertEquals(right[i], pit.right());
     }
     assertFalse(pit.hasNext());
+    try {
+      pit.next();
+      fail();
+    } catch (NoSuchElementException _) {
+      // ok
+    }
 
     int[] leftExpected = new int[len];
     System.arraycopy(left, 0, leftExpected, 0, len);

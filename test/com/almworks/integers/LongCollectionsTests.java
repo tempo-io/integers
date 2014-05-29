@@ -16,6 +16,8 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.LongFunctions;
+import com.almworks.integers.func.LongToLong;
 import com.almworks.integers.segmented.LongSegmentedArray;
 import com.almworks.util.Pair;
 
@@ -226,6 +228,7 @@ public class LongCollectionsTests extends IntegersFixture {
 
   public void testIsSortedUnique() {
     assertEquals(0, LongCollections.isSortedUnique(true, new long[]{}, 0, 0));
+    assertEquals(0, LongCollections.isSortedUnique(true, null, 0, 0));
     assertEquals(0, LongCollections.isSortedUnique(false, new long[]{}, 0, 0));
     assertEquals(0, LongCollections.isSortedUnique(true, new long[]{1, 5, 10, 11, 20}, 0, 5));
     assertEquals(0, LongCollections.isSortedUnique(false, new long[]{1, 5, 10, 11, 20}, 0, 5));
@@ -645,6 +648,23 @@ public class LongCollectionsTests extends IntegersFixture {
         arrays[i] = generateRandomLongArray(maxArraySize, UNORDERED);
       }
       checkCollect(arrays);
+    }
+  }
+
+  public void testMap() {
+    int attemptsCount = 10;
+    int size = 200;
+    int maxVal = 10000;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      LongArray values = generateRandomLongArray(size, UNORDERED, maxVal);
+      LongToLong[] functions = {LongFunctions.SQR, LongFunctions.INC, LongFunctions.DEC, LongFunctions.NEG};
+      for (LongToLong fun : functions) {
+        long[] expected = values.toNativeArray();
+        for (int i = 0; i < expected.length; i++) {
+          expected[i] = fun.invoke(expected[i]);
+        }
+        checkCollection(LongCollections.map(fun, values), expected);
+      }
     }
   }
 }

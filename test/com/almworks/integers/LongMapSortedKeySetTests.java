@@ -22,7 +22,7 @@ import java.util.List;
 
 import static com.almworks.integers.IntCollections.repeat;
 
-public class LongIntMapSortedKeySetTests extends LongSetChecker<LongSet> {
+public class LongMapSortedKeySetTests extends LongSetChecker<LongSet> {
 
   @Override
   protected List<LongSet> createSets(LongList sortedUniqueList) {
@@ -37,7 +37,12 @@ public class LongIntMapSortedKeySetTests extends LongSetChecker<LongSet> {
         return true;
       }
     });
-    return Arrays.asList(createSet(sortedUniqueList), objMap.keySet());
+    LongTwoWayMap twoWayMap = new LongTwoWayMap();
+    for (LongIterator ii : sortedUniqueList) {
+      twoWayMap.put(ii.value(), -ii.value());
+    }
+
+    return Arrays.asList(createSet(sortedUniqueList), objMap.keySet(), twoWayMap.keySet());
   }
 
   @Override

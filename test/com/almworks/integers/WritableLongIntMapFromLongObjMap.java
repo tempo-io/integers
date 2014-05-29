@@ -18,6 +18,7 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.AbstractCollection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -118,6 +119,7 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
 
       @Override
       public boolean hasValue() {
+        // added for checking fail-fast behavior: java.util.Iterator don't support hasValue() method.
         it.hasNext();
         return myHasValue;
       }
@@ -185,7 +187,18 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
   }
 
   @Override
-  public void putAll(LongSizedIterable keys, IntSizedIterable values) {
+  public void putAll(LongSizedIterable keys, final IntSizedIterable values) {
+    myMap.putAll(keys, new AbstractCollection<Integer>() {
+      @Override
+      public Iterator<Integer> iterator() {
+        return IntIterators.asIterator(values.iterator());
+      }
+
+      @Override
+      public int size() {
+        return values.size();
+      }
+    });
     putAllKeys(keys, values);
   }
 

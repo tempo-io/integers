@@ -306,4 +306,17 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
       checkSet(set, expected);
     }
   }
+
+  public void testAsList() {
+    int attemptsCount = 10;
+    int count = 10;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      LongArray values = generateRandomLongArray(count, SORTED_UNIQUE);
+      for (LongAmortizedSet aSet : createSets(values)) {
+        CHECK.order(values, aSet.asList());
+        aSet.remove(values.getLast(0));
+        CHECK.order(values.subList(0, values.size() - 1), aSet.asList());
+      }
+    }
+  }
 }

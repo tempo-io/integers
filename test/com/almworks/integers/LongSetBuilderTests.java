@@ -274,4 +274,25 @@ public class LongSetBuilderTests extends LongSetChecker<LongSetBuilder> {
     b.add(10);
     CHECK.order(LongArray.create(10).iterator(), b.iterator());
   }
+
+  public void testMergeFromSortedCollection() {
+    LongArray expected = LongArray.create(0, 10, 20);
+    for (LongSetBuilder builder : createSets(expected)) {
+      builder.mergeFromSortedCollection(LongProgression.Arithmetic.range(1, 30, 10));
+      expected.addAll(LongProgression.Arithmetic.range(1, 30, 10));
+
+      expected.sortUnique();
+      checkSet(builder, expected);
+      builder.mergeFromSortedCollection(LongList.EMPTY);
+      checkSet(builder, expected);
+
+      CHECK.order(expected, builder.commitToArray());
+      try {
+        builder.mergeFromSortedCollection(LongList.EMPTY);
+        fail();
+      } catch (IllegalStateException _) {
+        // ok
+      }
+    }
+  }
 }
