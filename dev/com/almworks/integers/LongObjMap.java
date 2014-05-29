@@ -29,18 +29,18 @@ import java.util.*;
 /**
  * Serves as a map with long keys.
  *
- * @param <E> element type
+ * @param <T> element type
  */
-public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
+public class LongObjMap<T> extends AbstractWritableLongObjMap<T> {
   private final LongArray myKeys = new LongArray();
-  private final List<E> myValues = IntegersUtils.arrayList();
+  private final List<T> myValues = IntegersUtils.arrayList();
 
-  public static <E> LongObjMap<E> create() {
+  public static <T> LongObjMap<T> create() {
     return new LongObjMap();
   }
 
   @Override
-  protected E putImpl(long key, E value) {
+  protected T putImpl(long key, T value) {
     int pos = myKeys.binarySearch(key);
     if (pos >= 0) {
       return myValues.set(pos, value);
@@ -56,7 +56,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
    * Returns null if the element is not in the map.
    */
   @Nullable
-  public E get(long key) {
+  public T get(long key) {
     int pos = myKeys.binarySearch(key);
     if (pos >= 0) return myValues.get(pos);
     return null;
@@ -82,13 +82,13 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
   /**
    * @return an unmodifiable list of values sorted by their keys in ascending order.
    */
-  public List<E> getValues() {
+  public List<T> getValues() {
     //noinspection ReturnOfCollectionOrArrayField
     return Collections.unmodifiableList(myValues);
   }
 
   @Override
-  protected E removeImpl(long key) {
+  protected T removeImpl(long key) {
     int pos = myKeys.binarySearch(key);
     if (pos >= 0) {
       myKeys.removeAt(pos);
@@ -115,10 +115,10 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
   }
 
   @Override
-  public Iterator<E> valuesIterator() {
-    final Iterator<E> iterator = myValues.iterator();
+  public Iterator<T> valuesIterator() {
+    final Iterator<T> iterator = myValues.iterator();
     final long expectedModCount = myModCount;
-    return new Iterator<E>() {
+    return new Iterator<T>() {
       @Override
       public boolean hasNext() {
         checkMod();
@@ -126,7 +126,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
       }
 
       @Override
-      public E next() {
+      public T next() {
         checkMod();
         return iterator.next();
       }
@@ -159,7 +159,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
     myValues.clear();
   }
 
-  public class LongMapIterator extends AbstractLongObjIterator<E> {
+  public class LongMapIterator extends AbstractLongObjIterator<T> {
     private int myFrom;
     private int myNext;
     private int myExpectedModCount;
@@ -193,13 +193,13 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
       return myKeys.get(myNext - 1);
     }
 
-    public E right() {
+    public T right() {
       checkMod();
       if (!hasValue()) throw new IllegalStateException();
       return myValues.get(myNext - 1);
     }
 
-    public LongObjIterator<E> next() {
+    public LongObjIterator<T> next() {
       checkMod();
       if (myNext >= size()) throw new NoSuchElementException();
       myNext++;
@@ -228,7 +228,7 @@ public class LongObjMap<E> extends AbstractWritableLongObjMap<E> {
       return myNext > myFrom + 1;
     }
 
-    public LongObjIterator<E> previous() {
+    public LongObjIterator<T> previous() {
       checkMod();
       if (!hasPrevious()) throw new NoSuchElementException();
       myNext--;

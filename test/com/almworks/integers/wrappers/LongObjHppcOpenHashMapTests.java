@@ -39,25 +39,25 @@ public class LongObjHppcOpenHashMapTests extends WritableLongObjMapChecker<LongO
   }
 
   @Override
-  protected <E> LongObjHppcOpenHashMap<E> createObjMap() {
-    return new LongObjHppcOpenHashMap<E>();
+  protected <T> LongObjHppcOpenHashMap<T> createObjMap() {
+    return new LongObjHppcOpenHashMap<T>();
   }
 
   @Override
-  protected <E> LongObjHppcOpenHashMap<E> createObjMapWithCapacity(int capacity) {
-    return new LongObjHppcOpenHashMap<E>(capacity);
+  protected <T> LongObjHppcOpenHashMap<T> createObjMapWithCapacity(int capacity) {
+    return new LongObjHppcOpenHashMap<T>(capacity);
   }
 
   @Override
-  protected <E> List<WritableLongObjMap<E>> createObjMapsFromLists(LongList keys, List<E> values) {
-    WritableLongObjMap<E> map0 = createObjMap();
+  protected <T> List<WritableLongObjMap<T>> createObjMapsFromLists(LongList keys, List<T> values) {
+    WritableLongObjMap<T> map0 = createObjMap();
     map0.putAll(keys, values);
 
     int capacity = Math.max(keys.size(), values.size());
-    WritableLongObjMap<E> map1 = createObjMapWithCapacity(capacity);
+    WritableLongObjMap<T> map1 = createObjMapWithCapacity(capacity);
     map1.putAll(keys, values);
 
-    WritableLongObjMap<E> map2 = createObjMapWithCapacity(capacity * 2);
+    WritableLongObjMap<T> map2 = createObjMapWithCapacity(capacity * 2);
     map2.putAll(keys, values);
 
     return Arrays.asList(map0, map1, map2);

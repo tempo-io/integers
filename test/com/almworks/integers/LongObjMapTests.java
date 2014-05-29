@@ -32,18 +32,18 @@ public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
   }
 
   @Override
-  protected <E> LongObjMap<E> createObjMap() {
-    return new LongObjMap<E>();
+  protected <T> LongObjMap<T> createObjMap() {
+    return new LongObjMap<T>();
   }
 
   @Override
-  protected <E> LongObjMap<E> createObjMapWithCapacity(int capacity) {
+  protected <T> LongObjMap<T> createObjMapWithCapacity(int capacity) {
     return createObjMap();
   }
 
   @Override
-  protected <E> List<WritableLongObjMap<E>> createObjMapsFromLists(LongList keys, List<E> values) {
-    WritableLongObjMap<E> map0 = new LongObjMap<E>();
+  protected <T> List<WritableLongObjMap<T>> createObjMapsFromLists(LongList keys, List<T> values) {
+    WritableLongObjMap<T> map0 = new LongObjMap<T>();
     map0.putAll(keys, values);
     return Arrays.asList(map0);
   }

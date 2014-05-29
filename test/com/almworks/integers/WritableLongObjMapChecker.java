@@ -48,11 +48,11 @@ public abstract class WritableLongObjMapChecker<T extends WritableLongObjMap> ex
     return maps;
   }
 
-  protected abstract <E> WritableLongObjMap<E> createObjMap();
+  protected abstract <T> WritableLongObjMap<T> createObjMap();
 
-  protected abstract <E> WritableLongObjMap<E> createObjMapWithCapacity(int capacity);
+  protected abstract <T> WritableLongObjMap<T> createObjMapWithCapacity(int capacity);
 
-  protected abstract <E> List<WritableLongObjMap<E>> createObjMapsFromLists(LongList keys, List<E> values);
+  protected abstract <T> List<WritableLongObjMap<T>> createObjMapsFromLists(LongList keys, List<T> values);
 
   @Override
   public void testHashCode() {

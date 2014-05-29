@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 
 /**
  * The read-only decorator contains elements from the base list at indices I = (i0, i1, i2, ...).
- * The feature of this decorator is that the list of indices is stored as (i0 - 0, i1 - 1, i2 -2, ...)
+ * The feature of this decorator is that the list of indices is stored as (i0 - 0, i1 - 1, i2 - 2, ... )
  * so that a run of n successive indices is stored as n equal values.
  * This can be efficiently stored in {@link IntSameValuesList}.
  * This class serves the same purpose as {@link LongListRemovingDecorator}.

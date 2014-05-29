@@ -27,12 +27,12 @@ import com.carrotsearch.hppc.cursors.LongObjectCursor;
 import java.util.Iterator;
 
 public class LongObjHppcWrappers {
-  public static <E> LongObjFindingIterator<E> cursorToLongObjIterator(final Iterator<LongObjectCursor<E>> cursor) {
-    return new LongObjFindingIterator<E>() {
+  public static <T> LongObjFindingIterator<T> cursorToLongObjIterator(final Iterator<LongObjectCursor<T>> cursor) {
+    return new LongObjFindingIterator<T>() {
       @Override
       protected boolean findNext() {
         if (!cursor.hasNext()) return false;
-        LongObjectCursor<E> cur = cursor.next();
+        LongObjectCursor<T> cur = cursor.next();
         myNextLeft = cur.key;
         myNextRight = cur.value;
         return true;

@@ -31,22 +31,22 @@ import java.util.Iterator;
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 import static com.almworks.integers.wrappers.LongObjHppcWrappers.cursorToLongObjIterator;
 
-public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
-  protected final LongObjectOpenHashMap<E> myMap;
+public class LongObjHppcOpenHashMap<T> extends AbstractWritableLongObjMap<T> {
+  protected final LongObjectOpenHashMap<T> myMap;
 
   public LongObjHppcOpenHashMap() {
-    myMap = new LongObjectOpenHashMap<E>();
+    myMap = new LongObjectOpenHashMap<T>();
   }
 
   public LongObjHppcOpenHashMap(int initialCapacity) {
-    myMap = new LongObjectOpenHashMap<E>(initialCapacity);
+    myMap = new LongObjectOpenHashMap<T>(initialCapacity);
   }
 
   public LongObjHppcOpenHashMap(int initialCapacity, float loadFactor) {
-    myMap = new LongObjectOpenHashMap<E>(initialCapacity, loadFactor);
+    myMap = new LongObjectOpenHashMap<T>(initialCapacity, loadFactor);
   }
 
-  public static <E> LongObjHppcOpenHashMap<E> createFrom(LongIterable keys, Iterable<E> values) {
+  public static <T> LongObjHppcOpenHashMap<T> createFrom(LongIterable keys, Iterable<T> values) {
     int keysSize = (keys instanceof LongSizedIterable) ? ((LongSizedIterable) keys).size() : 0;
     int valuesSize = (values instanceof Collection) ? ((Collection) keys).size() : 0;
 
@@ -64,14 +64,14 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     return map;
   }
 
-  public static <E> LongObjHppcOpenHashMap<E> createFrom(long[] keys, E[] values) {
+  public static <T> LongObjHppcOpenHashMap<T> createFrom(long[] keys, T[] values) {
     if (keys.length != values.length) {
       throw new IllegalArgumentException("Arrays of keys and values must have an identical length.");
     }
     int size = keys.length;
     float loadFactor = LongObjectOpenHashMap.DEFAULT_LOAD_FACTOR;
     int initialCapacity = (int)(size / loadFactor) + 1;
-    LongObjHppcOpenHashMap map = new LongObjHppcOpenHashMap<E>(initialCapacity, loadFactor);
+    LongObjHppcOpenHashMap map = new LongObjHppcOpenHashMap<T>(initialCapacity, loadFactor);
     map.putAll(keys, values);
     return map;
   }
@@ -105,8 +105,8 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
   }
 
   @NotNull
-  public LongObjIterator<E> iterator() {
-	return new LongObjFailFastIterator<E>(cursorToLongObjIterator(myMap.iterator())) {
+  public LongObjIterator<T> iterator() {
+	return new LongObjFailFastIterator<T>(cursorToLongObjIterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -123,16 +123,16 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
     };
   }
 
-  public Iterator<E> valuesIterator() {
-    final Iterator<ObjectCursor<E>> it = myMap.values().iterator();
-    return new Iterator<E>() {
+  public Iterator<T> valuesIterator() {
+    final Iterator<ObjectCursor<T>> it = myMap.values().iterator();
+    return new Iterator<T>() {
       @Override
       public boolean hasNext() {
         return it.hasNext();
       }
 
       @Override
-      public E next() {
+      public T next() {
         return it.next().value;
       }
 
@@ -144,7 +144,7 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
   }
 
   @Override
-  public E get(long key) {
+  public T get(long key) {
     return myMap.get(key);
   }
 
@@ -154,7 +154,7 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
   }
 
   @Override
-  protected E putImpl(long key, E value) {
+  protected T putImpl(long key, T value) {
     return myMap.put(key, value);
   }
 
@@ -162,7 +162,7 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
    * Returns the last value saved in a call to {@link #containsKey}.
    * @see #containsKey
    */
-  public E lget() {
+  public T lget() {
     return myMap.lget();
   }
 
@@ -175,7 +175,7 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
    * @return Returns the previous value stored under the given key
    * or {@code null} if there was no mapping for the last used key
    */
-  public E lset(E value) {
+  public T lset(T value) {
     return myMap.lset(value);
   }
 
@@ -190,12 +190,12 @@ public class LongObjHppcOpenHashMap<E> extends AbstractWritableLongObjMap<E> {
   }
 
   @Override
-  protected E removeImpl(long key) {
+  protected T removeImpl(long key) {
     return myMap.remove(key);
   }
 
   @Override
-  public boolean remove(long key, E value) {
+  public boolean remove(long key, T value) {
     modified();
     if (!containsKey(key)) return false;
     if (!(myMap.lget() == value)) return false;
