@@ -199,7 +199,6 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
         return values.size();
       }
     });
-    putAllKeys(keys, values);
   }
 
   @Override

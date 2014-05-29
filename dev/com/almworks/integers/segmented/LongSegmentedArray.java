@@ -89,7 +89,7 @@ public class LongSegmentedArray extends AbstractWritableLongList implements Clon
     assert mySegments != null || size == 0 : size + " " + mySegments;
     assert mySegments == null || mySegments.segments != null : mySegments;
     assert
-        mySegmentCount >= 0 && (mySegmentCount == 0 || mySegmentCount <= mySegments.segments.length) :
+        mySegmentCount >= 0 && (mySegments == null || mySegmentCount <= mySegments.segments.length) :
         mySegmentCount + " " + mySegments;
     assert myCapacity == mySegmentCount << mySegmentBits : mySegmentBits + " " + mySegmentCount + " " + myCapacity;
     assert size <= myCapacity : size + " " + myCapacity;

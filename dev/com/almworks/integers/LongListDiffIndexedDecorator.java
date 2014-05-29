@@ -27,17 +27,17 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 /**
- * Read-only decorator on the specified list.
- * Suppose that decorator contains elements from the base list on the indices I = (i0, i1, i2, ...).
- * Then it will be stored as J = I - (0, 1, 2, 3, ...) = (i0 - 0, i1 - 1, i2 - 2, ...),
- * so if amount of removes much smaller then the size of the base list or removals are successive,
- * it's more compact to store indices in the {@link IntSameValuesList}.
+ * The read-only decorator contains elements from the base list at indices I = (i0, i1, i2, ...).
+ * The feature of this decorator is that the list of indices is stored as (i0 - 0, i1 - 1, i2 -2, ...)
+ * so that a run of n successive indices is stored as n equal values.
+ * This can be efficiently stored in {@link IntSameValuesList}.
+ * This class serves the same purpose as {@link LongListRemovingDecorator}.
+ * The constructor takes the list of processed indices, you can use {@link LongListRemovingDecorator#prepareSortedIndices(WritableIntList)}to generate it.
  * For example: new DiffIndexedDecorator([0, 1, 2, 3, 4, 5], [0, 0, 2, 2]) -> [0, 1, 4, 5]
  * @see LongListRemovingDecorator
  */
 public class LongListDiffIndexedDecorator extends AbstractLongList {
   private final LongList mySource;
-  // list with the differences between the indices
   private final IntList myDiffIndices;
 
   public LongListDiffIndexedDecorator(LongList source, IntList diffIndices) {
@@ -67,7 +67,7 @@ public class LongListDiffIndexedDecorator extends AbstractLongList {
     return mySource;
   }
 
-  public IntList getIndexes() {
+  public IntList getIndices() {
     return myDiffIndices;
   }
 

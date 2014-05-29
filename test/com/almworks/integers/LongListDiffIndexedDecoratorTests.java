@@ -29,7 +29,7 @@ public class LongListDiffIndexedDecoratorTests extends IntegersFixture {
   public void testGet() {
     long[] expected = {0, 1, 2, 5, 6, 7};
 
-    CHECK.order(indices.iterator(), decorator.getIndexes().iterator());
+    CHECK.order(indices.iterator(), decorator.getIndices().iterator());
     CHECK.order(source.iterator(), decorator.getSource().iterator());
     checkCollection(decorator, expected);
   }

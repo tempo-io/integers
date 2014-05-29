@@ -25,7 +25,7 @@ import java.util.List;
 
 import static com.almworks.integers.IntCollections.repeat;
 
-public class LongIntMapUnsortedKeySetTests extends LongSetChecker<LongSet> {
+public class LongMapUnsortedKeySetTests extends LongSetChecker<LongSet> {
 
   @Override
   protected List<LongSet> createSets(LongList sortedUniqueList) {

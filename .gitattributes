@@ -65,7 +65,6 @@ test/com/almworks/integers/LongFindingIteratorTests.java -text
 test/com/almworks/integers/LongIndexedIteratorTests.java -text
 test/com/almworks/integers/LongIntIteratorsTests.java -text
 test/com/almworks/integers/LongIntListMapTests.java -text
-test/com/almworks/integers/LongIntMapUnsortedKeySetTests.java -text
 test/com/almworks/integers/LongIntPairIteratorTests.java -text
 test/com/almworks/integers/LongIntersectionIteratorTests.java -text
 test/com/almworks/integers/LongIterableLexicographicComparatorTests.java -text
@@ -81,6 +80,7 @@ test/com/almworks/integers/LongListIteratorSpecificationChecker.java -text
 test/com/almworks/integers/LongListRemovingDecoratorTests.java -text
 test/com/almworks/integers/LongLongestCommonSubsequenceTests.java -text
 test/com/almworks/integers/LongMapSortedKeySetTests.java -text
+test/com/almworks/integers/LongMapUnsortedKeySetTests.java -text
 test/com/almworks/integers/LongMinusIteratorTests.java -text
 test/com/almworks/integers/LongNativeArrayIteratorTests.java -text
 test/com/almworks/integers/LongObjMapTests.java -text
