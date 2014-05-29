@@ -23,9 +23,9 @@ import com.almworks.integers.*;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.wrappers.LongIntHppcWrappers.cursorToLongIntIterator;
-import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
+import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
+import static com.almworks.integers.wrappers.LongIntHppcWrappers.cursorToLongIntIterator;
 
 public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   protected final LongIntOpenHashMap myMap;

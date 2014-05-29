@@ -21,7 +21,10 @@
 
 package com.almworks.integers.func;
 
-import com.almworks.integers.*;
+import com.almworks.integers.IntCollections;
+import com.almworks.integers.IntIterable;
+import com.almworks.integers.IntIterator;
+import com.almworks.integers.IntList;
 
 public class IntFunctions {
   private IntFunctions() {}

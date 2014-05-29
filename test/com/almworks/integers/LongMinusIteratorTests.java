@@ -16,8 +16,6 @@
 
 package com.almworks.integers;
 
-import junit.framework.TestCase;
-
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
 
 public class LongMinusIteratorTests extends IntegersFixture {

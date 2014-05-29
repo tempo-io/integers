@@ -466,18 +466,4 @@ public class LongTwoWayMapTests extends IntegersFixture {
       assertEquals(it.right(), mapIt.right());
     }
   }
-
-  public void testSimple() {
-    LongList keys = LongProgression.Arithmetic.range(10);
-    for (LongLongIterator it : new LongLongPairIterator(keys, LongCollections.map(SQR, keys))) {
-      map.put(it.left(), it.right());
-    }
-    map.transformValues(new LongLongToLong() {
-      @Override
-      public long invoke(long a, long b) {
-        return 0;
-      }
-    });
-    System.out.println(map);
-  }
 }

@@ -180,7 +180,7 @@ public class LongCyclicQueue extends AbstractLongList implements LongCollector {
   }
 
   /**
-   * @return the capacity of this queue
+   * @return the capacity of the internal buffer that holds the elements
    */
   public int getCapacity() {
     return myHostArray.length;

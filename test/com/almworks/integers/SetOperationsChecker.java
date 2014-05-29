@@ -18,8 +18,9 @@ package com.almworks.integers;
 
 import java.util.Random;
 
-import static com.almworks.integers.IntegersFixture.*;
+import static com.almworks.integers.IntegersFixture.SortedStatus;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.IntegersFixture.generateRandomLongArray;
 import static com.almworks.integers.LongArray.create;
 import static com.almworks.integers.LongCollections.collectIterables;
 

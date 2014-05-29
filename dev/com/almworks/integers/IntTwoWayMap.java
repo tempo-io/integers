@@ -21,7 +21,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntToInt;

@@ -21,8 +21,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
-  private LongObjMap<String> myMap = LongObjMap.create();
+public class LongObjMapTests extends WritableLongObjMapChecker<LongObjListMap> {
+  private LongObjListMap<String> myMap = LongObjListMap.create();
 
   @Override
   protected List<WritableLongIntMapFromLongObjMap> createMapsFromLists(LongList keys, IntList values) {
@@ -32,18 +32,18 @@ public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
   }
 
   @Override
-  protected <T> LongObjMap<T> createObjMap() {
-    return new LongObjMap<T>();
+  protected <T> LongObjListMap<T> createObjMap() {
+    return new LongObjListMap<T>();
   }
 
   @Override
-  protected <T> LongObjMap<T> createObjMapWithCapacity(int capacity) {
+  protected <T> LongObjListMap<T> createObjMapWithCapacity(int capacity) {
     return createObjMap();
   }
 
   @Override
   protected <T> List<WritableLongObjMap<T>> createObjMapsFromLists(LongList keys, List<T> values) {
-    WritableLongObjMap<T> map0 = new LongObjMap<T>();
+    WritableLongObjMap<T> map0 = new LongObjListMap<T>();
     map0.putAll(keys, values);
     return Arrays.asList(map0);
   }
@@ -111,7 +111,7 @@ public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
     myMap.put(0, "0");
     myMap.put(100, "100");
 
-    final LongObjMap.LongMapIterator it = myMap.iterator();
+    final LongObjListMap.LongMapIterator it = myMap.iterator();
     assertFalse(it.hasPrevious());
     assertTrue(it.hasNext());
 
@@ -124,7 +124,7 @@ public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
     myMap.put(50, "50");
     TestUtil.mustThrow(ConcurrentModificationException.class, new Runnable() { public void run() {it.next();} });
 
-    LongObjMap.LongMapIterator it2 = myMap.iterator();
+    LongObjListMap.LongMapIterator it2 = myMap.iterator();
     checkIterator(it2.next(), 0);
     checkIterator(it2.next(), 50);
     it2.remove();
@@ -142,7 +142,7 @@ public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
   public void testFind() {
     myMap.put(0, "0");
     myMap.put(100, "100");
-    LongObjMap.LongMapIterator it = myMap.find(50);
+    LongObjListMap.LongMapIterator it = myMap.find(50);
     checkIterator(it.next(), 100);
     it = myMap.find(100);
     checkIterator(it.next(), 100);
@@ -152,7 +152,7 @@ public class LongObjMapTests extends WritableLongObjMapChecker<LongObjMap> {
     myMap.put(0, "0");
     myMap.put(100, "100");
     assertEquals("0", myMap.remove(0));
-    LongObjMap.LongMapIterator it = myMap.iterator();
+    LongObjListMap.LongMapIterator it = myMap.iterator();
     checkIterator(it.next(), 100);
     assertFalse(it.hasNext());
   }

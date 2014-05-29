@@ -19,8 +19,6 @@
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
-
 public interface LongIntMap extends LongIntIterable {
   LongIntMap EMPTY = new LongIntEmptyMap();
 

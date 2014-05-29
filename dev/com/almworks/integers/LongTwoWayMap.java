@@ -21,7 +21,10 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.*;
+import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.LongFunctions;
+import com.almworks.integers.func.LongLongToLong;
+import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

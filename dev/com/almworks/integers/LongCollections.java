@@ -21,8 +21,8 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.LongFunctions;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
@@ -888,8 +888,8 @@ public class LongCollections {
     };
   }
 
-  public static <T> LongObjMapI<T> emptyMap() {
-    return LongObjMapI.EMPTY;
+  public static <T> LongObjMap<T> emptyMap() {
+    return LongObjMap.EMPTY;
   }
 
 }

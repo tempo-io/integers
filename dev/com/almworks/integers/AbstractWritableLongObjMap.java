@@ -219,9 +219,9 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   @Override
   public boolean equals(Object o) {
     if (o == this) return true;
-    if (!(o instanceof LongObjMapI)) return false;
+    if (!(o instanceof LongObjMap)) return false;
 
-    LongObjMapI<T> otherMap = (LongObjMapI<T>) o;
+    LongObjMap<T> otherMap = (LongObjMap<T>) o;
 
     if (otherMap.size() != size()) return false;
     for (LongObjIterator<T> it : this) {

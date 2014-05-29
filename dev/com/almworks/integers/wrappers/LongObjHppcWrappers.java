@@ -19,9 +19,7 @@
 
 package com.almworks.integers.wrappers;
 
-import com.almworks.integers.LongIntFindingIterator;
 import com.almworks.integers.LongObjFindingIterator;
-import com.carrotsearch.hppc.cursors.LongIntCursor;
 import com.carrotsearch.hppc.cursors.LongObjectCursor;
 
 import java.util.Iterator;

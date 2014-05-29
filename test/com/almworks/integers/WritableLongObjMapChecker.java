@@ -16,9 +16,7 @@
 
 package com.almworks.integers;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;

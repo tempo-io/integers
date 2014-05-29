@@ -26,7 +26,7 @@ public class LongMapSortedKeySetTests extends LongSetChecker<LongSet> {
 
   @Override
   protected List<LongSet> createSets(LongList sortedUniqueList) {
-    LongObjMap<Integer> objMap = new LongObjMap<Integer>();
+    LongObjListMap<Integer> objMap = new LongObjListMap<Integer>();
     final LongIterator it = sortedUniqueList.iterator();
     objMap.putAll(new LongObjFindingIterator<Integer>() {
       @Override

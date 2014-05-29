@@ -21,7 +21,6 @@ package com.almworks.integers;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 public class LongObjIterators {
   public static <T> LongObjIterator<T> pair(final LongIterator left, final Iterator<T> right) {

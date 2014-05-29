@@ -16,8 +16,6 @@
 
 package com.almworks.integers;
 
-import com.almworks.util.TestUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;

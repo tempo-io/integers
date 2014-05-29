@@ -21,7 +21,7 @@ package com.almworks.integers;
 
 import java.util.Collection;
 
-public interface WritableLongObjMap<T> extends LongObjMapI<T> {
+public interface WritableLongObjMap<T> extends LongObjMap<T> {
 
   /**
    * Removes all entries from this map.

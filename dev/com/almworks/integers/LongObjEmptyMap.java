@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class LongObjEmptyMap<T> implements LongObjMapI<T> {
+public class LongObjEmptyMap<T> implements LongObjMap<T> {
   @Override
   public T get(long key) {
     return null;

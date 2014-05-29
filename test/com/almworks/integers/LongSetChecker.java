@@ -20,13 +20,14 @@ import com.almworks.integers.func.LongFunctions;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.LongCollections.concatLists;
 import static com.almworks.integers.LongCollections.map;
 import static com.almworks.integers.LongIteratorSpecificationChecker.ValuesType;
+import static com.almworks.integers.LongListSet.asSet;
 import static com.almworks.integers.LongProgression.arithmetic;
 import static com.almworks.integers.LongProgression.range;
-import static com.almworks.integers.LongListSet.asSet;
 
 /**
  * add {@code -Dcom.almworks.integers.check=true} in VM options to run full set checks

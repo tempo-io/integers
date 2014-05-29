@@ -22,6 +22,7 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.util.NoSuchElementException;
 
 public class IntParallelListMap implements IntIntIterable {

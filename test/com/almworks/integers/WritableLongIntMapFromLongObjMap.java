@@ -251,7 +251,7 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
     if (o == this) return true;
     if (!(o instanceof LongIntMap)) return false;
     final LongIntMap map = (LongIntMap) o;
-    LongObjMapI<Integer> objMap = new LongObjMapI<Integer>() {
+    LongObjMap<Integer> objMap = new LongObjMap<Integer>() {
 
       @Override
       public Integer get(long key) {
