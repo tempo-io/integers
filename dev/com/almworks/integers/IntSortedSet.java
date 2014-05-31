@@ -49,10 +49,10 @@ public interface IntSortedSet extends IntSet {
    */
   public int getLowerBound();
 
-    /**
-     * Writes values from this set to {@code dest} in the ascending order.<br>
-     * {@inheritDoc}
-     */
+  /**
+   * Writes values from this set to {@code dest} in the ascending order.<br>
+   * {@inheritDoc}
+   */
   int[] toNativeArray(int[] dest, int destPos);
 
   /**

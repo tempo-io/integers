@@ -46,10 +46,10 @@ public interface #E#SortedSet extends #E#Set {
    */
   public #e# getLowerBound();
 
-    /**
-     * Writes values from this set to {@code dest} in the ascending order.<br>
-     * {@inheritDoc}
-     */
+  /**
+   * Writes values from this set to {@code dest} in the ascending order.<br>
+   * {@inheritDoc}
+   */
   #e#[] toNativeArray(#e#[] dest, int destPos);
 
   /**
