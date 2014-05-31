@@ -64,6 +64,9 @@ lib/hppc-0.5.2-javadoc.jar -text
 lib/hppc-0.5.2-sources.jar -text
 lib/hppc-0.5.2.jar -text
 lib/junit-4.11.jar -text
+pom/integers-wrappers.pom -text
+pom/integers.pom -text
+pom/upload-oss.sh -text
 templates/com/almworks/integers/AbstractPObjIterator.tpl -text
 templates/com/almworks/integers/AbstractPObjIteratorWithFlag.tpl -text
 templates/com/almworks/integers/AbstractWritablePObjMap.tpl -text
