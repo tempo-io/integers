@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractWritablePQMap.tpl
+// CODE GENERATED FROM com/almworks/integers/AbstractWritablePObjMap.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.IntegersUtils.appendShortName;
-import static com.almworks.integers.IntIntIterators.pair;
+import java.util.Collection;
+import java.util.Iterator;
 
-public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
+import static com.almworks.integers.IntegersUtils.appendShortName;
+
+public abstract class AbstractWritableIntObjMap<T> implements WritableIntObjMap<T> {
   protected int myModCount = 0;
 
   /**
    * put element without invocation of {@code AbstractWritableIntIntMap#modified()}
    */
-  protected abstract int putImpl(int key, int value);
+  protected abstract T putImpl(int key, T value);
 
   /**
    * remove element without invocation of {@code AbstractWritableIntIntMap#modified()}
    */
-  protected abstract int removeImpl(int key);
+  protected abstract T removeImpl(int key);
 
   public boolean isEmpty() {
     return size() == 0;
@@ -59,7 +61,7 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
 
       @Override
       public int size() {
-        return AbstractWritableIntIntMap.this.size();
+        return AbstractWritableIntObjMap.this.size();
       }
 
       @NotNull
@@ -74,30 +76,30 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
     myModCount++;
   }
 
-  public int put(int key, int value) {
+  public T put(int key, T value) {
     modified();
     return putImpl(key, value);
   }
 
-  public boolean putIfAbsent(int key, int value) {
+  public boolean putIfAbsent(int key, T value) {
     modified();
     if (containsKey(key)) return false;
     putImpl(key, value);
     return true;
   }
 
-  public AbstractWritableIntIntMap add(int key, int value) {
+  public AbstractWritableIntObjMap<T> add(int key, T value) {
     modified();
     putImpl(key, value);
     return this;
   }
 
-  public int remove(int key) {
+  public T remove(int key) {
     modified();
     return removeImpl(key);
   }
 
-  public boolean remove(int key, int value) {
+  public boolean remove(int key, T value) {
     modified();
     if (containsKey(key) && get(key) == value) {
       removeImpl(key);
@@ -106,23 +108,24 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
     return false;
   }
 
-  public void putAll(IntSizedIterable keys, IntSizedIterable values) {
+  public void putAll(IntObjIterable<T> entries) {
     modified();
-    if (keys.size() != values.size()) {
-      throw new IllegalArgumentException();
-    }
-    putAll(pair(keys, values));
-  }
-
-  public void putAll(IntIntIterable entries) {
-    modified();
-    for (IntIntIterator it: entries) {
+    for (IntObjIterator<T> it: entries) {
       putImpl(it.left(), it.right());
     }
   }
 
   @Override
-  public void putAll(int[] keys, int[] values) {
+  public void putAll(IntSizedIterable keys, Collection<T> values) {
+    modified();
+    if (keys.size() != values.size()) {
+      throw new IllegalArgumentException();
+    }
+    putAll(IntObjIterators.pair(keys.iterator(), values.iterator()));
+  }
+
+  @Override
+  public void putAll(int[] keys, T[] values) {
     modified();
     if (keys.length != values.length) {
       throw new IllegalArgumentException();
@@ -133,24 +136,23 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
     }
   }
 
-  @Override
-  public void putAllKeys(IntIterable keys, IntIterable values) {
+  public void putAllKeys(IntIterable keys, Iterable<T> values) {
     modified();
     IntIterator keysIt = keys.iterator();
-    IntIterator valuesIt = values.iterator();
+    Iterator<T> valuesIt = values.iterator();
 
     while (keysIt.hasNext() && valuesIt.hasNext()) {
-      putImpl(keysIt.nextValue(), valuesIt.nextValue());
+      putImpl(keysIt.nextValue(), valuesIt.next());
     }
     while (keysIt.hasNext()) {
-      putIfAbsent(keysIt.nextValue(), DEFAULT_VALUE);
+      putIfAbsent(keysIt.nextValue(), null);
     }
   }
 
   public void removeAll(int... keys) {
     modified();
-    if (keys != null && keys.length > 0) {
-      removeAll(new IntNativeArrayIterator(keys));
+    for (int key: keys) {
+      removeImpl(key);
     }
   }
 
@@ -161,12 +163,11 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
     }
   }
 
-
   public StringBuilder toString(StringBuilder builder) {
     appendShortName(builder, this);
     builder.append(" ").append(size()).append(" [");
     String sep = "";
-    for (IntIntIterator ii : this) {
+    for (IntObjIterator<T> ii : this) {
       builder.append(sep).append('(').append(ii.left()).append(' ').append(ii.right()).append(')');
       sep = ", ";
     }
@@ -197,7 +198,7 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
     joinCurrent(cur, builders);
 
     String sep = "";
-    for (IntIntIterator ii : this) {
+    for (IntObjIterator<T> ii : this) {
       cur[0].setLength(0);
       cur[1].setLength(0);
 
@@ -218,12 +219,12 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
   @Override
   public boolean equals(Object o) {
     if (o == this) return true;
-    if (!(o instanceof IntIntMap)) return false;
+    if (!(o instanceof IntObjMap)) return false;
 
-    IntIntMap otherMap = (IntIntMap) o;
+    IntObjMap<T> otherMap = (IntObjMap<T>) o;
 
     if (otherMap.size() != size()) return false;
-    for (IntIntIterator it : this) {
+    for (IntObjIterator<T> it : this) {
       int key = it.left();
       if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
@@ -235,8 +236,8 @@ public abstract class AbstractWritableIntIntMap implements WritableIntIntMap {
   @Override
   public int hashCode() {
     int h = 0;
-    for (IntIntIterator it : this) {
-      h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right());
+    for (IntObjIterator<T> it : this) {
+      h += IntegersUtils.hash(it.left()) + it.right().hashCode();
     }
     return h;
   }

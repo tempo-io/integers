@@ -197,19 +197,29 @@ public class LongLongListMap extends AbstractWritableLongLongMap {
     return findKey(key) >= 0;
   }
 
+  public LongListIterator keysIterator(int from, int to) {
+    checkMutatorPresence();
+    return new LongFailFastListIterator(myKeys.iterator(from, to)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
+  }
+
   public LongListIterator keysIterator(int from) {
     checkMutatorPresence();
     return keysIterator(from, size());
   }
 
-  public LongListIterator keysIterator(int from, int to) {
+  public LongListIterator keysIterator() {
     checkMutatorPresence();
-    return myKeys.iterator(from, to);
+    return keysIterator(0, size());
   }
 
-  public LongIterator keysIterator() {
+  public LongListIterator valuesIterator(int from, int to) {
     checkMutatorPresence();
-    return new LongFailFastIterator(keysIterator(0)) {
+    return new LongFailFastListIterator(myValues.iterator(from, to)) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -222,23 +232,13 @@ public class LongLongListMap extends AbstractWritableLongLongMap {
     return valuesIterator(from, size());
   }
 
-  public LongListIterator valuesIterator(int from, int to) {
+  public LongListIterator valuesIterator() {
     checkMutatorPresence();
-    return myValues.iterator(from, to);
-  }
-
-  public LongIterator valuesIterator() {
-    checkMutatorPresence();
-    return new LongFailFastIterator(valuesIterator(0)) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
+    return valuesIterator(0, size());
   }
 
   @Override
-  public LongSet keySet() {
+  public LongSortedSet keySet() {
     return LongListSet.asSet(myKeys);
   }
 

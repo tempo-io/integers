@@ -23,6 +23,7 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntProcedure;
 import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntFunctions;
 import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -208,12 +209,7 @@ public class IntCollections {
     final IntArray sorted = new IntArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-        new IntIntToInt() {
-          @Override
-          public int invoke(int a, int b) {
-            return IntCollections.compare(sorted.get(a), sorted.get(b));
-          }
-        },
+				IntFunctions.comparator(sorted),
         new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
@@ -237,8 +233,6 @@ public class IntCollections {
   }
 
   /**
-   * @param array
-   * @param capacity
    * @return {@code array} if {@code capacity <= array.length} otherwise
    * new array that contains all values of array and has length equal to the
    * maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
@@ -298,9 +292,9 @@ public class IntCollections {
   }
 
   /**
-   * @see #indexOf(int, int[], int, int)
+   * @see IntCollections#indexOf(int, int[], int, int)
    */
-  public static long indexOf(int value, int[] array) {
+  public static int indexOf(int value, int[] array) {
     return indexOf(value, array, 0, array.length);
   }
 
@@ -337,6 +331,20 @@ public class IntCollections {
       @Override
       public int get(int index) throws NoSuchElementException {
         return coll.get(index);
+      }
+    };
+  }
+
+  public static IntList asIntList(final IntList list) {
+    return new AbstractIntList() {
+      @Override
+      public int size() {
+        return list.size();
+      }
+
+      @Override
+      public int get(int index) throws NoSuchElementException {
+        return list.get(index);
       }
     };
   }
@@ -878,5 +886,9 @@ public class IntCollections {
         return dest;
       }
     };
+  }
+
+  public static <T> IntObjMap<T> emptyMap() {
+    return IntObjMap.EMPTY;
   }
 }

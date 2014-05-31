@@ -21,10 +21,11 @@ package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
+import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.IntCollections.sizeOfIterable;
-import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 import static com.almworks.integers.wrappers.IntIntHppcWrappers.cursorToIntIntIterator;
+import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
+import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 
 public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
   protected final IntIntOpenHashMap myMap;
@@ -33,8 +34,8 @@ public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
     myMap = new IntIntOpenHashMap();
   }
 
-  public IntIntHppcOpenHashMap(int initicalCapacity) {
-    myMap = new IntIntOpenHashMap(initicalCapacity);
+  public IntIntHppcOpenHashMap(int initialCapacity) {
+    myMap = new IntIntOpenHashMap(initialCapacity);
   }
 
   public IntIntHppcOpenHashMap(int initialCapacity, float loadFactor) {
@@ -42,12 +43,10 @@ public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
   }
 
   public static IntIntHppcOpenHashMap createFrom(IntIterable keys, IntIterable values) {
-    int keysSize = (keys instanceof IntSizedIterable) ? ((IntSizedIterable) keys).size() : 0;
-    int valuesSize = sizeOfIterable(values, 0);
-    if (keysSize * valuesSize != 0) {
-      if (keysSize != valuesSize) {
-        throw new IllegalArgumentException("keys.size() != values.size()");
-      }
+    int keysSize = IntCollections.sizeOfIterable(keys, 0);
+    int valuesSize = IntCollections.sizeOfIterable(values, 0);
+    if (keysSize != valuesSize) {
+      throw new IllegalArgumentException("keys.size() != values.size()");
     } else {
       keysSize = Math.max(keysSize, valuesSize);
     }
@@ -106,8 +105,9 @@ public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
     return myMap.size();
   }
 
+  @NotNull
   public IntIntIterator iterator() {
-	return new IntIntFailFastIterator(cursorToIntIntIterator(myMap.iterator())) {
+  	return new IntIntFailFastIterator(cursorToIntIntIterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -196,8 +196,8 @@ public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
    * @see #containsKey
    * @return Returns the previous value stored under the given key.
    */
-  public int lset(int key) {
-    return myMap.lset(key);
+  public int lset(int value) {
+    return myMap.lset(value);
   }
 
   /**
@@ -222,10 +222,5 @@ public class IntIntHppcOpenHashMap extends AbstractWritableIntIntMap {
     if (!(myMap.lget() == value)) return false;
     myMap.remove(key);
     return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return myMap.hashCode();
   }
 }

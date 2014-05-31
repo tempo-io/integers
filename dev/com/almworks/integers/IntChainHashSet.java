@@ -81,7 +81,7 @@ public class IntChainHashSet extends AbstractWritableIntSet implements WritableI
   public static IntChainHashSet createFrom(IntIterable keys) {
     int capacity = IntCollections.sizeOfIterable(keys, 0);
     IntChainHashSet set = createForAdd(capacity);
-    for (IntIterator it : keys.iterator()) {
+    for (IntIterator it : keys) {
       set.add(it.value());
     }
     return set;
@@ -191,7 +191,7 @@ public class IntChainHashSet extends AbstractWritableIntSet implements WritableI
       int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
       resize(newCap);
     }
-    for (IntIterator it: values.iterator()) {
+    for (IntIterator it: values) {
       include1(it.value());
     }
   }

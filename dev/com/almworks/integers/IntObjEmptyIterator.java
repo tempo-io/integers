@@ -14,57 +14,37 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PQEmptyMap.tpl
+// CODE GENERATED FROM com/almworks/integers/PObjEmptyIterator.tpl
 
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 
-public class IntLongEmptyMap implements IntLongMap {
+public class IntObjEmptyIterator<T> extends AbstractIntObjIterator<T> {
   @Override
-  public long get(int key) {
-    return 0;
-  }
-
-  @Override
-  public boolean containsKey(int key) {
+  public boolean hasNext() throws ConcurrentModificationException {
     return false;
   }
 
   @Override
-  public boolean containsKeys(IntIterable keys) {
+  public IntObjIterator<T> next() {
+    throw new NoSuchElementException();
+  }
+
+  @Override
+  public boolean hasValue() {
     return false;
   }
 
   @Override
-  public int size() {
-    return 0;
+  public int left() throws NoSuchElementException {
+    throw new NoSuchElementException();
   }
 
   @Override
-  public boolean isEmpty() {
-    return true;
-  }
-
-  @NotNull
-  @Override
-  public IntLongIterator iterator() {
-    return IntLongIterator.EMPTY;
-  }
-
-  @Override
-  public IntIterator keysIterator() {
-    return IntIterator.EMPTY;
-  }
-
-  @Override
-  public LongIterator valuesIterator() {
-    return LongIterator.EMPTY;
-  }
-
-  @Override
-  public IntSet keySet() {
-    return IntSet.EMPTY;
+  public T right() throws NoSuchElementException {
+    throw new NoSuchElementException();
   }
 }

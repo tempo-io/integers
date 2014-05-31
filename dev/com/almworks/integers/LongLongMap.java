@@ -19,8 +19,6 @@
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
-
 public interface LongLongMap extends LongLongIterable {
   LongLongMap EMPTY = new LongLongEmptyMap();
 
@@ -52,13 +50,14 @@ public interface LongLongMap extends LongLongIterable {
    */
   boolean isEmpty();
 
-  @NotNull
-  @Override
-  LongLongIterator iterator();
-
   LongIterator keysIterator();
 
   LongIterator valuesIterator();
+
+  /**
+   * @return a {@link LongSet} view of the keys contained in this map.
+   */
+  LongSet keySet();
 
   /**
    * Compares the specified object with this map for equality. Returns
@@ -75,10 +74,4 @@ public interface LongLongMap extends LongLongIterable {
    * of elements in a map does not affect the hash code.
    */
   public int hashCode();
-
-  /**
-   * @return a {@link LongSet} view of the keys contained in this map.
-   */
-  LongSet keySet();
-
 }

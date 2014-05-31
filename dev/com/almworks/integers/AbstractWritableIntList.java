@@ -22,7 +22,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntProcedure;
-import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.IntFunctions;
 import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
@@ -216,7 +216,12 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
   }
 
   public void setAll(int index, IntList values, int sourceOffset, int count) {
-    if (count <= 0) return;
+    if (count < 0) {
+      throw new IllegalArgumentException("count < 0");
+    }
+    if (count == 0) {
+      return;
+    }
     int sz = size();
     checkAddedCount(index, count, sz);
     if (values == this || values instanceof SubList && ((SubList) values).getParent() == this) {
@@ -259,19 +264,16 @@ public abstract class AbstractWritableIntList extends AbstractIntList implements
         assert list.size() == size();
       }
     }
-    IntegersUtils.quicksort(size(), new IntIntToInt() {
-      public int invoke(int a, int b) {
-        return IntCollections.compare(get(a), get(b));
-      }
-    }, new IntIntProcedure() {
-      public void invoke(int a, int b) {
-        swap(a, b);
-        if (sortAlso != null)
-          for (WritableIntList list : sortAlso) {
-            list.swap(a, b);
+    IntegersUtils.quicksort(size(), IntFunctions.comparator(this),
+        new IntIntProcedure() {
+          public void invoke(int a, int b) {
+            swap(a, b);
+            if (sortAlso != null)
+              for (WritableIntList list : sortAlso) {
+                list.swap(a, b);
+              }
           }
-      }
-    });
+        });
   }
 
   public void sortUnique() {

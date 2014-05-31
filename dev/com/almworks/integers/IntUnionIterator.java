@@ -70,8 +70,4 @@ public class IntUnionIterator extends IntSetOperationsIterator {
     }
     return true;
   }
-
-  public int getCurrentIteratorIndex() {
-    return myHeap[TOP];
-  }
 }

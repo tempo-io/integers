@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractPQIteratorWithFlag.tpl
+// CODE GENERATED FROM com/almworks/integers/AbstractPObjIteratorWithFlag.tpl
 
 
 package com.almworks.integers;
@@ -22,10 +22,10 @@ package com.almworks.integers;
 import java.util.NoSuchElementException;
 
 /**
- * @see IntIntIterator
+ * @see IntObjIterator
  * @see AbstractIntIteratorWithFlag
  */
-public abstract class AbstractIntIntIteratorWithFlag extends AbstractIntIntIterator {
+public abstract class AbstractIntObjIteratorWithFlag<T> extends AbstractIntObjIterator<T> {
 
   protected boolean myIterated = false;
 
@@ -40,33 +40,33 @@ public abstract class AbstractIntIntIteratorWithFlag extends AbstractIntIntItera
     return leftImpl();
   }
 
-  public int right() throws NoSuchElementException {
+  public T right() throws NoSuchElementException {
     if (!myIterated) {
       throw new NoSuchElementException();
     }
     return rightImpl();
   }
 
-  public IntIntIterator next() {
+  public IntObjIterator<T> next() {
     nextImpl();
     myIterated = true;
     return this;
   }
 
   /**
-   * Called after any call to {@link AbstractIntIteratorWithFlag#nextImpl()}, should return value of iterator.
+   * Called after any call to {@link com.almworks.integers.AbstractIntIteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
   protected abstract int leftImpl();
 
   /**
-   * Called after any call to {@link AbstractIntIteratorWithFlag#nextImpl()}, should return value of iterator.
+   * Called after any call to {@link com.almworks.integers.AbstractIntIteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
-  protected abstract int rightImpl();
+  protected abstract T rightImpl();
 
   /**
-   * Called before any call to {@link AbstractIntIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
+   * Called before any call to {@link com.almworks.integers.AbstractIntIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
    * */
   protected abstract void nextImpl() throws NoSuchElementException;
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PFailFastIterator.tpl
+// CODE GENERATED FROM com/almworks/integers/PFailFastListIterator.tpl
 
 
 package com.almworks.integers;
@@ -22,57 +22,27 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class IntFailFastListIterator extends AbstractIntIterator implements IntListIterator {
-  private final IntListIterator myIterator;
-  private final int myModCountAtCreation = getCurrentModCount();
-
-  protected abstract int getCurrentModCount();
+public abstract class IntFailFastListIterator extends IntFailFastIterator<IntListIterator> implements IntListIterator {
 
   public IntFailFastListIterator(IntListIterator it) {
-    myIterator = it;
-  }
-
-  public boolean hasNext() throws ConcurrentModificationException {
-    checkMod();
-    return myIterator.hasNext();
-  }
-
-  public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
-    checkMod();
-    myIterator.next();
-    return this;
-  }
-
-  public boolean hasValue() throws ConcurrentModificationException {
-    checkMod();
-    return myIterator.hasValue();
-  }
-
-  public int value() throws IllegalStateException {
-    checkMod();
-    return myIterator.value();
+    super(it);
   }
 
   @Override
   public void move(int offset) throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    myIterator.move(offset);
+    getIterator().move(offset);
   }
 
   @Override
   public int get(int offset) throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    return myIterator.get(offset);
+    return getIterator().get(offset);
   }
 
   @Override
   public int index() throws NoSuchElementException {
     checkMod();
-    return myIterator.index();
-  }
-
-  private void checkMod() {
-    if (myModCountAtCreation != getCurrentModCount())
-      throw new ConcurrentModificationException(myModCountAtCreation + " " + getCurrentModCount());
+    return getIterator().index();
   }
 }

@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PQEmptyMap.tpl
+// CODE GENERATED FROM com/almworks/integers/PObjEmptyMap.tpl
 
 
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-public class IntLongEmptyMap implements IntLongMap {
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+public class IntObjEmptyMap<T> implements IntObjMap<T> {
   @Override
-  public long get(int key) {
-    return 0;
+  public T get(int key) {
+    return null;
   }
 
   @Override
@@ -49,8 +52,8 @@ public class IntLongEmptyMap implements IntLongMap {
 
   @NotNull
   @Override
-  public IntLongIterator iterator() {
-    return IntLongIterator.EMPTY;
+  public IntObjIterator<T> iterator() {
+    return IntObjIterator.EMPTY;
   }
 
   @Override
@@ -59,8 +62,23 @@ public class IntLongEmptyMap implements IntLongMap {
   }
 
   @Override
-  public LongIterator valuesIterator() {
-    return LongIterator.EMPTY;
+  public Iterator<T> valuesIterator() {
+    return new Iterator<T>() {
+      @Override
+      public boolean hasNext() {
+        return false;
+      }
+
+      @Override
+      public T next() {
+        throw new NoSuchElementException();
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    };
   }
 
   @Override

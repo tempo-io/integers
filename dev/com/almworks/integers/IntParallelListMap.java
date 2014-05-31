@@ -22,7 +22,6 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.NoSuchElementException;
 
 public class IntParallelListMap implements IntIntIterable {
@@ -154,6 +153,7 @@ public class IntParallelListMap implements IntIntIterable {
     return new Iterator(from, size());
   }
 
+  @NotNull
   public Iterator iterator() {
     return new Iterator(0, size());
   }
@@ -176,6 +176,7 @@ public class IntParallelListMap implements IntIntIterable {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
+
     for (IntParallelList.Iterator ii = myMap.iterator(from, to); ii.hasNext();) {
       ii.next(null);
       ii.set(0, 0, (int)(ii.get(0, 0) + increment));
@@ -229,15 +230,15 @@ public class IntParallelListMap implements IntIntIterable {
       return myKeyValue[1];
     }
 
-    public int getKey(int relativeOffset) {
+    public int getLeft(int relativeOffset) {
       return ii.get(relativeOffset, 0);
     }
 
-    public int getValue(int relativeOffset) {
+    public int getRight(int relativeOffset) {
       return ii.get(relativeOffset, 1);
     }
 
-    public void setValue(int relativeOffset, int value) {
+    public void setRight(int relativeOffset, int value) {
       ii.set(relativeOffset, 1, value);
     }
 
@@ -255,8 +256,8 @@ public class IntParallelListMap implements IntIntIterable {
 
     @NotNull
     @Override
-    public IntIntIterator iterator() {
-      return null;
+    public Iterator iterator() {
+      return this;
     }
   }
 }

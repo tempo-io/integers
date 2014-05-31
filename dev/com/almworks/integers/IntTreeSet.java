@@ -568,7 +568,7 @@ public class IntTreeSet extends AbstractWritableIntSet implements WritableIntSor
 
   public void retain(IntList values) {
     IntArray res = new IntArray();
-    for (IntIterator it: values.iterator()) {
+    for (IntIterator it: values) {
       int value = it.value();
       if (contains(value)) res.add(value);
     }

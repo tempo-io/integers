@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PFailFastIterator.tpl
+// CODE GENERATED FROM com/almworks/integers/PObjFailFastIterator.tpl
 
 
 package com.almworks.integers;
@@ -22,42 +22,43 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class IntFailFastIterator<T extends IntIterator> extends AbstractIntIterator {
-  protected final T myIterator;
+public abstract class IntObjFailFastIterator<T> extends AbstractIntObjIterator<T> {
+  private final IntObjIterator<T> myIterator;
   private final int myModCountAtCreation = getCurrentModCount();
 
   protected abstract int getCurrentModCount();
 
-  protected T getIterator() {
-    return myIterator;
-  }
-
-  public IntFailFastIterator(T it) {
+  public IntObjFailFastIterator(IntObjIterator<T> it) {
     myIterator = it;
   }
 
   public boolean hasNext() throws ConcurrentModificationException {
     checkMod();
-    return getIterator().hasNext();
+    return myIterator.hasNext();
   }
 
-  public IntIterator next() throws ConcurrentModificationException, NoSuchElementException {
+  public IntObjIterator<T> next() throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    getIterator().next();
+    myIterator.next();
     return this;
   }
 
   public boolean hasValue() throws ConcurrentModificationException {
     checkMod();
-    return getIterator().hasValue();
+    return myIterator.hasValue();
   }
 
-  public int value() throws IllegalStateException {
+  public int left() throws IllegalStateException {
     checkMod();
-    return getIterator().value();
+    return myIterator.left();
   }
 
-  protected void checkMod() {
+  public T right() throws IllegalStateException {
+    checkMod();
+    return myIterator.right();
+  }
+
+  private void checkMod() {
     if (myModCountAtCreation != getCurrentModCount())
       throw new ConcurrentModificationException(myModCountAtCreation + " " + getCurrentModCount());
   }
