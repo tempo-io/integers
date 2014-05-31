@@ -63,7 +63,7 @@ public interface IntSet extends IntSizedIterable {
 
   /**
    * Writes values from this set to {@code dest}.
-   * @see {@link #toNativeArray(int[], int)}
+   * @see #toNativeArray(int[], int)
    */
   int[] toNativeArray(int[] dest);
 

@@ -31,6 +31,7 @@ public interface LongSortedSet extends LongSet {
    * @return an iterator over this set in the sorted order
    * */
   @NotNull
+  @Override
   LongIterator iterator();
 
   /**
@@ -56,7 +57,7 @@ public interface LongSortedSet extends LongSet {
 
   /**
    * Writes values from this set to {@code dest} in the ascending order.
-   * @see {@link #toNativeArray(long[], int)}
+   * @see #toNativeArray(long[], int)
    */
   @Override
   long[] toNativeArray(long[] dest);

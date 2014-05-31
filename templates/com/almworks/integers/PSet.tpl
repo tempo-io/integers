@@ -60,7 +60,7 @@ public interface #E#Set extends #E#SizedIterable {
 
   /**
    * Writes values from this set to {@code dest}.
-   * @see {@link #toNativeArray(#e#[], int)}
+   * @see #toNativeArray(#e#[], int)
    */
   #e#[] toNativeArray(#e#[] dest);
 

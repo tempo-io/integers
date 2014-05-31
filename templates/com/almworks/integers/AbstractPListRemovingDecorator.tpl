@@ -135,7 +135,6 @@ public abstract class Abstract#E#ListRemovingDecorator extends Abstract#E#ListDe
   /**
    * For the given list of remove indices (may be empty, unsorted, or contain duplicates), creates a prepared list of remove indices ready to be used by implementations of this class.
    * @param removeIndices remove indices
-   * @return
    */
   protected static IntArray prepareUnsortedIndicesInternal(int... removeIndices) {
     int[] correctRemove = arrayCopy(removeIndices);
