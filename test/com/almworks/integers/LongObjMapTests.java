@@ -19,13 +19,34 @@ package com.almworks.integers;
 import com.almworks.util.TestUtil;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
-public class LongObjMapTests extends IntegersFixture {
-  private LongObjMap<String> myMap = LongObjMap.create();
+public class LongObjMapTests extends WritableLongObjMapChecker<LongObjListMap> {
+  private LongObjListMap<String> myMap = LongObjListMap.create();
+
+  @Override
+  protected List<WritableLongIntMapFromLongObjMap> createMapsFromLists(LongList keys, IntList values) {
+    WritableLongIntMapFromLongObjMap map0 = createMap();
+    map0.putAll(keys, values);
+    return Arrays.asList(map0);
+  }
+
+  @Override
+  protected <T> LongObjListMap<T> createObjMap() {
+    return new LongObjListMap<T>();
+  }
+
+  @Override
+  protected <T> LongObjListMap<T> createObjMapWithCapacity(int capacity) {
+    return createObjMap();
+  }
+
+  @Override
+  protected <T> List<WritableLongObjMap<T>> createObjMapsFromLists(LongList keys, List<T> values) {
+    WritableLongObjMap<T> map0 = new LongObjListMap<T>();
+    map0.putAll(keys, values);
+    return Arrays.asList(map0);
+  }
 
   public void testPutGet() {
     myMap.put(0, "0");
@@ -78,68 +99,67 @@ public class LongObjMapTests extends IntegersFixture {
     }
 
     int last = -1;
-    for(LongObjMap.Entry<String> p : myMap) {
-      assertEquals(String.valueOf(p.getKey()), p.getValue());
-      long cur = toLong(p.getValue(), -10);
+
+    for(LongObjIterator<String> it : myMap) {
+      assertEquals(String.valueOf(it.left()), it.right());
+      long cur = toLong(it.right(), -10);
       assertTrue(last + " " + cur, last < cur);
     }
   }
 
-  public void testIterator() {
+  public void testIterator2() {
     myMap.put(0, "0");
     myMap.put(100, "100");
 
-    final LongObjMap.LongMapIterator it = myMap.iterator();
+    final LongObjListMap.LongMapIterator it = myMap.iterator();
     assertFalse(it.hasPrevious());
     assertTrue(it.hasNext());
-    checkEntry(it.next(), 0);
-    checkEntry(it.previous(), 0);
-    it.next();
-    checkEntry(it.next(), 100);
+
+    checkIterator(it.next(), 0);
+    checkIterator(it.next(), 100);
     assertFalse(it.hasNext());
     TestUtil.mustThrow(NoSuchElementException.class, new Runnable() { public void run() { it.next(); }});
-    checkEntry(it.previous(), 100);
+    checkIterator(it.previous(), 0);
 
     myMap.put(50, "50");
     TestUtil.mustThrow(ConcurrentModificationException.class, new Runnable() { public void run() {it.next();} });
 
-    LongObjMap.LongMapIterator it2 = myMap.iterator();
-    checkEntry(it2.next(), 0);
-    checkEntry(it2.next(), 50);
+    LongObjListMap.LongMapIterator it2 = myMap.iterator();
+    checkIterator(it2.next(), 0);
+    checkIterator(it2.next(), 50);
     it2.remove();
-    checkEntry(it2.next(), 100);
-    checkEntry(it2.previous(), 100);
-    checkEntry(it2.previous(), 0);
+    checkIterator(it2.next(), 100);
+    checkIterator(it2.previous(), 0);
 
-    checkEntry(it2.next(), 0);
-    checkEntry(it2.previous(), 0);
+    checkIterator(it2.next(), 100);
+    checkIterator(it2.previous(), 0);
     it2.remove();
     assertTrue(it2.hasNext());
     assertFalse(it2.hasPrevious());
-    checkEntry(it2.next(), 100);
+    checkIterator(it2.next(), 100);
   }
 
   public void testFind() {
     myMap.put(0, "0");
     myMap.put(100, "100");
-    LongObjMap.LongMapIterator it = myMap.find(50);
-    checkEntry(it.next(), 100);
+    LongObjListMap.LongMapIterator it = myMap.find(50);
+    checkIterator(it.next(), 100);
     it = myMap.find(100);
-    checkEntry(it.next(), 100);
+    checkIterator(it.next(), 100);
   }
 
   public void testRemove() {
     myMap.put(0, "0");
     myMap.put(100, "100");
     assertEquals("0", myMap.remove(0));
-    LongObjMap.LongMapIterator it = myMap.iterator();
-    checkEntry(it.next(), 100);
+    LongObjListMap.LongMapIterator it = myMap.iterator();
+    checkIterator(it.next(), 100);
     assertFalse(it.hasNext());
   }
 
-  private void checkEntry(LongObjMap.Entry<String> e, int key) {
-    assertEquals(key, e.getKey());
-    assertEquals(String.valueOf(key), e.getValue());
+  private void checkIterator(LongObjIterator<String> e, int key) {
+    assertEquals(key, e.left());
+    assertEquals(String.valueOf(key), e.right());
   }
 
   public void testContainsKey() {
@@ -155,16 +175,21 @@ public class LongObjMapTests extends IntegersFixture {
     myMap.put(0, "0");
     myMap.put(100, "100");
     myMap.put(228, "228");
-    CHECK.order(myMap.keySet(), 0, 100, 228);
+    checkSet(myMap.keySet(), LongArray.create(0, 100, 228));
 
     LongArray expected = new LongArray(10000);
     expected.addAll(0, 100, 228);
     for (int i = 0; i < 10000; i++) {
-      long value = RAND.nextInt();
+      long value = myRand.nextInt();
       expected.add(value);
       myMap.put(value, Long.toString(value));
     }
     expected.sortUnique();
-    CHECK.order(myMap.keySet(), expected);
+    checkSet(myMap.keySet(), expected);
+  }
+
+  @Override
+  protected boolean isSortedSet() {
+    return false;
   }
 }

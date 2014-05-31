@@ -63,6 +63,11 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
     return LongTreeSet.createFromSortedUnique(sortedUniqueList);
   }
 
+  @Override
+  protected boolean isSortedSet() {
+    return true;
+  }
+
   public void testRandom2() {
     int setSize = 510, listSize = 510;
     int nAttempts = 10;
@@ -127,7 +132,7 @@ public class LongTreeSetTests extends WritableLongSetChecker<LongTreeSet> {
         set = LongTreeSet.createFromSortedUnique(sortedUniqueArray);
       } else {
         set = LongTreeSet.createFromSortedUnique(
-            sortedUniqueArray.iterator(), RAND.nextInt(listSize * 2), types[attempt % 4  - 1]);
+            sortedUniqueArray.iterator(), myRand.nextInt(listSize * 2), types[attempt % 4  - 1]);
       }
       checkSet(set, sortedUniqueArray);
     }

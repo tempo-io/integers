@@ -31,6 +31,7 @@ public interface IntSortedSet extends IntSet {
    * @return an iterator over this set in the sorted order
    * */
   @NotNull
+  @Override
   IntIterator iterator();
 
   /**
@@ -48,15 +49,15 @@ public interface IntSortedSet extends IntSet {
    */
   public int getLowerBound();
 
-    /**
-     * Writes values from this set to {@code dest} in the ascending order.<br>
-     * {@inheritDoc}
-     */
+  /**
+   * Writes values from this set to {@code dest} in the ascending order.<br>
+   * {@inheritDoc}
+   */
   int[] toNativeArray(int[] dest, int destPos);
 
   /**
    * Writes values from this set to {@code dest} in the ascending order.
-   * @see {@link #toNativeArray(int[], int)}
+   * @see #toNativeArray(int[], int)
    */
   @Override
   int[] toNativeArray(int[] dest);

@@ -67,8 +67,4 @@ public class #E#UnionIterator extends #E#SetOperationsIterator {
     }
     return true;
   }
-
-  public int getCurrentIteratorIndex() {
-    return myHeap[TOP];
-  }
 }

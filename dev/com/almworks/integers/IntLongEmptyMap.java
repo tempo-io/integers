@@ -62,4 +62,9 @@ public class IntLongEmptyMap implements IntLongMap {
   public LongIterator valuesIterator() {
     return LongIterator.EMPTY;
   }
+
+  @Override
+  public IntSet keySet() {
+    return IntSet.EMPTY;
+  }
 }

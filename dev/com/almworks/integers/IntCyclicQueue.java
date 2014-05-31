@@ -179,6 +179,13 @@ public class IntCyclicQueue extends AbstractIntList implements IntCollector {
     ensureCapacity(size() + nToAdd);
   }
 
+  /**
+   * @return the capacity of the internal buffer that holds the elements
+   */
+  public int getCapacity() {
+    return myHostArray.length;
+  }
+
   private void ensureCapacity(int capacity) {
     int n = myHostArray.length;
     if (capacity >= n) {

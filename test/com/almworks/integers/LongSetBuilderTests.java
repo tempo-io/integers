@@ -25,10 +25,11 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 import static com.almworks.integers.LongCollections.map;
 
-public class LongSetBuilderTests extends IntegersFixture {
+public class LongSetBuilderTests extends LongSetChecker<LongSetBuilder> {
   protected static final long MIN = Long.MIN_VALUE, MAX = Long.MAX_VALUE;
 
-  protected List<LongSetBuilder> createBuildersFromSortedUniqueList(LongList sortedUniqueList) {
+  @Override
+  protected List<LongSetBuilder> createSets(LongList sortedUniqueList) {
     ArrayList<LongSetBuilder> sets = new ArrayList();
     LongSetBuilder builder = new LongSetBuilder();
     builder.addAll(sortedUniqueList);
@@ -52,6 +53,28 @@ public class LongSetBuilderTests extends IntegersFixture {
       }
     }
     return sets;
+  }
+
+  @Override
+  protected LongSetBuilder createSet(LongList sortedUniqueList) {
+    LongSetBuilder builder = new LongSetBuilder();
+    builder.addAll(sortedUniqueList);
+    return builder;
+  }
+
+  @Override
+  protected boolean isSortedSet() {
+    return true;
+  }
+
+  protected void check(long[] ... v) {
+    LongSetBuilder builder = new LongSetBuilder();
+    for (long[] ints : v) {
+      for (long value : ints) {
+        builder.add(value);
+      }
+    }
+    checkSet(builder, v);
   }
 
   public void testSimple() {
@@ -86,25 +109,15 @@ public class LongSetBuilderTests extends IntegersFixture {
     CHECK.order(collection.iterator(), expected);
   }
 
-  protected void check(long[] ... v) {
-    LongSetBuilder builder = new LongSetBuilder();
-    for (long[] ints : v) {
-      for (long value : ints) {
-        builder.add(value);
-      }
-    }
-    checkSet(builder, v);
-  }
-
   public void testAddRandom() {
     for (int i = 0; i < 20; i++) { // replace 100 with 20 to make test run faster on build agent
-      int size = RAND.nextInt(16000) + 10;
-      int factor = RAND.nextInt(10) + 1;
+      int size = myRand.nextInt(16000) + 10;
+      int factor = myRand.nextInt(10) + 1;
       int count = size * factor / 2;
       LongArray set = new LongArray();
       LongSetBuilder builder = new LongSetBuilder(5);
       for (int j = 0; j < count; j++) {
-        int v = RAND.nextInt(size);
+        int v = myRand.nextInt(size);
         set.add(v);
         builder.add(v);
       }
@@ -117,13 +130,13 @@ public class LongSetBuilderTests extends IntegersFixture {
   public void testAddAllRandom() {
     int elementsCount = 300;
     for (int i = 0; i < 3; i++) {
-      int size = RAND.nextInt(1600) + 10;
-      int factor = RAND.nextInt(10) + 1;
+      int size = myRand.nextInt(1600) + 10;
+      int factor = myRand.nextInt(10) + 1;
       int count = size * factor / 2;
       LongArray set = new LongArray();
       LongSetBuilder builder = new LongSetBuilder(100);
       for (int j = 0; j < count; j++) {
-        LongArray v = IntegersFixture.generateRandomLongArray(elementsCount, IntegersFixture.SortedStatus.UNORDERED, size);
+        LongArray v = generateRandomLongArray(elementsCount, IntegersFixture.SortedStatus.UNORDERED, size);
         set.addAll(v);
         builder.addAll(v);
       }
@@ -212,14 +225,6 @@ public class LongSetBuilderTests extends IntegersFixture {
     CHECK.order(collection.iterator(), expected.iterator());
   }
 
-  public void testTailIterator() {
-    LongSetBuilder b = new LongSetBuilder(100);
-    b.addAll(ap(1, 50, 2));
-    for (int i = 0; i < 99; i++) {
-      assertEquals(i + 1 - (i % 2), b.tailIterator(i).nextValue());
-    }
-  }
-
   public void testSize() {
     int attemptsCount = 10, addCount = 20, tempSize = 20;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
@@ -227,14 +232,14 @@ public class LongSetBuilderTests extends IntegersFixture {
       LongSetBuilder b = new LongSetBuilder(tempSize);
       for (int i = 0; i < addCount; i++) {
         int start = stop;
-        stop = start + RAND.nextInt(tempSize * 2);
+        stop = start + myRand.nextInt(tempSize * 2);
         b.addAll(LongProgression.range(start, stop));
         assertEquals(stop, b.size());
       }
     }
   }
 
-  public void testContains() {
+  public void testContains2() {
     int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
@@ -270,21 +275,24 @@ public class LongSetBuilderTests extends IntegersFixture {
     CHECK.order(LongArray.create(10).iterator(), b.iterator());
   }
 
-  protected void checkBounds(LongArray array) {
-    long upper = array.size() == 0 ? MIN : array.getLast(0);
-    long lower = array.size() == 0 ? MAX : array.get(0);
+  public void testMergeFromSortedCollection() {
+    LongArray expected = LongArray.create(0, 10, 20);
+    for (LongSetBuilder builder : createSets(expected)) {
+      builder.mergeFromSortedCollection(LongProgression.Arithmetic.range(1, 30, 10));
+      expected.addAll(LongProgression.Arithmetic.range(1, 30, 10));
 
-    for (LongSetBuilder builder : createBuildersFromSortedUniqueList(array)) {
-      assertEquals(builder.toString(), upper, builder.getUpperBound());
-      assertEquals(builder.toString(), lower, builder.getLowerBound());
+      expected.sortUnique();
+      checkSet(builder, expected);
+      builder.mergeFromSortedCollection(LongList.EMPTY);
+      checkSet(builder, expected);
+
+      CHECK.order(expected, builder.commitToArray());
+      try {
+        builder.mergeFromSortedCollection(LongList.EMPTY);
+        fail();
+      } catch (IllegalStateException _) {
+        // ok
+      }
     }
   }
-
-  public void testGetBounds() {
-    LongArray values = LongArray.create(MIN, MIN + 1, 0, 1, 10, MAX - 1, MAX);
-    for (LongArray array : LongCollections.allSubLists(values)) {
-      checkBounds(array);
-    }
-  }
-
 }

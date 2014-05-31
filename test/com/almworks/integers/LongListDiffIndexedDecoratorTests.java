@@ -19,32 +19,28 @@ package com.almworks.integers;
 public class LongListDiffIndexedDecoratorTests extends IntegersFixture {
   private static LongArray source = LongArray.create(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
   private static IntArray indices = IntArray.create(0, 0, 0, 2, 2, 2);
-  private static LongListDiffIndexedDecorator array;
+  private static LongListDiffIndexedDecorator decorator;
 
   public void setUp() throws Exception {
     super.setUp();
-    array = new LongListDiffIndexedDecorator(source, indices);
+    decorator = new LongListDiffIndexedDecorator(source, indices);
   }
 
   public void testGet() {
     long[] expected = {0, 1, 2, 5, 6, 7};
 
-    CHECK.order(array, expected);
-    CHECK.order(indices.iterator(), array.getIndexes().iterator());
-    CHECK.order(source.iterator(), array.getSource().iterator());
-
-    for (int i = 0; i < expected.length; i++) {
-      assertEquals(expected[i], array.get(i));
-    }
+    CHECK.order(indices.iterator(), decorator.getIndices().iterator());
+    CHECK.order(source.iterator(), decorator.getSource().iterator());
+    checkCollection(decorator, expected);
   }
 
   public void testStatusMethods() {
-    assertFalse(array.isEmpty());
-    assertEquals(6, array.size());
+    assertFalse(decorator.isEmpty());
+    assertEquals(6, decorator.size());
   }
 
   public void testIterator() {
-    LongListIterator myIt = array.iterator(1, array.size() - 1);
+    LongListIterator myIt = decorator.iterator(1, decorator.size() - 1);
     assertTrue(myIt.hasNext());
 
     assertEquals(1, myIt.nextValue());

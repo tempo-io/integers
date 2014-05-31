@@ -17,39 +17,49 @@
 // CODE GENERATED FROM com/almworks/integers/PListDiffIndexedDecorator.tpl
 
 
-
-
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
+/**
+ * A read-only decorator that contains elements from the base list at indices I = (i0, i1, i2, ...).
+ * The feature of this decorator is that the list of indices is stored as (i0 - 0, i1 - 1, i2 - 2, ... )
+ * so that a run of n successive indices is stored as n equal values.
+ * This can be efficiently stored in {@link IntSameValuesList}.
+ * <br>
+ * This class serves the same purpose as {@link IntListRemovingDecorator}.
+ * The constructor takes the list of processed indices, you can use
+ * {@link IntListRemovingDecorator#prepareSortedIndices(WritableIntList)} to generate it.
+ * <br>
+ * For example: {@code new DiffIndexedDecorator([0, 1, 2, 3, 4, 5], [0, 0, 2, 2]) -> [0, 1, 4, 5]}
+ * @see IntListRemovingDecorator
+ */
 public class IntListDiffIndexedDecorator extends AbstractIntList {
   private final IntList mySource;
-  private final IntList myIndices;
+  private final IntList myDiffIndices;
 
-  public IntListDiffIndexedDecorator(IntList source, IntList indices) {
+  public IntListDiffIndexedDecorator(IntList source, IntList diffIndices) {
     mySource = source;
-    myIndices = indices;
+    myDiffIndices = diffIndices;
   }
 
   public int size() {
-    return myIndices.size();
+    return myDiffIndices.size();
   }
 
   public int get(int index) {
-    return mySource.get(myIndices.get(index) + index);
+    return mySource.get(myDiffIndices.get(index) + index);
   }
 
   public boolean isEmpty() {
-    return myIndices.isEmpty();
+    return myDiffIndices.isEmpty();
   }
 
   @NotNull
   public IntListIterator iterator(int from, int to) {
-    IntListIterator indexIterator = myIndices.iterator(from, to);
+    IntListIterator indexIterator = myDiffIndices.iterator(from, to);
     return new DiffIndexedIterator(from, indexIterator);
   }
 
@@ -57,8 +67,8 @@ public class IntListDiffIndexedDecorator extends AbstractIntList {
     return mySource;
   }
 
-  public IntList getIndexes() {
-    return myIndices;
+  public IntList getIndices() {
+    return myDiffIndices;
   }
 
   private class DiffIndexedIterator extends AbstractIntIteratorWithFlag implements IntListIterator {

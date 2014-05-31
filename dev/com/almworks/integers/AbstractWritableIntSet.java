@@ -110,7 +110,7 @@ public abstract class AbstractWritableIntSet extends AbstractIntSet implements W
   @Override
   public void retain(IntList values) {
     IntArray res = new IntArray();
-    for (IntIterator it: values.iterator()) {
+    for (IntIterator it: values) {
       int value = it.value();
       if (contains(value)) res.add(value);
     }

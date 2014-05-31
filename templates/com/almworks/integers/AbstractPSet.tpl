@@ -17,10 +17,15 @@
 package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.appendShortName;
+import static com.almworks.integers.#E#IterableLexicographicComparator.#EC#_ITERABLE_LEXICOGRAPHIC_COMPARATOR;
 
 public abstract class Abstract#E#Set implements #E#Set {
 
-  protected abstract void toNativeArrayImpl(#e#[] dest, int destPos);
+  protected void toNativeArrayImpl(#e#[] dest, int destPos) {
+    for (#E#Iterator it : iterator()) {
+      dest[destPos++] = it.value();
+    }
+  }
 
   @Override
   public boolean containsAll(#E#Iterable iterable) {
@@ -78,13 +83,20 @@ public abstract class Abstract#E#Set implements #E#Set {
     if (otherSet.size() != size()) {
       return false;
     }
-    return containsAll(otherSet);
+    if (!(this instanceof #E#SortedSet)) {
+      return containsAll(otherSet);
+    }
+    if (!(otherSet instanceof #E#SortedSet)) {
+      return otherSet.containsAll(otherSet);
+    }
+    assert (this instanceof #E#SortedSet) && (otherSet instanceof #E#SortedSet);
+    return #EC#_ITERABLE_LEXICOGRAPHIC_COMPARATOR.compare(this, otherSet) == 0;
   }
 
   @Override
   public int hashCode() {
     int h = 0;
-    for (#E#Iterator it : iterator()) {
+    for (#E#Iterator it : this) {
       h += IntegersUtils.hash(it.value());
     }
     return h;

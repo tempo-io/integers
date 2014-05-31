@@ -32,7 +32,7 @@ public class LongSubListTests extends LongListChecker<AbstractLongList.SubList> 
     long[] newValues = new long[length + 3];
     System.arraycopy(values, 0, newValues, 3, length);
     for (int i = 0; i < 3; i++) {
-      newValues[i] = RAND.nextInt();
+      newValues[i] = myRand.nextInt();
     }
     result.add(new AbstractLongList.SubList(LongArray.create(newValues), 3, length + 3));
 
@@ -40,7 +40,7 @@ public class LongSubListTests extends LongListChecker<AbstractLongList.SubList> 
     newValues = new long[length + 3];
     System.arraycopy(values, 0, newValues, 0, length);
     for (int i = 0; i < 3; i++) {
-      newValues[i + length] = RAND.nextInt();
+      newValues[i + length] = myRand.nextInt();
     }
     result.add(new AbstractLongList.SubList(LongArray.create(newValues), 0, length));
 
@@ -48,8 +48,8 @@ public class LongSubListTests extends LongListChecker<AbstractLongList.SubList> 
     newValues = new long[length + 6];
     System.arraycopy(values, 0, newValues, 3, length);
     for (int i = 0; i < 3; i++) {
-      newValues[i] = RAND.nextInt();
-      newValues[i + 3 + length] = RAND.nextInt();
+      newValues[i] = myRand.nextInt();
+      newValues[i + 3 + length] = myRand.nextInt();
     }
     result.add(new AbstractLongList.SubList(LongArray.create(newValues), 3, length + 3));
     return result;

@@ -18,6 +18,7 @@ package com.almworks.integers;
 
 import com.almworks.integers.func.LongFunctions;
 import com.almworks.integers.func.LongToLong;
+import com.almworks.util.TestUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -209,6 +210,43 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     }
   }
 
+  public void testSetAllExceptions() {
+    long[] values = {0, 1, 2, -1, 1, 3};
+    LongList setList = LongArray.create(5, 10, 20);
+    for (WritableLongList list : createWritableLongLists(values)) {
+      try {
+        list.setAll(0, list, 0, -4);
+        fail();
+      } catch (IllegalArgumentException _) {
+        // ok
+      }
+      list.setAll(0, setList, 0, 0);
+      checkCollection(list, values);
+
+
+      try {
+        list.setAll(-1, setList, 0, 2);
+        fail();
+      } catch (IndexOutOfBoundsException _) {
+        // ok
+      }
+
+      try {
+        list.setAll(4, setList, 0, 4);
+        fail();
+      } catch (IndexOutOfBoundsException _) {
+        // ok
+      }
+
+      try {
+        list.setAll(5, setList, 0, 4);
+        fail();
+      } catch (IndexOutOfBoundsException _) {
+        // ok
+      }
+    }
+  }
+
   public void testSetRange() {
     for (WritableLongList list: createWritableLongLists(ap(0, 20, 1))) {
       long[] expected = ap(0, 20, 1);
@@ -336,6 +374,35 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
     }
   }
 
+  public void checkJustRemoved(final WritableLongListIterator it) {
+    assertFalse(it.hasValue());
+    TestUtil.mustThrow(IllegalStateException.class, new Runnable() {
+      public void run() {
+        it.value();
+      }
+    });
+    TestUtil.mustThrow(IllegalStateException.class, new Runnable() {
+      public void run() {
+        it.get(0);
+      }
+    });
+    TestUtil.mustThrow(IllegalStateException.class, new Runnable() {
+      public void run() {
+        it.move(0);
+      }
+    });
+    TestUtil.mustThrow(IllegalStateException.class, new Runnable() {
+      public void run() {
+        it.set(0, 0);
+      }
+    });
+    TestUtil.mustThrow(IllegalStateException.class, new Runnable() {
+      public void run() {
+        it.remove();
+      }
+    });
+  }
+
   public void testIteratorRemove() {
     for (WritableLongList list: empty()) {
       LongArray expected = LongArray.create(1, 2, 3, 5);
@@ -343,12 +410,13 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       for (WritableLongListIterator it : list.write()) {
         if (it.value() == 4) {
           it.remove();
-          assertFalse(it.hasValue());
+          checkJustRemoved(it);
         }
       }
       CHECK.order(expected, list);
     }
   }
+
 
   public void testIteratorRemove2() {
     for (WritableLongList list: createWritableLongLists(ap(0, 10, 1))) {
@@ -356,7 +424,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       it.next().next().next().next();
       assertEquals(3, it.value());
       it.remove();
-      assertFalse(it.hasValue());
+      checkJustRemoved(it);
       assertEquals(4, it.nextValue());
     }
   }
@@ -366,7 +434,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       WritableLongListIterator it = list.iterator();
       it.next().next();
       it.remove();
-      assertFalse(it.hasValue());
+      checkJustRemoved(it);
       assertEquals(2, it.nextValue());
 
       it.move(7);
@@ -385,7 +453,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       for (int i = 0; i < 10; i++)
         ii.nextValue();
       ii.removeRange(-9, 1);
-      assertFalse(ii.hasValue());
+      checkJustRemoved(ii);
       try {
         ii.removeRange(-9, 1);
         fail();
@@ -393,11 +461,11 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       ii.next();
       ii.move(19);
       ii.removeRange(-9, 1);
-      assertFalse(ii.hasValue());
+      checkJustRemoved(ii);
       checkList(list, ap(0, 100, 1), ap(110, 10, 1), ap(130, 9870, 1));
       ii.next();
       ii.removeRange(-10, 0);
-      assertFalse(ii.hasValue());
+      checkJustRemoved(ii);
       checkList(list, ap(0, 100, 1), ap(130, 9870, 1));
     }
   }
@@ -411,7 +479,7 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       while (ii.hasNext()) {
         ii.nextValue();
         ii.remove();
-        assertFalse(ii.hasValue());
+        checkJustRemoved(ii);
       }
       checkList(list, ap(0, 8192, 1), ap(9192, 808, 1));
     }
@@ -679,8 +747,8 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
       long[] elements = generateRandomLongArray(arrayLength, UNORDERED, maxValue).extractHostArray();
       for (WritableLongList list:
           createWritableLongLists(elements)) {
-        int index = RAND.nextInt(elements.length);
-        checkExpand(elements, index, RAND.nextInt(maxExpandCount), list);
+        int index = myRand.nextInt(elements.length);
+        checkExpand(elements, index, myRand.nextInt(maxExpandCount), list);
       }
     }
   }
@@ -725,13 +793,13 @@ public abstract class WritableLongListChecker<T extends WritableLongList> extend
         long[] values = Arrays.copyOf(array, array.length);
         if (!(list instanceof AbstractWritableLongList)) return;
         AbstractWritableLongList abstractList = (AbstractWritableLongList)list;
-        int index = RAND.nextInt(size);
-        abstractList.update(index, RAND.nextInt(), LongFunctions.NEG);
+        int index = myRand.nextInt(size);
+        abstractList.update(index, myRand.nextInt(), LongFunctions.NEG);
         values[index] = -values[index];
         CHECK.order(abstractList, values);
 
-        int count = RAND.nextInt(size);
-        long value = RAND.nextInt();
+        int count = myRand.nextInt(size);
+        long value = myRand.nextInt();
         abstractList.update(size + count, value, LongFunctions.NEG);
         assertEquals(size + count + 1, abstractList.size());
         CHECK.order(abstractList.subList(0, size), values);

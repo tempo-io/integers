@@ -37,13 +37,13 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker<Writ
 
     // [...]~
     source = LongArray.copy(source);
-    source.add(RAND.nextInt());
+    source.add(myRand.nextInt());
     array = new WritableLongListRemovingDecorator(source);
     array.removeAt(values.length);
     res.add(array);
 
     // ~[...]~
-    source = LongCollections.collectIterables(values.length + 1, new LongIterator.Single(RAND.nextInt()), source);
+    source = LongCollections.collectIterables(values.length + 1, new LongIterator.Single(myRand.nextInt()), source);
     array = new WritableLongListRemovingDecorator(source);
     array.removeAt(0);
     array.removeAt(values.length + 1);
@@ -59,7 +59,7 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker<Writ
     // [..~..]
     source = LongArray.copy(values);
     int pos = source.size() / 2;
-    source.insert(pos, RAND.nextInt());
+    source.insert(pos, myRand.nextInt());
     if (pos != 0) {
       array = new WritableLongListRemovingDecorator(source);
       array.removeAt(pos);
@@ -73,11 +73,11 @@ public class WritableLongListRemovingDecoratorTests extends LongListChecker<Writ
         source = LongArray.copy(values);
         IntArray indices = IntArray.create();
         int maxDiff = 4;
-        int curIdx = RAND.nextInt(maxDiff);
+        int curIdx = myRand.nextInt(maxDiff);
         while (curIdx < source.size()) {
           indices.add(curIdx);
-          source.insert(curIdx, RAND.nextInt());
-          curIdx += 1 + RAND.nextInt(maxDiff);
+          source.insert(curIdx, myRand.nextInt());
+          curIdx += 1 + myRand.nextInt(maxDiff);
         }
         WritableLongListRemovingDecorator resArray = new WritableLongListRemovingDecorator(source);
         prepareSortedIndices(indices);

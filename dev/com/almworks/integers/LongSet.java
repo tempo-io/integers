@@ -63,7 +63,7 @@ public interface LongSet extends LongSizedIterable {
 
   /**
    * Writes values from this set to {@code dest}.
-   * @see {@link #toNativeArray(long[], int)}
+   * @see #toNativeArray(long[], int)
    */
   long[] toNativeArray(long[] dest);
 

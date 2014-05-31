@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
+// CODE GENERATED FROM com/almworks/integers/PListSet.tpl
+
+
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-public class LongSortedUniqueListSet extends AbstractLongSet implements LongSortedSet {
+/**
+ * Class that allows you to consider the specified sorted unique list as set.
+ * Changes in list propagate to this set.
+ */
+public class LongListSet extends AbstractLongSet implements LongSortedSet {
   protected final LongList myList;
 
-  public static LongSortedUniqueListSet asSet(LongList sortedUniqueList) {
+  public static LongListSet asSet(LongList sortedUniqueList) {
     assert sortedUniqueList.isSortedUnique();
-    return new LongSortedUniqueListSet(sortedUniqueList);
+    return new LongListSet(sortedUniqueList);
   }
 
-  private LongSortedUniqueListSet(LongList sortedUniqueList) {
+  private LongListSet(LongList sortedUniqueList) {
     assert sortedUniqueList.isSortedUnique();
     myList = sortedUniqueList;
   }

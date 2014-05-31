@@ -34,6 +34,7 @@ public final class IntegersUtils {
   public static final int[] EMPTY_INTS = {};
   public static final long[] EMPTY_LONGS = {};
   public static final short[] EMPTY_SHORTS = {};
+  public static final short[] EMPTY_CHARS = {};
   public static final int MAX_INT = Integer.MAX_VALUE;
   public static final long MAX_LONG = Long.MAX_VALUE;
 
@@ -171,39 +172,6 @@ public final class IntegersUtils {
     Object t = x[a];
     x[a] = x[b];
     x[b] = t;
-  }
-
-  // copied from ArrayUtil
-  public static int[] arrayCopy(int[] ints) {
-    return arrayCopy(ints, 0, ints.length);
-  }
-
-  public static int[] arrayCopy(int[] array, int offset, int length) {
-    if (length == 0)
-      return EMPTY_INTS;
-    int[] copy = new int[length];
-    System.arraycopy(array, offset, copy, 0, length);
-    return copy;
-  }
-
-  public static long[] arrayCopy(long[] array, int offset, int length) {
-    if (length == 0)
-      return EMPTY_LONGS;
-    long[] copy = new long[length];
-    System.arraycopy(array, offset, copy, 0, length);
-    return copy;
-  }
-
-  public static int indexOf(int[] ints, int value) {
-    return indexOf(ints, 0, ints.length, value);
-  }
-
-  public static int indexOf(int[] ints, int from, int to, int value) {
-    for (int i = from; i < to; i++) {
-      if (ints[i] == value)
-        return i;
-    }
-    return -1;
   }
 
 

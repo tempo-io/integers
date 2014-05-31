@@ -50,6 +50,11 @@ public class LongOpenHashSetTests extends WritableLongSetChecker<LongOpenHashSet
     return LongOpenHashSet.createFrom(sortedUniqueList);
   }
 
+  @Override
+  protected boolean isSortedSet() {
+    return false;
+  }
+
   public void testCreateForAdd() {
     int minSize = 16, maxSize = 266;
     float[] loadFactors = {0.1f, 0.3f, 0.5f, 0.75f, 0.99f};

@@ -21,8 +21,8 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.LongFunctions;
 import com.almworks.integers.func.LongLongToLong;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ import java.util.List;
  * Keys and values are sorted, and it is possible to retrieve either value by key or key by value. However, mappings are still added only by key. <br/>
  * The mapping is stored in a separate list in the following way: if {@code (k, v)} is a stored pair, then {@code v = vals[idxMap[i]]}, where {@code k = keys[i]}.
  * */
-public class LongTwoWayMap {
+public class LongTwoWayMap implements LongLongMap {
   private final LongArray myKeys = new LongArray();
   private final IntArray myIdxMap = new IntArray();
   private final LongArray myValues = new LongArray();
@@ -53,6 +53,16 @@ public class LongTwoWayMap {
     return containsKeys(keys, false);
   }
 
+  @Override
+  public boolean containsKeys(LongIterable keys) {
+    for (LongIterator key : keys) {
+      if (!containsKey(key.value())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public boolean containsKeys(LongList keys, boolean all) {
     Long key;
     if (keys.isSorted()) {
@@ -67,10 +77,10 @@ public class LongTwoWayMap {
   @Nullable
   private Long containsKeysSorted(LongList keys, boolean shouldContain) {
     for (int i = 0,
-      m = keys.size(),
-      pos = 0,
-      n = myKeys.size()
-        ; i < m; ++i)
+             m = keys.size(),
+             pos = 0,
+             n = myKeys.size()
+                 ; i < m; ++i)
     {
       long key = keys.get(i);
       pos = myKeys.binarySearch(key, pos, n);
@@ -117,7 +127,42 @@ public class LongTwoWayMap {
   }
 
   public int size() {
+    assert myKeys.size() == myValues.size();
     return myKeys.size();
+  }
+
+  @Override
+  public boolean isEmpty() {
+    assert myKeys.isEmpty() == myValues.isEmpty();
+    return myKeys.isEmpty();
+  }
+
+  /**
+   * @return pair-iterator over this map in the sorted by key order.
+   */
+  @NotNull
+  @Override
+  public LongLongIterator iterator() {
+    return new LongLongPairIterator(myKeys, new LongIndexedIterator(myValues, myIdxMap.iterator()));
+  }
+
+  @Override
+  public LongIterator keysIterator() {
+    return myKeys.iterator();
+  }
+
+  /**
+   * Note, that this iterator isn't equal to right projection of {@link #iterator()}
+   * @return iterator over values of this map in the sorted order.
+   */
+  @Override
+  public LongIterator valuesIterator() {
+    return myValues.iterator();
+  }
+
+  @Override
+  public LongSet keySet() {
+    return LongListSet.asSet(myKeys);
   }
 
   public List<Entry> toList() {
@@ -168,8 +213,8 @@ public class LongTwoWayMap {
       for (int i = 0, iEnd = myIdxMap.size(); i < iEnd; ++i) {
         int pos = myIdxMap.get(i);
         if (inc > 0
-          ? pos >= newPos && pos < oldPos
-          : pos > oldPos && pos <= newPos)
+            ? pos >= newPos && pos < oldPos
+            : pos > oldPos && pos <= newPos)
         {
           myIdxMap.set(i, pos + inc);
         }
@@ -263,20 +308,20 @@ public class LongTwoWayMap {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(@NotNull LongToLong f) {
-    transformValues(Long.MIN_VALUE, f);
+  public void transformValues(@NotNull LongToLong fun) {
+    transformValues(Long.MIN_VALUE, fun);
   }
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(long valFrom, @NotNull LongToLong f) {
+  public void transformValues(long valFrom, @NotNull LongToLong fun) {
     int n = size();
     boolean isSortingBroken = false;
     long lastValue = Long.MIN_VALUE;
     int viFrom = myValues.binarySearch(valFrom);
     if (viFrom < 0) viFrom = -viFrom - 1;
     for (int vi = viFrom; vi < n; ++vi) {
-      long val = f.invoke(myValues.get(vi));
+      long val = fun.invoke(myValues.get(vi));
       myValues.set(vi, val);
       if (val < lastValue) isSortingBroken = true;
       lastValue = val;
@@ -284,41 +329,36 @@ public class LongTwoWayMap {
     if (isSortingBroken) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
-  public void transformValues(@NotNull LongLongToLong f) {
+  public void transformValues(@NotNull LongLongToLong fun) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
       int vi = myIdxMap.get(ki);
-      myValues.set(vi, f.invoke(myKeys.get(ki), myValues.get(vi)));
+      myValues.set(vi, fun.invoke(myKeys.get(ki), myValues.get(vi)));
     }
     if (!myValues.isSorted()) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   private void restoreIndexMap(int n) {
     // Sort the values remembering the sorting transposition, r
     final IntArray r = new IntArray(IntProgression.arithmetic(0, n));
     IntegersUtils.quicksort(n,
-      // order
-      new IntIntToInt() {
-        @Override
-        public int invoke(int i, int j) {
-          return LongCollections.compare(myValues.get(i), myValues.get(j));
+        // order
+        LongFunctions.comparator(myValues),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int i, int j) {
+            myValues.swap(i, j);
+            r.swap(i, j);
+          }
         }
-      },
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int i, int j) {
-          myValues.swap(i, j);
-          r.swap(i, j);
-        }
-      }
     );
     // The trickier part is to restore the index map.
     // Previously, we had k = v*p where k - keys, v - values, p - index map (effectively, a transposition); a*p is a new vector,b, such as b[i] = a[p[i]].
@@ -338,9 +378,7 @@ public class LongTwoWayMap {
 
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
   public void transformKeys(LongToLong injection) throws NonInjectiveFunctionException {
-    int n = size();
-    LongArray newKeys = new LongArray(n);
-    for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
+    LongArray newKeys = new LongArray(LongCollections.map(injection, myKeys));
   
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
@@ -358,18 +396,16 @@ public class LongTwoWayMap {
     assert main.size() == parallel.size();
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
-      // compare
-      new IntIntToInt() { public int invoke(int a, int b) {
-        return LongCollections.compare(main.get(a), main.get(b));
-      }},
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int a, int b) {
-          main.swap(a, b);
-          parallel.swap(a, b);
+        // compare
+        LongFunctions.comparator(main),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int a, int b) {
+            main.swap(a, b);
+            parallel.swap(a, b);
+          }
         }
-      }
     );
   }
 
@@ -528,11 +564,7 @@ public class LongTwoWayMap {
       if (o == null || getClass() != o.getClass()) return false;
 
       Entry entry = (Entry) o;
-
-      if (key != entry.key) return false;
-      if (val != entry.val) return false;
-
-      return true;
+      return key == entry.key && val == entry.val;
     }
 
     @Override

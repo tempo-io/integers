@@ -176,6 +176,13 @@ public class #E#CyclicQueue extends Abstract#E#List implements #E#Collector {
     ensureCapacity(size() + nToAdd);
   }
 
+  /**
+   * @return the capacity of the internal buffer that holds the elements
+   */
+  public int getCapacity() {
+    return myHostArray.length;
+  }
+
   private void ensureCapacity(int capacity) {
     int n = myHostArray.length;
     if (capacity >= n) {

@@ -71,7 +71,7 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
       for (int point: points) {
         array = new LongSegmentedArray();
         array.addAll(vals.subList(0, point));
-        array.add(RAND.nextLong());
+        array.add(myRand.nextLong());
         array.addAll(vals.subList(point, size));
         array.removeAt(point);
         res.add(array);
@@ -423,6 +423,18 @@ public class LongSegmentedArrayTests extends WritableLongListChecker<LongSegment
       LongArray expected = generateRandomLongArray(size, UNORDERED);
       array = LongSegmentedArray.create(expected);
       CHECK.order(expected, array);
+    }
+  }
+
+  public void testSetAllBorders() {
+    array.addAll(LongProgression.Arithmetic.range(1050));
+    array.removeRange(0, 10);
+
+    try {
+      array.setAll(-5, LongArray.create(-1, -1), 0, 2);
+      fail();
+    } catch (IndexOutOfBoundsException _) {
+      // ok
     }
   }
 }

@@ -23,6 +23,7 @@ import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class IntIterators {
@@ -52,25 +53,25 @@ public class IntIterators {
   public static IntIterator repeat(final int value, int count) {
     final int lim0 = Math.max(count, 0);
     return new AbstractIntIterator() {
-      int count = lim0;
+      int myCount = lim0;
 
       @Override
       public boolean hasNext() throws ConcurrentModificationException {
-        return count > 0;
+        return myCount > 0;
       }
 
       @Override
       public IntIterator next() throws NoSuchElementException {
-        if (count == 0) {
+        if (myCount == 0) {
           throw new NoSuchElementException();
         }
-        count--;
+        myCount--;
         return this;
       }
 
       @Override
       public boolean hasValue() {
-        return count != lim0;
+        return myCount != lim0;
       }
 
       @Override
@@ -281,7 +282,7 @@ public class IntIterators {
    * @return intersection of iterables.
    * If {@code iterables == null || iterables.length == 0}, {@link IntIterator#EMPTY} is returned
    * */
-   public static IntIterator intersectionIterator(IntIterable ... iterables) {
+  public static IntIterator intersectionIterator(IntIterable ... iterables) {
     if (iterables == null || iterables.length == 0) return IntIterator.EMPTY;
     return new IntIntersectionIterator(iterables);
   }
@@ -306,4 +307,65 @@ public class IntIterators {
     };
   }
 
+  /**
+   * Beware of boxing: every call to {@link java.util.Iterator#next()} leads to boxing
+   */
+  public static Iterator<Integer> asIterator(final IntIterator iterator) {
+    return new Iterator<Integer>() {
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public Integer next() {
+        return iterator.nextValue();
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
+
+  /**
+   * Beware of unboxing: it always occurs on receiving the next element of {@code iterator}
+   */
+  public static IntIterator asIntIterator(final Iterator<Integer> iterator) {
+    return new IntFindingIterator() {
+      @Override
+      protected boolean findNext() throws ConcurrentModificationException {
+        if (!iterator.hasNext()) return false;
+        iterator.next();
+        myNext = iterator.next();
+        return true;
+      }
+    };
+  }
+
+  public static IntIterator asIntIterator(final IntIterator iterator) {
+    return new AbstractIntIterator() {
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public boolean hasValue() {
+        return iterator.hasValue();
+      }
+
+      @Override
+      public int value() throws NoSuchElementException {
+        return iterator.value();
+      }
+
+      @Override
+      public IntIterator next() {
+        iterator.next();
+        return this;
+      }
+    };
+  }
 }

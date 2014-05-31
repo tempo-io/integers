@@ -127,7 +127,7 @@ public class IntOpenHashSet extends AbstractWritableIntSet implements WritableIn
   public static IntOpenHashSet createFrom(IntIterable keys) {
     int capacity = IntCollections.sizeOfIterable(keys, 0);
     IntOpenHashSet set = createForAdd(capacity);
-    for (IntIterator it : keys.iterator()) {
+    for (IntIterator it : keys) {
       set.add(it.value());
     }
     return set;
@@ -152,19 +152,19 @@ public class IntOpenHashSet extends AbstractWritableIntSet implements WritableIn
     int mask = newCapacity - 1;
 
     int[] keysNew = new int[newCapacity];
-    BitSet alocatedNew = new BitSet(newCapacity);
+    BitSet allocatedNew = new BitSet(newCapacity);
 
-    for (IntIterator it: iterator()) {
+    for (IntIterator it: this) {
       int value = it.value();
       int slot = index(hash(value), mask);
-      while (alocatedNew.get(slot)) {
+      while (allocatedNew.get(slot)) {
         slot = index(slot + 1, mask);
       }
       keysNew[slot] = value;
-      alocatedNew.set(slot);
+      allocatedNew.set(slot);
     }
 
-    init(keysNew, alocatedNew, (int)(newCapacity * myLoadFactor));
+    init(keysNew, allocatedNew, (int)(newCapacity * myLoadFactor));
   }
 
   @Override

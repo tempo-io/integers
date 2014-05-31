@@ -16,11 +16,9 @@
 
 package com.almworks.integers;
 
-import junit.framework.TestCase;
-
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED;
 
-public class LongMinusIteratorTests extends TestCase {
+public class LongMinusIteratorTests extends IntegersFixture {
   private LongArray create(long... values) {
     return new LongArray(values);
   }
@@ -38,7 +36,7 @@ public class LongMinusIteratorTests extends TestCase {
   }
 
   public void testAllCases() {
-    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+    new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return new LongMinusIterator(arrays[0], arrays[1]);

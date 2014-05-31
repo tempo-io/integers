@@ -4,10 +4,10 @@ build process
 http://gant.codehaus.org/
 install groovy and gant to run build script
 
-* run
-run "gant" in the ant directory of the project
+* build
+run `gant` in the ant directory of the project
 OR
-run "gant -f <integers_directory>/ant/build.gant"
+run `gant -f <integers_directory>/ant/build.gant`
 
 * arguments
 default target - build
@@ -36,4 +36,3 @@ for build without checking that version of code complies with last release versi
 | javadoc                        | doc                            |
 | dist                           | generate jars                  |
 | build                          | empty                          |
-

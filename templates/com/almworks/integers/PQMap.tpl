@@ -16,8 +16,6 @@
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
-
 public interface #E##F#Map extends #E##F#Iterable {
   #E##F#Map EMPTY = new #E##F#EmptyMap();
 
@@ -49,13 +47,14 @@ public interface #E##F#Map extends #E##F#Iterable {
    */
   boolean isEmpty();
 
-  @NotNull
-  @Override
-  #E##F#Iterator iterator();
-
   #E#Iterator keysIterator();
 
   #F#Iterator valuesIterator();
+
+  /**
+   * @return a {@link #E#Set} view of the keys contained in this map.
+   */
+  #E#Set keySet();
 
   /**
    * Compares the specified object with this map for equality. Returns

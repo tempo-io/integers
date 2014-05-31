@@ -16,6 +16,8 @@
 
 package com.almworks.integers;
 
+import com.almworks.integers.func.LongFunctions;
+import com.almworks.integers.func.LongToLong;
 import com.almworks.integers.segmented.LongSegmentedArray;
 import com.almworks.util.Pair;
 
@@ -108,7 +110,7 @@ public class LongCollectionsTests extends IntegersFixture {
     maxElem = maxElem / factor;
     LongArray larr = new LongArray(len);
     for (int i = 0; i < len; ++i) {
-      int elem = RAND.nextInt(maxElem) * factor;
+      int elem = myRand.nextInt(maxElem) * factor;
       larr.add(elem);
     }
     larr.sortUnique();
@@ -122,7 +124,7 @@ public class LongCollectionsTests extends IntegersFixture {
     int szb = b.size();
     int max = (int)((sza + szb) / intersRate);
     for (int i = 0; i < intersLen; ++i) {
-      int idx = RAND.nextInt(max);
+      int idx = myRand.nextInt(max);
       if (idx < sza) {
         long value = a.get(idx);
         trueIntersection.add(value);
@@ -133,7 +135,7 @@ public class LongCollectionsTests extends IntegersFixture {
         withExtra.add(value);
       } else {
         long value;
-        do value = RAND.nextInt(maxElem);
+        do value = myRand.nextInt(maxElem);
         while (value % 2 == 0 || value % 3 == 0);
         withExtra.add(value);
       }
@@ -149,7 +151,7 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testDiffSortedUniqueLists() {
-    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+    new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return LongCollections.diffSortedUniqueLists(arrays[0], arrays[1]).iterator();
@@ -209,7 +211,7 @@ public class LongCollectionsTests extends IntegersFixture {
     long[] arr = new long[arrLength];
     for (int test = 0; test < 20; test++) {
       for (int i = 0; i < arrLength; i++) {
-        arr[i] = RAND.nextInt(maxInt);
+        arr[i] = myRand.nextInt(maxInt);
       }
       checkFindDuplicate(arr);
     }
@@ -226,6 +228,7 @@ public class LongCollectionsTests extends IntegersFixture {
 
   public void testIsSortedUnique() {
     assertEquals(0, LongCollections.isSortedUnique(true, new long[]{}, 0, 0));
+    assertEquals(0, LongCollections.isSortedUnique(true, null, 0, 0));
     assertEquals(0, LongCollections.isSortedUnique(false, new long[]{}, 0, 0));
     assertEquals(0, LongCollections.isSortedUnique(true, new long[]{1, 5, 10, 11, 20}, 0, 5));
     assertEquals(0, LongCollections.isSortedUnique(false, new long[]{1, 5, 10, 11, 20}, 0, 5));
@@ -277,7 +280,7 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testBinarySearch() {
-    BinarySearchChecker.test(new BinarySearchChecker.BinarySearcher() {
+    BinarySearchChecker.test(myRand, new BinarySearchChecker.BinarySearcher() {
       private long[] arr;
       private int length;
 
@@ -397,7 +400,7 @@ public class LongCollectionsTests extends IntegersFixture {
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
       for (int j = 0; j < 2; j++) {
         arrays[j] = generateRandomLongArray(maxSize, IntegersFixture.SortedStatus.SORTED_UNIQUE);
-        sets[j] = (RAND.nextBoolean()) ?
+        sets[j] = (myRand.nextBoolean()) ?
             LongTreeSet.createFromSortedUnique(arrays[j]) : LongOpenHashSet.createFrom(arrays[j]);
       }
       expected = new LongArray(maxSize * 2);
@@ -436,7 +439,7 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testComplementSorted() {
-    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+    new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return LongCollections.complementSorted(arrays[0], arrays[1]).iterator();
@@ -445,7 +448,7 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testIntersectionSorted() {
-    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+    new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return LongCollections.intersectionSortedUnique(arrays[0], arrays[1]).iterator();
@@ -454,7 +457,7 @@ public class LongCollectionsTests extends IntegersFixture {
   }
 
   public void testUnionSorted() {
-    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+    new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return LongCollections.unionSortedUnique(arrays[0], arrays[1]).iterator();
@@ -613,7 +616,7 @@ public class LongCollectionsTests extends IntegersFixture {
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
       LongIterable[] iterables = new LongIterable[lists.length];
       for (int i = 0; i < lists.length; i++) {
-        switch (RAND.nextInt(3)) {
+        switch (myRand.nextInt(3)) {
           case 0: iterables[i] = lists[i]; break;
           case 1: iterables[i] = lists[i].iterator(); break;
           case 2:
@@ -645,6 +648,23 @@ public class LongCollectionsTests extends IntegersFixture {
         arrays[i] = generateRandomLongArray(maxArraySize, UNORDERED);
       }
       checkCollect(arrays);
+    }
+  }
+
+  public void testMap() {
+    int attemptsCount = 10;
+    int size = 200;
+    int maxVal = 10000;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      LongArray values = generateRandomLongArray(size, UNORDERED, maxVal);
+      LongToLong[] functions = {LongFunctions.SQR, LongFunctions.INC, LongFunctions.DEC, LongFunctions.NEG};
+      for (LongToLong fun : functions) {
+        long[] expected = values.toNativeArray();
+        for (int i = 0; i < expected.length; i++) {
+          expected[i] = fun.invoke(expected[i]);
+        }
+        checkCollection(LongCollections.map(fun, values), expected);
+      }
     }
   }
 }

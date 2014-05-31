@@ -127,7 +127,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   public static LongOpenHashSet createFrom(LongIterable keys) {
     int capacity = LongCollections.sizeOfIterable(keys, 0);
     LongOpenHashSet set = createForAdd(capacity);
-    for (LongIterator it : keys.iterator()) {
+    for (LongIterator it : keys) {
       set.add(it.value());
     }
     return set;
@@ -152,19 +152,19 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     int mask = newCapacity - 1;
 
     long[] keysNew = new long[newCapacity];
-    BitSet alocatedNew = new BitSet(newCapacity);
+    BitSet allocatedNew = new BitSet(newCapacity);
 
-    for (LongIterator it: iterator()) {
+    for (LongIterator it: this) {
       long value = it.value();
       int slot = index(hash(value), mask);
-      while (alocatedNew.get(slot)) {
+      while (allocatedNew.get(slot)) {
         slot = index(slot + 1, mask);
       }
       keysNew[slot] = value;
-      alocatedNew.set(slot);
+      allocatedNew.set(slot);
     }
 
-    init(keysNew, alocatedNew, (int)(newCapacity * myLoadFactor));
+    init(keysNew, allocatedNew, (int)(newCapacity * myLoadFactor));
   }
 
   @Override

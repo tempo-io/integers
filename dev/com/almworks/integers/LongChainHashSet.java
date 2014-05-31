@@ -81,7 +81,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
   public static LongChainHashSet createFrom(LongIterable keys) {
     int capacity = LongCollections.sizeOfIterable(keys, 0);
     LongChainHashSet set = createForAdd(capacity);
-    for (LongIterator it : keys.iterator()) {
+    for (LongIterator it : keys) {
       set.add(it.value());
     }
     return set;
@@ -191,7 +191,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
       int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
       resize(newCap);
     }
-    for (LongIterator it: values.iterator()) {
+    for (LongIterator it: values) {
       include1(it.value());
     }
   }

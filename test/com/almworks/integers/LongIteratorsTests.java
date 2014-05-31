@@ -62,6 +62,10 @@ public class LongIteratorsTests extends IntegersFixture {
       assertEquals(cur, arithmetic.nextValue());
       cur += 10;
     }
+
+    for (LongIterator it : LongIterators.limit(LongIterators.arithmeticProgression(239, 0), 100)) {
+      assertEquals(239, it.value());
+    }
   }
 
   public void testLimit() throws Exception {
@@ -83,7 +87,7 @@ public class LongIteratorsTests extends IntegersFixture {
   }
 
   public void testLimitSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       @Override
       public List<LongIterator> get(long... values) {
         LongArray valuesArray2 = LongCollections.collectLists(LongArray.create(values), LongArray.create(10, 20));
@@ -125,10 +129,10 @@ public class LongIteratorsTests extends IntegersFixture {
       checkRange(test);
     }
     for (int attempt = 0; attempt < 20; attempt++) {
-      long start = (long)RAND.nextInt(2000) - 1000;
-      long step = RAND.nextInt(2000) - 1000;
+      long start = (long) myRand.nextInt(2000) - 1000;
+      long step = myRand.nextInt(2000) - 1000;
       if (step == 0) step++;
-      long stop = start + (step > 0 ? 1 : -1) * RAND.nextInt(1000);
+      long stop = start + (step > 0 ? 1 : -1) * myRand.nextInt(1000);
       checkRange(start, stop, step);
     }
 
@@ -148,15 +152,22 @@ public class LongIteratorsTests extends IntegersFixture {
         LongIterators.arithmetic(t[0], t[1], t[2]));
     }
     for (int attempt = 0; attempt < 20; attempt++) {
-      long start = RAND.nextInt();
-      int count = RAND.nextInt(100);
-      long step = RAND.nextInt(2000) - 1000;
+      long start = myRand.nextInt();
+      int count = myRand.nextInt(100);
+      long step = myRand.nextInt(2000) - 1000;
       if (attempt % 4 == 0) {
         step = 0;
       }
       LongIterator actual = LongIterators.arithmetic(start, count, step);
       checkNoValue(actual);
       CHECK.order(LongProgression.arithmetic(start, count, step).iterator(), actual);
+    }
+
+    try {
+      LongIterators.arithmetic(0, -1);
+      fail();
+    } catch (IllegalArgumentException _) {
+      // ok
     }
   }
 }

@@ -19,6 +19,8 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.almworks.integers.IntegersUtils.appendShortName;
 import static com.almworks.integers.LongLongIterators.pair;
 
@@ -28,12 +30,12 @@ public abstract class AbstractWritableLongLongMap implements WritableLongLongMap
   /**
    * put element without invocation of {@code AbstractWritableLongLongMap#modified()}
    */
-  abstract protected long putImpl(long key, long value);
+  protected abstract long putImpl(long key, long value);
 
   /**
    * remove element without invocation of {@code AbstractWritableLongLongMap#modified()}
    */
-  abstract protected long removeImpl(long key);
+  protected abstract long removeImpl(long key);
 
   public boolean isEmpty() {
     return size() == 0;
@@ -41,10 +43,31 @@ public abstract class AbstractWritableLongLongMap implements WritableLongLongMap
 
   @Override
   public boolean containsKeys(LongIterable iterable) {
-    for (LongIterator it: iterable.iterator()) {
+    for (LongIterator it: iterable) {
       if (!containsKey(it.value())) return false;
     }
     return true;
+  }
+
+  @Override
+  public LongSet keySet() {
+    return new AbstractLongSet() {
+      @Override
+      public boolean contains(long value) {
+        return containsKey(value);
+      }
+
+      @Override
+      public int size() {
+        return AbstractWritableLongLongMap.this.size();
+      }
+
+      @NotNull
+      @Override
+      public LongIterator iterator() {
+        return keysIterator();
+      }
+    };
   }
 
   protected void modified() {
@@ -126,14 +149,14 @@ public abstract class AbstractWritableLongLongMap implements WritableLongLongMap
 
   public void removeAll(long... keys) {
     modified();
-    for (long key: keys) {
-      removeImpl(key);
+    if (keys != null && keys.length > 0) {
+      removeAll(new LongNativeArrayIterator(keys));
     }
   }
 
   public void removeAll(LongIterable keys) {
     modified();
-    for (LongIterator it : keys.iterator()) {
+    for (LongIterator it : keys) {
       removeImpl(it.value());
     }
   }
@@ -200,7 +223,7 @@ public abstract class AbstractWritableLongLongMap implements WritableLongLongMap
     LongLongMap otherMap = (LongLongMap) o;
 
     if (otherMap.size() != size()) return false;
-    for (LongLongIterator it : iterator()) {
+    for (LongLongIterator it : this) {
       long key = it.left();
       if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
@@ -212,7 +235,7 @@ public abstract class AbstractWritableLongLongMap implements WritableLongLongMap
   @Override
   public int hashCode() {
     int h = 0;
-    for (LongLongIterator it : iterator()) {
+    for (LongLongIterator it : this) {
       h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right());
     }
     return h;

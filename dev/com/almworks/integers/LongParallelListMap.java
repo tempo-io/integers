@@ -153,6 +153,7 @@ public class LongParallelListMap implements LongLongIterable {
     return new Iterator(from, size());
   }
 
+  @NotNull
   public Iterator iterator() {
     return new Iterator(0, size());
   }
@@ -175,6 +176,7 @@ public class LongParallelListMap implements LongLongIterable {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
+
     for (LongParallelList.Iterator ii = myMap.iterator(from, to); ii.hasNext();) {
       ii.next(null);
       ii.set(0, 0, (long)(ii.get(0, 0) + increment));
@@ -228,15 +230,15 @@ public class LongParallelListMap implements LongLongIterable {
       return myKeyValue[1];
     }
 
-    public long getKey(int relativeOffset) {
+    public long getLeft(int relativeOffset) {
       return ii.get(relativeOffset, 0);
     }
 
-    public long getValue(int relativeOffset) {
+    public long getRight(int relativeOffset) {
       return ii.get(relativeOffset, 1);
     }
 
-    public void setValue(int relativeOffset, long value) {
+    public void setRight(int relativeOffset, long value) {
       ii.set(relativeOffset, 1, value);
     }
 
@@ -254,8 +256,8 @@ public class LongParallelListMap implements LongLongIterable {
 
     @NotNull
     @Override
-    public LongLongIterator iterator() {
-      return null;
+    public Iterator iterator() {
+      return this;
     }
   }
 }

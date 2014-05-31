@@ -28,7 +28,7 @@ public class LongUnionIteratorTwoTests extends IntegersFixture {
   }
 
   public void testAllCases() {
-    new SetOperationsChecker().check(new SetOperationsChecker.SetCreator() {
+    new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
         return new LongUnionIteratorOfTwo(arrays[0], arrays[1]);

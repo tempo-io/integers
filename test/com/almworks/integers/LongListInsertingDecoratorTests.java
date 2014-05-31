@@ -62,11 +62,11 @@ public class LongListInsertingDecoratorTests extends LongListChecker<LongListIns
         LongArray source = LongArray.copy(values);
         IntLongListMap inserted = new IntLongListMap();
         int maxDiff = 4;
-        int curIdx = RAND.nextInt(maxDiff);
+        int curIdx = myRand.nextInt(maxDiff);
         int removeCount = 0;
         while (curIdx < source.size()) {
           inserted.add(curIdx + removeCount, source.removeAt(curIdx));
-          curIdx += 1 + RAND.nextInt(maxDiff);
+          curIdx += 1 + myRand.nextInt(maxDiff);
           removeCount++;
         }
         LongListInsertingDecorator resArray = new LongListInsertingDecorator(source, inserted);
@@ -93,7 +93,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker<LongListIns
     LongList base = ins.getBase();
     for (int i = 0; i < base.size(); i++) {
       int newIndex = ins.getNewIndex(i);
-      assertTrue(IntegersUtils.indexOf(expected, newIndex) < 0);
+      assertTrue(IntCollections.indexOf(newIndex, expected) < 0);
       assertEquals(base.get(i), ins.get(newIndex));
     }
     final int[] expectedCopy = expected;
@@ -103,7 +103,7 @@ public class LongListInsertingDecoratorTests extends LongListChecker<LongListIns
       public boolean accept(long value, LongList source) {
         index++;
         assertEquals(value, ins.get(index));
-        if (IntegersUtils.indexOf(expectedCopy, index) >= 0)
+        if (IntCollections.indexOf(index, expectedCopy) >= 0)
           assertSame(ins, source);
         else
           assertSame(ins.getBase(), source);

@@ -16,8 +16,11 @@
 
 package com.almworks.integers;
 
-import static com.almworks.integers.IntegersFixture.*;
+import java.util.Random;
+
+import static com.almworks.integers.IntegersFixture.SortedStatus;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
+import static com.almworks.integers.IntegersFixture.generateRandomLongArray;
 import static com.almworks.integers.LongArray.create;
 import static com.almworks.integers.LongCollections.collectIterables;
 
@@ -26,6 +29,7 @@ import static com.almworks.integers.LongCollections.collectIterables;
  * */
 public class SetOperationsChecker {
 
+  private Random myRand;
   private static final int MIN = Integer.MIN_VALUE;
   private static final int MAX = Integer.MAX_VALUE;
   protected static final CollectionsCompare CHECK = new CollectionsCompare();
@@ -60,13 +64,13 @@ public class SetOperationsChecker {
       mValues = IntIterators.cycle(minMaxValues);
     }
 
-    LongArray intersection = generateRandomLongArray(intersectionLength, UNORDERED);
+    LongArray intersection = generateRandomLongArray(myRand, intersectionLength, UNORDERED);
     LongArray[] arrays = new LongArray[arraysNumber];
     for (int i = 0; i < arraysNumber; i++) {
-      arrays[i] = generateRandomLongArray(RAND.nextInt(maxArrayLength), UNORDERED, mValues.nextValue(), mValues.nextValue());
+      arrays[i] = generateRandomLongArray(myRand, myRand.nextInt(maxArrayLength), UNORDERED, mValues.nextValue(), mValues.nextValue());
       arrays[i].addAll(intersection);
       if (getCurrentStatus(i) == UNORDERED) {
-        arrays[i].shuffle(RAND);
+        arrays[i].shuffle(myRand);
       } else {
         getCurrentStatus(i).action(arrays[i]);
       }
@@ -81,7 +85,8 @@ public class SetOperationsChecker {
     }
   }
 
-  public void check(SetCreator creator, SetCreator expected, boolean onlyTwo, SortedStatus... statuses) {
+  public void check(Random random, SetCreator creator, SetCreator expected, boolean onlyTwo, SortedStatus... statuses) {
+    this.myRand = random;
     this.creator = creator;
     this.expected = expected;
     assert statuses.length == 1 || statuses.length == 2;
@@ -139,8 +144,8 @@ public class SetOperationsChecker {
       for (int attempt = 0; attempt < 10; attempt++) {
         for (int[] size: sizes) {
           checkNewSetCreator(
-            generateRandomLongArray(size[0], getCurrentStatus(0), size[0] * 5),
-            generateRandomLongArray(size[1], getCurrentStatus(1), size[1] * 5));
+            generateRandomLongArray(myRand, size[0], getCurrentStatus(0), size[0] * 5),
+            generateRandomLongArray(myRand, size[1], getCurrentStatus(1), size[1] * 5));
         }
       }
     }
@@ -160,13 +165,13 @@ public class SetOperationsChecker {
       testRandom(0, 2, 100, 0, 1000, 1100, 2000);
       testRandom(0, 2, 1000, 0, MAX / 2, MAX / 2 + 1, MAX);
 
-      LongArray first = generateRandomLongArray(1000, SortedStatus.SORTED_UNIQUE);
-      LongArray complement = collectIterables(new LongMinusIterator(generateRandomLongArray(1000, SortedStatus.SORTED_UNIQUE), first));
+      LongArray first = generateRandomLongArray(myRand, 1000, SortedStatus.SORTED_UNIQUE);
+      LongArray complement = collectIterables(new LongMinusIterator(generateRandomLongArray(myRand, 1000, SortedStatus.SORTED_UNIQUE), first));
       if (getCurrentStatus(0) == UNORDERED) {
-        first.shuffle(RAND);
+        first.shuffle(myRand);
       }
       if (getCurrentStatus(1) == UNORDERED) {
-        complement.shuffle(RAND);
+        complement.shuffle(myRand);
       }
       checkNewSetCreator(first, complement);
     }

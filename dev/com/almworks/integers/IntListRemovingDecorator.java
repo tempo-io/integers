@@ -24,6 +24,7 @@ package com.almworks.integers;
 /**
  * Removing {@code IntList} decorator that does not alter the given list of removed indices.
  * @see WritableIntListRemovingDecorator
+ * @see IntListDiffIndexedDecorator
  * @author igor baltiyskiy
  */
 public class IntListRemovingDecorator extends AbstractIntListRemovingDecorator {

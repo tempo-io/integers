@@ -21,8 +21,10 @@
 
 package com.almworks.integers.func;
 
+import com.almworks.integers.LongCollections;
 import com.almworks.integers.LongIterable;
 import com.almworks.integers.LongIterator;
+import com.almworks.integers.LongList;
 
 public class LongFunctions {
   private LongFunctions() {}
@@ -194,6 +196,19 @@ public class LongFunctions {
       @Override
       public String toString() {
         return "swap (" + f + ')';
+      }
+    };
+  }
+
+  /**
+   * @return comparator that for a pair of indices returns the result of comparing the values from {@code list}
+   * at these indices. Behaves in the same way as {@link java.util.Comparator}
+   */
+  public static IntIntToInt comparator(final LongList list) {
+    return new IntIntToInt() {
+      @Override
+      public int invoke(int a, int b) {
+        return LongCollections.compare(list.get(a), list.get(b));
       }
     };
   }

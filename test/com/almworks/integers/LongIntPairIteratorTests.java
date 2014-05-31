@@ -18,14 +18,15 @@ package com.almworks.integers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.almworks.integers.IntLongIterators.leftProjection;
 import static com.almworks.integers.IntLongIterators.rightProjection;
 import static com.almworks.integers.IntegersFixture.SortedStatus.UNORDERED;
 
-public class IntLongPairIteratorTests extends IntegersFixture {
+public class LongIntPairIteratorTests extends IntegersFixture {
   public void testRightIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       private LongIterator getFromProjection(IntIterable leftIterable, LongIterable rightIterable) {
         return rightProjection(new IntLongPairIterator(leftIterable, rightIterable));
       }
@@ -45,9 +46,9 @@ public class IntLongPairIteratorTests extends IntegersFixture {
   }
 
   public void testLeftIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter<LongIterator>() {
       private LongIterator getFromProjection(IntIterable leftIterable, LongIterable rightIterable) {
-        return asLongs(leftProjection(new IntLongPairIterator(leftIterable, rightIterable)));
+        return LongIterators.asLongIterator(leftProjection(new IntLongPairIterator(leftIterable, rightIterable)));
       }
 
       @Override
@@ -72,7 +73,7 @@ public class IntLongPairIteratorTests extends IntegersFixture {
     for (int[] left : leftVariants) {
       for (int[] right0 : leftVariants) {
         IntList leftList = new IntArray(left);
-        LongList rightList = asLongs(new IntArray(right0));
+        LongList rightList = LongCollections.asLongList(new IntArray(right0));
         IntList leftSingle = new IntList.Single(Integer.MIN_VALUE);
         LongList rightSingle = new LongList.Single(Long.MIN_VALUE);
 
@@ -98,6 +99,12 @@ public class IntLongPairIteratorTests extends IntegersFixture {
       assertEquals(right[i], pit.right());
     }
     assertFalse(pit.hasNext());
+    try {
+      pit.next();
+      fail();
+    } catch (NoSuchElementException _) {
+      // ok
+    }
 
     int[] leftExpected = new int[len];
     System.arraycopy(left, 0, leftExpected, 0, len);

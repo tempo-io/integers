@@ -243,8 +243,12 @@ public final class IntArray extends AbstractWritableIntList {
   }
 
   public void setAll(int index, IntList values, int sourceIndex, int count) {
-    if (count <= 0)
+    if (count < 0) {
+      throw new IllegalArgumentException("count < 0");
+    }
+    if (count == 0) {
       return;
+    }
     int sz = size();
     if (index < 0 || index >= sz)
       throw new IndexOutOfBoundsException(index + " " + sz);

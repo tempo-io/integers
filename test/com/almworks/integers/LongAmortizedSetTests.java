@@ -81,6 +81,11 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
     return LongAmortizedSet.createFromSortedUniqueArray(new LongArray(sortedUniqueList));
   }
 
+  @Override
+  protected boolean isSortedSet() {
+    return true;
+  }
+
   public void testIteratorCoalesce() {
     set = new LongAmortizedSet();
     set.addAll(2, 4, 6, 8);
@@ -227,7 +232,7 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
     }
   }
 
-  public void testContains2() {
+  public void testContains4() {
     int arSize = 45, maxVal = Integer.MAX_VALUE, attempts = 10;
     for (int attempt = 0; attempt < attempts; attempt++) {
       LongArray arr = generateRandomLongArray(arSize, SORTED_UNIQUE, maxVal);
@@ -299,6 +304,19 @@ public class LongAmortizedSetTests extends WritableLongSetChecker<LongAmortizedS
       notExpected.removeAll(expected);
       set.removeAll(notExpected);
       checkSet(set, expected);
+    }
+  }
+
+  public void testAsList() {
+    int attemptsCount = 10;
+    int count = 10;
+    for (int attempt = 0; attempt < attemptsCount; attempt++) {
+      LongArray values = generateRandomLongArray(count, SORTED_UNIQUE);
+      for (LongAmortizedSet aSet : createSets(values)) {
+        CHECK.order(values, aSet.asList());
+        aSet.remove(values.getLast(0));
+        CHECK.order(values.subList(0, values.size() - 1), aSet.asList());
+      }
     }
   }
 }

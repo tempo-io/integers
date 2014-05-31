@@ -23,8 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
-
-import static com.almworks.integers.IntegersUtils.arrayCopy;
+import static com.almworks.integers.IntCollections.arrayCopy;
 
 /**
  * Removing decorator for a native int list.
@@ -136,7 +135,6 @@ public abstract class Abstract#E#ListRemovingDecorator extends Abstract#E#ListDe
   /**
    * For the given list of remove indices (may be empty, unsorted, or contain duplicates), creates a prepared list of remove indices ready to be used by implementations of this class.
    * @param removeIndices remove indices
-   * @return
    */
   protected static IntArray prepareUnsortedIndicesInternal(int... removeIndices) {
     int[] correctRemove = arrayCopy(removeIndices);

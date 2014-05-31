@@ -59,4 +59,9 @@ public class #E##F#EmptyMap implements #E##F#Map {
   public #F#Iterator valuesIterator() {
     return #F#Iterator.EMPTY;
   }
+
+  @Override
+  public #E#Set keySet() {
+    return #E#Set.EMPTY;
+  }
 }

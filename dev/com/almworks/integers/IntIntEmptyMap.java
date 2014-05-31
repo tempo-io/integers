@@ -62,4 +62,9 @@ public class IntIntEmptyMap implements IntIntMap {
   public IntIterator valuesIterator() {
     return IntIterator.EMPTY;
   }
+
+  @Override
+  public IntSet keySet() {
+    return IntSet.EMPTY;
+  }
 }

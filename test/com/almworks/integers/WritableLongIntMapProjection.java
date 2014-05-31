@@ -60,7 +60,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
   @Override
   public void retain(LongList values) {
     LongArray res = new LongArray();
-    for (LongIterator it: values.iterator()) {
+    for (LongIterator it: values) {
       long value = it.value();
       if (contains(value)) res.add(value);
     }
@@ -99,10 +99,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
 
   @Override
   public boolean containsAll(LongIterable iterable) {
-    for (LongIterator iterator : iterable) {
-      if (!contains(iterator.value())) return false;
-    }
-    return true;
+    return myMap.containsKeys(iterable);
   }
 
   @Override
@@ -133,7 +130,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
   @Override
   public int hashCode() {
     int h = 0;
-    for (LongIterator it : iterator()) {
+    for (LongIterator it : this) {
       h += IntegersUtils.hash(it.value());
     }
     return h;
@@ -144,7 +141,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
     if (destPos < 0 || destPos + size() > dest.length) {
       throw new ArrayIndexOutOfBoundsException();
     }
-    for (LongIterator it : iterator()) {
+    for (LongIterator it : this) {
       dest[destPos++] = it.value();
     }
     return dest;

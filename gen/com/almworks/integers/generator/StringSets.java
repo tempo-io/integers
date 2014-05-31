@@ -29,6 +29,7 @@ public enum StringSets {
   LONG("long", "Long", "Long", "LONG"),
   SHORT("short", "Short", "Short", "SHORT"),
   BYTE("byte", "Byte", "Byte", "BYTE"),
+  CHAR("char", "Character", "Char", "CHAR"),
   ;
   String[] myStrings;
 

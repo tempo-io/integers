@@ -17,7 +17,7 @@
 package com.almworks.integers;
 
 import com.almworks.integers.func.IntIntProcedure;
-import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.LongFunctions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,15 +37,24 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
   @Override
   protected List<LongIntListMap> createMapsFromLists(LongList keys, IntList values) {
     IntArray indices = new IntArray(IntProgression.range(keys.size()));
-    indices.shuffle(RAND);
+    indices.shuffle(myRand);
 
     LongIntListMap createdMap = new LongIntListMap();
     for (LongIntIterator it : LongIntIterators.pair(keys.get(indices), values.get(indices))) {
       createdMap.add(it.left(), it.right());
     }
 
-    return Arrays.asList(new LongIntListMap(new LongArray(keys), new IntArray(values)),
-        createdMap);
+    final LongArray keys0 = new LongArray(keys);
+    final IntArray values0 = new IntArray(values);
+    IntegersUtils.quicksort(keys.size(), LongFunctions.comparator(keys0),
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int a, int b) {
+            keys0.swap(a, b);
+            values0.swap(a, b);
+          }
+        });
+    return Arrays.asList(new LongIntListMap(keys0, values0), createdMap);
   }
 
   @Override
@@ -54,12 +63,8 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
 
     final LongArray keysArray = new LongArray(expectedKeys);
     final IntArray valuesArray = new IntArray(expectedValues);
-    IntegersUtils.quicksort(keysArray.size(), new IntIntToInt() {
-          @Override
-          public int invoke(int a, int b) {
-            return LongCollections.compare(keysArray.get(a), keysArray.get(b));
-          }
-        }, new IntIntProcedure() {
+    IntegersUtils.quicksort(keysArray.size(), LongFunctions.comparator(keysArray),
+        new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
             keysArray.swap(a, b);
@@ -67,7 +72,7 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
           }
         });
     CHECK.order(keysArray, actualMap.keysAsList());
-    CHECK.order(asLongs(valuesArray), asLongs(actualMap.valuesAsList()));
+    CHECK.order(LongCollections.asLongList(valuesArray), LongCollections.asLongList(actualMap.valuesAsList()));
 
     CHECK.order(actualMap.keysIterator(0, actualMap.size()), keysArray.iterator());
     CHECK.order(actualMap.valuesIterator(0, actualMap.size()), valuesArray.iterator());
@@ -172,5 +177,10 @@ public class LongIntListMapTests extends WritableLongIntMapChecker<LongIntListMa
         // ok
       }
     }
+  }
+
+  @Override
+  protected boolean isSortedSet() {
+    return false;
   }
 }

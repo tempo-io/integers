@@ -194,19 +194,29 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
     return findKey(key) >= 0;
   }
 
+  public #E#ListIterator keysIterator(int from, int to) {
+    checkMutatorPresence();
+    return new #E#FailFastListIterator(myKeys.iterator(from, to)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
+  }
+
   public #E#ListIterator keysIterator(int from) {
     checkMutatorPresence();
     return keysIterator(from, size());
   }
 
-  public #E#ListIterator keysIterator(int from, int to) {
+  public #E#ListIterator keysIterator() {
     checkMutatorPresence();
-    return myKeys.iterator(from, to);
+    return keysIterator(0, size());
   }
 
-  public #E#Iterator keysIterator() {
+  public #F#ListIterator valuesIterator(int from, int to) {
     checkMutatorPresence();
-    return new #E#FailFastIterator(keysIterator(0)) {
+    return new #F#FailFastListIterator(myValues.iterator(from, to)) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -219,19 +229,14 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
     return valuesIterator(from, size());
   }
 
-  public #F#ListIterator valuesIterator(int from, int to) {
+  public #F#ListIterator valuesIterator() {
     checkMutatorPresence();
-    return myValues.iterator(from, to);
+    return valuesIterator(0, size());
   }
 
-  public #F#Iterator valuesIterator() {
-    checkMutatorPresence();
-    return new #F#FailFastIterator(valuesIterator(0)) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
+  @Override
+  public #E#SortedSet keySet() {
+    return #E#ListSet.asSet(myKeys);
   }
 
   /**

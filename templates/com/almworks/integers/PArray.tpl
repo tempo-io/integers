@@ -240,8 +240,12 @@ public final class #E#Array extends AbstractWritable#E#List {
   }
 
   public void setAll(int index, #E#List values, int sourceIndex, int count) {
-    if (count <= 0)
+    if (count < 0) {
+      throw new IllegalArgumentException("count < 0");
+    }
+    if (count == 0) {
       return;
+    }
     int sz = size();
     if (index < 0 || index >= sz)
       throw new IndexOutOfBoundsException(index + " " + sz);

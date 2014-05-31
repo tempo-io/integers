@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 
 /**
  * @see IntLongIterator
- * @see AbstractLongIteratorWithFlag
+ * @see AbstractIntIteratorWithFlag
  */
 public abstract class AbstractIntLongIteratorWithFlag extends AbstractIntLongIterator {
 
@@ -54,19 +54,19 @@ public abstract class AbstractIntLongIteratorWithFlag extends AbstractIntLongIte
   }
 
   /**
-   * Called after any call to {@link AbstractLongIteratorWithFlag#nextImpl()}, should return value of iterator.
+   * Called after any call to {@link AbstractIntIteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
   protected abstract int leftImpl();
 
   /**
-   * Called after any call to {@link AbstractLongIteratorWithFlag#nextImpl()}, should return value of iterator.
+   * Called after any call to {@link AbstractIntIteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
   protected abstract long rightImpl();
 
   /**
-   * Called before any call to {@link AbstractLongIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
+   * Called before any call to {@link AbstractIntIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
    * */
   protected abstract void nextImpl() throws NoSuchElementException;
 }

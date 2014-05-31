@@ -56,13 +56,13 @@ public class LongProgressionTests extends IntegersFixture {
     int maxVal = 100000;
     int maxStep = 100000;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      long start = RAND.nextInt(maxVal);
-      long stop = RAND.nextInt(maxVal);
+      long start = myRand.nextInt(maxVal);
+      long stop = myRand.nextInt(maxVal);
       if (stop == start) {
         stop = start + 1;
       }
       // step in [-maxStep, maxStep)
-      long step = RAND.nextInt(maxStep * 2)  - maxStep;
+      long step = myRand.nextInt(maxStep * 2)  - maxStep;
 
       int count = LongProgression.getCount(start, stop, step);
       long lastValue = start + step * (count - 1);
@@ -87,7 +87,7 @@ public class LongProgressionTests extends IntegersFixture {
   }
 
   public void testArithmeticIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<? extends LongIterator> get(long... values) {
         long start = 0, step = 0;

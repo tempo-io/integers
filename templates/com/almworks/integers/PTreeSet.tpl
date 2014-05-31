@@ -565,7 +565,7 @@ public class #E#TreeSet extends AbstractWritable#E#Set implements Writable#E#Sor
 
   public void retain(#E#List values) {
     #E#Array res = new #E#Array();
-    for (#E#Iterator it: values.iterator()) {
+    for (#E#Iterator it: values) {
       #e# value = it.value();
       if (contains(value)) res.add(value);
     }

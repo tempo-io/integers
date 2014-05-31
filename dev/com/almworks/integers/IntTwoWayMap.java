@@ -21,8 +21,8 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.IntFunctions;
 import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ import java.util.List;
  * Keys and values are sorted, and it is possible to retrieve either value by key or key by value. However, mappings are still added only by key. <br/>
  * The mapping is stored in a separate list in the following way: if {@code (k, v)} is a stored pair, then {@code v = vals[idxMap[i]]}, where {@code k = keys[i]}.
  * */
-public class IntTwoWayMap {
+public class IntTwoWayMap implements IntIntMap {
   private final IntArray myKeys = new IntArray();
   private final IntArray myIdxMap = new IntArray();
   private final IntArray myValues = new IntArray();
@@ -53,6 +53,16 @@ public class IntTwoWayMap {
     return containsKeys(keys, false);
   }
 
+  @Override
+  public boolean containsKeys(IntIterable keys) {
+    for (IntIterator key : keys) {
+      if (!containsKey(key.value())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public boolean containsKeys(IntList keys, boolean all) {
     Integer key;
     if (keys.isSorted()) {
@@ -67,10 +77,10 @@ public class IntTwoWayMap {
   @Nullable
   private Integer containsKeysSorted(IntList keys, boolean shouldContain) {
     for (int i = 0,
-      m = keys.size(),
-      pos = 0,
-      n = myKeys.size()
-        ; i < m; ++i)
+             m = keys.size(),
+             pos = 0,
+             n = myKeys.size()
+                 ; i < m; ++i)
     {
       int key = keys.get(i);
       pos = myKeys.binarySearch(key, pos, n);
@@ -117,7 +127,42 @@ public class IntTwoWayMap {
   }
 
   public int size() {
+    assert myKeys.size() == myValues.size();
     return myKeys.size();
+  }
+
+  @Override
+  public boolean isEmpty() {
+    assert myKeys.isEmpty() == myValues.isEmpty();
+    return myKeys.isEmpty();
+  }
+
+  /**
+   * @return pair-iterator over this map in the sorted by key order.
+   */
+  @NotNull
+  @Override
+  public IntIntIterator iterator() {
+    return new IntIntPairIterator(myKeys, new IntIndexedIterator(myValues, myIdxMap.iterator()));
+  }
+
+  @Override
+  public IntIterator keysIterator() {
+    return myKeys.iterator();
+  }
+
+  /**
+   * Note, that this iterator isn't equal to right projection of {@link #iterator()}
+   * @return iterator over values of this map in the sorted order.
+   */
+  @Override
+  public IntIterator valuesIterator() {
+    return myValues.iterator();
+  }
+
+  @Override
+  public IntSet keySet() {
+    return IntListSet.asSet(myKeys);
   }
 
   public List<Entry> toList() {
@@ -168,8 +213,8 @@ public class IntTwoWayMap {
       for (int i = 0, iEnd = myIdxMap.size(); i < iEnd; ++i) {
         int pos = myIdxMap.get(i);
         if (inc > 0
-          ? pos >= newPos && pos < oldPos
-          : pos > oldPos && pos <= newPos)
+            ? pos >= newPos && pos < oldPos
+            : pos > oldPos && pos <= newPos)
         {
           myIdxMap.set(i, pos + inc);
         }
@@ -263,20 +308,20 @@ public class IntTwoWayMap {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(@NotNull IntToInt f) {
-    transformValues(Integer.MIN_VALUE, f);
+  public void transformValues(@NotNull IntToInt fun) {
+    transformValues(Integer.MIN_VALUE, fun);
   }
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(int valFrom, @NotNull IntToInt f) {
+  public void transformValues(int valFrom, @NotNull IntToInt fun) {
     int n = size();
     boolean isSortingBroken = false;
     int lastValue = Integer.MIN_VALUE;
     int viFrom = myValues.binarySearch(valFrom);
     if (viFrom < 0) viFrom = -viFrom - 1;
     for (int vi = viFrom; vi < n; ++vi) {
-      int val = f.invoke(myValues.get(vi));
+      int val = fun.invoke(myValues.get(vi));
       myValues.set(vi, val);
       if (val < lastValue) isSortingBroken = true;
       lastValue = val;
@@ -284,41 +329,36 @@ public class IntTwoWayMap {
     if (isSortingBroken) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
-  public void transformValues(@NotNull IntIntToInt f) {
+  public void transformValues(@NotNull IntIntToInt fun) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
       int vi = myIdxMap.get(ki);
-      myValues.set(vi, f.invoke(myKeys.get(ki), myValues.get(vi)));
+      myValues.set(vi, fun.invoke(myKeys.get(ki), myValues.get(vi)));
     }
     if (!myValues.isSorted()) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   private void restoreIndexMap(int n) {
     // Sort the values remembering the sorting transposition, r
     final IntArray r = new IntArray(IntProgression.arithmetic(0, n));
     IntegersUtils.quicksort(n,
-      // order
-      new IntIntToInt() {
-        @Override
-        public int invoke(int i, int j) {
-          return IntCollections.compare(myValues.get(i), myValues.get(j));
+        // order
+        IntFunctions.comparator(myValues),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int i, int j) {
+            myValues.swap(i, j);
+            r.swap(i, j);
+          }
         }
-      },
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int i, int j) {
-          myValues.swap(i, j);
-          r.swap(i, j);
-        }
-      }
     );
     // The trickier part is to restore the index map.
     // Previously, we had k = v*p where k - keys, v - values, p - index map (effectively, a transposition); a*p is a new vector,b, such as b[i] = a[p[i]].
@@ -338,9 +378,7 @@ public class IntTwoWayMap {
 
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
   public void transformKeys(IntToInt injection) throws NonInjectiveFunctionException {
-    int n = size();
-    IntArray newKeys = new IntArray(n);
-    for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
+    IntArray newKeys = new IntArray(IntCollections.map(injection, myKeys));
   
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
@@ -358,18 +396,16 @@ public class IntTwoWayMap {
     assert main.size() == parallel.size();
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
-      // compare
-      new IntIntToInt() { public int invoke(int a, int b) {
-        return IntCollections.compare(main.get(a), main.get(b));
-      }},
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int a, int b) {
-          main.swap(a, b);
-          parallel.swap(a, b);
+        // compare
+        IntFunctions.comparator(main),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int a, int b) {
+            main.swap(a, b);
+            parallel.swap(a, b);
+          }
         }
-      }
     );
   }
 
@@ -528,11 +564,7 @@ public class IntTwoWayMap {
       if (o == null || getClass() != o.getClass()) return false;
 
       Entry entry = (Entry) o;
-
-      if (key != entry.key) return false;
-      if (val != entry.val) return false;
-
-      return true;
+      return key == entry.key && val == entry.val;
     }
 
     @Override

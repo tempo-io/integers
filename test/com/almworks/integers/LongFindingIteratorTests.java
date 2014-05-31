@@ -36,7 +36,7 @@ public class LongFindingIteratorTests extends IntegersFixture {
   }
 
   public void testIteratorSpecification() {
-    LongIteratorSpecificationChecker.checkIterator(new LongIteratorSpecificationChecker.IteratorGetter() {
+    LongIteratorSpecificationChecker.checkIterator(myRand, new LongIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<? extends LongIterator> get(final long... values) {
         return Arrays.asList(new LongFindingIterator() {

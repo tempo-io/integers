@@ -19,8 +19,6 @@
 
 package com.almworks.integers;
 
-import org.jetbrains.annotations.NotNull;
-
 public interface IntLongMap extends IntLongIterable {
   IntLongMap EMPTY = new IntLongEmptyMap();
 
@@ -52,13 +50,14 @@ public interface IntLongMap extends IntLongIterable {
    */
   boolean isEmpty();
 
-  @NotNull
-  @Override
-  IntLongIterator iterator();
-
   IntIterator keysIterator();
 
   LongIterator valuesIterator();
+
+  /**
+   * @return a {@link IntSet} view of the keys contained in this map.
+   */
+  IntSet keySet();
 
   /**
    * Compares the specified object with this map for equality. Returns

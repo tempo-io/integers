@@ -21,8 +21,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.LongFunctions;
 import com.almworks.integers.func.LongToLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -208,12 +209,7 @@ public class LongCollections {
     final LongArray sorted = new LongArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-        new IntIntToInt() {
-          @Override
-          public int invoke(int a, int b) {
-            return LongCollections.compare(sorted.get(a), sorted.get(b));
-          }
-        },
+				LongFunctions.comparator(sorted),
         new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
@@ -237,8 +233,6 @@ public class LongCollections {
   }
 
   /**
-   * @param array
-   * @param capacity
    * @return {@code array} if {@code capacity <= array.length} otherwise
    * new array that contains all values of array and has length equal to the
    * maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
@@ -297,12 +291,24 @@ public class LongCollections {
     return -1;
   }
 
+  /**
+   * @see LongCollections#indexOf(long, long[], int, int)
+   */
+  public static int indexOf(long value, long[] array) {
+    return indexOf(value, array, 0, array.length);
+  }
+
   public static long[] arrayCopy(long[] array, int offset, int length) {
     if (length == 0)
       return EMPTY_LONGS;
     long[] copy = new long[length];
     System.arraycopy(array, offset, copy, 0, length);
     return copy;
+  }
+
+  // copied from ArrayUtil
+  public static long[] arrayCopy(long[] ints) {
+    return arrayCopy(ints, 0, ints.length);
   }
 
   public static int compare(long a, long b) {
@@ -325,6 +331,20 @@ public class LongCollections {
       @Override
       public long get(int index) throws NoSuchElementException {
         return coll.get(index);
+      }
+    };
+  }
+
+  public static LongList asLongList(final IntList list) {
+    return new AbstractLongList() {
+      @Override
+      public int size() {
+        return list.size();
+      }
+
+      @Override
+      public long get(int index) throws NoSuchElementException {
+        return list.get(index);
       }
     };
   }
@@ -505,7 +525,6 @@ public class LongCollections {
   }
 
   /**
-   * @return union of the specified lists
    * @param aSorted sorted unique {@code LongList}
    * @param bSorted sorted unique {@code LongList}
    * @return union of the specified lists
@@ -867,5 +886,9 @@ public class LongCollections {
         return dest;
       }
     };
+  }
+
+  public static <T> LongObjMap<T> emptyMap() {
+    return LongObjMap.EMPTY;
   }
 }

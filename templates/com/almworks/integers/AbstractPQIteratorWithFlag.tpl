@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 
 /**
  * @see #E##F#Iterator
- * @see AbstractLongIteratorWithFlag
+ * @see Abstract#E#IteratorWithFlag
  */
 public abstract class Abstract#E##F#IteratorWithFlag extends Abstract#E##F#Iterator {
 
@@ -51,19 +51,19 @@ public abstract class Abstract#E##F#IteratorWithFlag extends Abstract#E##F#Itera
   }
 
   /**
-   * Called after any call to {@link AbstractLongIteratorWithFlag#nextImpl()}, should return value of iterator.
+   * Called after any call to {@link Abstract#E#IteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
   protected abstract #e# leftImpl();
 
   /**
-   * Called after any call to {@link AbstractLongIteratorWithFlag#nextImpl()}, should return value of iterator.
+   * Called after any call to {@link Abstract#E#IteratorWithFlag#nextImpl()}, should return value of iterator.
    * Can safely assume that the iterator is initialized.
    * */
   protected abstract #f# rightImpl();
 
   /**
-   * Called before any call to {@link AbstractLongIteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
+   * Called before any call to {@link Abstract#E#IteratorWithFlag#valueImpl()}, should be used to either initialize the state or advance the iterator.
    * */
   protected abstract void nextImpl() throws NoSuchElementException;
 }

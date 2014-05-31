@@ -197,19 +197,29 @@ public class IntIntListMap extends AbstractWritableIntIntMap {
     return findKey(key) >= 0;
   }
 
+  public IntListIterator keysIterator(int from, int to) {
+    checkMutatorPresence();
+    return new IntFailFastListIterator(myKeys.iterator(from, to)) {
+      @Override
+      protected int getCurrentModCount() {
+        return myModCount;
+      }
+    };
+  }
+
   public IntListIterator keysIterator(int from) {
     checkMutatorPresence();
     return keysIterator(from, size());
   }
 
-  public IntListIterator keysIterator(int from, int to) {
+  public IntListIterator keysIterator() {
     checkMutatorPresence();
-    return myKeys.iterator(from, to);
+    return keysIterator(0, size());
   }
 
-  public IntIterator keysIterator() {
+  public IntListIterator valuesIterator(int from, int to) {
     checkMutatorPresence();
-    return new IntFailFastIterator(keysIterator(0)) {
+    return new IntFailFastListIterator(myValues.iterator(from, to)) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -222,19 +232,14 @@ public class IntIntListMap extends AbstractWritableIntIntMap {
     return valuesIterator(from, size());
   }
 
-  public IntListIterator valuesIterator(int from, int to) {
+  public IntListIterator valuesIterator() {
     checkMutatorPresence();
-    return myValues.iterator(from, to);
+    return valuesIterator(0, size());
   }
 
-  public IntIterator valuesIterator() {
-    checkMutatorPresence();
-    return new IntFailFastIterator(valuesIterator(0)) {
-      @Override
-      protected int getCurrentModCount() {
-        return myModCount;
-      }
-    };
+  @Override
+  public IntSortedSet keySet() {
+    return IntListSet.asSet(myKeys);
   }
 
   /**

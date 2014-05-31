@@ -21,6 +21,8 @@ import com.almworks.integers.segmented.LongSegmentedArray;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.almworks.integers.LongListConcatenation.concatUnmodifiable;
+
 public class LongListConcatenationTests extends LongListChecker<LongListConcatenation> {
 
   @Override
@@ -55,7 +57,7 @@ public class LongListConcatenationTests extends LongListChecker<LongListConcaten
     concatenation = new LongListConcatenation();
     for (long value : values) {
       concatenation.addSlice(LongArray.create(value));
-      if (RAND.nextInt(5) == 0) {
+      if (myRand.nextInt(5) == 0) {
         concatenation.addSlice(LongList.EMPTY);
       }
     }
@@ -66,16 +68,20 @@ public class LongListConcatenationTests extends LongListChecker<LongListConcaten
   public void testConcatUnmodifiable() {
     LongList[] res = {LongArray.create(0, 1, 2), LongArray.create(3, 4), LongArray.create(5)};
 
-    LongList concat = LongListConcatenation.concatUnmodifiable(res);
+    LongList concat = concatUnmodifiable(res);
     LongArray expected = LongArray.create(0, 1, 2, 3, 4, 5);
     CHECK.order(expected, concat);
 
-    concat = LongListConcatenation.concatUnmodifiable(res[0]);
+    concat = concatUnmodifiable(res[0]);
     expected = LongArray.create(0, 1, 2);
     CHECK.order(expected, concat);
 
-    concat = LongListConcatenation.concatUnmodifiable();
+    concat = concatUnmodifiable();
     CHECK.order(LongArray.create(), concat);
+
+    assertEquals(LongList.EMPTY, concatUnmodifiable());
+    assertEquals(LongList.EMPTY, concatUnmodifiable(LongList.EMPTY));
+    assertEquals(LongList.EMPTY, concatUnmodifiable(LongList.EMPTY, LongList.EMPTY));
   }
 
   public void testGet2() {

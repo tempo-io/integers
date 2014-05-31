@@ -111,7 +111,7 @@ public abstract class LongListChecker<T extends LongList> extends IntegersFixtur
   }
 
   public void testBinarySearch() {
-    BinarySearchChecker.test(new BinarySearchChecker.BinarySearcher() {
+    BinarySearchChecker.test(myRand, new BinarySearchChecker.BinarySearcher() {
       private LongList list;
 
       public void init(LongArray values) {
@@ -133,7 +133,7 @@ public abstract class LongListChecker<T extends LongList> extends IntegersFixtur
   }
 
   public void testIteratorSpecification() {
-    LongListIteratorSpecificationChecker.checkListIterator(new LongListIteratorSpecificationChecker.IteratorGetter() {
+    LongListIteratorSpecificationChecker.checkListIterator(myRand, new LongListIteratorSpecificationChecker.IteratorGetter() {
       @Override
       public List<LongListIterator> get(long... values) {
         List<? extends LongList> lists = createLongListVariants(values);

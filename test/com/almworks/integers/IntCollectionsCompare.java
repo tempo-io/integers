@@ -30,8 +30,8 @@ public class IntCollectionsCompare extends CollectionsCompare {
   }
 
   public void emptyIntersection(int[] array1, int[] array2) {
-    array1 = IntegersUtils.arrayCopy(array1);
-    array2 = IntegersUtils.arrayCopy(array2);
+    array1 = IntCollections.arrayCopy(array1);
+    array2 = IntCollections.arrayCopy(array2);
     Arrays.sort(array1);
     Arrays.sort(array2);
     for (int val : array1) {
@@ -45,9 +45,9 @@ public class IntCollectionsCompare extends CollectionsCompare {
   }
 
   public void unordered(int[] actual, int... expected) {
-    int[] actualCopy = IntegersUtils.arrayCopy(actual);
+    int[] actualCopy = IntCollections.arrayCopy(actual);
     Arrays.sort(actualCopy);
-    int[] expectedCopy = IntegersUtils.arrayCopy(expected);
+    int[] expectedCopy = IntCollections.arrayCopy(expected);
     Arrays.sort(expectedCopy);
     order(actualCopy, expectedCopy);
   }

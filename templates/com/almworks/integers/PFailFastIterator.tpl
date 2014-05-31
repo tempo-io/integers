@@ -19,38 +19,42 @@ package com.almworks.integers;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
-public abstract class #E#FailFastIterator extends Abstract#E#Iterator {
-  private final #E#Iterator myIterator;
+public abstract class #E#FailFastIterator<T extends #E#Iterator> extends Abstract#E#Iterator {
+  protected final T myIterator;
   private final int myModCountAtCreation = getCurrentModCount();
 
   protected abstract int getCurrentModCount();
 
-  public #E#FailFastIterator(#E#Iterator it) {
+  protected T getIterator() {
+    return myIterator;
+  }
+
+  public #E#FailFastIterator(T it) {
     myIterator = it;
   }
 
   public boolean hasNext() throws ConcurrentModificationException {
     checkMod();
-    return myIterator.hasNext();
+    return getIterator().hasNext();
   }
 
   public #E#Iterator next() throws ConcurrentModificationException, NoSuchElementException {
     checkMod();
-    myIterator.next();
+    getIterator().next();
     return this;
   }
 
   public boolean hasValue() throws ConcurrentModificationException {
     checkMod();
-    return myIterator.hasValue();
+    return getIterator().hasValue();
   }
 
   public #e# value() throws IllegalStateException {
     checkMod();
-    return myIterator.value();
+    return getIterator().value();
   }
 
-  private void checkMod() {
+  protected void checkMod() {
     if (myModCountAtCreation != getCurrentModCount())
       throw new ConcurrentModificationException(myModCountAtCreation + " " + getCurrentModCount());
   }

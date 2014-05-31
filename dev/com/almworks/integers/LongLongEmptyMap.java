@@ -62,4 +62,9 @@ public class LongLongEmptyMap implements LongLongMap {
   public LongIterator valuesIterator() {
     return LongIterator.EMPTY;
   }
+
+  @Override
+  public LongSet keySet() {
+    return LongSet.EMPTY;
+  }
 }

@@ -28,6 +28,7 @@ public interface #E#SortedSet extends #E#Set {
    * @return an iterator over this set in the sorted order
    * */
   @NotNull
+  @Override
   #E#Iterator iterator();
 
   /**
@@ -45,15 +46,15 @@ public interface #E#SortedSet extends #E#Set {
    */
   public #e# getLowerBound();
 
-    /**
-     * Writes values from this set to {@code dest} in the ascending order.<br>
-     * {@inheritDoc}
-     */
+  /**
+   * Writes values from this set to {@code dest} in the ascending order.<br>
+   * {@inheritDoc}
+   */
   #e#[] toNativeArray(#e#[] dest, int destPos);
 
   /**
    * Writes values from this set to {@code dest} in the ascending order.
-   * @see {@link #toNativeArray(#e#[], int)}
+   * @see #toNativeArray(#e#[], int)
    */
   @Override
   #e#[] toNativeArray(#e#[] dest);

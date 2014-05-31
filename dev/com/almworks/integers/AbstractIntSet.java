@@ -20,10 +20,15 @@
 package com.almworks.integers;
 
 import static com.almworks.integers.IntegersUtils.appendShortName;
+import static com.almworks.integers.IntIterableLexicographicComparator.INT_ITERABLE_LEXICOGRAPHIC_COMPARATOR;
 
 public abstract class AbstractIntSet implements IntSet {
 
-  protected abstract void toNativeArrayImpl(int[] dest, int destPos);
+  protected void toNativeArrayImpl(int[] dest, int destPos) {
+    for (IntIterator it : iterator()) {
+      dest[destPos++] = it.value();
+    }
+  }
 
   @Override
   public boolean containsAll(IntIterable iterable) {
@@ -81,13 +86,20 @@ public abstract class AbstractIntSet implements IntSet {
     if (otherSet.size() != size()) {
       return false;
     }
-    return containsAll(otherSet);
+    if (!(this instanceof IntSortedSet)) {
+      return containsAll(otherSet);
+    }
+    if (!(otherSet instanceof IntSortedSet)) {
+      return otherSet.containsAll(otherSet);
+    }
+    assert (this instanceof IntSortedSet) && (otherSet instanceof IntSortedSet);
+    return INT_ITERABLE_LEXICOGRAPHIC_COMPARATOR.compare(this, otherSet) == 0;
   }
 
   @Override
   public int hashCode() {
     int h = 0;
-    for (IntIterator it : iterator()) {
+    for (IntIterator it : this) {
       h += IntegersUtils.hash(it.value());
     }
     return h;

@@ -28,7 +28,7 @@ public abstract class IntegersFixture extends TestCase {
   protected static final CollectionsCompare CHECK = new CollectionsCompare();
 
   public static final String SEED = "com.almworks.integers.seed";
-  public static final Random RAND = createRandom();
+  public final Random myRand = createRandom();
 
   public enum SortedStatus {
     UNORDERED {
@@ -136,7 +136,7 @@ public abstract class IntegersFixture extends TestCase {
     for (int i = 0; i < ints.length; i++) {
       it = collection.iterator();
       it.move(i);
-      CHECK.order(it, IntegersUtils.arrayCopy(ints, i, ints.length - i));
+      CHECK.order(it, LongCollections.arrayCopy(ints, i, ints.length - i));
     }
     it = collection.iterator();
     for (int i = 0; i < ints.length; i++) {
@@ -152,7 +152,7 @@ public abstract class IntegersFixture extends TestCase {
       assertEquals(ints.length, checker.index);
       long[] array = new long[ints.length - i + 1];
       collection.toNativeArray(i, array, 1, collection.size() - i);
-      CHECK.order(IntegersUtils.arrayCopy(array, 1, array.length - 1), IntegersUtils.arrayCopy(ints, i, ints.length - i));
+      CHECK.order(LongCollections.arrayCopy(array, 1, array.length - 1), LongCollections.arrayCopy(ints, i, ints.length - i));
     }
     for (int i = ints.length; i >= 0; i--) {
       CheckLongCollection checker = new CheckLongCollection(collection, 0);
@@ -168,7 +168,7 @@ public abstract class IntegersFixture extends TestCase {
     LongList base = rem.getBase();
     for (int i = 0; i < base.size(); i++) {
       boolean removed = rem.isRemovedAt(i);
-      boolean kept = IntegersUtils.indexOf(expected, i) < 0;
+      boolean kept = IntCollections.indexOf(i, expected) < 0;
       assertTrue(String.valueOf(i), removed != kept);
       int newIndex = rem.getNewIndex(i);
       if (removed)
@@ -232,7 +232,7 @@ public abstract class IntegersFixture extends TestCase {
     return b.toString();
   }
 
-  private static void fillRandomArray(IntCollector collector, int arrayLength, int... minMaxValues) {
+  private static void fillRandomArray(Random random, IntCollector collector, int arrayLength, int... minMaxValues) {
     int mLen = minMaxValues.length;
     int minValue = 0, maxValue = Integer.MAX_VALUE;
     switch (mLen) {
@@ -252,7 +252,7 @@ public abstract class IntegersFixture extends TestCase {
     if (diff <= 0) throw new IllegalArgumentException(minValue + " " + maxValue);
 
     for (int i = 0; i < arrayLength; i++) {
-      collector.add(minValue + RAND.nextInt(diff));
+      collector.add(minValue + random.nextInt(diff));
     }
   }
 
@@ -265,9 +265,30 @@ public abstract class IntegersFixture extends TestCase {
    *                  the actual length may be less than maxLength.
    * @return {@link LongArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static LongArray generateRandomLongArray(int maxLength, SortedStatus status, int... minMaxValues) {
+  public LongArray generateRandomLongArray(int maxLength, SortedStatus status, int... minMaxValues) {
+    return generateRandomLongArray(myRand, maxLength, status, minMaxValues);
+  }
+
+  /**
+   * @see IntegersFixture#generateRandomLongArray(int, com.almworks.integers.IntegersFixture.SortedStatus, int...)
+   */
+  public static LongArray generateRandomLongArray(Random random, int maxLength, SortedStatus status, int... minMaxValues) {
     final LongArray res = new LongArray(maxLength);
-    fillRandomArray(new AbstractIntCollector() {
+    fillRandomArray(random, new AbstractIntCollector() {
+      public void add(int value) {
+        res.add(value);
+      }
+    }, maxLength, minMaxValues);
+    status.action(res);
+    return res;
+  }
+
+  /**
+   * @see IntegersFixture#generateRandomIntArray(int, com.almworks.integers.IntegersFixture.SortedStatus, int...)
+   */
+  public static IntArray generateRandomIntArray(Random random, int maxLength, SortedStatus status, int... minMaxValues) {
+    final IntArray res = new IntArray(maxLength);
+    fillRandomArray(random, new AbstractIntCollector() {
       public void add(int value) {
         res.add(value);
       }
@@ -285,18 +306,11 @@ public abstract class IntegersFixture extends TestCase {
    *                  the actual length may be less than maxLength.
    * @return {@link IntArray} with values uniformly distributed on the interval [minValue..maxValue)
    * */
-  public static IntArray generateRandomIntArray(int maxLength, SortedStatus status, int... minMaxValues) {
-    final IntArray res = new IntArray(maxLength);
-    fillRandomArray(new AbstractIntCollector() {
-      public void add(int value) {
-        res.add(value);
-      }
-    }, maxLength, minMaxValues);
-    status.action(res);
-    return res;
+  public IntArray generateRandomIntArray(int maxLength, SortedStatus status, int... minMaxValues) {
+    return generateRandomIntArray(myRand, maxLength, status, minMaxValues);
   }
 
-  public static LongIterator randomIterator() {
+  public LongIterator randomIterator() {
     return new AbstractLongIteratorWithFlag() {
       long myValue;
       @Override
@@ -306,7 +320,7 @@ public abstract class IntegersFixture extends TestCase {
 
       @Override
       protected void nextImpl() throws NoSuchElementException {
-        myValue = RAND.nextLong();
+        myValue = myRand.nextLong();
       }
 
       @Override
@@ -325,44 +339,5 @@ public abstract class IntegersFixture extends TestCase {
     modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
     field.set(null, newValue);
-  }
-
-  public static LongList asLongs(final IntList list) {
-    return new AbstractLongList() {
-      @Override
-      public int size() {
-        return list.size();
-      }
-
-      @Override
-      public long get(int index) throws NoSuchElementException {
-        return list.get(index);
-      }
-    };
-  }
-
-  public static LongIterator asLongs(final IntIterator iterator) {
-    return new AbstractLongIterator() {
-      @Override
-      public boolean hasNext() throws ConcurrentModificationException {
-        return iterator.hasNext();
-      }
-
-      @Override
-      public boolean hasValue() {
-        return iterator.hasValue();
-      }
-
-      @Override
-      public long value() throws NoSuchElementException {
-        return iterator.value();
-      }
-
-      @Override
-      public LongIterator next() {
-        iterator.next();
-        return this;
-      }
-    };
   }
 }

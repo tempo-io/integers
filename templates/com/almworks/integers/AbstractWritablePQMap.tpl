@@ -16,6 +16,8 @@
 
 package com.almworks.integers;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.almworks.integers.IntegersUtils.appendShortName;
 import static com.almworks.integers.#E##F#Iterators.pair;
 
@@ -25,12 +27,12 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
   /**
    * put element without invocation of {@code AbstractWritable#E##F#Map#modified()}
    */
-  abstract protected #f# putImpl(#e# key, #f# value);
+  protected abstract #f# putImpl(#e# key, #f# value);
 
   /**
    * remove element without invocation of {@code AbstractWritable#E##F#Map#modified()}
    */
-  abstract protected #f# removeImpl(#e# key);
+  protected abstract #f# removeImpl(#e# key);
 
   public boolean isEmpty() {
     return size() == 0;
@@ -38,10 +40,31 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
 
   @Override
   public boolean containsKeys(#E#Iterable iterable) {
-    for (#E#Iterator it: iterable.iterator()) {
+    for (#E#Iterator it: iterable) {
       if (!containsKey(it.value())) return false;
     }
     return true;
+  }
+
+  @Override
+  public #E#Set keySet() {
+    return new Abstract#E#Set() {
+      @Override
+      public boolean contains(#e# value) {
+        return containsKey(value);
+      }
+
+      @Override
+      public int size() {
+        return AbstractWritable#E##F#Map.this.size();
+      }
+
+      @NotNull
+      @Override
+      public #E#Iterator iterator() {
+        return keysIterator();
+      }
+    };
   }
 
   protected void modified() {
@@ -123,14 +146,14 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
 
   public void removeAll(#e#... keys) {
     modified();
-    for (#e# key: keys) {
-      removeImpl(key);
+    if (keys != null && keys.length > 0) {
+      removeAll(new #E#NativeArrayIterator(keys));
     }
   }
 
   public void removeAll(#E#Iterable keys) {
     modified();
-    for (#E#Iterator it : keys.iterator()) {
+    for (#E#Iterator it : keys) {
       removeImpl(it.value());
     }
   }
@@ -197,7 +220,7 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
     #E##F#Map otherMap = (#E##F#Map) o;
 
     if (otherMap.size() != size()) return false;
-    for (#E##F#Iterator it : iterator()) {
+    for (#E##F#Iterator it : this) {
       #e# key = it.left();
       if (!otherMap.containsKey(key) || otherMap.get(key) != it.right()) {
         return false;
@@ -209,7 +232,7 @@ public abstract class AbstractWritable#E##F#Map implements Writable#E##F#Map {
   @Override
   public int hashCode() {
     int h = 0;
-    for (#E##F#Iterator it : iterator()) {
+    for (#E##F#Iterator it : this) {
       h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right());
     }
     return h;

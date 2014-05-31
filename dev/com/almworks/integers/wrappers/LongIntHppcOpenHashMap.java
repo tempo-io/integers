@@ -21,8 +21,8 @@ package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
+import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.IntCollections.sizeOfIterable;
 import static com.almworks.integers.wrappers.LongIntHppcWrappers.cursorToLongIntIterator;
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
@@ -34,8 +34,8 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
     myMap = new LongIntOpenHashMap();
   }
 
-  public LongIntHppcOpenHashMap(int initicalCapacity) {
-    myMap = new LongIntOpenHashMap(initicalCapacity);
+  public LongIntHppcOpenHashMap(int initialCapacity) {
+    myMap = new LongIntOpenHashMap(initialCapacity);
   }
 
   public LongIntHppcOpenHashMap(int initialCapacity, float loadFactor) {
@@ -43,12 +43,10 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   }
 
   public static LongIntHppcOpenHashMap createFrom(LongIterable keys, IntIterable values) {
-    int keysSize = (keys instanceof LongSizedIterable) ? ((LongSizedIterable) keys).size() : 0;
-    int valuesSize = sizeOfIterable(values, 0);
-    if (keysSize * valuesSize != 0) {
-      if (keysSize != valuesSize) {
-        throw new IllegalArgumentException("keys.size() != values.size()");
-      }
+    int keysSize = LongCollections.sizeOfIterable(keys, 0);
+    int valuesSize = IntCollections.sizeOfIterable(values, 0);
+    if (keysSize != valuesSize) {
+      throw new IllegalArgumentException("keys.size() != values.size()");
     } else {
       keysSize = Math.max(keysSize, valuesSize);
     }
@@ -107,8 +105,9 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
     return myMap.size();
   }
 
+  @NotNull
   public LongIntIterator iterator() {
-	return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
+  	return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -197,8 +196,8 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
    * @see #containsKey
    * @return Returns the previous value stored under the given key.
    */
-  public int lset(int key) {
-    return myMap.lset(key);
+  public int lset(int value) {
+    return myMap.lset(value);
   }
 
   /**
@@ -223,10 +222,5 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
     if (!(myMap.lget() == value)) return false;
     myMap.remove(key);
     return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return myMap.hashCode();
   }
 }
