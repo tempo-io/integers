@@ -20,6 +20,7 @@ import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class #E#Iterators {
@@ -49,25 +50,25 @@ public class #E#Iterators {
   public static #E#Iterator repeat(final #e# value, int count) {
     final int lim0 = Math.max(count, 0);
     return new Abstract#E#Iterator() {
-      int count = lim0;
+      int myCount = lim0;
 
       @Override
       public boolean hasNext() throws ConcurrentModificationException {
-        return count > 0;
+        return myCount > 0;
       }
 
       @Override
       public #E#Iterator next() throws NoSuchElementException {
-        if (count == 0) {
+        if (myCount == 0) {
           throw new NoSuchElementException();
         }
-        count--;
+        myCount--;
         return this;
       }
 
       @Override
       public boolean hasValue() {
-        return count != lim0;
+        return myCount != lim0;
       }
 
       @Override
@@ -278,7 +279,7 @@ public class #E#Iterators {
    * @return intersection of iterables.
    * If {@code iterables == null || iterables.length == 0}, {@link #E#Iterator#EMPTY} is returned
    * */
-   public static #E#Iterator intersectionIterator(#E#Iterable ... iterables) {
+  public static #E#Iterator intersectionIterator(#E#Iterable ... iterables) {
     if (iterables == null || iterables.length == 0) return #E#Iterator.EMPTY;
     return new #E#IntersectionIterator(iterables);
   }
@@ -303,4 +304,65 @@ public class #E#Iterators {
     };
   }
 
+  /**
+   * Beware of boxing: every call to {@link java.util.Iterator#next()} leads to boxing
+   */
+  public static Iterator<#EW#> asIterator(final #E#Iterator iterator) {
+    return new Iterator<#EW#>() {
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public #EW# next() {
+        return iterator.nextValue();
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
+
+  /**
+   * Beware of unboxing: it always occurs on receiving the next element of {@code iterator}
+   */
+  public static #E#Iterator as#E#Iterator(final Iterator<#EW#> iterator) {
+    return new #E#FindingIterator() {
+      @Override
+      protected boolean findNext() throws ConcurrentModificationException {
+        if (!iterator.hasNext()) return false;
+        iterator.next();
+        myNext = iterator.next();
+        return true;
+      }
+    };
+  }
+
+  public static #E#Iterator as#E#Iterator(final IntIterator iterator) {
+    return new Abstract#E#Iterator() {
+      @Override
+      public boolean hasNext() throws ConcurrentModificationException {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public boolean hasValue() {
+        return iterator.hasValue();
+      }
+
+      @Override
+      public #e# value() throws NoSuchElementException {
+        return iterator.value();
+      }
+
+      @Override
+      public #E#Iterator next() {
+        iterator.next();
+        return this;
+      }
+    };
+  }
 }

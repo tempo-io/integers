@@ -86,7 +86,7 @@ public class #E#SegmentedArray extends AbstractWritable#E#List implements Clonea
     assert mySegments != null || size == 0 : size + " " + mySegments;
     assert mySegments == null || mySegments.segments != null : mySegments;
     assert
-        mySegmentCount >= 0 && (mySegmentCount == 0 || mySegmentCount <= mySegments.segments.length) :
+        mySegmentCount >= 0 && (mySegments == null || mySegmentCount <= mySegments.segments.length) :
         mySegmentCount + " " + mySegments;
     assert myCapacity == mySegmentCount << mySegmentBits : mySegmentBits + " " + mySegmentCount + " " + myCapacity;
     assert size <= myCapacity : size + " " + myCapacity;
@@ -247,8 +247,18 @@ public class #E#SegmentedArray extends AbstractWritable#E#List implements Clonea
 
   public void setAll(int index, #E#List values, int sourceIndex, int count) {
     assert !IntegersDebug.CHECK || checkInvariants();
-    if (values == null || count <= 0)
+    if (count < 0) {
+      throw new IllegalArgumentException("count < 0");
+    }
+    if (values == null || count == 0) {
       return;
+    }
+    int sz = size();
+    if (index < 0 || index >= sz)
+      throw new IndexOutOfBoundsException(index + " " + sz);
+    if (index + count > sz)
+      throw new IndexOutOfBoundsException(index + " " + count + " " + sz);
+
     if (values instanceof #E#SegmentedArray) {
       copySegmented(index, (#E#SegmentedArray) values, sourceIndex, count);
     } else if (values instanceof SubList) {

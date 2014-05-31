@@ -150,6 +150,7 @@ public class #E#ParallelListMap implements #E##E#Iterable {
     return new Iterator(from, size());
   }
 
+  @NotNull
   public Iterator iterator() {
     return new Iterator(0, size());
   }
@@ -172,6 +173,7 @@ public class #E#ParallelListMap implements #E##E#Iterable {
       if (getKey(to) <= b)
         throw new IllegalArgumentException(from + " " + to + " " + increment + " " + getKey(to) + " " + b);
     }
+
     for (#E#ParallelList.Iterator ii = myMap.iterator(from, to); ii.hasNext();) {
       ii.next(null);
       ii.set(0, 0, (#e#)(ii.get(0, 0) + increment));
@@ -225,15 +227,15 @@ public class #E#ParallelListMap implements #E##E#Iterable {
       return myKeyValue[1];
     }
 
-    public #e# getKey(int relativeOffset) {
+    public #e# getLeft(int relativeOffset) {
       return ii.get(relativeOffset, 0);
     }
 
-    public #e# getValue(int relativeOffset) {
+    public #e# getRight(int relativeOffset) {
       return ii.get(relativeOffset, 1);
     }
 
-    public void setValue(int relativeOffset, #e# value) {
+    public void setRight(int relativeOffset, #e# value) {
       ii.set(relativeOffset, 1, value);
     }
 
@@ -251,8 +253,8 @@ public class #E#ParallelListMap implements #E##E#Iterable {
 
     @NotNull
     @Override
-    public #E##E#Iterator iterator() {
-      return null;
+    public Iterator iterator() {
+      return this;
     }
   }
 }

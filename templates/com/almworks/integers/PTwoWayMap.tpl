@@ -18,8 +18,8 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.#E#Functions;
 import com.almworks.integers.func.#E##E#To#E#;
 import com.almworks.integers.func.#E#To#E#;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ import java.util.List;
  * Keys and values are sorted, and it is possible to retrieve either value by key or key by value. However, mappings are still added only by key. <br/>
  * The mapping is stored in a separate list in the following way: if {@code (k, v)} is a stored pair, then {@code v = vals[idxMap[i]]}, where {@code k = keys[i]}.
  * */
-public class #E#TwoWayMap {
+public class #E#TwoWayMap implements #E##E#Map {
   private final #E#Array myKeys = new #E#Array();
   private final IntArray myIdxMap = new IntArray();
   private final #E#Array myValues = new #E#Array();
@@ -50,6 +50,16 @@ public class #E#TwoWayMap {
     return containsKeys(keys, false);
   }
 
+  @Override
+  public boolean containsKeys(#E#Iterable keys) {
+    for (#E#Iterator key : keys) {
+      if (!containsKey(key.value())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public boolean containsKeys(#E#List keys, boolean all) {
     #EW# key;
     if (keys.isSorted()) {
@@ -64,10 +74,10 @@ public class #E#TwoWayMap {
   @Nullable
   private #EW# containsKeysSorted(#E#List keys, boolean shouldContain) {
     for (int i = 0,
-      m = keys.size(),
-      pos = 0,
-      n = myKeys.size()
-        ; i < m; ++i)
+             m = keys.size(),
+             pos = 0,
+             n = myKeys.size()
+                 ; i < m; ++i)
     {
       #e# key = keys.get(i);
       pos = myKeys.binarySearch(key, pos, n);
@@ -114,7 +124,42 @@ public class #E#TwoWayMap {
   }
 
   public int size() {
+    assert myKeys.size() == myValues.size();
     return myKeys.size();
+  }
+
+  @Override
+  public boolean isEmpty() {
+    assert myKeys.isEmpty() == myValues.isEmpty();
+    return myKeys.isEmpty();
+  }
+
+  /**
+   * @return pair-iterator over this map in the sorted by key order.
+   */
+  @NotNull
+  @Override
+  public #E##E#Iterator iterator() {
+    return new #E##E#PairIterator(myKeys, new #E#IndexedIterator(myValues, myIdxMap.iterator()));
+  }
+
+  @Override
+  public #E#Iterator keysIterator() {
+    return myKeys.iterator();
+  }
+
+  /**
+   * Note, that this iterator isn't equal to right projection of {@link #iterator()}
+   * @return iterator over values of this map in the sorted order.
+   */
+  @Override
+  public #E#Iterator valuesIterator() {
+    return myValues.iterator();
+  }
+
+  @Override
+  public #E#Set keySet() {
+    return #E#ListSet.asSet(myKeys);
   }
 
   public List<Entry> toList() {
@@ -165,8 +210,8 @@ public class #E#TwoWayMap {
       for (int i = 0, iEnd = myIdxMap.size(); i < iEnd; ++i) {
         int pos = myIdxMap.get(i);
         if (inc > 0
-          ? pos >= newPos && pos < oldPos
-          : pos > oldPos && pos <= newPos)
+            ? pos >= newPos && pos < oldPos
+            : pos > oldPos && pos <= newPos)
         {
           myIdxMap.set(i, pos + inc);
         }
@@ -260,20 +305,20 @@ public class #E#TwoWayMap {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(@NotNull #E#To#E# f) {
-    transformValues(#EW#.MIN_VALUE, f);
+  public void transformValues(@NotNull #E#To#E# fun) {
+    transformValues(#EW#.MIN_VALUE, fun);
   }
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(#e# valFrom, @NotNull #E#To#E# f) {
+  public void transformValues(#e# valFrom, @NotNull #E#To#E# fun) {
     int n = size();
     boolean isSortingBroken = false;
     #e# lastValue = #EW#.MIN_VALUE;
     int viFrom = myValues.binarySearch(valFrom);
     if (viFrom < 0) viFrom = -viFrom - 1;
     for (int vi = viFrom; vi < n; ++vi) {
-      #e# val = f.invoke(myValues.get(vi));
+      #e# val = fun.invoke(myValues.get(vi));
       myValues.set(vi, val);
       if (val < lastValue) isSortingBroken = true;
       lastValue = val;
@@ -281,41 +326,36 @@ public class #E#TwoWayMap {
     if (isSortingBroken) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
-  public void transformValues(@NotNull #E##E#To#E# f) {
+  public void transformValues(@NotNull #E##E#To#E# fun) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
       int vi = myIdxMap.get(ki);
-      myValues.set(vi, f.invoke(myKeys.get(ki), myValues.get(vi)));
+      myValues.set(vi, fun.invoke(myKeys.get(ki), myValues.get(vi)));
     }
     if (!myValues.isSorted()) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   private void restoreIndexMap(int n) {
     // Sort the values remembering the sorting transposition, r
     final IntArray r = new IntArray(IntProgression.arithmetic(0, n));
     IntegersUtils.quicksort(n,
-      // order
-      new IntIntToInt() {
-        @Override
-        public int invoke(int i, int j) {
-          return #E#Collections.compare(myValues.get(i), myValues.get(j));
+        // order
+        #E#Functions.comparator(myValues),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int i, int j) {
+            myValues.swap(i, j);
+            r.swap(i, j);
+          }
         }
-      },
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int i, int j) {
-          myValues.swap(i, j);
-          r.swap(i, j);
-        }
-      }
     );
     // The trickier part is to restore the index map.
     // Previously, we had k = v*p where k - keys, v - values, p - index map (effectively, a transposition); a*p is a new vector,b, such as b[i] = a[p[i]].
@@ -335,9 +375,7 @@ public class #E#TwoWayMap {
 
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
   public void transformKeys(#E#To#E# injection) throws NonInjectiveFunctionException {
-    int n = size();
-    #E#Array newKeys = new #E#Array(n);
-    for (int i = 0; i < n; ++i) newKeys.add(injection.invoke(myKeys.get(i)));
+    #E#Array newKeys = new #E#Array(#E#Collections.map(injection, myKeys));
   
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
@@ -355,18 +393,16 @@ public class #E#TwoWayMap {
     assert main.size() == parallel.size();
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
-      // compare
-      new IntIntToInt() { public int invoke(int a, int b) {
-        return #E#Collections.compare(main.get(a), main.get(b));
-      }},
-      // swap
-      new IntIntProcedure() {
-        @Override
-        public void invoke(int a, int b) {
-          main.swap(a, b);
-          parallel.swap(a, b);
+        // compare
+        #E#Functions.comparator(main),
+        // swap
+        new IntIntProcedure() {
+          @Override
+          public void invoke(int a, int b) {
+            main.swap(a, b);
+            parallel.swap(a, b);
+          }
         }
-      }
     );
   }
 
@@ -525,11 +561,7 @@ public class #E#TwoWayMap {
       if (o == null || getClass() != o.getClass()) return false;
 
       Entry entry = (Entry) o;
-
-      if (key != entry.key) return false;
-      if (val != entry.val) return false;
-
-      return true;
+      return key == entry.key && val == entry.val;
     }
 
     @Override

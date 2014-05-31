@@ -17,6 +17,7 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
+
 import static com.almworks.integers.IntegersUtils.hash;
 
 /**
@@ -272,7 +273,7 @@ public class #E#AmortizedSet extends AbstractWritable#E#Set implements Writable#
     // myAdded and myRemoved are disjoint
     if (!myAdded.isEmpty()) {
       int from = 0;
-      for (#E#Iterator iterator: myAdded.iterator()) {
+      for (#E#Iterator iterator: myAdded) {
         int idx = myBaseList.binarySearch(iterator.value(), from, myBaseList.size());
         if (idx < 0) {
           size++;

@@ -18,8 +18,10 @@
 
 package com.almworks.integers.func;
 
+import com.almworks.integers.#E#Collections;
 import com.almworks.integers.#E#Iterable;
 import com.almworks.integers.#E#Iterator;
+import com.almworks.integers.#E#List;
 
 public class #E#Functions {
   private #E#Functions() {}
@@ -191,6 +193,19 @@ public class #E#Functions {
       @Override
       public String toString() {
         return "swap (" + f + ')';
+      }
+    };
+  }
+
+  /**
+   * @return comparator that for a pair of indices returns the result of comparing the values from {@code list}
+   * at these indices. Behaves in the same way as {@link java.util.Comparator}
+   */
+  public static IntIntToInt comparator(final #E#List list) {
+    return new IntIntToInt() {
+      @Override
+      public int invoke(int a, int b) {
+        return #E#Collections.compare(list.get(a), list.get(b));
       }
     };
   }

@@ -78,7 +78,7 @@ public class #E#ChainHashSet extends AbstractWritable#E#Set implements Writable#
   public static #E#ChainHashSet createFrom(#E#Iterable keys) {
     int capacity = #E#Collections.sizeOfIterable(keys, 0);
     #E#ChainHashSet set = createForAdd(capacity);
-    for (#E#Iterator it : keys.iterator()) {
+    for (#E#Iterator it : keys) {
       set.add(it.value());
     }
     return set;
@@ -188,7 +188,7 @@ public class #E#ChainHashSet extends AbstractWritable#E#Set implements Writable#
       int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
       resize(newCap);
     }
-    for (#E#Iterator it: values.iterator()) {
+    for (#E#Iterator it: values) {
       include1(it.value());
     }
   }

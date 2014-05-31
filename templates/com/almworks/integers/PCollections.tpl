@@ -18,8 +18,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntToInt;
 import com.almworks.integers.func.IntIntProcedure;
+import com.almworks.integers.func.IntIntToInt;
+import com.almworks.integers.func.#E#Functions;
 import com.almworks.integers.func.#E#To#E#;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -205,12 +206,7 @@ public class #E#Collections {
     final #E#Array sorted = new #E#Array(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-        new IntIntToInt() {
-          @Override
-          public int invoke(int a, int b) {
-            return #E#Collections.compare(sorted.get(a), sorted.get(b));
-          }
-        },
+				#E#Functions.comparator(sorted),
         new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
@@ -234,8 +230,6 @@ public class #E#Collections {
   }
 
   /**
-   * @param array
-   * @param capacity
    * @return {@code array} if {@code capacity <= array.length} otherwise
    * new array that contains all values of array and has length equal to the
    * maximum of {@code 16}, {@code capacity} and {@code (array.length * 2)}
@@ -294,12 +288,24 @@ public class #E#Collections {
     return -1;
   }
 
+  /**
+   * @see #E#Collections#indexOf(#e#, #e#[], int, int)
+   */
+  public static int indexOf(#e# value, #e#[] array) {
+    return indexOf(value, array, 0, array.length);
+  }
+
   public static #e#[] arrayCopy(#e#[] array, int offset, int length) {
     if (length == 0)
       return EMPTY_#EC#S;
     #e#[] copy = new #e#[length];
     System.arraycopy(array, offset, copy, 0, length);
     return copy;
+  }
+
+  // copied from ArrayUtil
+  public static #e#[] arrayCopy(#e#[] ints) {
+    return arrayCopy(ints, 0, ints.length);
   }
 
   public static int compare(#e# a, #e# b) {
@@ -322,6 +328,20 @@ public class #E#Collections {
       @Override
       public #e# get(int index) throws NoSuchElementException {
         return coll.get(index);
+      }
+    };
+  }
+
+  public static #E#List as#E#List(final IntList list) {
+    return new Abstract#E#List() {
+      @Override
+      public int size() {
+        return list.size();
+      }
+
+      @Override
+      public #e# get(int index) throws NoSuchElementException {
+        return list.get(index);
       }
     };
   }
@@ -502,7 +522,6 @@ public class #E#Collections {
   }
 
   /**
-   * @return union of the specified lists
    * @param aSorted sorted unique {@code #E#List}
    * @param bSorted sorted unique {@code #E#List}
    * @return union of the specified lists
@@ -864,5 +883,9 @@ public class #E#Collections {
         return dest;
       }
     };
+  }
+
+  public static <T> #E#ObjMap<T> emptyMap() {
+    return #E#ObjMap.EMPTY;
   }
 }

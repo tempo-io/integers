@@ -18,8 +18,8 @@ package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
 import com.carrotsearch.hppc.#E##F#OpenHashMap;
+import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.#F#Collections.sizeOfIterable;
 import static com.almworks.integers.wrappers.#E##F#HppcWrappers.cursorTo#E##F#Iterator;
 import static com.almworks.integers.wrappers.#E#HppcWrappers.cursorTo#E#Iterator;
 import static com.almworks.integers.wrappers.#F#HppcWrappers.cursorTo#F#Iterator;
@@ -31,8 +31,8 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
     myMap = new #E##F#OpenHashMap();
   }
 
-  public #E##F#HppcOpenHashMap(int initicalCapacity) {
-    myMap = new #E##F#OpenHashMap(initicalCapacity);
+  public #E##F#HppcOpenHashMap(int initialCapacity) {
+    myMap = new #E##F#OpenHashMap(initialCapacity);
   }
 
   public #E##F#HppcOpenHashMap(int initialCapacity, float loadFactor) {
@@ -40,12 +40,10 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
   }
 
   public static #E##F#HppcOpenHashMap createFrom(#E#Iterable keys, #F#Iterable values) {
-    int keysSize = (keys instanceof #E#SizedIterable) ? ((#E#SizedIterable) keys).size() : 0;
-    int valuesSize = sizeOfIterable(values, 0);
-    if (keysSize * valuesSize != 0) {
-      if (keysSize != valuesSize) {
-        throw new IllegalArgumentException("keys.size() != values.size()");
-      }
+    int keysSize = #E#Collections.sizeOfIterable(keys, 0);
+    int valuesSize = #F#Collections.sizeOfIterable(values, 0);
+    if (keysSize != valuesSize) {
+      throw new IllegalArgumentException("keys.size() != values.size()");
     } else {
       keysSize = Math.max(keysSize, valuesSize);
     }
@@ -104,8 +102,9 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
     return myMap.size();
   }
 
+  @NotNull
   public #E##F#Iterator iterator() {
-	return new #E##F#FailFastIterator(cursorTo#E##F#Iterator(myMap.iterator())) {
+  	return new #E##F#FailFastIterator(cursorTo#E##F#Iterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;
@@ -194,8 +193,8 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
    * @see #containsKey
    * @return Returns the previous value stored under the given key.
    */
-  public #f# lset(#f# key) {
-    return myMap.lset(key);
+  public #f# lset(#f# value) {
+    return myMap.lset(value);
   }
 
   /**
@@ -220,10 +219,5 @@ public class #E##F#HppcOpenHashMap extends AbstractWritable#E##F#Map {
     if (!(myMap.lget() == value)) return false;
     myMap.remove(key);
     return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return myMap.hashCode();
   }
 }

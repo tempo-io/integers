@@ -107,7 +107,7 @@ public abstract class AbstractWritable#E#Set extends Abstract#E#Set implements W
   @Override
   public void retain(#E#List values) {
     #E#Array res = new #E#Array();
-    for (#E#Iterator it: values.iterator()) {
+    for (#E#Iterator it: values) {
       #e# value = it.value();
       if (contains(value)) res.add(value);
     }

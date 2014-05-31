@@ -124,7 +124,7 @@ public class #E#OpenHashSet extends AbstractWritable#E#Set implements Writable#E
   public static #E#OpenHashSet createFrom(#E#Iterable keys) {
     int capacity = #E#Collections.sizeOfIterable(keys, 0);
     #E#OpenHashSet set = createForAdd(capacity);
-    for (#E#Iterator it : keys.iterator()) {
+    for (#E#Iterator it : keys) {
       set.add(it.value());
     }
     return set;
@@ -149,19 +149,19 @@ public class #E#OpenHashSet extends AbstractWritable#E#Set implements Writable#E
     int mask = newCapacity - 1;
 
     #e#[] keysNew = new #e#[newCapacity];
-    BitSet alocatedNew = new BitSet(newCapacity);
+    BitSet allocatedNew = new BitSet(newCapacity);
 
-    for (#E#Iterator it: iterator()) {
+    for (#E#Iterator it: this) {
       #e# value = it.value();
       int slot = index(hash(value), mask);
-      while (alocatedNew.get(slot)) {
+      while (allocatedNew.get(slot)) {
         slot = index(slot + 1, mask);
       }
       keysNew[slot] = value;
-      alocatedNew.set(slot);
+      allocatedNew.set(slot);
     }
 
-    init(keysNew, alocatedNew, (int)(newCapacity * myLoadFactor));
+    init(keysNew, allocatedNew, (int)(newCapacity * myLoadFactor));
   }
 
   @Override
