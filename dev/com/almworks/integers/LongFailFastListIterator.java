@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PFailFastIterator.tpl
+// CODE GENERATED FROM com/almworks/integers/PFailFastListIterator.tpl
+
 
 package com.almworks.integers;
 

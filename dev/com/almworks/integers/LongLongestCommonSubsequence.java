@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
  * Basic LCS algorithm. 
  * @author Igor Sereda
  */
+
+// CODE GENERATED FROM com/almworks/integers/PLongestCommonSubsequence.tpl
+
 public class LongLongestCommonSubsequence {
   private final LongList aSequence;
   private final LongList bSequence;

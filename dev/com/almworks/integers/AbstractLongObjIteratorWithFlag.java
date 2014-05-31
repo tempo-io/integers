@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractPQIteratorWithFlag.tpl
+// CODE GENERATED FROM com/almworks/integers/AbstractPObjIteratorWithFlag.tpl
 
 
 package com.almworks.integers;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PQIterable.tpl
+// CODE GENERATED FROM com/almworks/integers/PObjIterable.tpl
 
 
 package com.almworks.integers;

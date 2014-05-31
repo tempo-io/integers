@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PQFindingIterator.tpl
-
-
+// CODE GENERATED FROM com/almworks/integers/PObjFindingIterator.tpl
 
 
 package com.almworks.integers;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/wrappers/PQHppcOpenHashMap.tpl
+// CODE GENERATED FROM com/almworks/integers/wrappers/PObjHppcOpenHashMap.tpl
 
 
 package com.almworks.integers.wrappers;

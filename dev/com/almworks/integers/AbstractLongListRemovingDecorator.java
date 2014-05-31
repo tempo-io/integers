@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
-
 import static com.almworks.integers.IntCollections.arrayCopy;
 
 /**

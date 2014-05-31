@@ -23,9 +23,9 @@ import com.almworks.integers.*;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
-import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
-import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 import static com.almworks.integers.wrappers.LongIntHppcWrappers.cursorToLongIntIterator;
+import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
+import static com.almworks.integers.wrappers.IntHppcWrappers.cursorToIntIterator;
 
 public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
   protected final LongIntOpenHashMap myMap;
@@ -52,7 +52,7 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
     }
 
     float loadFactor = LongIntOpenHashMap.DEFAULT_LOAD_FACTOR;
-    int initialCapacity = (int) (keysSize / loadFactor) + 1;
+    int initialCapacity = (int)(keysSize / loadFactor) + 1;
     LongIntHppcOpenHashMap map = new LongIntHppcOpenHashMap(initialCapacity);
 
     LongIterator keysIt = keys.iterator();
@@ -107,7 +107,7 @@ public class LongIntHppcOpenHashMap extends AbstractWritableLongIntMap {
 
   @NotNull
   public LongIntIterator iterator() {
-    return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
+  	return new LongIntFailFastIterator(cursorToLongIntIterator(myMap.iterator())) {
       @Override
       protected int getCurrentModCount() {
         return myModCount;

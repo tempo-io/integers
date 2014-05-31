@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PObjMap.tpl
-
-
+// CODE GENERATED FROM com/almworks/integers/PObjListMap.tpl
 
 
 package com.almworks.integers;
@@ -117,7 +115,7 @@ public class LongObjListMap<T> extends AbstractWritableLongObjMap<T> {
   @Override
   public Iterator<T> valuesIterator() {
     final Iterator<T> iterator = myValues.iterator();
-    final long expectedModCount = myModCount;
+    final int expectedModCount = myModCount;
     return new Iterator<T>() {
       @Override
       public boolean hasNext() {

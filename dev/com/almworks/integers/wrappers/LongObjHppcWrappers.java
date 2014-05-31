@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/wrappers/PQHppcWrappers.tpl
+// CODE GENERATED FROM com/almworks/integers/wrappers/PObjHppcWrappers.tpl
 
 
 package com.almworks.integers.wrappers;

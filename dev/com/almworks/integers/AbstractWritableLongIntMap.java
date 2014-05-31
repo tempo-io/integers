@@ -149,8 +149,8 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
 
   public void removeAll(long... keys) {
     modified();
-    for (long key: keys) {
-      removeImpl(key);
+    if (keys != null && keys.length > 0) {
+      removeAll(new LongNativeArrayIterator(keys));
     }
   }
 
@@ -235,7 +235,7 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
   @Override
   public int hashCode() {
     int h = 0;
-    for (LongIntIterator it : iterator()) {
+    for (LongIntIterator it : this) {
       h += IntegersUtils.hash(it.left()) + IntegersUtils.hash(it.right());
     }
     return h;

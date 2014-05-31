@@ -209,7 +209,7 @@ public class LongCollections {
     final LongArray sorted = new LongArray(unsorted);
     final IntArray perms = new IntArray(IntProgression.arithmetic(0, sorted.size()));
     IntegersUtils.quicksort(sorted.size(),
-        LongFunctions.comparator(sorted),
+				LongFunctions.comparator(sorted),
         new IntIntProcedure() {
           @Override
           public void invoke(int a, int b) {
@@ -294,7 +294,7 @@ public class LongCollections {
   /**
    * @see LongCollections#indexOf(long, long[], int, int)
    */
-  public static int indexOf(int value, long[] array) {
+  public static int indexOf(long value, long[] array) {
     return indexOf(value, array, 0, array.length);
   }
 
@@ -891,5 +891,4 @@ public class LongCollections {
   public static <T> LongObjMap<T> emptyMap() {
     return LongObjMap.EMPTY;
   }
-
 }

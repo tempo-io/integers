@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/AbstractWritablePQMap.tpl
+// CODE GENERATED FROM com/almworks/integers/AbstractWritablePObjMap.tpl
 
 
 package com.almworks.integers;

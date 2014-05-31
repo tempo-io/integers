@@ -213,7 +213,6 @@ public class LongFunctions {
     };
   }
 
-
   public static LongLongToLong ignore1(final LongToLong f) {
     return new LongLongToLong() {
       @Override

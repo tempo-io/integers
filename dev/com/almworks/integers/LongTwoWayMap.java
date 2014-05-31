@@ -35,8 +35,6 @@ import java.util.List;
  * Maps integer keys to integer values. <br/>
  * Keys and values are sorted, and it is possible to retrieve either value by key or key by value. However, mappings are still added only by key. <br/>
  * The mapping is stored in a separate list in the following way: if {@code (k, v)} is a stored pair, then {@code v = vals[idxMap[i]]}, where {@code k = keys[i]}.
- * Method {@link #iterator()} returns key-value pairs sorted by key and
- * methods {@link #keysIterator()} and {@link #valuesIterator()} return keys and values in sorted order.
  * */
 public class LongTwoWayMap implements LongLongMap {
   private final LongArray myKeys = new LongArray();
@@ -310,8 +308,8 @@ public class LongTwoWayMap implements LongLongMap {
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
    * Memory: O(n). */
-  public void transformValues(@NotNull LongToLong f) {
-    transformValues(Long.MIN_VALUE, f);
+  public void transformValues(@NotNull LongToLong fun) {
+    transformValues(Long.MIN_VALUE, fun);
   }
 
   /** Transforms each value using the specified function. Values are supplied in ascending order.<br/>
@@ -335,16 +333,16 @@ public class LongTwoWayMap implements LongLongMap {
   }
 
   /** Transforms the value of each mapping using the specified function (key, val). Mappings are supplied in ascending order by key. */
-  public void transformValues(@NotNull LongLongToLong f) {
+  public void transformValues(@NotNull LongLongToLong fun) {
     int n = size();
     for (int ki = 0; ki < n; ++ki) {
       int vi = myIdxMap.get(ki);
-      myValues.set(vi, f.invoke(myKeys.get(ki), myValues.get(vi)));
+      myValues.set(vi, fun.invoke(myKeys.get(ki), myValues.get(vi)));
     }
     if (!myValues.isSorted()) {
       restoreIndexMap(n);
     }
-    assert checkInvariants(String.valueOf(f));
+    assert checkInvariants(String.valueOf(fun));
   }
 
   private void restoreIndexMap(int n) {
@@ -381,7 +379,7 @@ public class LongTwoWayMap implements LongLongMap {
   /** Updates keys of the mappings using the specified function. Function must be injective; if duplicate key is generated, {@link NonInjectiveFunctionException} is thrown. */
   public void transformKeys(LongToLong injection) throws NonInjectiveFunctionException {
     LongArray newKeys = new LongArray(LongCollections.map(injection, myKeys));
-
+  
     IntArray newIdxMap = new IntArray(myIdxMap);
     sort(newKeys, newIdxMap);
     int dupIdx = LongCollections.findDuplicateSorted(newKeys);
@@ -390,7 +388,7 @@ public class LongTwoWayMap implements LongLongMap {
     myIdxMap.clear();
     myKeys.addAll(newKeys);
     myIdxMap.addAll(newIdxMap);
-
+  
     assert checkInvariants(String.valueOf(injection));
   }
 
@@ -398,7 +396,7 @@ public class LongTwoWayMap implements LongLongMap {
     assert main.size() == parallel.size();
     // We cannot use PArray.sort(PArray... sortAlso) because types are different
     IntegersUtils.quicksort(main.size(),
-        // comparator
+        // compare
         LongFunctions.comparator(main),
         // swap
         new IntIntProcedure() {
@@ -566,7 +564,6 @@ public class LongTwoWayMap implements LongLongMap {
       if (o == null || getClass() != o.getClass()) return false;
 
       Entry entry = (Entry) o;
-
       return key == entry.key && val == entry.val;
     }
 

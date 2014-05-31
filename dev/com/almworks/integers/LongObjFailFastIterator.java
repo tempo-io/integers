@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CODE GENERATED FROM com/almworks/integers/PQFailFastIterator.tpl
+// CODE GENERATED FROM com/almworks/integers/PObjFailFastIterator.tpl
 
 
 package com.almworks.integers;

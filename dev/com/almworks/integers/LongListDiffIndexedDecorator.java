@@ -17,12 +17,9 @@
 // CODE GENERATED FROM com/almworks/integers/PListDiffIndexedDecorator.tpl
 
 
-
-
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
