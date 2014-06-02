@@ -271,6 +271,18 @@ target(name: 'javadoc') {
       attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
     }
   }
+
+  ant.mkdir(dir: "$buildDir/javadoc-all")
+  ant.javadoc(destdir: "$buildDir/javadoc-all", 'protected': "true", packagenames: "com.almworks.integers.*") {
+    sourcepath {
+      pathelement(path: generatedJavaDir)
+      pathelement(path: javaDir)
+    }
+    classpath {
+      pathelement(path: "$rootDir/lib/junit.jar")
+      pathelement(path: "$rootDir/lib/annotations.jar")
+    }
+  }
 }
 
 target(name: 'dist') {
