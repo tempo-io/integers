@@ -245,7 +245,13 @@ target(name: 'javadoc') {
       pathelement(path: "$rootDir/lib/annotations.jar")
     }
   }
-  ant.jar(basedir: "$buildDir/javadoc", destfile: "$deliverDir/$jarName-javadoc.jar",)
+  ant.jar(basedir: "$buildDir/javadoc", destfile: "$deliverDir/$jarName-javadoc.jar") {
+    manifest {
+      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+      attribute(name: "Implementation-Vendor", value: "ALM Works")
+      attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
+    }
+  }
 
   ant.mkdir(dir: "$buildDir/javadoc-wrappers")
   ant.javadoc(destdir: "$buildDir/javadoc-wrappers", 'protected': "true", packagenames: "com.almworks.integers.wrappers.*") {
@@ -258,7 +264,13 @@ target(name: 'javadoc') {
       pathelement(path: "$rootDir/lib/annotations.jar")
     }
   }
-  ant.jar(basedir: "$buildDir/javadoc-wrappers", destfile: "$deliverDir/$jarName-wrappers-javadoc.jar",)
+  ant.jar(basedir: "$buildDir/javadoc-wrappers", destfile: "$deliverDir/$jarName-wrappers-javadoc.jar",) {
+    manifest {
+      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+      attribute(name: "Implementation-Vendor", value: "ALM Works")
+      attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
+    }
+  }
 }
 
 target(name: 'dist') {
@@ -286,7 +298,13 @@ target(name: 'dist') {
   }
   String srcFileName = deliverName + "-src.zip"
   ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
-  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar")
+  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar") {
+    manifest {
+      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+      attribute(name: "Implementation-Vendor", value: "ALM Works")
+      attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
+    }
+  }
   almMessage "dist done"
 }
 
@@ -315,7 +333,13 @@ target(name: 'dist-wrappers') {
   }
   String srcFileName = deliverName + "-src.zip"
   ant.zip(basedir: deliverSources, destfile: rel2(deliverDir, srcFileName))
-  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar")
+  ant.jar(basedir: deliverSources, destfile: "$deliverDir/$deliverName-sources.jar") {
+    manifest {
+      attribute(name: "Implementation-URL", value: "http://code.google.com/p/integers/")
+      attribute(name: "Implementation-Vendor", value: "ALM Works")
+      attribute(name: "Implementation-Version", value: isDirty ? "dirty" : "${version}")
+    }
+  }
   almMessage "dist done"
 }
 
