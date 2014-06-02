@@ -121,7 +121,7 @@ test/com/almworks/integers/LongMapSortedKeySetTests.java -text
 test/com/almworks/integers/LongMapUnsortedKeySetTests.java -text
 test/com/almworks/integers/LongMinusIteratorTests.java -text
 test/com/almworks/integers/LongNativeArrayIteratorTests.java -text
-test/com/almworks/integers/LongObjMapTests.java -text
+test/com/almworks/integers/LongObjListMapTests.java -text
 test/com/almworks/integers/LongOpenHashSetTests.java -text
 test/com/almworks/integers/LongParallelListMapTests.java -text
 test/com/almworks/integers/LongParallelListTests.java -text

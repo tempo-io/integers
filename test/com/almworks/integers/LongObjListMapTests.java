@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class LongObjMapTests extends WritableLongObjMapChecker<LongObjListMap> {
+public class LongObjListMapTests extends WritableLongObjMapChecker<LongObjListMap> {
   private LongObjListMap<String> myMap = LongObjListMap.create();
 
   @Override
