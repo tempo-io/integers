@@ -41,6 +41,12 @@ public interface LongObjMap<T> extends LongObjIterable<T> {
   boolean containsKeys(LongIterable keys);
 
   /**
+   * @return true if this map contains any of the elements produced by {@code keys}.
+   * Otherwise false
+   */
+  boolean containsAnyKey(LongIterable keys);
+
+  /**
    * @return the number of keys/values in this map(its cardinality)
    */
   int size();

@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 public class LongListSet extends AbstractLongSet implements LongSortedSet {
   protected final LongList myList;
 
-  public static LongListSet asSet(LongList sortedUniqueList) {
+  public static LongListSet setFromSortedList(LongList sortedUniqueList) {
     assert sortedUniqueList.isSortedUnique();
     return new LongListSet(sortedUniqueList);
   }

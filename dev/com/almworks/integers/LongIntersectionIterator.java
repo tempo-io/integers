@@ -20,61 +20,76 @@
 
 package com.almworks.integers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 /**
- * Iterates through a list of unique long lists in O(N * log(K)), where K - number of lists, N - average size,
- * providing unique sorted values that exist in every list
- *
+ * Iterates through a list of unique long lists in O(N), where N - total length of iterables,
  * @author Eugene Vagin
  */
-public class LongIntersectionIterator extends LongSetOperationsIterator {
+public class LongIntersectionIterator extends LongFindingIterator {
+  /**
+   * ArrayList is preferable implementation. Using LinkedList may be ineffective
+   * */
+  protected final List<LongIterator> myIts;
 
   public LongIntersectionIterator(LongIterable... iterables) {
-    super(longIterablesToIterators(Arrays.asList(iterables)));
+    this(Arrays.asList(iterables));
   }
 
   public LongIntersectionIterator(List<? extends LongIterable> iterables) {
-    super(longIterablesToIterators(iterables));
+    myIts = longIterablesToIterators(iterables);
   }
 
-  private boolean equalValues() {
-    long topValue = getTopIterator().value();
-    for (int i = parent(heapLength) + TOP; i <= heapLength; i++) {
-      if (topValue != myIts.get(myHeap[i]).value()) {
+  protected static List<LongIterator> longIterablesToIterators(List<? extends LongIterable> includes) {
+    List<LongIterator> result = new ArrayList<LongIterator>(includes.size());
+    for (LongIterable arr : includes) {
+      result.add(arr.iterator());
+    }
+    return result;
+  }
+
+  @Override
+  protected boolean findNext() throws ConcurrentModificationException {
+    if (myIts.size() == 0) return false;
+    for (int i = 0; i < myIts.size(); i++) {
+      if (!myIts.get(i).hasNext()) {
         return false;
       }
+      myIts.get(i).next();
     }
+    myNext = myIts.get(0).value();
+
+    boolean ok;
+    do {
+      ok = true;
+      for (int i = 0; i < myIts.size(); i++) {
+        if (!accept(myIts.get(i))) {
+          if (myIts.get(i).value() < myNext) {
+            return false;
+          } else {
+            ok = false;
+            myNext = myIts.get(i).value();
+            break;
+          }
+        }
+      }
+    } while (!ok);
     return true;
   }
 
-  protected boolean findNext() {
-    if (myIts.size() == 0) {
-      return false;
-    }
-    for (int i = 0, n = myIts.size(); i < n; i++) {
-      if (myIts.get(i).hasNext()) {
-        myIts.get(i).next();
-        myHeap[i + TOP] = i;
-      } else {
+  private boolean accept(LongIterator it) {
+    assert it.hasValue();
+    while (it.value() < myNext) {
+      long prev = it.value();
+      if (!it.hasNext()) {
         return false;
       }
+      it.next();
+      assert prev < it.value() : prev + " " + it.value();
     }
-    buildHeap();
-    if (IntegersDebug.PRINT) outputHeap();
-
-    while (!equalValues()) {
-      LongIterator topIterator = getTopIterator();
-      if (!topIterator.hasNext()) return false;
-
-      long prev = topIterator.value();
-      topIterator.next();
-      assert prev < topIterator.value() : myHeap[TOP] + " " + prev + " " + topIterator.value();
-      heapify(TOP);
-    }
-    // all values are the same as the TOP
-    myNext = getTopIterator().value();
-    return true;
+    return it.value() == myNext;
   }
 }

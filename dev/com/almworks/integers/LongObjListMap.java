@@ -142,7 +142,7 @@ public class LongObjListMap<T> extends AbstractWritableLongObjMap<T> {
 
   @Override
   public LongSortedSet keySet() {
-    return LongListSet.asSet(myKeys);
+    return LongListSet.setFromSortedList(myKeys);
   }
 
   public int size() {

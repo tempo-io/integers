@@ -58,7 +58,7 @@ public class LongCollections {
     return toSorted(true, values);
   }
 
-  public static LongList toSorted(boolean unique, LongIterable values) {
+  public static LongList toSorted(boolean unique, @NotNull LongIterable values) {
     if (values instanceof LongList) {
       LongList list = (LongList) values;
       if ((unique && list.isSortedUnique()) || (!unique && list.isSorted())) return list;
@@ -499,15 +499,40 @@ public class LongCollections {
    * @return intersection of the two sets
    */
   @NotNull
-  public static WritableLongSortedSet intersection(@NotNull LongSet first, @NotNull LongSet second) {
-    LongArray[] arrays = {first.toArray(), second.toArray()};
-    if (!(first instanceof LongSortedSet)) arrays[0].sort();
-    if (!(second instanceof LongSortedSet)) arrays[1].sort();
-    assert arrays[0].size() == first.size() && arrays[1].size() == second.size();
+  public static WritableLongSortedSet toSortedIntersection(@NotNull LongSet first, @NotNull LongSet second) {
+    LongArray res = new LongArray();
+    collectSetsIntersection(first, second, res);
+    if (!(first instanceof LongSortedSet || second instanceof LongSortedSet)) {
+      res.sort();
+    }
+    return LongAmortizedSet.createFromSortedUniqueArray(res);
+  }
 
-    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
-    arrays[dest].retainSorted(arrays[1 - dest]);
-    return LongAmortizedSet.createFromSortedUniqueArray(arrays[dest]);
+  public static WritableLongSet intersection(@NotNull LongSet first, @NotNull LongSet second) {
+    LongOpenHashSet res = new LongOpenHashSet();
+    collectSetsIntersection(first, second, res);
+    return res;
+  }
+
+  private static void collectSetsIntersection(LongSet first, LongSet second, LongCollector collector) {
+    if (first instanceof LongSortedSet && second instanceof LongSortedSet) {
+      collector.addAll(new LongIntersectionIterator(first, second));
+      return;
+    }
+    if (first instanceof LongSortedSet || first.size() <= second.size()) {
+      collectElements(first, second, collector);
+    } else {
+      collectElements(second, first, collector);
+    }
+  }
+
+  private static void collectElements(LongIterable iterable, LongSet filter, LongCollector collector) {
+    for (LongIterator ii : iterable) {
+      long value = ii.value();
+      if (filter.contains(value)) {
+        collector.add(value);
+      }
+    }
   }
 
   /**

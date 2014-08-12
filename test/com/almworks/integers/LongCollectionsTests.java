@@ -428,6 +428,7 @@ public class LongCollectionsTests extends IntegersFixture {
           }
           expected = LongArray.copy(arrays[0]);
           expected.retain(arrays[1]);
+          IntegersFixture.checkSet(toSortedIntersection(sets[0], sets[1]), expected);
           IntegersFixture.checkSet(intersection(sets[0], sets[1]), expected);
 
           expected = LongArray.copy(arrays[0]);

@@ -162,7 +162,7 @@ public class LongTwoWayMap implements LongLongMap {
 
   @Override
   public LongSet keySet() {
-    return LongListSet.asSet(myKeys);
+    return LongListSet.setFromSortedList(myKeys);
   }
 
   public List<Entry> toList() {

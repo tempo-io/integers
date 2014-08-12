@@ -51,6 +51,11 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
   }
 
   @Override
+  public boolean containsAnyKey(LongIterable keys) {
+    return myMap.containsAnyKey(keys);
+  }
+
+  @Override
   public int size() {
     return myMap.size();
   }
@@ -266,6 +271,11 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
       @Override
       public boolean containsKeys(LongIterable keys) {
         return map.containsKeys(keys);
+      }
+
+      @Override
+      public boolean containsAnyKey(LongIterable keys) {
+        return map.containsAnyKey(keys);
       }
 
       @Override

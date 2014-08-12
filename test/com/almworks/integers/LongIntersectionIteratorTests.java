@@ -76,4 +76,19 @@ public class LongIntersectionIteratorTests extends IntegersFixture {
     }, new SetOperationsChecker.IntersectionGetter(false), false, SortedStatus.SORTED_UNIQUE);
   }
 
+  public void testSimple() {
+    long[][][] variants = {{{0, 1, 2}, {1, 2, 3}},
+        {{0, 2, 4, 6, 8, 10}, {0, 3, 6, 9, 12}},
+        {{0, 3, 5, 6, 10, 14}, {-1, 0, 4, 10, 100}},
+        {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, {0, 2, 4, 6, 8, 10, 12}, {0, 3, 6, 9, 12}}};
+    long[][] expected = {{1, 2}, {0, 6}, {0, 10}, {0, 6, 12}};
+    for (int j = 0; j < variants.length; j++) {
+      long[][] variant = variants[j];
+      LongArray[] arrays = new LongArray[variant.length];
+      for (int i = 0; i < variant.length; i++) {
+        arrays[i] = new LongArray(variant[i]);
+      }
+      CHECK.order(new LongIntersectionIterator(arrays), expected[j]);
+    }
+  }
 }
