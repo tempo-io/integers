@@ -22,6 +22,7 @@ final String gantDir = {
   if (command.contains(" -f ")) {
     commandSub = command.substring(command.indexOf(" -f ") + 4);
     path = commandSub.substring(0, commandSub.indexOf("build.gant") - 1)
+    path = new File(path).getCanonicalPath().replace('\\', '/');
   } else {
     path = ant.project.baseDir.getCanonicalPath().replace('\\', '/');
     if (path.endsWith("/")) path = path.substring(0, path.length() - 1)
