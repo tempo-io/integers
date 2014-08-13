@@ -496,43 +496,44 @@ public class LongCollections {
   }
 
   /**
-   * @return intersection of the two sets
+   * @return sorted intersection of the two sets
    */
   @NotNull
   public static WritableLongSortedSet toSortedIntersection(@NotNull LongSet first, @NotNull LongSet second) {
-    LongArray res = new LongArray();
-    collectSetsIntersection(first, second, res);
+    LongArray res = collectSetsIntersection(first, second, new LongArray());
     if (!(first instanceof LongSortedSet || second instanceof LongSortedSet)) {
       res.sort();
     }
     return LongAmortizedSet.createFromSortedUniqueArray(res);
   }
 
+  /**
+   * @return intersection of the two sets
+   */
   public static WritableLongSet intersection(@NotNull LongSet first, @NotNull LongSet second) {
-    LongOpenHashSet res = new LongOpenHashSet();
-    collectSetsIntersection(first, second, res);
-    return res;
+    return collectSetsIntersection(first, second, new LongOpenHashSet());
   }
 
-  private static void collectSetsIntersection(LongSet first, LongSet second, LongCollector collector) {
+  private static <T extends LongCollector> T collectSetsIntersection(LongSet first, LongSet second, T collector) {
     if (first instanceof LongSortedSet && second instanceof LongSortedSet) {
       collector.addAll(new LongIntersectionIterator(first, second));
-      return;
     }
     if (first instanceof LongSortedSet || first.size() <= second.size()) {
       collectElements(first, second, collector);
     } else {
       collectElements(second, first, collector);
     }
+    return collector;
   }
 
-  private static void collectElements(LongIterable iterable, LongSet filter, LongCollector collector) {
+  public static <T extends LongCollector> T collectElements(LongIterable iterable, LongSet filter, T collector) {
     for (LongIterator ii : iterable) {
       long value = ii.value();
       if (filter.contains(value)) {
         collector.add(value);
       }
     }
+    return collector;
   }
 
   /**
