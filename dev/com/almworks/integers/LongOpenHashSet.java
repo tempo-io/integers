@@ -187,6 +187,32 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
     return true;
   }
 
+  @Override
+  public void addAll(long... values) {
+    if (values.length > 10) {
+      addAll(new LongArray(values));
+    } else {
+      super.addAll(values);
+    }
+  }
+
+  public void addAll(LongSizedIterable values) {
+    modified();
+    int newSize = size() + values.size();
+    if (newSize >= myThreshold) {
+      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
+      resize(newCap);
+    }
+    for (LongIterator it: values) {
+      include1(it.value());
+    }
+  }
+
+  @Override
+  public void addAll(LongList values) {
+    addAll((LongSizedIterable)values);
+  }
+
   /**
    * Shift all the slot-conflicting values allocated to (and including) <code>slot</code>.
    * copied from hppc

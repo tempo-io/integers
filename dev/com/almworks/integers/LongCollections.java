@@ -526,6 +526,10 @@ public class LongCollections {
     return collector;
   }
 
+  /**
+   * Adds all elements to {@code collector} from {@code iterable} that contained in {@code filter} set
+   * @return {@code collector}
+   */
   public static <T extends LongCollector> T collectElements(LongIterable iterable, LongSet filter, T collector) {
     for (LongIterator ii : iterable) {
       long value = ii.value();

@@ -239,7 +239,7 @@ public class LongIntListMap extends AbstractWritableLongIntMap {
 
   @Override
   public LongSortedSet keySet() {
-    return LongListSet.setFromSortedList(myKeys);
+    return LongListSet.setFromSortedUniqueList(myKeys);
   }
 
   /**

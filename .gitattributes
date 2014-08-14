@@ -116,6 +116,7 @@ test/com/almworks/integers/LongListIndexedIteratorTests.java -text
 test/com/almworks/integers/LongListInsertingDecoratorTests.java -text
 test/com/almworks/integers/LongListIteratorSpecificationChecker.java -text
 test/com/almworks/integers/LongListRemovingDecoratorTests.java -text
+test/com/almworks/integers/LongListSetTests.java -text
 test/com/almworks/integers/LongLongestCommonSubsequenceTests.java -text
 test/com/almworks/integers/LongMapSortedKeySetTests.java -text
 test/com/almworks/integers/LongMapUnsortedKeySetTests.java -text

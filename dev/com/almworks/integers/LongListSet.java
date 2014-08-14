@@ -27,15 +27,22 @@ import org.jetbrains.annotations.NotNull;
  */
 public class LongListSet extends AbstractLongSet implements LongSortedSet {
   protected final LongList myList;
+  protected int mySize;
 
-  public static LongListSet setFromSortedList(LongList sortedUniqueList) {
+  public static LongListSet setFromSortedUniqueList(LongList sortedUniqueList) {
     assert sortedUniqueList.isSortedUnique();
-    return new LongListSet(sortedUniqueList);
+    return new LongListSet(sortedUniqueList, true);
   }
 
-  private LongListSet(LongList sortedUniqueList) {
+  public static LongListSet setFromSortedList(LongList sortedList) {
+    assert sortedList.isSorted();
+    return new LongListSet(sortedList, false);
+  }
+
+  private LongListSet(LongList sortedUniqueList, boolean isUnique) {
     assert sortedUniqueList.isSortedUnique();
     myList = sortedUniqueList;
+    mySize = isUnique ? sortedUniqueList.size() : -1;
   }
 
   @Override
@@ -72,7 +79,15 @@ public class LongListSet extends AbstractLongSet implements LongSortedSet {
 
   @Override
   public int size() {
-    return myList.size();
+    if (mySize == -1) {
+      mySize = myList.size();
+      for (int i = 1; i < myList.size(); i++) {
+        if (myList.get(i) == myList.get(i - 1)) {
+          mySize--;
+        }
+      }
+    }
+    return mySize;
   }
 
   @NotNull

@@ -25,7 +25,7 @@ import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
 import static com.almworks.integers.LongCollections.concatLists;
 import static com.almworks.integers.LongCollections.map;
 import static com.almworks.integers.LongIteratorSpecificationChecker.ValuesType;
-import static com.almworks.integers.LongListSet.setFromSortedList;
+import static com.almworks.integers.LongListSet.setFromSortedUniqueList;
 import static com.almworks.integers.LongProgression.arithmetic;
 import static com.almworks.integers.LongProgression.range;
 
@@ -65,6 +65,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         assertTrue(curSet.containsAll(curSet.iterator()));
         assertTrue(curSet.containsAll(LongList.EMPTY));
         assertFalse(curSet.containsAll(concatLists(arr, new LongList.Single(arr.getLast(0) + 1))));
+        assertEquals(arr.size(), curSet.size());
       }
     }
   }
@@ -271,7 +272,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         assertTrue(set0.equals(set0));
         assertFalse(set0.equals(null));
         assertFalse(set0.equals(LongSet.EMPTY));
-        assertFalse(set0.equals(setFromSortedList(list)));
+        assertFalse(set0.equals(setFromSortedUniqueList(list)));
         for (T set1 : createSets(array)) {
           assertTrue(set0.equals(set1));
           assertTrue(set1.equals(set0));
