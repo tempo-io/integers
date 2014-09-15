@@ -102,7 +102,6 @@ public class IntegersUtilsTests extends IntegersFixture {
     CHECK.order(IntProgression.arithmetic(0, n).iterator(), e.iterator());
   }
 
-
   public void testArrayCopy() {
     int arrayLength = 1000;
     int maxValue = Integer.MAX_VALUE;

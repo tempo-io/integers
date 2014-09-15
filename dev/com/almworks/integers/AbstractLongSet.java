@@ -41,7 +41,6 @@ public abstract class AbstractLongSet implements LongSet {
 
   @Override
   public boolean containsAny(LongIterable iterable) {
-    if (iterable == this) return true;
     for (LongIterator it: iterable) {
       if (contains(it.value())) return true;
     }

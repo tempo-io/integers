@@ -174,11 +174,7 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   @Override
   public void addAll(long... values) {
-    if (values.length > 10) {
-      addAll(new LongArray(values));
-    } else {
-      super.addAll(values);
-    }
+    addAll(new LongArray(values));
   }
 
   public void addAll(LongSizedIterable values) {

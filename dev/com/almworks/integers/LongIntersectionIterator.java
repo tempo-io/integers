@@ -26,7 +26,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 /**
- * Iterates through a list of unique long lists in O(N), where N - total length of iterables,
+ * Iterates through a list of sorted unique long lists in O(N), where N - total length of iterables,
  * @author Eugene Vagin
  */
 public class LongIntersectionIterator extends LongFindingIterator {

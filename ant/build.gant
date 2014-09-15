@@ -25,7 +25,6 @@ final String gantDir = {
     path = new File(path).getCanonicalPath().replace('\\', '/');
   } else {
     path = ant.project.baseDir.getCanonicalPath().replace('\\', '/');
-    if (path.endsWith("/")) path = path.substring(0, path.length() - 1)
   }
   path
 }()

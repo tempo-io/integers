@@ -527,7 +527,7 @@ public class LongCollections {
   }
 
   /**
-   * Adds all elements to {@code collector} from {@code iterable} that contained in {@code filter} set
+   * Adds all elements to {@code collector} from {@code iterable} that are contained in {@code filter} set
    * @return {@code collector}
    */
   public static <T extends LongCollector> T collectElements(LongIterable iterable, LongSet filter, T collector) {
