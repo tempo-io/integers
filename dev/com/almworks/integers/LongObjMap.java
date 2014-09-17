@@ -42,7 +42,7 @@ public interface LongObjMap<T> extends LongObjIterable<T> {
 
   /**
    * @return true if this map contains any of the elements produced by {@code keys}.
-   * Otherwise false
+   * Otherwise false. If {@code keys == null} always returns false.
    */
   boolean containsAnyKey(LongIterable keys);
 

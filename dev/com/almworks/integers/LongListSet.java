@@ -39,10 +39,10 @@ public class LongListSet extends AbstractLongSet implements LongSortedSet {
     return new LongListSet(sortedList, false);
   }
 
-  private LongListSet(LongList sortedUniqueList, boolean isUnique) {
-    assert sortedUniqueList.isSortedUnique();
-    myList = sortedUniqueList;
-    mySize = isUnique ? sortedUniqueList.size() : -1;
+  private LongListSet(LongList sortedList, boolean isUnique) {
+    assert isUnique ? sortedList.isSortedUnique() : sortedList.isSortedUnique();
+    myList = sortedList;
+    mySize = isUnique ? sortedList.size() : -1;
   }
 
   @Override
