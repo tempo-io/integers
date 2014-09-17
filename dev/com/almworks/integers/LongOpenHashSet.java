@@ -199,7 +199,7 @@ public class LongOpenHashSet extends AbstractWritableLongSet implements Writable
   public void addAll(LongSizedIterable values) {
     modified();
     int newSize = size() + values.size();
-    if (newSize >= myThreshold) {
+    if (newSize > myThreshold) {
       int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
       resize(newCap);
     }
