@@ -76,6 +76,13 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
       assertFalse(set.containsAny(LongSet.EMPTY));
       assertFalse(set.containsAny(LongList.EMPTY));
       assertFalse(set.containsAny(LongIterator.EMPTY));
+      try {
+        set.containsAny(null);
+        fail();
+      } catch (NullPointerException _) {
+        // ok
+      }
+
     }
 
     LongArray check = collectIterables(create(Long.MIN_VALUE, Long.MAX_VALUE, 239), LongProgression.range(10));
@@ -216,9 +223,12 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
 
   public void testTailIteratorSimple() {
     if (!isSortedSet()) return;
-    for (LongSet set : createSets(arithmetic(1, 50, 2))) {
+    for (LongSet set : createSets(arithmetic(1, 5, 2))) {
       LongSortedSet sortedSet = (LongSortedSet) set;
-      for (int i = 0; i < 99; i++) {
+      for (int i = 0; i < 9; i++) {
+        if (i == 6) {
+          System.out.println("asdf");
+        }
         assertEquals(i + 1 - (i % 2), sortedSet.tailIterator(i).nextValue());
       }
     }
@@ -241,7 +251,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         for (int j = 0; j < testValues.size(); j++) {
           long key = testValues.get(j);
           int ind = expected. binarySearch(key);
-          CHECK.order(expected.iterator(ind >= 0 ? ind : -ind - 1), sortedSet.tailIterator(key));
+          CHECK.order(sortedSet.tailIterator(key), expected.iterator(ind >= 0 ? ind : -ind - 1));
         }
       }
     }

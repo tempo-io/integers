@@ -21,6 +21,8 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ConcurrentModificationException;
+
 /**
  * Class that allows you to consider the specified sorted unique list as set.
  * Changes in list propagate to this set.
@@ -28,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 public class LongListSet extends AbstractLongSet implements LongSortedSet {
   protected final LongList myList;
   protected int mySize;
+  protected final boolean myIsUnique;
 
   public static LongListSet setFromSortedUniqueList(LongList sortedUniqueList) {
     assert sortedUniqueList.isSortedUnique();
@@ -40,26 +43,57 @@ public class LongListSet extends AbstractLongSet implements LongSortedSet {
   }
 
   private LongListSet(LongList sortedList, boolean isUnique) {
-    assert isUnique ? sortedList.isSortedUnique() : sortedList.isSortedUnique();
+    assert isUnique ? sortedList.isSortedUnique() : sortedList.isSorted();
     myList = sortedList;
     mySize = isUnique ? sortedList.size() : -1;
+    myIsUnique = isUnique;
   }
 
   @Override
   protected void toNativeArrayImpl(long[] dest, int destPos) {
-    myList.toNativeArray(0, dest, destPos, myList.size());
+    if (myIsUnique) {
+      myList.toNativeArray(0, dest, destPos, myList.size());
+    } else {
+      super.toNativeArrayImpl(dest, destPos);
+    }
   }
 
   @Override
   public LongIterator tailIterator(long fromElement) {
     int idx = myList.binarySearch(fromElement);
-    if (idx < 0) {
-      idx = -idx - 1;
-    }
-    if (idx == size()) {
+    return iteratorFromIndex(idx >= 0 ? idx : -idx - 1);
+  }
+
+  @NotNull
+  @Override
+  public LongIterator iterator() {
+    return iteratorFromIndex(0);
+  }
+
+  @NotNull
+  protected LongIterator iteratorFromIndex(final int idx) {
+    if (idx == myList.size()) {
       return LongIterator.EMPTY;
     }
-    return myList.iterator(idx);
+    final LongIterator iterator = myList.iterator(idx);
+    if (myIsUnique) {
+      return iterator;
+    } else {
+      return new LongFindingIterator() {
+        private int curIdx;
+
+        @Override
+        protected boolean findNext() throws ConcurrentModificationException {
+          curIdx = hasValue() ? myList.getNextDifferentValueIndex(curIdx) : idx;
+
+          if (curIdx == myList.size()) {
+            return false;
+          }
+          myNext = myList.get(curIdx);
+          return true;
+        }
+      };
+    }
   }
 
   @Override
@@ -80,19 +114,13 @@ public class LongListSet extends AbstractLongSet implements LongSortedSet {
   @Override
   public int size() {
     if (mySize == -1) {
-      mySize = myList.size();
-      for (int i = 1; i < myList.size(); i++) {
-        if (myList.get(i) == myList.get(i - 1)) {
-          mySize--;
-        }
+      mySize = 0;
+      int i = 0;
+      while (i != myList.size()) {
+        i = myList.getNextDifferentValueIndex(i);
+        mySize++;
       }
     }
     return mySize;
-  }
-
-  @NotNull
-  @Override
-  public LongIterator iterator() {
-    return myList.iterator();
   }
 }
