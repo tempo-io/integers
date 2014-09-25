@@ -123,4 +123,8 @@ public class LongListSet extends AbstractLongSet implements LongSortedSet {
     }
     return mySize;
   }
+
+  public LongList getList() {
+    return myList;
+  }
 }
