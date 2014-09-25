@@ -42,7 +42,7 @@ public interface LongIntMap extends LongIntIterable {
 
   /**
    * @return true if this map contains any of the elements produced by {@code keys}.
-   * Otherwise false. If {@code keys} would produce no elements always returns false.
+   * Otherwise false. If {@code keys} produce no elements returns false.
    */
   boolean containsAnyKey(LongIterable keys);
 

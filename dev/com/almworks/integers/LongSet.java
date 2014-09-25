@@ -35,7 +35,7 @@ public interface LongSet extends LongSizedIterable {
 
   /**
    * @return true if this set contains any of the elements produced by {@code iterable}.
-   * Otherwise false. If {@code iterable} would produce no elements always returns false.
+   * Otherwise false. If {@code iterable} produce no elements returns false.
    */
   boolean containsAny(LongIterable iterable);
 

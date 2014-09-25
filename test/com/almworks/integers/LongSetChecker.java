@@ -76,13 +76,6 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
       assertFalse(set.containsAny(LongSet.EMPTY));
       assertFalse(set.containsAny(LongList.EMPTY));
       assertFalse(set.containsAny(LongIterator.EMPTY));
-      try {
-        set.containsAny(null);
-        fail();
-      } catch (NullPointerException _) {
-        // ok
-      }
-
     }
 
     LongArray check = collectIterables(create(Long.MIN_VALUE, Long.MAX_VALUE, 239), LongProgression.range(10));
@@ -226,9 +219,6 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
     for (LongSet set : createSets(arithmetic(1, 5, 2))) {
       LongSortedSet sortedSet = (LongSortedSet) set;
       for (int i = 0; i < 9; i++) {
-        if (i == 6) {
-          System.out.println("asdf");
-        }
         assertEquals(i + 1 - (i % 2), sortedSet.tailIterator(i).nextValue());
       }
     }
