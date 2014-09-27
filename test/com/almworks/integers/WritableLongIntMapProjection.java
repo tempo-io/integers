@@ -104,7 +104,7 @@ public class WritableLongIntMapProjection implements WritableLongSet {
 
   @Override
   public boolean containsAny(LongIterable iterable) {
-    return myMap.containsAnyKey(iterable);
+    return myMap.containsAnyKeys(iterable);
   }
 
   @Override

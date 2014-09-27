@@ -20,6 +20,7 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
+import java.util.ConcurrentModificationException;
 
 /**
  * Class that allows you to consider the specified sorted unique list as set.
@@ -27,32 +28,72 @@ import org.jetbrains.annotations.NotNull;
  */
 public class IntListSet extends AbstractIntSet implements IntSortedSet {
   protected final IntList myList;
+  protected int mySize;
+  protected final boolean myIsUnique;
 
-  public static IntListSet asSet(IntList sortedUniqueList) {
+  public static IntListSet setFromSortedUniqueList(IntList sortedUniqueList) {
     assert sortedUniqueList.isSortedUnique();
-    return new IntListSet(sortedUniqueList);
+    return new IntListSet(sortedUniqueList, true);
   }
 
-  private IntListSet(IntList sortedUniqueList) {
-    assert sortedUniqueList.isSortedUnique();
-    myList = sortedUniqueList;
+  public static IntListSet setFromSortedList(IntList sortedList) {
+    assert sortedList.isSorted();
+    return new IntListSet(sortedList, false);
   }
+
+  private IntListSet(IntList sortedList, boolean isUnique) {
+    assert isUnique ? sortedList.isSortedUnique() : sortedList.isSorted();
+    myList = sortedList;
+    mySize = isUnique ? sortedList.size() : -1;
+    myIsUnique = isUnique;
+  }
+
 
   @Override
   protected void toNativeArrayImpl(int[] dest, int destPos) {
-    myList.toNativeArray(0, dest, destPos, myList.size());
+    if (myIsUnique) {
+      myList.toNativeArray(0, dest, destPos, myList.size());
+    } else {
+      super.toNativeArrayImpl(dest, destPos);
+    }
   }
 
   @Override
   public IntIterator tailIterator(int fromElement) {
     int idx = myList.binarySearch(fromElement);
-    if (idx < 0) {
-      idx = -idx - 1;
-    }
-    if (idx == size()) {
+    return iteratorFromIndex(idx >= 0 ? idx : -idx - 1);
+  }
+
+  @NotNull
+  @Override
+  public IntIterator iterator() {
+    return iteratorFromIndex(0);
+  }
+
+  @NotNull
+  protected IntIterator iteratorFromIndex(final int idx) {
+    if (idx == myList.size()) {
       return IntIterator.EMPTY;
     }
-    return myList.iterator(idx);
+    final IntIterator iterator = myList.iterator(idx);
+    if (myIsUnique) {
+      return iterator;
+    } else {
+      return new IntFindingIterator() {
+        private int curIdx;
+
+        @Override
+        protected boolean findNext() throws ConcurrentModificationException {
+          curIdx = hasValue() ? myList.getNextDifferentValueIndex(curIdx) : idx;
+
+          if (curIdx == myList.size()) {
+            return false;
+          }
+          myNext = myList.get(curIdx);
+          return true;
+        }
+      };
+    }
   }
 
   @Override
@@ -72,12 +113,18 @@ public class IntListSet extends AbstractIntSet implements IntSortedSet {
 
   @Override
   public int size() {
-    return myList.size();
+    if (mySize == -1) {
+      mySize = 0;
+      int i = 0;
+      while (i != myList.size()) {
+        i = myList.getNextDifferentValueIndex(i);
+        mySize++;
+      }
+    }
+    return mySize;
   }
 
-  @NotNull
-  @Override
-  public IntIterator iterator() {
-    return myList.iterator();
+  public IntList getList() {
+    return myList;
   }
 }

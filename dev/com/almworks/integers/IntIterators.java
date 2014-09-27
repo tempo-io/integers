@@ -288,6 +288,15 @@ public class IntIterators {
   }
 
   /**
+   * @param include sorted unique {@code IntIterable}
+   * @param exclude sorted unique {@code IntIterable}
+   * @return complement of iterables.
+   * */
+  public static IntIterator minusIterator(IntIterable include, IntIterable exclude) {
+    return new IntMinusIterator(include, exclude);
+  }
+
+  /**
    * @param currentModCount A function that returns the current modification count.
    *                        The function argument has no meaning and should be ignored.
    * @return wrapper around the specified iterator that throws ConcurrentModificationException if

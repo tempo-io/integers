@@ -37,6 +37,14 @@ public abstract class Abstract#E#Set implements #E#Set {
   }
 
   @Override
+  public boolean containsAny(#E#Iterable iterable) {
+    for (#E#Iterator it: iterable) {
+      if (contains(it.value())) return true;
+    }
+    return false;
+  }
+
+  @Override
   public boolean isEmpty() {
     return size() == 0;
   }

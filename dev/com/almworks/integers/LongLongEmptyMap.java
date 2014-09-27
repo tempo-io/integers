@@ -38,6 +38,11 @@ public class LongLongEmptyMap implements LongLongMap {
   }
 
   @Override
+  public boolean containsAnyKeys(LongIterable keys) {
+    return false;
+  }
+
+  @Override
   public int size() {
     return 0;
   }

@@ -19,25 +19,22 @@ package com.almworks.integers;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.almworks.integers.LongListSet.setFromSortedList;
-import static com.almworks.integers.LongListSet.setFromSortedUniqueList;
-
 public class LongListSetTests extends LongSetChecker<LongListSet> {
   @Override
   protected List<LongListSet> createSets(LongList sortedUniqueList) {
     List<LongListSet> sets = new ArrayList<LongListSet>();
-    sets.add(setFromSortedList(sortedUniqueList));
-    sets.add(setFromSortedUniqueList(sortedUniqueList));
+    sets.add(LongListSet.setFromSortedList(sortedUniqueList));
+    sets.add(LongListSet.setFromSortedUniqueList(sortedUniqueList));
     for (int i = 1; i < 4; i++) {
       LongList sortedList = LongSameValuesList.create(sortedUniqueList, IntIterators.repeat(i));
-      sets.add(setFromSortedList(sortedList));
+      sets.add(LongListSet.setFromSortedList(sortedList));
     }
     return sets;
   }
 
   @Override
   protected LongListSet createSet(LongList sortedUniqueList) {
-    return setFromSortedList(sortedUniqueList);
+    return LongListSet.setFromSortedList(sortedUniqueList);
   }
 
   @Override

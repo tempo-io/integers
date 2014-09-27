@@ -27,6 +27,7 @@
 ant/build.gant -text
 ant/build.properties -text
 ant/build.xml -text
+ant/script_for_rebuild.sh -text
 dev/com/almworks/integers/AbstractIntObjIterator.java -text
 dev/com/almworks/integers/AbstractIntObjIteratorWithFlag.java -text
 dev/com/almworks/integers/AbstractWritableIntObjMap.java -text

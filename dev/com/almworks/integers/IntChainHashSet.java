@@ -174,17 +174,10 @@ public class IntChainHashSet extends AbstractWritableIntSet implements WritableI
 
   @Override
   public void addAll(int... values) {
-    modified();
-    int newSize = size() + values.length;
-    if (newSize >= myThreshold) {
-      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
-      resize(newCap);
-    }
-    super.addAll(values);
+    addAll(new IntArray(values));
   }
 
-  @Override
-  public void addAll(IntList values) {
+  public void addAll(IntSizedIterable values) {
     modified();
     int newSize = size() + values.size();
     if (newSize >= myThreshold) {
@@ -194,6 +187,11 @@ public class IntChainHashSet extends AbstractWritableIntSet implements WritableI
     for (IntIterator it: values) {
       include1(it.value());
     }
+  }
+
+  @Override
+  public void addAll(IntList values) {
+    addAll((IntSizedIterable)values);
   }
 
   @Override

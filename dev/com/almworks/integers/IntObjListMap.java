@@ -142,7 +142,7 @@ public class IntObjListMap<T> extends AbstractWritableIntObjMap<T> {
 
   @Override
   public IntSortedSet keySet() {
-    return IntListSet.asSet(myKeys);
+    return IntListSet.setFromSortedUniqueList(myKeys);
   }
 
   public int size() {

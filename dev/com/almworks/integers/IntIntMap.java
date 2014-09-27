@@ -41,6 +41,12 @@ public interface IntIntMap extends IntIntIterable {
   boolean containsKeys(IntIterable keys);
 
   /**
+   * @return true if this map contains any of the elements produced by {@code keys}.
+   * Otherwise false. If {@code keys} produce no elements returns false.
+   */
+  boolean containsAnyKeys(IntIterable keys);
+
+  /**
    * @return the number of keys/values in this map(its cardinality)
    */
   int size();

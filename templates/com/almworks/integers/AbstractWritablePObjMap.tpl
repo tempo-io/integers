@@ -49,6 +49,14 @@ public abstract class AbstractWritable#E#ObjMap<T> implements Writable#E#ObjMap<
   }
 
   @Override
+  public boolean containsAnyKeys(#E#Iterable iterable) {
+    for (#E#Iterator it: iterable) {
+      if (containsKey(it.value())) return true;
+    }
+    return false;
+  }
+
+  @Override
   public #E#Set keySet() {
     return new Abstract#E#Set() {
       @Override

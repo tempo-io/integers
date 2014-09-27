@@ -38,6 +38,11 @@ public class IntLongEmptyMap implements IntLongMap {
   }
 
   @Override
+  public boolean containsAnyKeys(IntIterable keys) {
+    return false;
+  }
+
+  @Override
   public int size() {
     return 0;
   }

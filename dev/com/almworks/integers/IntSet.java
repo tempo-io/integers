@@ -34,6 +34,12 @@ public interface IntSet extends IntSizedIterable {
   boolean containsAll(IntIterable iterable);
 
   /**
+   * @return true if this set contains any of the elements produced by {@code iterable}.
+   * Otherwise false. If {@code iterable} produce no elements returns false.
+   */
+  boolean containsAny(IntIterable iterable);
+
+  /**
    * @return the number of elements in this set (its cardinality)
    */
   int size();

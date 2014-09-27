@@ -40,6 +40,14 @@ public abstract class AbstractIntSet implements IntSet {
   }
 
   @Override
+  public boolean containsAny(IntIterable iterable) {
+    for (IntIterator it: iterable) {
+      if (contains(it.value())) return true;
+    }
+    return false;
+  }
+
+  @Override
   public boolean isEmpty() {
     return size() == 0;
   }

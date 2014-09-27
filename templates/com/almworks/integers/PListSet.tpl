@@ -17,6 +17,7 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
+import java.util.ConcurrentModificationException;
 
 /**
  * Class that allows you to consider the specified sorted unique list as set.
@@ -24,32 +25,72 @@ import org.jetbrains.annotations.NotNull;
  */
 public class #E#ListSet extends Abstract#E#Set implements #E#SortedSet {
   protected final #E#List myList;
+  protected int mySize;
+  protected final boolean myIsUnique;
 
-  public static #E#ListSet asSet(#E#List sortedUniqueList) {
+  public static #E#ListSet setFromSortedUniqueList(#E#List sortedUniqueList) {
     assert sortedUniqueList.isSortedUnique();
-    return new #E#ListSet(sortedUniqueList);
+    return new #E#ListSet(sortedUniqueList, true);
   }
 
-  private #E#ListSet(#E#List sortedUniqueList) {
-    assert sortedUniqueList.isSortedUnique();
-    myList = sortedUniqueList;
+  public static #E#ListSet setFromSortedList(#E#List sortedList) {
+    assert sortedList.isSorted();
+    return new #E#ListSet(sortedList, false);
   }
+
+  private #E#ListSet(#E#List sortedList, boolean isUnique) {
+    assert isUnique ? sortedList.isSortedUnique() : sortedList.isSorted();
+    myList = sortedList;
+    mySize = isUnique ? sortedList.size() : -1;
+    myIsUnique = isUnique;
+  }
+
 
   @Override
   protected void toNativeArrayImpl(#e#[] dest, int destPos) {
-    myList.toNativeArray(0, dest, destPos, myList.size());
+    if (myIsUnique) {
+      myList.toNativeArray(0, dest, destPos, myList.size());
+    } else {
+      super.toNativeArrayImpl(dest, destPos);
+    }
   }
 
   @Override
   public #E#Iterator tailIterator(#e# fromElement) {
     int idx = myList.binarySearch(fromElement);
-    if (idx < 0) {
-      idx = -idx - 1;
-    }
-    if (idx == size()) {
+    return iteratorFromIndex(idx >= 0 ? idx : -idx - 1);
+  }
+
+  @NotNull
+  @Override
+  public #E#Iterator iterator() {
+    return iteratorFromIndex(0);
+  }
+
+  @NotNull
+  protected #E#Iterator iteratorFromIndex(final int idx) {
+    if (idx == myList.size()) {
       return #E#Iterator.EMPTY;
     }
-    return myList.iterator(idx);
+    final #E#Iterator iterator = myList.iterator(idx);
+    if (myIsUnique) {
+      return iterator;
+    } else {
+      return new #E#FindingIterator() {
+        private int curIdx;
+
+        @Override
+        protected boolean findNext() throws ConcurrentModificationException {
+          curIdx = hasValue() ? myList.getNextDifferentValueIndex(curIdx) : idx;
+
+          if (curIdx == myList.size()) {
+            return false;
+          }
+          myNext = myList.get(curIdx);
+          return true;
+        }
+      };
+    }
   }
 
   @Override
@@ -69,12 +110,18 @@ public class #E#ListSet extends Abstract#E#Set implements #E#SortedSet {
 
   @Override
   public int size() {
-    return myList.size();
+    if (mySize == -1) {
+      mySize = 0;
+      int i = 0;
+      while (i != myList.size()) {
+        i = myList.getNextDifferentValueIndex(i);
+        mySize++;
+      }
+    }
+    return mySize;
   }
 
-  @NotNull
-  @Override
-  public #E#Iterator iterator() {
-    return myList.iterator();
+  public #E#List getList() {
+    return myList;
   }
 }

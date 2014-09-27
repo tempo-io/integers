@@ -187,6 +187,32 @@ public class IntOpenHashSet extends AbstractWritableIntSet implements WritableIn
     return true;
   }
 
+  @Override
+  public void addAll(int... values) {
+    if (values.length > 10) {
+      addAll(new IntArray(values));
+    } else {
+      super.addAll(values);
+    }
+  }
+
+  public void addAll(IntSizedIterable values) {
+    modified();
+    int newSize = size() + values.size();
+    if (newSize > myThreshold) {
+      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
+      resize(newCap);
+    }
+    for (IntIterator it: values) {
+      include1(it.value());
+    }
+  }
+
+  @Override
+  public void addAll(IntList values) {
+    addAll((IntSizedIterable)values);
+  }
+
   /**
    * Shift all the slot-conflicting values allocated to (and including) <code>slot</code>.
    * copied from hppc

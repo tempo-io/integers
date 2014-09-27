@@ -41,6 +41,11 @@ public class IntObjEmptyMap<T> implements IntObjMap<T> {
   }
 
   @Override
+  public boolean containsAnyKeys(IntIterable keys) {
+    return false;
+  }
+
+  @Override
   public int size() {
     return 0;
   }

@@ -53,6 +53,10 @@ public class IntTwoWayMap implements IntIntMap {
     return containsKeys(keys, false);
   }
 
+  public boolean containsAnyKeys(IntIterable keys) {
+    return containsKeys(keys);
+  }
+
   @Override
   public boolean containsKeys(IntIterable keys) {
     for (IntIterator key : keys) {
@@ -162,7 +166,7 @@ public class IntTwoWayMap implements IntIntMap {
 
   @Override
   public IntSet keySet() {
-    return IntListSet.asSet(myKeys);
+    return IntListSet.setFromSortedUniqueList(myKeys);
   }
 
   public List<Entry> toList() {
