@@ -20,7 +20,6 @@
 package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ConcurrentModificationException;
 
 /**
@@ -48,6 +47,7 @@ public class LongListSet extends AbstractLongSet implements LongSortedSet {
     mySize = isUnique ? sortedList.size() : -1;
     myIsUnique = isUnique;
   }
+
 
   @Override
   protected void toNativeArrayImpl(long[] dest, int destPos) {

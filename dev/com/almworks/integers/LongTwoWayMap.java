@@ -53,6 +53,10 @@ public class LongTwoWayMap implements LongLongMap {
     return containsKeys(keys, false);
   }
 
+  public boolean containsAnyKeys(LongIterable keys) {
+    return containsKeys(keys);
+  }
+
   @Override
   public boolean containsKeys(LongIterable keys) {
     for (LongIterator key : keys) {

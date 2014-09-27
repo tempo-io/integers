@@ -44,7 +44,7 @@ public interface LongIntMap extends LongIntIterable {
    * @return true if this map contains any of the elements produced by {@code keys}.
    * Otherwise false. If {@code keys} produce no elements returns false.
    */
-  boolean containsAnyKey(LongIterable keys);
+  boolean containsAnyKeys(LongIterable keys);
 
   /**
    * @return the number of keys/values in this map(its cardinality)

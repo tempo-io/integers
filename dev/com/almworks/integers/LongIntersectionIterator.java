@@ -17,7 +17,6 @@
 // CODE GENERATED FROM com/almworks/integers/PIntersectionIterator.tpl
 
 
-
 package com.almworks.integers;
 
 import java.util.ArrayList;

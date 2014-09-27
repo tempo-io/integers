@@ -38,7 +38,7 @@ public class LongIntEmptyMap implements LongIntMap {
   }
 
   @Override
-  public boolean containsAnyKey(LongIterable keys) {
+  public boolean containsAnyKeys(LongIterable keys) {
     return false;
   }
 

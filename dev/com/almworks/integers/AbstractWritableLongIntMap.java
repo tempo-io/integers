@@ -49,8 +49,7 @@ public abstract class AbstractWritableLongIntMap implements WritableLongIntMap {
     return true;
   }
 
-  @Override
-  public boolean containsAnyKey(LongIterable keys) {
+  public boolean containsAnyKeys(LongIterable keys) {
     for (LongIterator it: keys) {
       if (containsKey(it.value())) return true;
     }
