@@ -38,6 +38,12 @@ public interface #E#ObjMap<T> extends #E#ObjIterable<T> {
   boolean containsKeys(#E#Iterable keys);
 
   /**
+   * @return true if this map contains any of the elements produced by {@code keys}.
+   * Otherwise false. If {@code keys} produce no elements returns false.
+   */
+  boolean containsAnyKeys(#E#Iterable keys);
+
+  /**
    * @return the number of keys/values in this map(its cardinality)
    */
   int size();

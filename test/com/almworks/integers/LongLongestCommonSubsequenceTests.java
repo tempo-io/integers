@@ -29,7 +29,9 @@ public class LongLongestCommonSubsequenceTests extends IntegersFixture {
         {{1}, {1}, {1}},
         {{1, 2, 3, 4, 5}, {1, 2, 3, 4, 5}, {1, 2, 3, 4, 5}},
         {{1, 2, 3, 4, 5}, {}, {}},
-        {{}, {1, 2, 3, 4, 5}, {},}};
+        {{}, {1, 2, 3, 4, 5}, {},},
+        {{0, 1, 2, 3}, {3, 1, 2, 0}, {1, 2}},
+        {{0, 1, 2, 3, 4, 5, 6, 7}, {7, 1, 2, 3, 4, 5, 6, 0}, {1, 2, 3, 4, 5, 6}}};
     for (long[][] curCase : cases) {
       LongArray a = new LongArray(curCase[0]);
       LongArray b = new LongArray(curCase[1]);

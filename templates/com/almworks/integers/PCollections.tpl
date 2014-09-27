@@ -55,7 +55,7 @@ public class #E#Collections {
     return toSorted(true, values);
   }
 
-  public static #E#List toSorted(boolean unique, #E#Iterable values) {
+  public static #E#List toSorted(boolean unique, @NotNull #E#Iterable values) {
     if (values instanceof #E#List) {
       #E#List list = (#E#List) values;
       if ((unique && list.isSortedUnique()) || (!unique && list.isSorted())) return list;
@@ -493,18 +493,48 @@ public class #E#Collections {
   }
 
   /**
-   * @return intersection of the two sets
+   * @return sorted intersection of the two sets
    */
   @NotNull
-  public static Writable#E#SortedSet intersection(@NotNull #E#Set first, @NotNull #E#Set second) {
-    #E#Array[] arrays = {first.toArray(), second.toArray()};
-    if (!(first instanceof #E#SortedSet)) arrays[0].sort();
-    if (!(second instanceof #E#SortedSet)) arrays[1].sort();
-    assert arrays[0].size() == first.size() && arrays[1].size() == second.size();
+  public static Writable#E#SortedSet toSortedIntersection(@NotNull #E#Set first, @NotNull #E#Set second) {
+    #E#Array res = collectSetsIntersection(first, second, new #E#Array());
+    if (!(first instanceof #E#SortedSet || second instanceof #E#SortedSet)) {
+      res.sort();
+    }
+    return #E#AmortizedSet.createFromSortedUniqueArray(res);
+  }
 
-    int dest = arrays[0].size() <= arrays[1].size() ? 1 : 0;
-    arrays[dest].retainSorted(arrays[1 - dest]);
-    return #E#AmortizedSet.createFromSortedUniqueArray(arrays[dest]);
+  /**
+   * @return intersection of the two sets
+   */
+  public static Writable#E#Set intersection(@NotNull #E#Set first, @NotNull #E#Set second) {
+    return collectSetsIntersection(first, second, new #E#OpenHashSet());
+  }
+
+  private static <T extends #E#Collector> T collectSetsIntersection(#E#Set first, #E#Set second, T collector) {
+    if (first instanceof #E#SortedSet && second instanceof #E#SortedSet) {
+      collector.addAll(new #E#IntersectionIterator(first, second));
+    }
+    if (first instanceof #E#SortedSet || first.size() <= second.size()) {
+      collectElements(first, second, collector);
+    } else {
+      collectElements(second, first, collector);
+    }
+    return collector;
+  }
+
+  /**
+   * Adds all elements to {@code collector} from {@code iterable} that are contained in {@code filter} set
+   * @return {@code collector}
+   */
+  public static <T extends #E#Collector> T collectElements(#E#Iterable iterable, #E#Set filter, T collector) {
+    for (#E#Iterator ii : iterable) {
+      #e# value = ii.value();
+      if (filter.contains(value)) {
+        collector.add(value);
+      }
+    }
+    return collector;
   }
 
   /**

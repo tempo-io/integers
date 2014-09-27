@@ -42,11 +42,18 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
   }
 
   @Override
-  public boolean containsKeys(IntIterable iterable) {
-    for (IntIterator it: iterable) {
+  public boolean containsKeys(IntIterable keys) {
+    for (IntIterator it: keys) {
       if (!containsKey(it.value())) return false;
     }
     return true;
+  }
+
+  public boolean containsAnyKeys(IntIterable keys) {
+    for (IntIterator it: keys) {
+      if (containsKey(it.value())) return true;
+    }
+    return false;
   }
 
   @Override
@@ -178,39 +185,18 @@ public abstract class AbstractWritableIntLongMap implements WritableIntLongMap {
     return toString(new StringBuilder()).toString();
   }
 
-  private void joinCurrent(StringBuilder[] cur, StringBuilder[] builders) {
-    int maxLength = Math.max(cur[0].length(), cur[1].length());
-    for (int idx = 0; idx < 2; idx++) {
-      for (int i = 0; i < maxLength - cur[idx].length(); i++) {
-        builders[idx].append(' ');
-      }
-      builders[idx].append(cur[idx]);
-    }
-  }
-
   public String toTableString() {
     StringBuilder[] builders = {new StringBuilder(), new StringBuilder()};
     StringBuilder[] cur = {new StringBuilder(), new StringBuilder()};
 
     cur[0] = appendShortName(cur[0], this).append(" /");
     cur[1].append(size()).append(" \\");
-    joinCurrent(cur, builders);
+    IntLongIterators.joinCurrent(cur, builders);
 
-    String sep = "";
-    for (IntLongIterator ii : this) {
-      cur[0].setLength(0);
-      cur[1].setLength(0);
+    String[] elements = IntLongIterators.toTableString(this);
+    builders[0].append(elements[0]);
+    builders[1].append(elements[1]);
 
-      cur[0].append(ii.left());
-      cur[1].append(ii.right());
-
-      builders[0].append(sep);
-      builders[1].append(sep);
-
-
-      joinCurrent(cur, builders);
-      sep = ", ";
-    }
     builders[0].append(" \\\n").append(builders[1]).append(" /");
     return builders[0].toString();
   }

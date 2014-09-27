@@ -285,6 +285,15 @@ public class #E#Iterators {
   }
 
   /**
+   * @param include sorted unique {@code #E#Iterable}
+   * @param exclude sorted unique {@code #E#Iterable}
+   * @return complement of iterables.
+   * */
+  public static #E#Iterator minusIterator(#E#Iterable include, #E#Iterable exclude) {
+    return new #E#MinusIterator(include, exclude);
+  }
+
+  /**
    * @param currentModCount A function that returns the current modification count.
    *                        The function argument has no meaning and should be ignored.
    * @return wrapper around the specified iterator that throws ConcurrentModificationException if

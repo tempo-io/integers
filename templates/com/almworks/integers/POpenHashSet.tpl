@@ -184,6 +184,32 @@ public class #E#OpenHashSet extends AbstractWritable#E#Set implements Writable#E
     return true;
   }
 
+  @Override
+  public void addAll(#e#... values) {
+    if (values.length > 10) {
+      addAll(new #E#Array(values));
+    } else {
+      super.addAll(values);
+    }
+  }
+
+  public void addAll(#E#SizedIterable values) {
+    modified();
+    int newSize = size() + values.size();
+    if (newSize > myThreshold) {
+      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
+      resize(newCap);
+    }
+    for (#E#Iterator it: values) {
+      include1(it.value());
+    }
+  }
+
+  @Override
+  public void addAll(#E#List values) {
+    addAll((#E#SizedIterable)values);
+  }
+
   /**
    * Shift all the slot-conflicting values allocated to (and including) <code>slot</code>.
    * copied from hppc

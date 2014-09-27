@@ -174,17 +174,10 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
 
   @Override
   public void addAll(long... values) {
-    modified();
-    int newSize = size() + values.length;
-    if (newSize >= myThreshold) {
-      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
-      resize(newCap);
-    }
-    super.addAll(values);
+    addAll(new LongArray(values));
   }
 
-  @Override
-  public void addAll(LongList values) {
+  public void addAll(LongSizedIterable values) {
     modified();
     int newSize = size() + values.size();
     if (newSize >= myThreshold) {
@@ -194,6 +187,11 @@ public class LongChainHashSet extends AbstractWritableLongSet implements Writabl
     for (LongIterator it: values) {
       include1(it.value());
     }
+  }
+
+  @Override
+  public void addAll(LongList values) {
+    addAll((LongSizedIterable)values);
   }
 
   @Override

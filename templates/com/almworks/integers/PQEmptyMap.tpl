@@ -35,6 +35,11 @@ public class #E##F#EmptyMap implements #E##F#Map {
   }
 
   @Override
+  public boolean containsAnyKeys(#E#Iterable keys) {
+    return false;
+  }
+
+  @Override
   public int size() {
     return 0;
   }

@@ -139,7 +139,7 @@ public class #E#ObjListMap<T> extends AbstractWritable#E#ObjMap<T> {
 
   @Override
   public #E#SortedSet keySet() {
-    return #E#ListSet.asSet(myKeys);
+    return #E#ListSet.setFromSortedUniqueList(myKeys);
   }
 
   public int size() {

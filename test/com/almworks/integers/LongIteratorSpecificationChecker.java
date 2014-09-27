@@ -209,7 +209,7 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
   }
 
   private void testSimple() {
-    for(LongIterator it: getter.get(0, 1, 2)) {
+    for (LongIterator it : getter.get(0, 1, 2)) {
       assertFalse(it.hasValue());
       checkValueAndCatchNSEE(it);
       assertTrue(it.hasNext());
@@ -228,8 +228,8 @@ public class LongIteratorSpecificationChecker<I extends LongIterator> {
 
       assertFalse(it.hasNext());
       try {
-       it.next();
-       fail();
+        it.next();
+        fail();
       } catch (NoSuchElementException _) {
         // ok
       }

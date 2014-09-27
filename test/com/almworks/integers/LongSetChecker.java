@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.SORTED_UNIQUE;
-import static com.almworks.integers.LongCollections.concatLists;
-import static com.almworks.integers.LongCollections.map;
+import static com.almworks.integers.LongArray.create;
+import static com.almworks.integers.LongCollections.*;
 import static com.almworks.integers.LongIteratorSpecificationChecker.ValuesType;
-import static com.almworks.integers.LongListSet.asSet;
+import static com.almworks.integers.LongListSet.setFromSortedUniqueList;
 import static com.almworks.integers.LongProgression.arithmetic;
 import static com.almworks.integers.LongProgression.range;
 
@@ -65,6 +65,25 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         assertTrue(curSet.containsAll(curSet.iterator()));
         assertTrue(curSet.containsAll(LongList.EMPTY));
         assertFalse(curSet.containsAll(concatLists(arr, new LongList.Single(arr.getLast(0) + 1))));
+        assertEquals(arr.size(), curSet.size());
+      }
+    }
+  }
+
+  public void testContainsAny() {
+    for (T set : createSets(LongList.EMPTY)) {
+      assertFalse(set.containsAny(set));
+      assertFalse(set.containsAny(LongSet.EMPTY));
+      assertFalse(set.containsAny(LongList.EMPTY));
+      assertFalse(set.containsAny(LongIterator.EMPTY));
+    }
+
+    LongArray check = collectIterables(create(Long.MIN_VALUE, Long.MAX_VALUE, 239), LongProgression.range(10));
+    check.sortUnique();
+    LongArray list = new LongArray(LongProgression.range(0, 10, 2));
+    for (T set : createSets(list)) {
+      for (LongArray array : LongCollections.allSubLists(check)) {
+        assertEquals(hasIntersection(list, check), set.containsAny(check));
       }
     }
   }
@@ -127,7 +146,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
 
   public void testGetBounds() {
     if (!isSortedSet()) return;
-    LongArray values = LongArray.create(MIN, MIN + 1, 0, 1, MAX - 1, MAX);
+    LongArray values = create(MIN, MIN + 1, 0, 1, MAX - 1, MAX);
     for (LongArray array : LongCollections.allSubLists(values)) {
       checkBounds(array);
     }
@@ -197,9 +216,9 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
 
   public void testTailIteratorSimple() {
     if (!isSortedSet()) return;
-    for (LongSet set : createSets(arithmetic(1, 50, 2))) {
+    for (LongSet set : createSets(arithmetic(1, 5, 2))) {
       LongSortedSet sortedSet = (LongSortedSet) set;
-      for (int i = 0; i < 99; i++) {
+      for (int i = 0; i < 9; i++) {
         assertEquals(i + 1 - (i % 2), sortedSet.tailIterator(i).nextValue());
       }
     }
@@ -222,7 +241,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         for (int j = 0; j < testValues.size(); j++) {
           long key = testValues.get(j);
           int ind = expected. binarySearch(key);
-          CHECK.order(expected.iterator(ind >= 0 ? ind : -ind - 1), sortedSet.tailIterator(key));
+          CHECK.order(sortedSet.tailIterator(key), expected.iterator(ind >= 0 ? ind : -ind - 1));
         }
       }
     }
@@ -271,7 +290,7 @@ public abstract class LongSetChecker<T extends LongSet> extends IntegersFixture 
         assertTrue(set0.equals(set0));
         assertFalse(set0.equals(null));
         assertFalse(set0.equals(LongSet.EMPTY));
-        assertFalse(set0.equals(asSet(list)));
+        assertFalse(set0.equals(setFromSortedUniqueList(list)));
         for (T set1 : createSets(array)) {
           assertTrue(set0.equals(set1));
           assertTrue(set1.equals(set0));

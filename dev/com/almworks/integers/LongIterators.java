@@ -288,6 +288,15 @@ public class LongIterators {
   }
 
   /**
+   * @param include sorted unique {@code LongIterable}
+   * @param exclude sorted unique {@code LongIterable}
+   * @return complement of iterables.
+   * */
+  public static LongIterator minusIterator(LongIterable include, LongIterable exclude) {
+    return new LongMinusIterator(include, exclude);
+  }
+
+  /**
    * @param currentModCount A function that returns the current modification count.
    *                        The function argument has no meaning and should be ignored.
    * @return wrapper around the specified iterator that throws ConcurrentModificationException if

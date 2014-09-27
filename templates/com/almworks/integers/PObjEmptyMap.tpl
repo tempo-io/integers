@@ -38,6 +38,11 @@ public class #E#ObjEmptyMap<T> implements #E#ObjMap<T> {
   }
 
   @Override
+  public boolean containsAnyKeys(#E#Iterable keys) {
+    return false;
+  }
+
+  @Override
   public int size() {
     return 0;
   }

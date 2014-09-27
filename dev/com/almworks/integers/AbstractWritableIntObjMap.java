@@ -52,6 +52,14 @@ public abstract class AbstractWritableIntObjMap<T> implements WritableIntObjMap<
   }
 
   @Override
+  public boolean containsAnyKeys(IntIterable iterable) {
+    for (IntIterator it: iterable) {
+      if (containsKey(it.value())) return true;
+    }
+    return false;
+  }
+
+  @Override
   public IntSet keySet() {
     return new AbstractIntSet() {
       @Override

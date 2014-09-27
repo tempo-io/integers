@@ -41,6 +41,11 @@ public class LongObjEmptyMap<T> implements LongObjMap<T> {
   }
 
   @Override
+  public boolean containsAnyKeys(LongIterable keys) {
+    return false;
+  }
+
+  @Override
   public int size() {
     return 0;
   }

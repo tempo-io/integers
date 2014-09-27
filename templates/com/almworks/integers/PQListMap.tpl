@@ -236,7 +236,7 @@ public class #E##F#ListMap extends AbstractWritable#E##F#Map {
 
   @Override
   public #E#SortedSet keySet() {
-    return #E#ListSet.asSet(myKeys);
+    return #E#ListSet.setFromSortedUniqueList(myKeys);
   }
 
   /**

@@ -171,17 +171,10 @@ public class #E#ChainHashSet extends AbstractWritable#E#Set implements Writable#
 
   @Override
   public void addAll(#e#... values) {
-    modified();
-    int newSize = size() + values.length;
-    if (newSize >= myThreshold) {
-      int newCap = IntegersUtils.nextHighestPowerOfTwo((int)(newSize / myLoadFactor) + 1);
-      resize(newCap);
-    }
-    super.addAll(values);
+    addAll(new #E#Array(values));
   }
 
-  @Override
-  public void addAll(#E#List values) {
+  public void addAll(#E#SizedIterable values) {
     modified();
     int newSize = size() + values.size();
     if (newSize >= myThreshold) {
@@ -191,6 +184,11 @@ public class #E#ChainHashSet extends AbstractWritable#E#Set implements Writable#
     for (#E#Iterator it: values) {
       include1(it.value());
     }
+  }
+
+  @Override
+  public void addAll(#E#List values) {
+    addAll((#E#SizedIterable)values);
   }
 
   @Override

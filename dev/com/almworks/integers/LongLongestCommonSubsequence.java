@@ -57,7 +57,6 @@ public class LongLongestCommonSubsequence {
       }
     }
     assert ri == -1 : ri + " " + i + " " + j + " " + aSequence + " " + bSequence;
-    assert i == -1 || j == -1 : i + " " + j + " " + aSequence + " " + bSequence;
     return new LongArray(r);
   }
 

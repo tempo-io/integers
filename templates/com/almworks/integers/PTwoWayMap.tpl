@@ -50,6 +50,10 @@ public class #E#TwoWayMap implements #E##E#Map {
     return containsKeys(keys, false);
   }
 
+  public boolean containsAnyKeys(#E#Iterable keys) {
+    return containsKeys(keys);
+  }
+
   @Override
   public boolean containsKeys(#E#Iterable keys) {
     for (#E#Iterator key : keys) {
@@ -159,7 +163,7 @@ public class #E#TwoWayMap implements #E##E#Map {
 
   @Override
   public #E#Set keySet() {
-    return #E#ListSet.asSet(myKeys);
+    return #E#ListSet.setFromSortedUniqueList(myKeys);
   }
 
   public List<Entry> toList() {

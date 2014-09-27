@@ -52,6 +52,14 @@ public abstract class AbstractWritableLongObjMap<T> implements WritableLongObjMa
   }
 
   @Override
+  public boolean containsAnyKeys(LongIterable iterable) {
+    for (LongIterator it: iterable) {
+      if (containsKey(it.value())) return true;
+    }
+    return false;
+  }
+
+  @Override
   public LongSet keySet() {
     return new AbstractLongSet() {
       @Override
