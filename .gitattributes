@@ -1,156 +1,68 @@
-* text=auto !eol
-.idea/Additional[!!-~]files.iml -text
-.idea/Build.iml -text
-.idea/Collections.iml -text
-.idea/Generated[!!-~]files.iml -text
-.idea/Generator.iml -text
-.idea/ant.xml -text
-.idea/compiler.xml -text
-.idea/copyright/integers.xml -text
-.idea/copyright/profiles_settings.xml -text
-.idea/encodings.xml -text
-.idea/inspectionProfiles/Project_Default.xml -text
-.idea/inspectionProfiles/profiles_settings.xml -text
-.idea/libraries/groovy.xml -text
-.idea/libraries/lib.xml -text
-.idea/misc.xml -text
-.idea/modules.xml -text
-.idea/runConfigurations/Build.xml -text
-.idea/runConfigurations/Dist.xml -text
-.idea/runConfigurations/Generate.xml -text
-.idea/runConfigurations/Generate_Make.xml -text
-.idea/runConfigurations/Test.xml -text
-.idea/runConfigurations/fetchVersion.xml -text
-.idea/uiDesigner.xml -text
-.idea/vcs.xml -text
-/README -text
-ant/build.gant -text
-ant/build.properties -text
-ant/build.xml -text
-ant/script_for_rebuild.sh -text
-dev/com/almworks/integers/AbstractIntObjIterator.java -text
-dev/com/almworks/integers/AbstractIntObjIteratorWithFlag.java -text
-dev/com/almworks/integers/AbstractWritableIntObjMap.java -text
-dev/com/almworks/integers/IntFailFastListIterator.java -text
-dev/com/almworks/integers/IntIntEmptyMap.java -text
-dev/com/almworks/integers/IntListSet.java -text
-dev/com/almworks/integers/IntLongEmptyMap.java -text
-dev/com/almworks/integers/IntLongestCommonSubsequence.java -text
-dev/com/almworks/integers/IntObjEmptyIterator.java -text
-dev/com/almworks/integers/IntObjEmptyMap.java -text
-dev/com/almworks/integers/IntObjFailFastIterator.java -text
-dev/com/almworks/integers/IntObjFindingIterator.java -text
-dev/com/almworks/integers/IntObjIterable.java -text
-dev/com/almworks/integers/IntObjIterator.java -text
-dev/com/almworks/integers/IntObjIterators.java -text
-dev/com/almworks/integers/IntObjListMap.java -text
-dev/com/almworks/integers/IntObjPairIterator.java -text
-dev/com/almworks/integers/LongIntEmptyMap.java -text
-dev/com/almworks/integers/LongListSet.java -text
-dev/com/almworks/integers/LongLongEmptyMap.java -text
-dev/com/almworks/integers/LongLongestCommonSubsequence.java -text
-dev/com/almworks/integers/LongObjEmptyMap.java -text
-dev/com/almworks/integers/WritableIntObjMap.java -text
-dev/com/almworks/integers/wrappers/IntObjHppcOpenHashMap.java -text
-dev/com/almworks/integers/wrappers/IntObjHppcWrappers.java -text
-gen/com/almworks/integers/generator/IntegerCollectionsCodegen.java -text
-gen/com/almworks/integers/generator/SkipImportsRegex.groovy -text
-gen/com/almworks/integers/generator/StringSets.java -text
-gen/com/almworks/integers/generator/TypeDescriptor.java -text
-java/com/almworks/integers/IntegersDebug.java -text
-java/com/almworks/integers/IntegersUtils.java -text
-java/com/almworks/integers/RemovedIndexIterator.java -text
-lib/annotations.jar -text
-lib/hppc-0.5.2-javadoc.jar -text
-lib/hppc-0.5.2-sources.jar -text
-lib/hppc-0.5.2.jar -text
-lib/junit-4.11.jar -text
-pom/integers-wrappers.pom -text
-pom/integers.pom -text
-pom/upload-oss.sh -text
-templates/com/almworks/integers/AbstractPObjIterator.tpl -text
-templates/com/almworks/integers/AbstractPObjIteratorWithFlag.tpl -text
-templates/com/almworks/integers/AbstractWritablePObjMap.tpl -text
-templates/com/almworks/integers/PFailFastListIterator.tpl -text
-templates/com/almworks/integers/PListSet.tpl -text
-templates/com/almworks/integers/PLongestCommonSubsequence.tpl -text
-templates/com/almworks/integers/PObjEmptyIterator.tpl -text
-templates/com/almworks/integers/PObjEmptyMap.tpl -text
-templates/com/almworks/integers/PObjFailFastIterator.tpl -text
-templates/com/almworks/integers/PObjFindingIterator.tpl -text
-templates/com/almworks/integers/PObjIterable.tpl -text
-templates/com/almworks/integers/PObjIterator.tpl -text
-templates/com/almworks/integers/PObjIterators.tpl -text
-templates/com/almworks/integers/PObjListMap.tpl -text
-templates/com/almworks/integers/PObjPairIterator.tpl -text
-templates/com/almworks/integers/PQEmptyMap.tpl -text
-templates/com/almworks/integers/WritablePObjMap.tpl -text
-templates/com/almworks/integers/wrappers/PObjHppcOpenHashMap.tpl -text
-templates/com/almworks/integers/wrappers/PObjHppcWrappers.tpl -text
-test/com/almworks/integers/BinarySearchChecker.java -text
-test/com/almworks/integers/CollectionsCompare.java -text
-test/com/almworks/integers/Containers.java -text
-test/com/almworks/integers/IntCollectionsCompare.java -text
-test/com/almworks/integers/IntLongIteratorTests.java -text
-test/com/almworks/integers/IntegersFixture.java -text
-test/com/almworks/integers/IntegersUtilsTests.java -text
-test/com/almworks/integers/LongAmortizedSetTests.java -text
-test/com/almworks/integers/LongArrayTests.java -text
-test/com/almworks/integers/LongChainHashSetTests.java -text
-test/com/almworks/integers/LongCollectionsTests.java -text
-test/com/almworks/integers/LongConcatIteratorTests.java -text
-test/com/almworks/integers/LongCyclicQueueTests.java -text
-test/com/almworks/integers/LongFindingIteratorTests.java -text
-test/com/almworks/integers/LongIndexedIteratorTests.java -text
-test/com/almworks/integers/LongIntIteratorsTests.java -text
-test/com/almworks/integers/LongIntListMapTests.java -text
-test/com/almworks/integers/LongIntPairIteratorTests.java -text
-test/com/almworks/integers/LongIntersectionIteratorTests.java -text
-test/com/almworks/integers/LongIterableLexicographicComparatorTests.java -text
-test/com/almworks/integers/LongIteratorSingleTests.java -text
-test/com/almworks/integers/LongIteratorSpecificationChecker.java -text
-test/com/almworks/integers/LongIteratorsTests.java -text
-test/com/almworks/integers/LongListChecker.java -text
-test/com/almworks/integers/LongListConcatenationTests.java -text
-test/com/almworks/integers/LongListDiffIndexedDecoratorTests.java -text
-test/com/almworks/integers/LongListIndexedIteratorTests.java -text
-test/com/almworks/integers/LongListInsertingDecoratorTests.java -text
-test/com/almworks/integers/LongListIteratorSpecificationChecker.java -text
-test/com/almworks/integers/LongListRemovingDecoratorTests.java -text
-test/com/almworks/integers/LongListSetTests.java -text
-test/com/almworks/integers/LongLongestCommonSubsequenceTests.java -text
-test/com/almworks/integers/LongMapSortedKeySetTests.java -text
-test/com/almworks/integers/LongMapUnsortedKeySetTests.java -text
-test/com/almworks/integers/LongMinusIteratorTests.java -text
-test/com/almworks/integers/LongNativeArrayIteratorTests.java -text
-test/com/almworks/integers/LongObjListMapTests.java -text
-test/com/almworks/integers/LongOpenHashSetTests.java -text
-test/com/almworks/integers/LongParallelListMapTests.java -text
-test/com/almworks/integers/LongParallelListTests.java -text
-test/com/almworks/integers/LongProgressionTests.java -text
-test/com/almworks/integers/LongSameValuesListTests.java -text
-test/com/almworks/integers/LongSetBuilderTests.java -text
-test/com/almworks/integers/LongSetChecker.java -text
-test/com/almworks/integers/LongSubListTests.java -text
-test/com/almworks/integers/LongTreeSetTests.java -text
-test/com/almworks/integers/LongTwoWayMapTests.java -text
-test/com/almworks/integers/LongUnionIteratorTests.java -text
-test/com/almworks/integers/LongUnionIteratorTwoTests.java -text
-test/com/almworks/integers/SetOperationsChecker.java -text
-test/com/almworks/integers/WritableLongIntMapChecker.java -text
-test/com/almworks/integers/WritableLongIntMapFromLongObjMap.java -text
-test/com/almworks/integers/WritableLongIntMapProjection.java -text
-test/com/almworks/integers/WritableLongListChecker.java -text
-test/com/almworks/integers/WritableLongListRemovingDecoratorTests.java -text
-test/com/almworks/integers/WritableLongObjMapChecker.java -text
-test/com/almworks/integers/WritableLongSetChecker.java -text
-test/com/almworks/integers/segmented/LongSegmentedArrayTests.java -text
-test/com/almworks/integers/segmented/TestEnvForLongSegmentedArray.java -text
-test/com/almworks/integers/wrappers/LongIntHppcOpenHashMapTests.java -text
-test/com/almworks/integers/wrappers/LongObjHppcOpenHashMapTests.java -text
-test/com/almworks/util/TestUtil.java -text
-util/Util.iml -text
-util/com/almworks/util/BadFormatException.java -text
-util/com/almworks/util/ByteArray.java -text
-util/com/almworks/util/FileUtil.java -text
-util/com/almworks/util/Pair.java -text
+# Boilerplate .gitattributes
+#
+# If you add anything here that might be useful for other (new) projects, 
+# consider changing ssh://git/git/template.git 
+
+* 		text=auto 	!eol
+
+.*ignore	text
+.gitattributes	text
+
+*.txt		text
+*.java		text 		diff=java
+*.html   	text		diff=html
+*.css    	text
+*.js		text
+*.sql		text
+*.properties	text
+*.ipr		text
+*.iml		text
+*.iws		text
+*.xml		text
+*.form		text
+*.dtd		text
+*.xsl		text
+*.xslt		text
+*.plist		text
+*.vm		text
+*.install4j	text
+*.soy		text
+*.json		text
+*.groovy	text
+
+*.cs		text 		diff=csharp
+*.csproj	text		merge=union
+*.sln		text		merge=union	eol=crlf
+*.dsp		text		eol=crlf
+*.dsw		text		eol=crlf
+*.c		text		diff=cpp
+*.cpp		text		diff=cpp
+*.h		text		diff=cpp
+
+*.php		text		diff=php
+*.py		text		diff=python
+
+*.sh		text		eol=lf
+*.bat		text		eol=crlf
+*.cmd		text		eol=crlf
+*.lnk		text		eol=crlf
+Makefile	text
+
+*.png		binary
+*.jpg		binary
+*.gif		binary
+*.license	binary
+*.jar		binary
+*.zip		binary
+*.exe		binary
+*.bin		binary
+*.dat		binary
+*.bmp		binary
+*.ico		binary
+*.pdf		binary
+
+README		text
+*.gant		text
+*.pom		text
+*.tpl		text
+
