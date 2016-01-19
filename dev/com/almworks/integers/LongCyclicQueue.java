@@ -28,6 +28,11 @@ import static com.almworks.integers.IntIterators.range;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+/**
+ * This is memory-optimized cyclic queue which can be increased. It's garanteed that during executing
+ * {queue.removeFirst(); queue.add(val)} new memory will not allocated.
+ * Alternative names: circular buffer, cyclic buffer, ring buffer.
+ */
 public class LongCyclicQueue extends AbstractLongList implements LongCollector {
   private long[] myHostArray;
   private int myL;
