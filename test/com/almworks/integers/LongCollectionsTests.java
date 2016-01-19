@@ -441,7 +441,7 @@ public class LongCollectionsTests extends IntegersFixture {
     new SetOperationsChecker().check(myRand, new SetOperationsChecker.SetCreator() {
       @Override
       public LongIterator get(LongArray... arrays) {
-        return LongCollections.complementSorted(arrays[0], arrays[1]).iterator();
+        return LongCollections.complementSorted(arrays[0], arrays[1]);
       }
     }, new SetOperationsChecker.MinusGetter(), true, SORTED_UNIQUE, SORTED);
   }

@@ -21,17 +21,11 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntProcedure;
-import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.LongFunctions;
-import com.almworks.integers.func.LongToLong;
+import com.almworks.integers.func.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_LONGS;
 
@@ -547,11 +541,11 @@ public class LongCollections {
    * with the exception of those elements that are contained in {@code excludeSorted}.
    */
   @NotNull
-  public static LongList complementSorted(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
-    if (includeSorted == null || includeSorted.isEmpty()) return LongList.EMPTY;
-    if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted;
+  public static LongIterator complementSorted(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
+    if (includeSorted == null || includeSorted.isEmpty()) return LongIterator.EMPTY;
+    if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted.iterator();
     LongMinusIterator complement = new LongMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
-    return complement.hasNext() ? collectIterable(includeSorted.size(), complement) : LongList.EMPTY;
+    return complement.hasNext() ? complement : LongIterator.EMPTY;
   }
 
   /**

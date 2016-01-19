@@ -22,9 +22,7 @@ package com.almworks.integers;
 import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class LongIterators {
   /**
@@ -287,13 +285,25 @@ public class LongIterators {
     return new LongIntersectionIterator(iterables);
   }
 
+  public static LongIterator intersectionOfTwo(LongIterable a, LongIterable b) {
+    if (isSizedAndEmpty(a) || isSizedAndEmpty(b)) return LongIterator.EMPTY;
+    return new LongIntersectionIterator(a.iterator(), b.iterator());
+  }
+
+
   /**
-   * @param include sorted unique {@code LongIterable}
-   * @param exclude sorted unique {@code LongIterable}
+   * @param includeSorted sorted unique {@code LongIterable}
+   * @param excludeSorted sorted unique {@code LongIterable}
    * @return complement of iterables.
    * */
-  public static LongIterator minusIterator(LongIterable include, LongIterable exclude) {
-    return new LongMinusIterator(include, exclude);
+  public static LongIterator minusIterator(@NotNull LongIterable includeSorted, @NotNull LongIterable excludeSorted) {
+    if (isSizedAndEmpty(includeSorted)) return LongIterator.EMPTY;
+    if (isSizedAndEmpty(excludeSorted)) return includeSorted.iterator();
+    return new LongMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
+  }
+
+  private static boolean isSizedAndEmpty(LongIterable iterable) {
+    return iterable instanceof LongSizedIterable && ((LongSizedIterable) iterable).isEmpty();
   }
 
   /**
