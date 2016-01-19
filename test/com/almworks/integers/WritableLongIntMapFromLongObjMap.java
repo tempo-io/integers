@@ -18,10 +18,7 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.AbstractCollection;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
 
@@ -334,6 +331,22 @@ public class WritableLongIntMapFromLongObjMap implements WritableLongIntMap {
       @Override
       public LongSet keySet() {
         return map.keySet();
+      }
+
+      @Override
+      public Collection<Integer> values() {
+        return Collections.unmodifiableCollection(new AbstractCollection<Integer>() {
+          @NotNull
+          @Override
+          public Iterator<Integer> iterator() {
+            return IntIterators.asIterator(map.valuesIterator());
+          }
+
+          @Override
+          public int size() {
+            return map.size();
+          }
+        });
       }
     };
     return myMap.equals(objMap);
