@@ -54,14 +54,22 @@ public class LongParallelListTests extends TestCase {
     CHECK.order(res, 2, 3);
 
     try {
-      myList.insert(0, null);
+      myList.insert(0);
       fail();
-    } catch (IllegalArgumentException ex) {}
+    } catch (IllegalArgumentException ignore) {}
 
     try {
       myList.insert(0, 1);
       fail();
-    } catch (IllegalArgumentException ex) {}
+    } catch (IllegalArgumentException ignore) {}
+
+    myList.add(8, 9);
+    checkStorage(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+    try {
+      myList.add(1);
+      fail();
+    } catch (IllegalArgumentException ignore) {}
   }
 
   public void testIteratorNextSet() {
@@ -117,13 +125,13 @@ public class LongParallelListTests extends TestCase {
     try {
       myList.get(0, null);
       fail();
-    } catch (IllegalArgumentException ex) { }
+    } catch (IllegalArgumentException ignore) { }
 
     try {
       long[] vals1 = new long[1];
       myList.get(0, vals1);
       fail();
-    } catch (IllegalArgumentException ex) { }
+    } catch (IllegalArgumentException ignore) { }
   }
 
   public void testIteratorGetRemoveRange() {
@@ -153,7 +161,7 @@ public class LongParallelListTests extends TestCase {
     try {
       it.get(0, 2);
       fail();
-    } catch (IllegalArgumentException ex) { }
+    } catch (IllegalArgumentException ignore) { }
 
     it.removeRange(0, 1);
     checkStorage(-2, -3, 1, 2, 3, 4, 30, 40);

@@ -84,6 +84,12 @@ public class LongParallelList {
     myStorage.insertAll(offset * getListCount(), new LongArray(values));
   }
 
+  public void add(long ... values) {
+    if (values == null || values.length != getListCount())
+      throw new IllegalArgumentException();
+    myStorage.insertAll(myStorage.size(), new LongArray(values));
+  }
+
   public Iterator iterator(int from) {
     return new Iterator(myStorage.iterator(from * getListCount()));
   }

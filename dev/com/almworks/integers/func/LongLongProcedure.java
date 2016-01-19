@@ -23,4 +23,10 @@ package com.almworks.integers.func;
 
 public interface LongLongProcedure {
   void invoke(long a, long b);
+
+  // todo why there are no LongInt or IntLong?
+  LongLongProcedure NO_OP = new LongLongProcedure() {
+    @Override
+    public void invoke(long a, long b) {}
+  };
 }
