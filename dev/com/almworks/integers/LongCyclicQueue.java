@@ -22,9 +22,7 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static com.almworks.integers.IntIterators.range;
 import static java.lang.Math.max;

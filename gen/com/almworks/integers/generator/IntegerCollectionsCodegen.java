@@ -16,17 +16,10 @@
 
 package com.almworks.integers.generator;
 
-import com.almworks.util.BadFormatException;
-import com.almworks.util.FileUtil;
-import com.almworks.util.Pair;
+import com.almworks.util.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -16,10 +16,7 @@
 
 package com.almworks.integers;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public final class Containers {
   private Containers() {}
