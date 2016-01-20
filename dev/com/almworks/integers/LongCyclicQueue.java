@@ -29,8 +29,8 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
- * This is memory-optimized cyclic queue which can be increased. It's garanteed that during executing
- * {queue.removeFirst(); queue.add(val)} new memory will not allocated.
+ * A memory-optimized cyclic queue of size that can be increased. It's guaranteed that during executing
+ * {queue.removeFirst(); queue.add(val)} new memory will not be allocated.
  * Alternative names: circular buffer, cyclic buffer, ring buffer.
  */
 public class LongCyclicQueue extends AbstractLongList implements LongCollector {

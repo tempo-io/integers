@@ -35,8 +35,7 @@ public abstract class AbstractLongIterator implements LongIterator {
   @Override
   public String toString() {
     if (!hasValue()) return "no value";
-    String s = Long.toString(value());
-    return hasNext() ? s + "," : s;
+    return Long.toString(value());
   }
 
 

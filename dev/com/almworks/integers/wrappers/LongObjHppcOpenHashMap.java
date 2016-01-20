@@ -144,7 +144,7 @@ public class LongObjHppcOpenHashMap<T> extends AbstractWritableLongObjMap<T> {
   @Override
   public Collection<T> values() {
     final ObjectContainer<T> valuesContainer = myMap.values();
-    return Collections.unmodifiableCollection(new AbstractCollection<T>() {
+    return new AbstractCollection<T>() {
       @NotNull
       @Override
       public Iterator<T> iterator() {
@@ -175,7 +175,7 @@ public class LongObjHppcOpenHashMap<T> extends AbstractWritableLongObjMap<T> {
           return false;
         }
       }
-    });
+    };
   }
 
   @Override
