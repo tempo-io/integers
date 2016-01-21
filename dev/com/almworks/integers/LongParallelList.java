@@ -51,7 +51,7 @@ public class LongParallelList {
     return myStorage.size() / getListCount();
   }
 
-  private int getListCount() {
+  public int getListCount() {
     return myListCount;
   }
 
