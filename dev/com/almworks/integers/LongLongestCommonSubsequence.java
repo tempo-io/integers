@@ -11,6 +11,9 @@ import static com.almworks.integers.LongCollections.toBoundedString;
  *
  * Copied from IntLongestCommonSequence.
  */
+
+// CODE GENERATED FROM com/almworks/integers/PLongestCommonSubsequence.tpl
+
 public class LongLongestCommonSubsequence {
   private final LongList aseq;
   private final LongList bseq;

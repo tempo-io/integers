@@ -38,7 +38,6 @@ public abstract class AbstractLongIterator implements LongIterator {
     return Long.toString(value());
   }
 
-
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

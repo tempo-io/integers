@@ -21,28 +21,28 @@ package com.almworks.integers;
 
 import java.util.Arrays;
 
-import static com.almworks.integers.IntCollections.toBoundedString;
+import static com.almworks.integers.LongCollections.toBoundedString;
 
-public class IntLongestIncreasingSubsequence {
+public class LongLongestIncreasingSubsequence {
   /**
    * @param a shouldn't contain duplicates
    * @return longest increasing subsequence for a
    */
-  public static IntList getLIS(IntList a) {
-    assert IntCollections.toSortedUnique(a).size() == a.size() : "duplicates aren't allowed in a:" + toBoundedString(a);
+  public static LongList getLIS(LongList a) {
+    assert LongCollections.toSortedUnique(a).size() == a.size() : "duplicates aren't allowed in a:" + toBoundedString(a);
     int sz = a.size() + 1;
     // increasing subseq of a with length i ends with a.get(ids[i])
     int[] ids = new int[sz];
     // increasing subseq of a with length i ends with d[i], we can get rid of d
-    int[] d = new int[sz];
+    long[] d = new long[sz];
     int[] prev = new int[sz];
-    Arrays.fill(d, Integer.MAX_VALUE);
-    d[0] = Integer.MIN_VALUE;
+    Arrays.fill(d, Long.MAX_VALUE);
+    d[0] = Long.MIN_VALUE;
 
     int len = 0;
     for (int i = 0; i < a.size(); ++i) {
-      int ai = a.get(i);
-      int j = -IntCollections.binarySearch(ai, d) - 1;
+      long ai = a.get(i);
+      int j = -LongCollections.binarySearch(ai, d) - 1;
       assert j > 0 : "a shouldn't contain duplicates -> a.get(i) not presented in d yet";
       if (d[j - 1] < ai && ai < d[j]) {
         ids[j] = i;
@@ -52,11 +52,11 @@ public class IntLongestIncreasingSubsequence {
       }
     }
 
-    int[] bestSubseq = new int[len];
+    long[] bestSubseq = new long[len];
     for (int i = len - 1, pos = ids[len]; i >= 0; ) {
       bestSubseq[i--] = a.get(pos);
       pos = prev[pos];
     }
-    return new IntArray(bestSubseq);
+    return new LongArray(bestSubseq);
   }
 }

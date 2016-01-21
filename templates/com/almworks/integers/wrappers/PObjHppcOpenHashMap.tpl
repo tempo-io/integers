@@ -138,6 +138,7 @@ public class #E#ObjHppcOpenHashMap<T> extends AbstractWritable#E#ObjMap<T> {
     };
   }
 
+  @Override
   public Collection<T> values() {
     final ObjectContainer<T> valuesContainer = myMap.values();
     return new AbstractCollection<T>() {

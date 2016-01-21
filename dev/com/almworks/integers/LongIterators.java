@@ -290,7 +290,6 @@ public class LongIterators {
     return new LongIntersectionIterator(a.iterator(), b.iterator());
   }
 
-
   /**
    * @param includeSorted sorted unique {@code LongIterable}
    * @param excludeSorted sorted unique {@code LongIterable}
