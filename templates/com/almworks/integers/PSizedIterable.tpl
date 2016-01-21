@@ -26,4 +26,6 @@ public interface #E#SizedIterable extends #E#Iterable {
    * @return size of this iterable
    */
   int size();
+
+  boolean isEmpty();
 }

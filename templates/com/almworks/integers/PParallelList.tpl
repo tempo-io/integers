@@ -48,7 +48,7 @@ public class #E#ParallelList {
     return myStorage.size() / getListCount();
   }
 
-  private int getListCount() {
+  public int getListCount() {
     return myListCount;
   }
 
@@ -79,6 +79,12 @@ public class #E#ParallelList {
     if (values == null || values.length != getListCount())
       throw new IllegalArgumentException();
     myStorage.insertAll(offset * getListCount(), new #E#Array(values));
+  }
+
+  public void add(#e# ... values) {
+    if (values == null || values.length != getListCount())
+      throw new IllegalArgumentException();
+    myStorage.insertAll(myStorage.size(), new #E#Array(values));
   }
 
   public Iterator iterator(int from) {
