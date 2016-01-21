@@ -32,7 +32,7 @@ public abstract class Abstract#E#Iterator implements #E#Iterator {
   @Override
   public String toString() {
     if (!hasValue()) return "no value";
-    return #E#.toString(value());
+    return #EW#.toString(value());
   }
 
   public void remove() throws UnsupportedOperationException {

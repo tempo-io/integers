@@ -282,9 +282,9 @@ public class #E#Iterators {
     return new #E#IntersectionIterator(iterables);
   }
 
-  public static LongIterator intersectionOfTwo(LongIterable a, LongIterable b) {
-    if (isSizedAndEmpty(a) || isSizedAndEmpty(b)) return LongIterator.EMPTY;
-    return new LongIntersectionIterator(a.iterator(), b.iterator());
+  public static #E#Iterator intersectionOfTwo(#E#Iterable a, #E#Iterable b) {
+    if (isSizedAndEmpty(a) || isSizedAndEmpty(b)) return #E#Iterator.EMPTY;
+    return new #E#IntersectionIterator(a.iterator(), b.iterator());
   }
 
   /**
@@ -292,7 +292,6 @@ public class #E#Iterators {
    * @param excludeSorted sorted unique {@code #E#Iterable}
    * @return complement of iterables.
    * */
-  public static #E#Iterator minusIterator(#E#Iterable include, #E#Iterable exclude) {
   public static #E#Iterator minusIterator(@NotNull #E#Iterable includeSorted, @NotNull #E#Iterable excludeSorted) {
     if (isSizedAndEmpty(includeSorted)) return #E#Iterator.EMPTY;
     if (isSizedAndEmpty(excludeSorted)) return includeSorted.iterator();
