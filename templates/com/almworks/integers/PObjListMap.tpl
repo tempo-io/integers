@@ -142,6 +142,11 @@ public class #E#ObjListMap<T> extends AbstractWritable#E#ObjMap<T> {
     return #E#ListSet.setFromSortedUniqueList(myKeys);
   }
 
+  @Override
+  public Collection<T> values() {
+    return Collections.unmodifiableList(myValues);
+  }
+
   public int size() {
     assert myKeys.size() == myValues.size();
     return myKeys.size();

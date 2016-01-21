@@ -18,17 +18,11 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntProcedure;
-import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.#E#Functions;
-import com.almworks.integers.func.#E#To#E#;
+import com.almworks.integers.func.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static com.almworks.integers.IntegersUtils.EMPTY_#EC#S;
 

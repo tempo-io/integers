@@ -23,4 +23,9 @@ package com.almworks.integers.func;
 
 public interface IntIntProcedure {
   void invoke(int a, int b);
+
+  IntIntProcedure NO_OP = new IntIntProcedure() {
+    @Override
+    public void invoke(int a, int b) {}
+  };
 }

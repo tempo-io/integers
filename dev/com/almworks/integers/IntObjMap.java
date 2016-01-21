@@ -19,6 +19,7 @@
 
 package com.almworks.integers;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 public interface IntObjMap<T> extends IntObjIterable<T> {
@@ -64,6 +65,8 @@ public interface IntObjMap<T> extends IntObjIterable<T> {
    * @return a {@link IntSet} view of the keys contained in this map.
    */
   IntSet keySet();
+
+  Collection<T> values();
 
   /**
    * Compares the specified object with this map for equality. Returns

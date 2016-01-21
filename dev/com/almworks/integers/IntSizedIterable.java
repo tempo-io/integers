@@ -29,4 +29,6 @@ public interface IntSizedIterable extends IntIterable {
    * @return size of this iterable
    */
   int size();
+
+  boolean isEmpty();
 }

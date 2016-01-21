@@ -20,9 +20,7 @@ import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ConcurrentModificationException;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.*;
 
 public abstract class IntegersFixture extends TestCase {
   protected static final CollectionsCompare CHECK = new CollectionsCompare();

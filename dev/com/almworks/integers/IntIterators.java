@@ -22,9 +22,7 @@ package com.almworks.integers;
 import com.almworks.integers.func.IntToInt;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class IntIterators {
   /**
@@ -287,13 +285,24 @@ public class IntIterators {
     return new IntIntersectionIterator(iterables);
   }
 
+  public static IntIterator intersectionOfTwo(IntIterable a, IntIterable b) {
+    if (isSizedAndEmpty(a) || isSizedAndEmpty(b)) return IntIterator.EMPTY;
+    return new IntIntersectionIterator(a.iterator(), b.iterator());
+  }
+
   /**
-   * @param include sorted unique {@code IntIterable}
-   * @param exclude sorted unique {@code IntIterable}
+   * @param includeSorted sorted unique {@code IntIterable}
+   * @param excludeSorted sorted unique {@code IntIterable}
    * @return complement of iterables.
    * */
-  public static IntIterator minusIterator(IntIterable include, IntIterable exclude) {
-    return new IntMinusIterator(include, exclude);
+  public static IntIterator minusIterator(@NotNull IntIterable includeSorted, @NotNull IntIterable excludeSorted) {
+    if (isSizedAndEmpty(includeSorted)) return IntIterator.EMPTY;
+    if (isSizedAndEmpty(excludeSorted)) return includeSorted.iterator();
+    return new IntMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
+  }
+
+  private static boolean isSizedAndEmpty(IntIterable iterable) {
+    return iterable instanceof IntSizedIterable && ((IntSizedIterable) iterable).isEmpty();
   }
 
   /**

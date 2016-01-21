@@ -20,4 +20,9 @@ package com.almworks.integers.func;
 
 public interface #E##E#Procedure {
   void invoke(#e# a, #e# b);
+
+  #E##E#Procedure NO_OP = new #E##E#Procedure() {
+    @Override
+    public void invoke(#e# a, #e# b) {}
+  };
 }

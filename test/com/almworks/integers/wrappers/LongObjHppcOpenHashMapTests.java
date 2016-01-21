@@ -18,8 +18,7 @@ package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class LongObjHppcOpenHashMapTests extends WritableLongObjMapChecker<LongObjHppcOpenHashMap> {
 

@@ -21,8 +21,7 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class LongObjEmptyMap<T> implements LongObjMap<T> {
   @Override
@@ -89,5 +88,10 @@ public class LongObjEmptyMap<T> implements LongObjMap<T> {
   @Override
   public LongSet keySet() {
     return LongSet.EMPTY;
+  }
+
+  @Override
+  public Collection<T> values() {
+    return Collections.emptyList();
   }
 }

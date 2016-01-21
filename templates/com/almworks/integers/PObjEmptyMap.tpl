@@ -18,8 +18,7 @@ package com.almworks.integers;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class #E#ObjEmptyMap<T> implements #E#ObjMap<T> {
   @Override
@@ -86,5 +85,10 @@ public class #E#ObjEmptyMap<T> implements #E#ObjMap<T> {
   @Override
   public #E#Set keySet() {
     return #E#Set.EMPTY;
+  }
+
+  @Override
+  public Collection<T> values() {
+    return Collections.emptyList();
   }
 }

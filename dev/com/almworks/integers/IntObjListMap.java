@@ -145,6 +145,11 @@ public class IntObjListMap<T> extends AbstractWritableIntObjMap<T> {
     return IntListSet.setFromSortedUniqueList(myKeys);
   }
 
+  @Override
+  public Collection<T> values() {
+    return Collections.unmodifiableList(myValues);
+  }
+
   public int size() {
     assert myKeys.size() == myValues.size();
     return myKeys.size();

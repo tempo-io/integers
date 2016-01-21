@@ -176,6 +176,7 @@ public class LongObjListMapTests extends WritableLongObjMapChecker<LongObjListMa
     myMap.put(100, "100");
     myMap.put(228, "228");
     checkSet(myMap.keySet(), LongArray.create(0, 100, 228));
+    assertEquals(myMap.values(), Arrays.asList("0", "100", "228"));
 
     LongArray expected = new LongArray(10000);
     expected.addAll(0, 100, 228);
