@@ -28,6 +28,12 @@ public abstract class AbstractLongObjIterator<T> implements LongObjIterator<T> {
     return this;
   }
 
+  @Override
+  public String toString() {
+    if (!hasValue()) return "no value";
+    return String.format("(%d, %s)", left(), right().toString());
+  }
+
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
