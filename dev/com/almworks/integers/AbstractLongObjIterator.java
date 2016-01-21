@@ -31,7 +31,7 @@ public abstract class AbstractLongObjIterator<T> implements LongObjIterator<T> {
   @Override
   public String toString() {
     if (!hasValue()) return "no value";
-    return String.format("(%d, %s)", left(), right().toString());
+    return String.format("(%d, %s)", left(), String.valueOf(right()));
   }
 
   public void remove() throws UnsupportedOperationException {
