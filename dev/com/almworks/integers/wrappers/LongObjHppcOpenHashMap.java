@@ -169,11 +169,7 @@ public class LongObjHppcOpenHashMap<T> extends AbstractWritableLongObjMap<T> {
 
       @Override
       public boolean contains(Object o) {
-        try {
-          return valuesContainer.contains((T) o);
-        } catch (ClassCastException ex) {
-          return false;
-        }
+        return valuesContainer.contains((T) o);
       }
     };
   }

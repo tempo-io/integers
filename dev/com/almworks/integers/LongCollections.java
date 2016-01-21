@@ -541,11 +541,11 @@ public class LongCollections {
    * with the exception of those elements that are contained in {@code excludeSorted}.
    */
   @NotNull
-  public static LongIterator complementSorted(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
-    if (includeSorted == null || includeSorted.isEmpty()) return LongIterator.EMPTY;
-    if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted.iterator();
+  public static LongList complementSorted(@Nullable LongList includeSorted, @Nullable LongList excludeSorted) {
+    if (includeSorted == null || includeSorted.isEmpty()) return LongList.EMPTY;
+    if (excludeSorted == null || excludeSorted.isEmpty()) return includeSorted;
     LongMinusIterator complement = new LongMinusIterator(includeSorted.iterator(), excludeSorted.iterator());
-    return complement.hasNext() ? complement : LongIterator.EMPTY;
+    return complement.hasNext() ? collectIterable(includeSorted.size(), complement) : LongList.EMPTY;
   }
 
   /**
