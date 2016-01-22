@@ -20,13 +20,11 @@
 package com.almworks.integers.wrappers;
 
 import com.almworks.integers.*;
-import com.carrotsearch.hppc.LongIntOpenHashMap;
-import com.carrotsearch.hppc.LongObjectOpenHashMap;
+import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 import static com.almworks.integers.wrappers.LongHppcWrappers.cursorToLongIterator;
 import static com.almworks.integers.wrappers.LongObjHppcWrappers.cursorToLongObjIterator;
@@ -139,6 +137,39 @@ public class LongObjHppcOpenHashMap<T> extends AbstractWritableLongObjMap<T> {
       @Override
       public void remove() {
         throw new UnsupportedOperationException();
+      }
+    };
+  }
+
+  @Override
+  public Collection<T> values() {
+    final ObjectContainer<T> valuesContainer = myMap.values();
+    return new AbstractCollection<T>() {
+      @NotNull
+      @Override
+      public Iterator<T> iterator() {
+        return valuesIterator();
+      }
+
+      @Override
+      public int size() {
+        return valuesContainer.size();
+      }
+
+      @Override
+      public boolean isEmpty() {
+        return valuesContainer.isEmpty();
+      }
+
+      @NotNull
+      @Override
+      public Object[] toArray() {
+        return valuesContainer.toArray();
+      }
+
+      @Override
+      public boolean contains(Object o) {
+        return valuesContainer.contains((T) o);
       }
     };
   }

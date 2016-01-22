@@ -28,6 +28,12 @@ public abstract class AbstractIntObjIterator<T> implements IntObjIterator<T> {
     return this;
   }
 
+  @Override
+  public String toString() {
+    if (!hasValue()) return "no value";
+    return String.format("(%d, %s)", left(), String.valueOf(right()));
+  }
+
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

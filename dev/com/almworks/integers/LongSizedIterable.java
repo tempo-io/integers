@@ -29,4 +29,6 @@ public interface LongSizedIterable extends LongIterable {
    * @return size of this iterable
    */
   int size();
+
+  boolean isEmpty();
 }

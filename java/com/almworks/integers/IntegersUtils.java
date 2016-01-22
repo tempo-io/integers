@@ -16,14 +16,9 @@
 
 package com.almworks.integers;
 
-import com.almworks.integers.func.IntIntProcedure;
-import com.almworks.integers.func.IntIntToInt;
-import com.almworks.integers.func.IntProcedure;
+import com.almworks.integers.func.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Utilities from everywhere on which integer collections depend.

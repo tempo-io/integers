@@ -32,6 +32,12 @@ public abstract class AbstractIntIterator implements IntIterator {
     return value();
   }
 
+  @Override
+  public String toString() {
+    if (!hasValue()) return "no value";
+    return Integer.toString(value());
+  }
+
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

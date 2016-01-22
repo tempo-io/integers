@@ -32,6 +32,12 @@ public abstract class AbstractLongIterator implements LongIterator {
     return value();
   }
 
+  @Override
+  public String toString() {
+    if (!hasValue()) return "no value";
+    return Long.toString(value());
+  }
+
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

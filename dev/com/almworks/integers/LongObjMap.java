@@ -19,6 +19,7 @@
 
 package com.almworks.integers;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 public interface LongObjMap<T> extends LongObjIterable<T> {
@@ -64,6 +65,8 @@ public interface LongObjMap<T> extends LongObjIterable<T> {
    * @return a {@link LongSet} view of the keys contained in this map.
    */
   LongSet keySet();
+
+  Collection<T> values();
 
   /**
    * Compares the specified object with this map for equality. Returns

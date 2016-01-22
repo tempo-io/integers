@@ -21,9 +21,7 @@ import com.almworks.integers.func.LongToLong;
 import com.almworks.integers.segmented.LongSegmentedArray;
 import com.almworks.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.almworks.integers.IntegersFixture.SortedStatus.*;
 import static com.almworks.integers.LongCollections.*;

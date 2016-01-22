@@ -69,14 +69,14 @@ public class IntOpenHashSet extends AbstractWritableIntSet implements WritableIn
    * If you need such guarantees, use {@link #createForAdd(int, float)}.
    */
   public IntOpenHashSet(int initialCapacity, float loadFactor) {
-    if (initialCapacity < 0)
-      throw new IllegalArgumentException("Illegal initial capacity: " +
-          initialCapacity);
-    if (!(0 < loadFactor && loadFactor < 1))
-      throw new IllegalArgumentException("Illegal load factor: " +
-          loadFactor);
+    if (initialCapacity < 0) {
+      throw new IllegalArgumentException("Illegal initial capacity: " + initialCapacity);
+    }
+    if (!(0 < loadFactor && loadFactor < 1)) {
+      throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
+    }
 
-    int keysLength = IntegersUtils.nextHighestPowerOfTwo(initialCapacity);
+    int keysLength = IntegersUtils.nextHighestPowerOfTwo(Math.max(DEFAULT_CAPACITY, initialCapacity));
     assert (keysLength & (keysLength - 1)) == 0;
 
     this.myLoadFactor = loadFactor;

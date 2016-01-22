@@ -29,6 +29,12 @@ public abstract class Abstract#E#Iterator implements #E#Iterator {
     return value();
   }
 
+  @Override
+  public String toString() {
+    if (!hasValue()) return "no value";
+    return #EW#.toString(value());
+  }
+
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

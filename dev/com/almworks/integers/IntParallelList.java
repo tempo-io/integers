@@ -51,7 +51,7 @@ public class IntParallelList {
     return myStorage.size() / getListCount();
   }
 
-  private int getListCount() {
+  public int getListCount() {
     return myListCount;
   }
 
@@ -82,6 +82,12 @@ public class IntParallelList {
     if (values == null || values.length != getListCount())
       throw new IllegalArgumentException();
     myStorage.insertAll(offset * getListCount(), new IntArray(values));
+  }
+
+  public void add(int ... values) {
+    if (values == null || values.length != getListCount())
+      throw new IllegalArgumentException();
+    myStorage.insertAll(myStorage.size(), new IntArray(values));
   }
 
   public Iterator iterator(int from) {

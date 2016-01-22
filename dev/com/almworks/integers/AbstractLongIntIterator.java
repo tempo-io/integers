@@ -27,6 +27,12 @@ public abstract class AbstractLongIntIterator implements LongIntIterator {
     return this;
   }
 
+  @Override
+  public String toString() {
+    if (!hasValue()) return "no value";
+    return String.format("(%d, %d)", left(), right());
+  }
+
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

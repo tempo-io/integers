@@ -19,14 +19,17 @@ package com.almworks.integers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static com.almworks.integers.IntIterators.range;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+/**
+ * A memory-optimized cyclic queue of size that can be increased. It's guaranteed that during executing
+ * {queue.removeFirst(); queue.add(val)} new memory will not be allocated.
+ * Alternative names: circular buffer, cyclic buffer, ring buffer.
+ */
 public class #E#CyclicQueue extends Abstract#E#List implements #E#Collector {
   private #e#[] myHostArray;
   private int myL;
