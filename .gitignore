@@ -5,6 +5,5 @@
 .idea/gant_config.xml
 .idea/scopes
 .idea/workspace.xml
-/build
-/dirty
 integers.iml
+/target
