@@ -28,9 +28,8 @@
     <url>http://code.google.com/p/integers/issues/list</url>
   </issueManagement>
   <scm>
-    <connection>scm:svn:http://integers.googlecode.com/svn/trunk/</connection>
-    <developerConnection>scm:svn:https://integers.googlecode.com/svn/trunk/</developerConnection>
-    <url>http://integers.googlecode.com/svn/trunk/</url>
+    <connection>scm:git:ssh://git@git.almworks.com/int/integers.git</connection>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
