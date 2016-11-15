@@ -37,7 +37,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <generator-version>1.0.3-SNAPSHOT</generator-version>
+    <generator-version>1.0.2</generator-version>
   </properties>
 
   <dependencies>
@@ -58,6 +58,18 @@
       <version>0.5.2</version>
     </dependency>
   </dependencies>
+
+  <!--todo: use public repository-->
+  <pluginRepositories>
+    <pluginRepository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>almworks.timekeeper</id>
+      <name>timekeeper</name>
+      <url>http://artifactory.almworks.com/artifactory/timekeeper</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <plugins>
