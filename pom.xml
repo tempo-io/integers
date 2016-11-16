@@ -6,11 +6,11 @@
     <version>4</version>
   </parent>
   <groupId>com.almworks.integers</groupId>
-  <artifactId>integers</artifactId>
-  <packaging>jar</packaging>
-  <name>integers</name>
+  <artifactId>integers-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>integers-parent</name>
   <version>1.1.1-SNAPSHOT</version>
-  <description>Efficient Java collections for primitive integer types</description>
+  <description>Parent module: Efficient Java collections for primitive integer types</description>
   <url>http://code.google.com/p/integers</url>
   <licenses>
     <license>
@@ -32,31 +32,38 @@
     <tag>HEAD</tag>
   </scm>
 
+  <modules>
+    <module>integers</module>
+    <module>integers-wrappers</module>
+  </modules>
+
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <generator-version>1.0.2</generator-version>
+    <generator-version>1.0.4</generator-version>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>[3.8,)</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains</groupId>
-      <artifactId>annotations</artifactId>
-      <version>15.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.carrotsearch</groupId>
-      <artifactId>hppc</artifactId>
-      <version>0.5.2</version>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>[3.8,)</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains</groupId>
+        <artifactId>annotations</artifactId>
+        <version>15.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.carrotsearch</groupId>
+        <artifactId>hppc</artifactId>
+        <version>0.5.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <!--todo: use public repository-->
   <pluginRepositories>
@@ -85,6 +92,9 @@
             <id>generate-java</id>
           </execution>
         </executions>
+        <configuration>
+          <failIfNoTemplates>false</failIfNoTemplates>
+        </configuration>
       </plugin>
 
       <!--Required due to not-standard test naming -->

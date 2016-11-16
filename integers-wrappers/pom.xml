@@ -1,42 +1,38 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>4</version>
+    <groupId>com.almworks.integers</groupId>
+    <artifactId>integers-parent</artifactId>
+    <version>1.1.1-SNAPSHOT</version>
   </parent>
-  <groupId>com.almworks.integers</groupId>
   <artifactId>integers-wrappers</artifactId>
   <packaging>jar</packaging>
   <name>integers-wrappers</name>
-  <version>#VERSION#</version>
   <description>Wrappers for other libraries that implement interfaces from Integers</description>
-  <url>http://code.google.com/p/integers</url>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <organization>
-    <name>ALM Works</name>
-    <url>http://almworks.com</url>
-  </organization>
-  <issueManagement> 
-    <system>Google code</system> 
-    <url>http://code.google.com/p/integers/issues/list</url> 
-  </issueManagement> 
-  <scm>
-    <connection>scm:svn:http://integers.googlecode.com/svn/trunk/</connection>
-    <developerConnection>scm:svn:https://integers.googlecode.com/svn/trunk/</developerConnection>
-    <url>http://integers.googlecode.com/svn/trunk/</url>
-  </scm>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>[3.8,)</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.carrotsearch</groupId>
+      <artifactId>hppc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.almworks.integers</groupId>
+      <artifactId>integers</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.almworks.integers</groupId>
+      <artifactId>integers</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -1,43 +1,40 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>4</version>
+    <groupId>com.almworks.integers</groupId>
+    <artifactId>integers-parent</artifactId>
+    <version>1.1.1-SNAPSHOT</version>
   </parent>
-  <groupId>com.almworks.integers</groupId>
   <artifactId>integers</artifactId>
   <packaging>jar</packaging>
   <name>integers</name>
-  <version>#VERSION#</version>
   <description>Efficient Java collections for primitive integer types</description>
-  <url>http://code.google.com/p/integers</url>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <organization>
-    <name>ALM Works</name>
-    <url>http://almworks.com</url>
-  </organization>
-  <issueManagement> 
-    <system>Google code</system> 
-    <url>http://code.google.com/p/integers/issues/list</url> 
-  </issueManagement> 
-  <scm>
-    <connection>scm:svn:http://integers.googlecode.com/svn/trunk/</connection>
-    <developerConnection>scm:svn:https://integers.googlecode.com/svn/trunk/</developerConnection>
-    <url>http://integers.googlecode.com/svn/trunk/</url>
-  </scm>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>[3.8,)</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>15.0</version>
+    </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
