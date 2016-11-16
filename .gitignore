@@ -7,3 +7,7 @@
 .idea/workspace.xml
 integers.iml
 /target
+integers-parent.iml
+integers-wrappers/integers-wrappers.iml
+integers-wrappers/target/
+integers/target/
