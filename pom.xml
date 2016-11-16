@@ -108,7 +108,8 @@
             <addMavenDescriptor>true</addMavenDescriptor>
             <manifestEntries>
               <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Vendor>ALMWorks Ltd</Implementation-Vendor>
+              <Implementation-Vendor>${organization.name}</Implementation-Vendor>
+              <Built-By>almworks</Built-By> <!-- Replace build-agent username-->
             </manifestEntries>
           </archive>
         </configuration>
