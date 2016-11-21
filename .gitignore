@@ -5,5 +5,9 @@
 .idea/gant_config.xml
 .idea/scopes
 .idea/workspace.xml
-/build
-/dirty
+integers.iml
+/target
+integers-parent.iml
+integers-wrappers/integers-wrappers.iml
+integers-wrappers/target/
+integers/target/

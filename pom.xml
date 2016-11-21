@@ -1,0 +1,179 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>4</version>
+  </parent>
+  <groupId>com.almworks.integers</groupId>
+  <artifactId>integers-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>integers-parent</name>
+  <version>1.1.1-SNAPSHOT</version>
+  <description>Parent module: Efficient Java collections for primitive integer types</description>
+  <url>http://code.google.com/p/integers</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <organization>
+    <name>ALM Works</name>
+    <url>http://almworks.com</url>
+  </organization>
+  <issueManagement>
+    <system>Google code</system>
+    <url>http://code.google.com/p/integers/issues/list</url>
+  </issueManagement>
+  <scm>
+    <connection>scm:git:ssh://git@git.almworks.com/int/integers.git</connection>
+    <tag>HEAD</tag>
+  </scm>
+
+  <modules>
+    <module>integers</module>
+    <module>integers-wrappers</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <generator-version>1.0.4</generator-version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>[3.8,)</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains</groupId>
+        <artifactId>annotations</artifactId>
+        <version>15.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.carrotsearch</groupId>
+        <artifactId>hppc</artifactId>
+        <version>0.5.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!--todo: use public repository-->
+  <pluginRepositories>
+    <pluginRepository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>almworks.timekeeper</id>
+      <name>timekeeper</name>
+      <url>http://artifactory.almworks.com/artifactory/timekeeper</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.almworks.integers</groupId>
+        <artifactId>generator-maven-plugin</artifactId>
+        <version>${generator-version}</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-java</goal>
+            </goals>
+            <id>generate-java</id>
+          </execution>
+        </executions>
+        <configuration>
+          <failIfNoTemplates>false</failIfNoTemplates>
+        </configuration>
+      </plugin>
+
+      <!--Required due to not-standard test naming -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.19.1</version>
+        <configuration>
+          <includes>
+            <include>%regex[.*Tests.*]</include>
+          </includes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <archive>
+            <addMavenDescriptor>true</addMavenDescriptor>
+            <manifestEntries>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>${organization.name}</Implementation-Vendor>
+              <Built-By>almworks</Built-By> <!-- Replace build-agent username-->
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- Suppress javaDoc errors -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <attach>true</attach>
+        </configuration>
+        <executions>
+          <execution>
+            <id>jar-sources</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <includePom>true</includePom>
+            </configuration>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jar-test-sources</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <includePom>true</includePom>
+            </configuration>
+            <goals>
+              <goal>test-jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,39 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.almworks.integers</groupId>
+    <artifactId>integers-parent</artifactId>
+    <version>1.1.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>integers-wrappers</artifactId>
+  <packaging>jar</packaging>
+  <name>integers-wrappers</name>
+  <description>Wrappers for other libraries that implement interfaces from Integers</description>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.carrotsearch</groupId>
+      <artifactId>hppc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.almworks.integers</groupId>
+      <artifactId>integers</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.almworks.integers</groupId>
+      <artifactId>integers</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
