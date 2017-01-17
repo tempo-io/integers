@@ -11,7 +11,8 @@
   <name>integers-parent</name>
   <version>1.1.1-SNAPSHOT</version>
   <description>Parent module: Efficient Java collections for primitive integer types</description>
-  <url>http://code.google.com/p/integers</url>
+  <url>https://bitbucket.org/almworks/integers</url>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -19,16 +20,21 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <organization>
     <name>ALM Works</name>
     <url>http://almworks.com</url>
   </organization>
+
   <issueManagement>
-    <system>Google code</system>
-    <url>http://code.google.com/p/integers/issues/list</url>
+    <system>Bitbucket</system>
+    <url>https://bitbucket.org/almworks/integers/issues</url>
   </issueManagement>
+
   <scm>
-    <connection>scm:git:ssh://git@git.almworks.com/int/integers.git</connection>
+    <connection>scm:git:ssh://git@bitbucket.org/almworks/integers.git</connection>
+    <developerConnection>scm:git:ssh://git@bitbucket.org/almworks/integers.git</developerConnection>
+    <url>https://bitbucket.org/almworks/integers</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -41,7 +47,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <generator-version>1.0.4</generator-version>
+    <generator-version>1.0.5</generator-version>
   </properties>
 
   <dependencyManagement>
@@ -64,18 +70,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <!--todo: use public repository-->
-  <pluginRepositories>
-    <pluginRepository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>almworks.timekeeper</id>
-      <name>timekeeper</name>
-      <url>http://artifactory.almworks.com/artifactory/timekeeper</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <build>
     <plugins>
@@ -173,7 +167,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 </project>
