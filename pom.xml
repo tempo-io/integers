@@ -1,17 +1,15 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>4</version>
-  </parent>
+
   <groupId>com.almworks.integers</groupId>
   <artifactId>integers-parent</artifactId>
-  <packaging>pom</packaging>
-  <name>integers-parent</name>
   <version>1.1.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>integers-parent</name>
   <description>Parent module: Efficient Java collections for primitive integer types</description>
-  <url>http://code.google.com/p/integers</url>
+  <url>https://bitbucket.org/almworks/integers</url>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -19,18 +17,31 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <organization>
     <name>ALM Works</name>
     <url>http://almworks.com</url>
   </organization>
-  <issueManagement>
-    <system>Google code</system>
-    <url>http://code.google.com/p/integers/issues/list</url>
-  </issueManagement>
+
   <scm>
-    <connection>scm:git:ssh://git@git.almworks.com/int/integers.git</connection>
+    <connection>scm:git:ssh://git@bitbucket.org/almworks/integers.git</connection>
+    <developerConnection>scm:git:ssh://git@bitbucket.org/almworks/integers.git</developerConnection>
+    <url>https://bitbucket.org/almworks/integers</url>
     <tag>HEAD</tag>
   </scm>
+
+  <issueManagement>
+    <system>Bitbucket</system>
+    <url>https://bitbucket.org/almworks/integers/issues</url>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <id>almworks</id>
+      <name>ALM Works</name>
+      <email>info@almworks.com</email>
+    </developer>
+  </developers>
 
   <modules>
     <module>integers</module>
@@ -41,7 +52,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <generator-version>1.0.4</generator-version>
+    <generator-version>1.0.5</generator-version>
   </properties>
 
   <dependencyManagement>
@@ -64,18 +75,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <!--todo: use public repository-->
-  <pluginRepositories>
-    <pluginRepository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>almworks.timekeeper</id>
-      <name>timekeeper</name>
-      <url>http://artifactory.almworks.com/artifactory/timekeeper</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <build>
     <plugins>
@@ -145,6 +144,19 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.4.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-gitexe</artifactId>
+            <version>1.9</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.4</version>
         <configuration>
@@ -173,7 +185,35 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>sonatype</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <configuration>
+              <homedir>${sign.homedir}</homedir>
+              <passphrase>${sign.passphrase}</passphrase>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 </project>
