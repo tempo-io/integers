@@ -369,9 +369,10 @@ public abstract class WritableLongIntMapChecker<T extends WritableLongIntMap> ex
     int attemptsCount = 10, shuffleCount = 10;
     int sizeMax = 600, step = 50;
     for (int attempt = 0; attempt < attemptsCount; attempt++) {
-      for (int size = step; size < sizeMax; size += step) {
-        LongArray keys = generateRandomLongArray(size, SORTED_UNIQUE);
-        IntArray values = generateRandomIntArray(keys.size(), UNORDERED);
+      for (int mSize = step; mSize < sizeMax; mSize += step) {
+        LongArray keys = generateRandomLongArray(mSize, SORTED_UNIQUE);
+        int size = keys.size();
+        IntArray values = generateRandomIntArray(size, UNORDERED);
         int expectedHash = 0;
         for (int i = 0; i < size; i++) {
           expectedHash += IntegersUtils.hash(keys.get(i)) + IntegersUtils.hash(values.get(i));
