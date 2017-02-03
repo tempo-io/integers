@@ -20,6 +20,6 @@ Open `Project Structure` dialog and manually mark as source roots:
 1. Add features and fix bugs in `integers/dev` and `integers-wrappers/dev` java sources until you're done
 2. `mvn clean com.almworks.integers:generator-maven-plugin:generate-java`
 3. Compare `dev` directories with the corresponding `target/gen-java` 
-4. If there is difference - update templates in the corresponding `src\templates` and return to #2 
+4. If there is difference - update templates in the corresponding `src/templates` and return to #2 
 5. `mvn clean package` if build is successful - you are ready to create Pull Request
 6. Don't forget to delete `dev` directories before your Pull Request is approved.  
