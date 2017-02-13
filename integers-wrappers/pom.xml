@@ -28,12 +28,32 @@
       <artifactId>integers</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.almworks.integers</groupId>
-      <artifactId>integers</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>no.tests</id>
+      <activation>
+        <property>
+          <name>maven.test.skip</name>
+          <value>true</value>
+        </property>
+      </activation>
+    </profile>
+    <profile>
+      <id>Test.dependencies</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.almworks.integers</groupId>
+          <artifactId>integers</artifactId>
+          <version>${project.version}</version>
+          <type>test-jar</type>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 </project>
