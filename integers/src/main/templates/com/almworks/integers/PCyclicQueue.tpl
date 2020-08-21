@@ -270,7 +270,9 @@ public class #E#CyclicQueue extends Abstract#E#List implements #E#Collector {
     }
 
     protected void onRealloc(int oldL) {
-      myHostIdx = normalizeUnder(myHostIdx - oldL);
+      if (myHostIdx != -1) {
+        myHostIdx = normalizeUnder(myHostIdx - oldL);
+      }
     }
 
     @Override

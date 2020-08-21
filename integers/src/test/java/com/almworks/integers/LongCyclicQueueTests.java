@@ -358,7 +358,17 @@ public class LongCyclicQueueTests extends LongListChecker<LongCyclicQueue> {
 
     ii = clq.pinnedIterator().next();
     assertEquals(0, ii.index());
+  }
 
+  public void testPiteratorRealloc() {
+    LongCyclicQueue clq = new LongCyclicQueue(20);
+    clq.add(0);
+    LongCyclicQueue.PinnedIterator it = clq.pinnedIterator();
+
+    clq.addAll(LongProgression.arithmetic(1, 20));
+
+    assertTrue(it.hasNext());
+    assertEquals(0, it.nextValue());
   }
 
   public void testAddAll() {
