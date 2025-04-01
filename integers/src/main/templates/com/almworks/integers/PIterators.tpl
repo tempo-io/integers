@@ -352,7 +352,6 @@ public class #E#Iterators {
       @Override
       protected boolean findNext() throws ConcurrentModificationException {
         if (!iterator.hasNext()) return false;
-        iterator.next();
         myNext = iterator.next();
         return true;
       }
