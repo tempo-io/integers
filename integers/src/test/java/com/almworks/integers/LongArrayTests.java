@@ -21,6 +21,7 @@ import java.util.List;
 
 import static com.almworks.integers.IntProgression.range;
 import static com.almworks.integers.IntegersFixture.SortedStatus.*;
+import static org.junit.Assert.assertNotEquals;
 
 public class LongArrayTests extends WritableLongListChecker<LongArray> {
   private LongArray array = new LongArray();
@@ -283,5 +284,22 @@ public class LongArrayTests extends WritableLongListChecker<LongArray> {
         assertEquals(values[i], actual.get(i));
       }
     }
+  }
+
+  public void testEquals() {
+    LongArray oneToTen = LongArray.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    assertTrue(oneToTen.equals(oneToTen));
+    assertTrue(oneToTen.equals(LongProgression.arithmetic(1, 10)));
+    assertTrue(oneToTen.equals(LongArray.copy(LongProgression.arithmetic(1, 10))));
+    assertFalse(oneToTen.equals(LongArray.create(1, 2, 3, 4, 5)));
+    assertFalse(oneToTen.equals(LongProgression.arithmetic(1, 5)));
+  }
+
+  public void testHashCode() {
+    LongArray oneToTen = LongArray.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    assertEquals(oneToTen.hashCode(), LongProgression.arithmetic(1, 10).hashCode());
+    assertEquals(oneToTen.hashCode(), LongArray.copy(LongProgression.arithmetic(1, 10)).hashCode());
+    assertNotEquals(oneToTen.hashCode(), LongProgression.arithmetic(1, 5).hashCode());
+    assertNotEquals(oneToTen.hashCode(), LongArray.create(1, 2, 3, 4, 5).hashCode());
   }
 }

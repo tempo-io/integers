@@ -748,4 +748,29 @@ public final class #E#Array extends AbstractWritable#E#List {
       #E#Collections.swap(myArray, ind, curSize);
     }
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (o instanceof #E#Array) {
+      #E#Array that = (#E#Array) o;
+      int n = size();
+      if (n != that.size()) return false;
+      for (int i = 0; i < n; i++) {
+        if (get(i) != that.get(i))
+          return false;
+      }
+      return true;
+    }
+    return super.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    int hashCode = 1;
+    for (int i = 0, n = size(); i < n; i++) {
+      hashCode = 31 * hashCode + (int)get(i);
+    }
+    return hashCode;
+  }
 }
