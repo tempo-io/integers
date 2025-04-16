@@ -842,9 +842,9 @@ public class #E#TreeSet extends AbstractWritable#E#Set implements Writable#E#Sor
     final BitSet unremoved = new BitSet(myFront);
     visitULR(0, new IntIntToInt() {
       @Override
-      public int invoke(int x, int _) {
+      public int invoke(int x, int y) {
         if (x != 0) unremoved.set(x);
-        return _;
+        return y;
       }
     });
     if (myRemoved.isEmpty())

@@ -170,4 +170,11 @@ public class LongIteratorsTests extends IntegersFixture {
       // ok
     }
   }
+
+  public void testAsLongIterator() {
+    CHECK.order(LongIterators.asLongIterator(IntProgression.arithmetic(1, 10).iterator()),
+      LongProgression.arithmetic(1, 10).iterator());
+    CHECK.order(LongIterators.asLongIterator(LongProgression.arithmetic(1, 10).toList().iterator()),
+      LongProgression.arithmetic(1, 10).iterator());
+  }
 }
