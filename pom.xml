@@ -8,7 +8,7 @@
 
   <name>integers-parent</name>
   <description>Parent module: Efficient Java collections for primitive integer types</description>
-  <url>https://bitbucket.org/almworks/integers</url>
+  <url>https://github.com/tempo-io/integers</url>
 
   <licenses>
     <license>
@@ -19,20 +19,20 @@
   </licenses>
 
   <organization>
-    <name>ALM Works</name>
-    <url>http://almworks.com</url>
+    <name>Tempo</name>
+    <url>https://tempo.io</url>
   </organization>
 
   <scm>
-    <connection>scm:git:ssh://git@bitbucket.org/almworks/integers.git</connection>
-    <developerConnection>scm:git:ssh://git@bitbucket.org/almworks/integers.git</developerConnection>
-    <url>https://bitbucket.org/almworks/integers</url>
+    <connection>scm:git:git@github.com:tempo-io/integers.git</connection>
+    <developerConnection>scm:git:git@github.com:tempo-io/integers.git</developerConnection>
+    <url>https://github.com/tempo-io/integers</url>
     <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
-    <system>Bitbucket</system>
-    <url>https://bitbucket.org/almworks/integers/issues</url>
+    <system>Github</system>
+    <url>https://github.com/tempo-io/integers/issues</url>
   </issueManagement>
 
   <developers>
